@@ -1,6 +1,8 @@
 import { t } from "../createRouter";
-import testRouter from "./test.routes";
+import { authRoter } from "./auth.routes";
 
-export const appRouter = t.mergeRouters(testRouter);
+export const appRouter = t.router({
+  auth: authRoter,
+});
 
 export type AppRouter = typeof appRouter;
