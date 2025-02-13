@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    hostname: app
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres"
+      # NODE_ENV: production
+    expose:
+      - "3000"
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+        - action: rebuild
+          path: package.json
+  postgres:
+    image: postgres
+    command: postgres -c 'max_connections=450'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+    ports:
+      - "4000:80"
