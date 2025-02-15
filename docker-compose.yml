@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      target: production
+      target: dev
     hostname: app
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
