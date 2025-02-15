@@ -1,27 +1,49 @@
-FROM node:18-alpine AS base
+# Use a single base image definition
+ARG NODE_VERSION=18-alpine
+FROM node:${NODE_VERSION} AS base
 
-# Install dependencies only when needed
-FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+# Set common environment variables
+# ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Create a non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+  adduser --system --uid 1001 nextjs
+
 WORKDIR /app
+EXPOSE 3000
 
-# Install dependencies using yarn
-COPY package.json yarn.lock* ./
-RUN yarn --frozen-lockfile
+# Dependency management stage
+FROM base AS deps
 
-# Rebuild the source code only when needed
-FROM base AS builder
+RUN apk update \
+  && apk add --no-cache openssl curl libc6-compat \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/cache/apk/*
+
+RUN openssl version && curl --version
+RUN curl -sf https://gobinaries.com/tj/node-prune | sh
+
+WORKDIR /app
+COPY package.json yarn.lock ./
+COPY prisma ./prisma
+
+RUN yarn install --production=true --frozen-lockfile --ignore-scripts \
+  && npx prisma generate \
+  && node-prune \
+  && cp -R node_modules prod_node_modules \
+  && yarn install --production=false --prefer-offline \
+  && npx prisma generate \
+  && rm -rf prisma \
+  && yarn cache clean
+
+
+# Test stage
+FROM base AS test
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN yarn run build
+CMD ["sh", "-c", "npx prisma db push && yarn test"]
 
 # Development image
 FROM base AS dev
@@ -29,33 +51,24 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 EXPOSE 3000
-CMD ["yarn", "dev"]
+CMD ["sh", "-c", "npx prisma db push && yarn dev"]
 
-# Production image, copy all the files and run next
-FROM base AS runner
+# Builder stage
+FROM base AS builder
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN yarn build
 
-ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
+# Final production image
+FROM base AS production
+WORKDIR /app
 USER nextjs
 
-EXPOSE 3000
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
-ENV PORT=3000
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "npx prisma db push && node server.js"]

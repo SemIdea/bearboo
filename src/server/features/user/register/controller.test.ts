@@ -1,16 +1,27 @@
-import { describe, it, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
+
+import { CreateUserInput } from "../../../schema/user.schema";
+
 import { registerUserController } from "./controller";
-import { CreateUserInput } from "@/server/schema/user.schema";
 
 describe("Register User Controller Unitary Testing", () => {
-  test("should return user email and password", () => {
+  test("should return user email and password", async () => {
     const input: CreateUserInput = {
-      email: "test@example.com",
+      email: `${Date.now().toString()}@example.com`,
       password: "password123",
     };
 
-    const result = registerUserController({ input });
+    const result = await registerUserController({ input });
 
-    expect(result).toEqual(input);
+    expect(result.id).toBeTruthy();
   });
+
+  // test("should handle validation errors", () => {
+  //   const input: CreateUserInput = {
+  //     email: "invalid-email",
+  //     password: "short",
+  //   };
+
+  //   expect(() => registerUserController({ input })).toThrowError("Validation failed");
+  // });
 });

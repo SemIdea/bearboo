@@ -1,6 +1,14 @@
 import { z } from "zod";
 
-export const createUserSchema = z.object({
+const userSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  password: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+const createUserSchema = z.object({
   email: z
     .string({
       required_error: "Email is required",
@@ -13,7 +21,7 @@ export const createUserSchema = z.object({
     .min(8, "Password must be at least 8 characters long"),
 });
 
-export const loginUserSchema = z.object({
+const loginUserSchema = z.object({
   email: z
     .string({
       required_error: "Email is required",
@@ -26,5 +34,8 @@ export const loginUserSchema = z.object({
     .min(8, "Invalid Email or password"),
 });
 
-export type CreateUserInput = z.TypeOf<typeof createUserSchema>;
-export type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
+type CreateUserInput = z.TypeOf<typeof createUserSchema>;
+type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
+
+export { userSchema, createUserSchema, loginUserSchema };
+export type { CreateUserInput, LoginUserInput };

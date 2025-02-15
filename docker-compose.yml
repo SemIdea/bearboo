@@ -2,20 +2,16 @@ services:
   app:
     build:
       context: .
-      target: dev
+      target: production
     hostname: app
     environment:
-      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres"
-      # NODE_ENV: production
+      DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
     expose:
       - "3000"
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /app
-        - action: rebuild
-          path: package.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   postgres:
     image: postgres
     command: postgres -c 'max_connections=450'
@@ -25,6 +21,13 @@ services:
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+
   nginx:
     image: nginx
     volumes:

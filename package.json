@@ -29,6 +29,7 @@
     "@trpc/next": "^10.45.2",
     "@trpc/react-query": "^10.45.2",
     "@trpc/server": "^10.45.2",
+    "bcrypt": "^5.1.1",
     "clsx": "2.1.1",
     "framer-motion": "11.13.1",
     "intl-messageformat": "^10.5.0",
@@ -36,17 +37,18 @@
     "next-themes": "^0.4.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "autoprefixer": "10.4.19"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "15.0.4",
     "@react-types/shared": "3.25.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "20.5.7",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "8.11.0",
     "@typescript-eslint/parser": "8.11.0",
-    "autoprefixer": "10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "15.0.4",
     "eslint-config-prettier": "9.1.0",

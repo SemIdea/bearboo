@@ -1,6 +1,6 @@
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 
-export const createContext = async (opts: CreateNextContextOptions) => {
+const createContext = async (opts: FetchCreateContextFnOptions) => {
   const user = {
     id: 1,
     email: "teste@test.com",
@@ -11,4 +11,7 @@ export const createContext = async (opts: CreateNextContextOptions) => {
   };
 };
 
-export type Context = Awaited<ReturnType<typeof createContext>>;
+type Context = Awaited<ReturnType<typeof createContext>>;
+
+export { createContext };
+export type { Context };
