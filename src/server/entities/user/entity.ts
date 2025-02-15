@@ -1,7 +1,10 @@
+import { ZodError } from "zod";
 import { IUserModel, IUserEntity } from "./DTO";
+import { verifyUserSchema } from "@/server/schema/user.schema";
 
 class UserEntity implements IUserEntity {
   constructor(
+    public id: string,
     public email: string,
     public password: string,
   ) {}
@@ -21,20 +24,18 @@ class UserEntity implements IUserEntity {
       cache: any;
     };
   }) {
-    // try {
-    //   console.log(data)
-    //   userSchema.parse(data);
-    // } catch (error) {
-    //   if (error instanceof ZodError) {
-    //     throw new Error(
-    //       `Validation failed: ${error.errors.map((e) => e.message).join(", ")}`
-    //     );
-    //   }
-    //   throw error;
-    // }
-
     const { email, password } = data;
-    const newUser = new UserEntity(email, password);
+    const newUser = new UserEntity(id, email, password);
+    try {
+      verifyUserSchema.parse(newUser);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        throw new Error(
+          `Validation failed: ${error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`
+        );
+      }
+      throw error;
+    }
 
     const user = await repositories.database.create(id, newUser);
 
