@@ -1,11 +1,9 @@
 import { z } from "zod";
 
-const userSchema = z.object({
+const verifyUserSchema = z.object({
   id: z.string(),
-  email: z.string(),
-  password: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  email: z.string().email(),
+  password: z.string().min(8),
 });
 
 const createUserSchema = z.object({
@@ -37,5 +35,5 @@ const loginUserSchema = z.object({
 type CreateUserInput = z.TypeOf<typeof createUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
 
-export { userSchema, createUserSchema, loginUserSchema };
+export { verifyUserSchema, createUserSchema, loginUserSchema };
 export type { CreateUserInput, LoginUserInput };
