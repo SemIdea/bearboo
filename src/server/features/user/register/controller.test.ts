@@ -3,11 +3,13 @@ import { describe, expect, test } from "vitest";
 import { CreateUserInput } from "../../../schema/user.schema";
 
 import { registerUserController } from "./controller";
+import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 
 describe("Register User Controller Unitary Testing", () => {
-  test("should return user email and password", async () => {
+  test("Should verify if user is registered", async () => {
+    const uuid = GenerateSnowflakeUID();
     const input: CreateUserInput = {
-      email: `${Date.now().toString()}@example.com`,
+      email: `${uuid}@example.com`,
       password: "password123",
     };
 
@@ -15,13 +17,4 @@ describe("Register User Controller Unitary Testing", () => {
 
     expect(result.id).toBeTruthy();
   });
-
-  // test("should handle validation errors", () => {
-  //   const input: CreateUserInput = {
-  //     email: "invalid-email",
-  //     password: "short",
-  //   };
-
-  //   expect(() => registerUserController({ input })).toThrowError("Validation failed");
-  // });
 });

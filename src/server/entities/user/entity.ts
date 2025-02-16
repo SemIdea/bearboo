@@ -1,12 +1,13 @@
 import { ZodError } from "zod";
 import { IUserModel, IUserEntity } from "./DTO";
 import { verifyUserSchema } from "@/server/schema/user.schema";
+import { ICacheRepositoryAdapter } from "@/server/integrations/helpers/cache/adapter";
 
 class UserEntity implements IUserEntity {
   constructor(
     public id: string,
     public email: string,
-    public password: string,
+    public password: string
   ) {}
 
   static async create({
@@ -21,7 +22,7 @@ class UserEntity implements IUserEntity {
     };
     repositories: {
       database: IUserModel;
-      cache: any;
+      cache: ICacheRepositoryAdapter;
     };
   }) {
     const { email, password } = data;
@@ -38,6 +39,32 @@ class UserEntity implements IUserEntity {
     }
 
     const user = await repositories.database.create(id, newUser);
+    await repositories.cache.set(`user:${id}`, JSON.stringify(user), 60 * 15);
+
+    return user;
+  }
+
+  static async findByEmail({
+    email,
+    repositories,
+  }: {
+    email: string;
+    repositories: {
+      database: IUserModel;
+      cache: ICacheRepositoryAdapter;
+    };
+  }) {
+    const cachedUser = await repositories.cache.get(`user:email:${email}`);
+    if (cachedUser) return JSON.parse(cachedUser);
+
+    const user = await repositories.database.findByEmail(email);
+    if (!user) return null;
+
+    await repositories.cache.set(
+      `user:email:${email}`,
+      JSON.stringify(user),
+      60 * 15
+    );
 
     return user;
   }
