@@ -1,8 +1,13 @@
-import { User } from "@prisma/client";
+import { Session, User } from "@prisma/client";
+import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IUserEntity = {
   email: string;
   password: string;
+};
+
+type IUserWithSession = Partial<User> & {
+  session: Partial<Session>;
 };
 
 type IUserModel = {
@@ -13,4 +18,36 @@ type IUserModel = {
   findByEmail: (email: string) => Promise<User | null>;
 };
 
-export type { IUserModel, IUserEntity };
+type ICreateUserDTO = {
+  id: string;
+  data: IUserEntity;
+  repositories: {
+    database: IUserModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IFindUserDTO = {
+  id: string;
+  repositories: {
+    database: IUserModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IFindUserByEmailDTO = {
+  email: string;
+  repositories: {
+    database: IUserModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+export type {
+  IUserModel,
+  IUserEntity,
+  IUserWithSession,
+  ICreateUserDTO,
+  IFindUserDTO,
+  IFindUserByEmailDTO,
+};
