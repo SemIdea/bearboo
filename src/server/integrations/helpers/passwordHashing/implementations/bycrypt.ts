@@ -1,5 +1,4 @@
 import { hash, compare } from "bcrypt";
-
 import { IPasswordHashingHelperAdapter } from "../adapter";
 
 class BycryptPasswordHashingHelper implements IPasswordHashingHelperAdapter {

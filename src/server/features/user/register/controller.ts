@@ -1,25 +1,37 @@
+import { Session } from "@prisma/client";
+import { CreateAuthSessionService } from "../../auth/session/service";
 import { RegisterUserService } from "./service";
-
 import { CreateUserInput } from "@/server/schema/user.schema";
-import { PrismaUserModel } from "@/server/entities/user/repositories/prisma";
-import { BycryptPasswordHashingHelper } from "@/server/integrations/helpers/passwordHashing/implementations/bycrypt";
-import { RedisCacheRepository } from "@/server/integrations/helpers/cache/implementations/redis";
+import { IAPIContextDTO } from "@/server/createContext";
 
 const registerUserController = async ({
   input,
+  ctx,
 }: {
   input: CreateUserInput;
+  ctx: IAPIContextDTO;
 }) => {
   const user = await RegisterUserService({
     repositories: {
-      database: new PrismaUserModel(),
-      cache: new RedisCacheRepository(),
-      hashing: new BycryptPasswordHashingHelper(),
+      database: ctx.repositories.user,
+      cache: ctx.repositories.cache,
+      hashing: ctx.repositories.hashing,
     },
     ...input,
   });
 
-  return user;
+  const session = (await CreateAuthSessionService({
+    repositories: {
+      user: ctx.repositories.user,
+      database: ctx.repositories.session,
+      cache: ctx.repositories.cache,
+    },
+    userId: user.id,
+  })) as Partial<Session>;
+
+  delete session.userId;
+
+  return session as Omit<Session, "id">;
 };
 
 export { registerUserController };

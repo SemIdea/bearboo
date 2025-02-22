@@ -1,17 +1,44 @@
-import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import { IUserModel, IUserWithSession } from "./entities/user/DTO";
+import { ICacheRepositoryAdapter } from "./integrations/repositories/cache/adapter";
+import { ISessionModel } from "./entities/session/DTO";
+import { IPasswordHashingHelperAdapter } from "./integrations/helpers/passwordHashing/adapter";
+import {
+  cacheRepository,
+  passwordHashingHelper,
+  sessionRepository,
+  userRepository,
+} from "./drivers/repositories";
 
-const createContext = async (opts: FetchCreateContextFnOptions) => {
-  const user = {
-    id: 1,
-    email: "teste@test.com",
-  };
+type IInputAPIContextDTO = {
+  headers: Headers;
+};
 
-  return {
-    user,
+type IAPIContextDTO = {
+  headers: Headers;
+  user?: IUserWithSession;
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+    user: IUserModel;
+    session: ISessionModel;
+    hashing: IPasswordHashingHelperAdapter;
   };
 };
 
-type Context = Awaited<ReturnType<typeof createContext>>;
+const createTRPCContext = ({
+  headers,
+}: IInputAPIContextDTO): IAPIContextDTO => {
+  return {
+    headers,
+    repositories: {
+      cache: cacheRepository,
+      user: userRepository,
+      session: sessionRepository,
+      hashing: passwordHashingHelper,
+    },
+  };
+};
 
-export { createContext };
-export type { Context };
+type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+
+export { createTRPCContext };
+export type { IInputAPIContextDTO, IAPIContextDTO, Context };

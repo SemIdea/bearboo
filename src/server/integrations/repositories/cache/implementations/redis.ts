@@ -1,6 +1,6 @@
 import { Redis } from "ioredis";
-import { createRedisClient } from "@/server/drivers/redis";
 import { ICacheRepositoryAdapter } from "../adapter";
+import { createRedisClient } from "@/server/drivers/redis";
 
 class RedisCacheRepository implements ICacheRepositoryAdapter {
   redisClient: Redis;

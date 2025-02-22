@@ -8,6 +8,7 @@ const createRedisClient = () => {
   }
 
   const redis = new Redis(REDIS_URL);
+
   redis.setMaxListeners(40);
 
   return redis;

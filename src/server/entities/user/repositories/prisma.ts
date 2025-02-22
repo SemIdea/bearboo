@@ -1,5 +1,4 @@
 import { IUserModel, IUserEntity } from "../DTO";
-
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaUserModel implements IUserModel {
