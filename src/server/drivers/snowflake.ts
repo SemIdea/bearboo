@@ -1,54 +1,31 @@
-import { Snowflake } from "nodejs-snowflake";
+import { Snowflake, decodeSnowflake } from "@skorotkiewicz/snowflake-id";
 
-function GenerateSnowflakeUID(
-  custom_epoch?: number,
-  instance_id?: number
-): string {
-  const uid = new Snowflake({
-    custom_epoch: custom_epoch,
-    instance_id: instance_id,
-  });
+async function GenerateSnowflakeUID(machineId: number = 1): Promise<string> {
+  const snowflake = new Snowflake(machineId);
+  const id = await snowflake.generate();
 
-  return uid.getUniqueID().toString();
+  return id;
 }
 
-function GetIDFromTimestamp(
-  timestamp: number,
-  custom_epoch?: number,
-  instance_id?: number
-): string {
-  const uid = new Snowflake({
-    custom_epoch: custom_epoch,
-    instance_id: instance_id,
-  });
-
-  return uid.idFromTimestamp(timestamp).toString();
+function GetTimestampFromID(id: string): {
+  timestamp: string;
+  machineId: string;
+  sequence: string;
+} {
+  return decodeSnowflake(id);
 }
 
-function GetTimestampFromID(id: bigint, custom_epoch: number): number {
-  return Snowflake.timestampFromID(id, custom_epoch);
-}
+// (async () => {
+//   const machineId = 1; // machine ID (0-1023)
+//   const snowflake = new Snowflake(machineId);
 
-function GetInstanceIDFromID(id: bigint): number {
-  return Snowflake.instanceIDFromID(id);
-}
+//   const id1 = await snowflake.generate();
+//   console.log("encodeID", id1);
+//   // output: 7160521316708126720
 
-function GetCurrentInstanceID(
-  custom_epoch?: number,
-  instance_id?: number
-): number {
-  const uid = new Snowflake({
-    custom_epoch: custom_epoch,
-    instance_id: instance_id,
-  });
+//   const decoded = decodeSnowflake(id1);
+//   console.log("decodeID", decoded);
+//   // output: { timestamp: '2024-02-06T05:12:47.730Z', machineId: '1', sequence: '0' }
+// })();
 
-  return uid.instanceID();
-}
-
-export {
-  GenerateSnowflakeUID,
-  GetIDFromTimestamp,
-  GetTimestampFromID,
-  GetInstanceIDFromID,
-  GetCurrentInstanceID,
-};
+export { GenerateSnowflakeUID, GetTimestampFromID };
