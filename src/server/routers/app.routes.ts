@@ -1,9 +1,11 @@
 import { t } from "../createRouter";
+import AuthRoter from "./auth.routes";
 
-import { authRoter } from "./auth.routes";
-
-export const appRouter = t.router({
-  auth: authRoter,
+const appRouter = t.router({
+  auth: AuthRoter,
 });
 
-export type AppRouter = typeof appRouter;
+type AppRouter = typeof appRouter;
+
+export { appRouter };
+export type { AppRouter };
