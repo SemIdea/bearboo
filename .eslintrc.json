@@ -65,8 +65,7 @@
             "group": "external",
             "position": "after"
           }
-        ],
-        "newlines-between": "always"
+        ]
       }
     ],
     "react/self-closing-comp": "warn",
