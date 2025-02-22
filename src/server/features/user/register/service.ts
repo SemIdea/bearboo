@@ -8,13 +8,16 @@ const RegisterUserService = async ({
 }: IRegisterUserDTO) => {
   const { email, password } = data;
 
-  const existingUser = await repositories.database.findByEmail(email);
+  const existingUser = await UserEntity.findByEmail({
+    email,
+    repositories,
+  });
 
   if (existingUser) {
     throw new Error("User already exists");
   }
 
-  const userId = GenerateSnowflakeUID();
+  const userId = await GenerateSnowflakeUID();
   const hashedPassword = await repositories.hashing.hash(password);
 
   const user = await UserEntity.create({
