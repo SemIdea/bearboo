@@ -27,7 +27,15 @@ class PrismaSessionModel implements ISessionModel {
     });
   }
 
-  async update(id: string, data: ISessionEntity) {
+  async findByRefreshToken(refreshToken: string) {
+    return await prisma.session.findFirst({
+      where: {
+        refreshToken
+      }
+    })
+  }
+
+  async update(id: string, data: Partial<ISessionEntity>) {
     return await prisma.session.update({
       where: {
         id,

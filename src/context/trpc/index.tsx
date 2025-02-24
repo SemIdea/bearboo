@@ -1,75 +1,54 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, loggerLink } from "@trpc/react-query";
+import { httpBatchLink, loggerLink, TRPCClientError } from "@trpc/react-query";
 import { useState } from "react";
 import superjson from "superjson";
-import { AuthError } from "@/shared/error/auth";
 import { trpc } from "@/app/_trpc/client";
+import { AuthErrorCode } from "@/shared/error/auth";
+import { useAuth } from "../auth";
 
-type IErrorHandlers = {
-  [key: string]: () => void;
-};
+const handleRetry = (faliureCount: number, error: unknown): boolean => {
+  if (faliureCount > 1) return false;
+  const {
+    refreshSession
+  } = useAuth();
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 5 * 1000 } },
-});
+  if (error instanceof TRPCClientError) {
+    const message = error.message;
 
-const extractError = (data: any) => {
-  if (!data) return null;
-  if (Array.isArray(data)) return data.find((res: any) => res.error)?.error;
+    switch (message) {
+      case AuthErrorCode.INVALID_TOKEN:
+        // remove cookies redirect to login      
+        break;
 
-  return data.error;
-};
+      case AuthErrorCode.SESSION_EXPIRED:
+        const refreshToken = localStorage.getItem("refreshToken");
 
-const errorHandlers: IErrorHandlers = {
-  [AuthError.INVALID_TOKEN]: () => {
-    console.log("Invalid token");
-  },
-  [AuthError.SESSION_EXPIRED]: () => {
-    console.log("Session expired aa");
-  },
-};
+        if (!refreshToken) return false;
 
-const refreshToken = async () => {
-  const response = await fetch("/api/auth/refresh-token", {
-    credentials: "include",
-  });
+        refreshSession({
+          refreshToken
+        });
 
-  if (response.ok) {
-    return response.json();
-  }
+        break;
 
-  const data = await response.json();
-  const error = extractError(data);
-
-  if (error) {
-    console.log(error.message);
-  }
-};
-
-const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-  const response = await fetch(input, {
-    ...init,
-    credentials: "include",
-  });
-
-  const data = await response.json();
-
-  if (response.ok) {
-    return data;
-  }
-
-  const error = extractError(data);
-
-  if (error) {
-    const handler = errorHandlers[error.message];
-
-    if (handler) {
-      handler();
+      default:
+        return faliureCount < 3;
     }
   }
-};
+
+  return faliureCount < 3;
+}
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 1000,
+      retry: handleRetry
+    }
+  },
+});
 
 export default function TrpcProvider({
   children,
@@ -78,7 +57,7 @@ export default function TrpcProvider({
 }) {
   const url =
     process.env.NEXT_PUBLIC_APP_DOMAIN &&
-    !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
+      !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
       ? `https://www.${process.env.NEXT_PUBLIC_APP_DOMAIN}/api/trpc/`
       : "http://localhost:3000/api/trpc/";
 
@@ -91,16 +70,16 @@ export default function TrpcProvider({
         httpBatchLink({
           transformer: superjson,
           url: "/api/trpc",
-          headers() {
-            const h = new Map();
+          // headers() {
+          //   const h = new Map();
 
-            // h.set("x-trpc-source", "nextClient");
-            // const sessionCookie = getClientSession();
-            // if (sessionCookie) {
-            //     h.set('authorization', `Bearer ${sessionCookie}`);
-            // }
-            return Object.fromEntries(h);
-          },
+          //   // h.set("x-trpc-source", "nextClient");
+          //   // const sessionCookie = getClientSession();
+          //   // if (sessionCookie) {
+          //   //     h.set('authorization', `Bearer ${sessionCookie}`);
+          //   // }
+          //   return Object.fromEntries(h);
+          // },
         }),
       ],
     }),

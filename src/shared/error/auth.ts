@@ -1,7 +1,7 @@
-enum AuthError {
+enum AuthErrorCode {
   MISSING_TOKEN = "MISSING_TOKEN",
   INVALID_TOKEN = "INVALID_TOKEN",
   SESSION_EXPIRED = "SESSION_EXPIRED",
 }
 
-export { AuthError };
+export { AuthErrorCode };

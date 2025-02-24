@@ -1,6 +1,7 @@
 import { ISessionModel } from "@/server/entities/session/DTO";
 import { IUserModel } from "@/server/entities/user/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
+import { string } from "zod";
 
 type ICreateAuthSessionDTO = {
   userId: string;
@@ -20,4 +21,27 @@ type IFindUserAndSessionByAccessTokenDTO = {
   };
 };
 
-export type { ICreateAuthSessionDTO, IFindUserAndSessionByAccessTokenDTO };
+type IFindSessionByRefreshTokenDTO = {
+  refreshToken: string;
+  repositories: {
+    user: IUserModel,
+    database: ISessionModel
+  }
+}
+
+type IRefreshSessionDTO = {
+  id: string,
+  newAccessToken: string,
+  newRefreshToken: string
+  repositories: {
+    user: IUserModel,
+    database: ISessionModel
+  }
+}
+
+export type {
+  ICreateAuthSessionDTO,
+  IFindUserAndSessionByAccessTokenDTO,
+  IFindSessionByRefreshTokenDTO,
+  IRefreshSessionDTO
+};

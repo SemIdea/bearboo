@@ -1,7 +1,9 @@
 import { Session } from "@prisma/client";
 import {
   ICreateAuthSessionDTO,
+  IFindSessionByRefreshTokenDTO,
   IFindUserAndSessionByAccessTokenDTO,
+  IRefreshSessionDTO
 } from "./DTO";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { SessionEntity } from "@/server/entities/session/entity";
@@ -94,4 +96,42 @@ const FindUserAndSessionByAccessTokenService = async ({
   return user as Omit<IUserWithSession, "password">;
 };
 
-export { CreateAuthSessionService, FindUserAndSessionByAccessTokenService };
+const FindSessionByRefreshTokenService = async ({
+  repositories,
+  ...data
+}: IFindSessionByRefreshTokenDTO) => {
+  const session = SessionEntity.findByRefreshToken({
+    repositories,
+    ...data
+  })
+
+  if (!session) {
+    throw new Error("Session not found");
+  }
+
+  return session;
+}
+
+const RefreshSessionService = async ({
+  repositories,
+  ...data
+}: IRefreshSessionDTO) => {
+  const newSession = SessionEntity.refreshSession({
+    id: data.id,
+    accessToken: data.newAccessToken,
+    refreshToken: data.newRefreshToken,
+    repositories
+  });
+
+  if (!newSession) {
+    throw new Error("Failed to create session");
+  }
+
+  return newSession;
+}
+
+export {
+  CreateAuthSessionService, FindUserAndSessionByAccessTokenService,
+  FindSessionByRefreshTokenService,
+  RefreshSessionService
+};

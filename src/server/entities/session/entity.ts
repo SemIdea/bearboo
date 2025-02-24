@@ -1,6 +1,8 @@
 import {
   ICreateSessionDTO,
   IFindSessionByAccessTokenDTO,
+  IFindSessionByRefreshTokenDTO,
+  IRefreshSessionDTO,
   ISessionEntity,
 } from "./DTO";
 
@@ -10,7 +12,7 @@ class SessionEntity implements ISessionEntity {
     public userId: string,
     public accessToken: string,
     public refreshToken: string,
-  ) {}
+  ) { }
 
   static async create({ id, data, repositories }: ICreateSessionDTO) {
     const { userId, accessToken, refreshToken } = data;
@@ -40,6 +42,33 @@ class SessionEntity implements ISessionEntity {
       JSON.stringify(session),
       60 * 15,
     );
+
+    return session;
+  }
+
+  static async findByRefreshToken({
+    refreshToken,
+    repositories
+  }: IFindSessionByRefreshTokenDTO) {
+    const session = repositories.database.findByRefreshToken(refreshToken)
+
+    if (!session) return null;
+
+    return session
+  }
+
+  static async refreshSession({
+    id,
+    refreshToken,
+    accessToken,
+    repositories
+  }: IRefreshSessionDTO) {
+    const session = repositories.database.update(id, {
+      refreshToken,
+      accessToken
+    });
+
+    if (!session) return null;
 
     return session;
   }
