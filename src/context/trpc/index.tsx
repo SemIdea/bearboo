@@ -6,13 +6,15 @@ import { useState } from "react";
 import superjson from "superjson";
 import { trpc } from "@/app/_trpc/client";
 import { AuthErrorCode } from "@/shared/error/auth";
-import { useAuth } from "../auth";
 
 const handleRetry = (faliureCount: number, error: unknown): boolean => {
   if (faliureCount > 1) return false;
-  const {
-    refreshSession
-  } = useAuth();
+  const { mutate: refreshSession } = trpc.auth.refreshSession.useMutation({
+    onSuccess(data) {
+      document.cookie = `accessToken=${data.accessToken}; path=/;`;
+      localStorage.setItem("refreshToken", data.refreshToken);
+    }
+  });
 
   if (error instanceof TRPCClientError) {
     const message = error.message;

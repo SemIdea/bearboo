@@ -10,6 +10,8 @@ import { SessionEntity } from "@/server/entities/session/entity";
 import { UserEntity } from "@/server/entities/user/entity";
 import { IUserWithSession } from "@/server/entities/user/DTO";
 import { FieldError } from "@/utils/error";
+import { TRPCError } from "@trpc/server";
+import { AuthErrorCode } from "@/shared/error/auth";
 
 const CreateAuthSessionService = async ({
   repositories,
@@ -26,7 +28,10 @@ const CreateAuthSessionService = async ({
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: AuthErrorCode.USER_NOT_FOUD
+    })
   }
 
   const [sessionId, accessToken, refreshToken] = await Promise.all([
@@ -46,7 +51,10 @@ const CreateAuthSessionService = async ({
   });
 
   if (!session) {
-    throw new Error("Failed to create session");
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: AuthErrorCode.SESSION_CREATE_ERROR
+    });
   }
 
   return session;
@@ -67,9 +75,9 @@ const FindUserAndSessionByAccessTokenService = async ({
   })) as Partial<Session>;
 
   if (!session || !session.userId) {
-    throw new FieldError({
-      field: "accessToken",
-      reason: "Session not found",
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: AuthErrorCode.INVALID_TOKEN
     });
   }
 
@@ -82,9 +90,9 @@ const FindUserAndSessionByAccessTokenService = async ({
   })) as IUserWithSession;
 
   if (!user) {
-    throw new FieldError({
-      field: "userId",
-      reason: "User not found",
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: AuthErrorCode.INVALID_TOKEN
     });
   }
 
@@ -100,13 +108,16 @@ const FindSessionByRefreshTokenService = async ({
   repositories,
   ...data
 }: IFindSessionByRefreshTokenDTO) => {
-  const session = SessionEntity.findByRefreshToken({
+  const session = await SessionEntity.findByRefreshToken({
     repositories,
     ...data
   })
 
   if (!session) {
-    throw new Error("Session not found");
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: AuthErrorCode.INVALID_TOKEN
+    });
   }
 
   return session;
@@ -116,7 +127,7 @@ const RefreshSessionService = async ({
   repositories,
   ...data
 }: IRefreshSessionDTO) => {
-  const newSession = SessionEntity.refreshSession({
+  const newSession = await SessionEntity.refreshSession({
     id: data.id,
     accessToken: data.newAccessToken,
     refreshToken: data.newRefreshToken,
@@ -124,7 +135,10 @@ const RefreshSessionService = async ({
   });
 
   if (!newSession) {
-    throw new Error("Failed to create session");
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: AuthErrorCode.SESSION_UPDATE_ERROR
+    });
   }
 
   return newSession;

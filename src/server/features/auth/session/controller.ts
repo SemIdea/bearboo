@@ -21,7 +21,7 @@ const refreshSessionController = async ({
     const newAccessToken = await GenerateSnowflakeUID();
     const newRefreshToken = await GenerateSnowflakeUID();
 
-    const refreshedSession = await RefreshSessionService({
+    await RefreshSessionService({
         id: session.id,
         newAccessToken,
         newRefreshToken,
@@ -31,7 +31,10 @@ const refreshSessionController = async ({
         }
     })
 
-    return refreshedSession;
+    return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken
+    };
 }
 
 export {

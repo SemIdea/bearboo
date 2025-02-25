@@ -25,7 +25,7 @@ const useAuthLogic = () => {
     }
   })
 
-  return { session, login, register, logout, refreshSession };
+  return { session, login, register, logout };
 };
 
 type UseAuthLogicReturn = ReturnType<typeof useAuthLogic>;

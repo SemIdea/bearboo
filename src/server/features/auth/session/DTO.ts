@@ -1,7 +1,6 @@
 import { ISessionModel } from "@/server/entities/session/DTO";
 import { IUserModel } from "@/server/entities/user/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
-import { string } from "zod";
 
 type ICreateAuthSessionDTO = {
   userId: string;
