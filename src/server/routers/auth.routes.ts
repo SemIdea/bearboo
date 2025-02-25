@@ -14,7 +14,9 @@ const authRoter = t.router({
     .mutation(async ({ input, ctx }) => loginUserController({ input, ctx })),
   refreshSession: publicProcedure
     .input(refreshSessionSchema)
-    .mutation(async ({ input, ctx }) => refreshSessionController({ input, ctx })),
+    .mutation(async ({ input, ctx }) =>
+      refreshSessionController({ input, ctx }),
+    ),
   test: publicProcedure.query(async () => "Hello, World!"),
 });
 

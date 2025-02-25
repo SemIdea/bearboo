@@ -30,9 +30,9 @@ class PrismaSessionModel implements ISessionModel {
   async findByRefreshToken(refreshToken: string) {
     return await prisma.session.findFirst({
       where: {
-        refreshToken
-      }
-    })
+        refreshToken,
+      },
+    });
   }
 
   async update(id: string, data: Partial<ISessionEntity>) {

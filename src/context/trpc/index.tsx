@@ -13,7 +13,7 @@ const handleRetry = (faliureCount: number, error: unknown): boolean => {
     onSuccess(data) {
       document.cookie = `accessToken=${data.accessToken}; path=/;`;
       localStorage.setItem("refreshToken", data.refreshToken);
-    }
+    },
   });
 
   if (error instanceof TRPCClientError) {
@@ -21,7 +21,7 @@ const handleRetry = (faliureCount: number, error: unknown): boolean => {
 
     switch (message) {
       case AuthErrorCode.INVALID_TOKEN:
-        // remove cookies redirect to login      
+        // remove cookies redirect to login
         break;
 
       case AuthErrorCode.SESSION_EXPIRED:
@@ -30,7 +30,7 @@ const handleRetry = (faliureCount: number, error: unknown): boolean => {
         if (!refreshToken) return false;
 
         refreshSession({
-          refreshToken
+          refreshToken,
         });
 
         break;
@@ -41,14 +41,14 @@ const handleRetry = (faliureCount: number, error: unknown): boolean => {
   }
 
   return faliureCount < 3;
-}
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 1000,
-      retry: handleRetry
-    }
+      retry: handleRetry,
+    },
   },
 });
 
@@ -59,7 +59,7 @@ export default function TrpcProvider({
 }) {
   const url =
     process.env.NEXT_PUBLIC_APP_DOMAIN &&
-      !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
+    !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
       ? `https://www.${process.env.NEXT_PUBLIC_APP_DOMAIN}/api/trpc/`
       : "http://localhost:3000/api/trpc/";
 

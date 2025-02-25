@@ -12,7 +12,7 @@ class SessionEntity implements ISessionEntity {
     public userId: string,
     public accessToken: string,
     public refreshToken: string,
-  ) { }
+  ) {}
 
   static async create({ id, data, repositories }: ICreateSessionDTO) {
     const { userId, accessToken, refreshToken } = data;
@@ -48,24 +48,24 @@ class SessionEntity implements ISessionEntity {
 
   static async findByRefreshToken({
     refreshToken,
-    repositories
+    repositories,
   }: IFindSessionByRefreshTokenDTO) {
-    const session = repositories.database.findByRefreshToken(refreshToken)
+    const session = repositories.database.findByRefreshToken(refreshToken);
 
     if (!session) return null;
 
-    return session
+    return session;
   }
 
   static async refreshSession({
     id,
     refreshToken,
     accessToken,
-    repositories
+    repositories,
   }: IRefreshSessionDTO) {
     const session = repositories.database.update(id, {
       refreshToken,
-      accessToken
+      accessToken,
     });
 
     if (!session) return null;

@@ -35,18 +35,18 @@ type IFindSessionByAccessTokenDTO = {
 type IFindSessionByRefreshTokenDTO = {
   refreshToken: string;
   repositories: {
-    database: ISessionModel
-  }
-}
+    database: ISessionModel;
+  };
+};
 
 type IRefreshSessionDTO = {
-  id: string,
-  refreshToken: string,
-  accessToken: string,
+  id: string;
+  refreshToken: string;
+  accessToken: string;
   repositories: {
-    database: ISessionModel
-  }
-}
+    database: ISessionModel;
+  };
+};
 
 export type {
   ISessionModel,
@@ -54,5 +54,5 @@ export type {
   ICreateSessionDTO,
   IFindSessionByAccessTokenDTO,
   IFindSessionByRefreshTokenDTO,
-  IRefreshSessionDTO
+  IRefreshSessionDTO,
 };

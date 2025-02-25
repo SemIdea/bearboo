@@ -1,16 +1,15 @@
 import { Session } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import {
   ICreateAuthSessionDTO,
   IFindSessionByRefreshTokenDTO,
   IFindUserAndSessionByAccessTokenDTO,
-  IRefreshSessionDTO
+  IRefreshSessionDTO,
 } from "./DTO";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { SessionEntity } from "@/server/entities/session/entity";
 import { UserEntity } from "@/server/entities/user/entity";
 import { IUserWithSession } from "@/server/entities/user/DTO";
-import { FieldError } from "@/utils/error";
-import { TRPCError } from "@trpc/server";
 import { AuthErrorCode } from "@/shared/error/auth";
 
 const CreateAuthSessionService = async ({
@@ -30,8 +29,8 @@ const CreateAuthSessionService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.USER_NOT_FOUD
-    })
+      message: AuthErrorCode.USER_NOT_FOUD,
+    });
   }
 
   const [sessionId, accessToken, refreshToken] = await Promise.all([
@@ -53,7 +52,7 @@ const CreateAuthSessionService = async ({
   if (!session) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_CREATE_ERROR
+      message: AuthErrorCode.SESSION_CREATE_ERROR,
     });
   }
 
@@ -77,7 +76,7 @@ const FindUserAndSessionByAccessTokenService = async ({
   if (!session || !session.userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: AuthErrorCode.INVALID_TOKEN,
     });
   }
 
@@ -92,7 +91,7 @@ const FindUserAndSessionByAccessTokenService = async ({
   if (!user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: AuthErrorCode.INVALID_TOKEN,
     });
   }
 
@@ -110,18 +109,18 @@ const FindSessionByRefreshTokenService = async ({
 }: IFindSessionByRefreshTokenDTO) => {
   const session = await SessionEntity.findByRefreshToken({
     repositories,
-    ...data
-  })
+    ...data,
+  });
 
   if (!session) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: AuthErrorCode.INVALID_TOKEN,
     });
   }
 
   return session;
-}
+};
 
 const RefreshSessionService = async ({
   repositories,
@@ -131,21 +130,22 @@ const RefreshSessionService = async ({
     id: data.id,
     accessToken: data.newAccessToken,
     refreshToken: data.newRefreshToken,
-    repositories
+    repositories,
   });
 
   if (!newSession) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_UPDATE_ERROR
+      message: AuthErrorCode.SESSION_UPDATE_ERROR,
     });
   }
 
   return newSession;
-}
+};
 
 export {
-  CreateAuthSessionService, FindUserAndSessionByAccessTokenService,
+  CreateAuthSessionService,
+  FindUserAndSessionByAccessTokenService,
   FindSessionByRefreshTokenService,
-  RefreshSessionService
+  RefreshSessionService,
 };

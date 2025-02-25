@@ -23,24 +23,24 @@ type IFindUserAndSessionByAccessTokenDTO = {
 type IFindSessionByRefreshTokenDTO = {
   refreshToken: string;
   repositories: {
-    user: IUserModel,
-    database: ISessionModel
-  }
-}
+    user: IUserModel;
+    database: ISessionModel;
+  };
+};
 
 type IRefreshSessionDTO = {
-  id: string,
-  newAccessToken: string,
-  newRefreshToken: string
+  id: string;
+  newAccessToken: string;
+  newRefreshToken: string;
   repositories: {
-    user: IUserModel,
-    database: ISessionModel
-  }
-}
+    user: IUserModel;
+    database: ISessionModel;
+  };
+};
 
 export type {
   ICreateAuthSessionDTO,
   IFindUserAndSessionByAccessTokenDTO,
   IFindSessionByRefreshTokenDTO,
-  IRefreshSessionDTO
+  IRefreshSessionDTO,
 };
