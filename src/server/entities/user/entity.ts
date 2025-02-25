@@ -12,7 +12,7 @@ class UserEntity implements IUserEntity {
     public id: string,
     public email: string,
     public password: string,
-  ) {}
+  ) { }
 
   static async create({ id, data, repositories }: ICreateUserDTO) {
     const { email, password } = data;
@@ -53,7 +53,7 @@ class UserEntity implements IUserEntity {
     return user;
   }
 
-  static async findByEmail({ email, repositories }: IFindUserByEmailDTO) {
+  static async findByEmail({ email, repositories }: IFindUserByEmailDTO): Promise<UserEntity | null> {
     const cachedUser = await repositories.cache.get(`user:email:${email}`);
 
     if (cachedUser) return JSON.parse(cachedUser);

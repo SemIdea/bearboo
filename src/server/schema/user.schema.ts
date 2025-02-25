@@ -6,7 +6,7 @@ const verifyUserSchema = z.object({
   password: z.string().min(8),
 });
 
-const createUserSchema = z.object({
+const registerUserSchema = z.object({
   email: z
     .string({
       required_error: "Email is required",
@@ -32,8 +32,8 @@ const loginUserSchema = z.object({
     .min(8, "Invalid Email or password"),
 });
 
-type CreateUserInput = z.TypeOf<typeof createUserSchema>;
+type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
 
-export { verifyUserSchema, createUserSchema, loginUserSchema };
+export { verifyUserSchema, registerUserSchema, loginUserSchema };
 export type { CreateUserInput, LoginUserInput };
