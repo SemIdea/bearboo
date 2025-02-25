@@ -12,12 +12,21 @@ model User {
   email    String    @unique
   password String
   sessions Session[]
+  Post     Post[]
 }
 
 model Session {
-  id        String   @id
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  accessToken String
+  id           String @id
+  userId       String
+  user         User   @relation(fields: [userId], references: [id])
+  accessToken  String
   refreshToken String
+}
+
+model Post {
+  id      String @id
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  title   String
+  content String
 }

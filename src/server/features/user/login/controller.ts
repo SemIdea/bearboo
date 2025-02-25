@@ -1,3 +1,4 @@
+import { LoginUserInput } from "@/server/schema/user.schema";
 import { CreateAuthSessionService } from "../../auth/session/service";
 import { LoginUserService } from "./service";
 import { IAPIContextDTO } from "@/server/createContext";
@@ -6,7 +7,7 @@ const loginUserController = async ({
   input,
   ctx,
 }: {
-  input: any;
+  input: LoginUserInput;
   ctx: IAPIContextDTO;
 }) => {
   const user = await LoginUserService({
