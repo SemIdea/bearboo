@@ -1,6 +1,6 @@
-import { LoginUserInput } from "@/server/schema/user.schema";
 import { CreateAuthSessionService } from "../../auth/session/service";
 import { LoginUserService } from "./service";
+import { LoginUserInput } from "@/server/schema/user.schema";
 import { IAPIContextDTO } from "@/server/createContext";
 
 const loginUserController = async ({

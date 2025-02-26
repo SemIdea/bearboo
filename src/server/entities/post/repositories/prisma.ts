@@ -1,4 +1,3 @@
-import { Post } from "@prisma/client";
 import { IPostEntity, IPostModel } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
@@ -39,3 +38,5 @@ class PrismaPostModel implements IPostModel {
     });
   }
 }
+
+export { PrismaPostModel };

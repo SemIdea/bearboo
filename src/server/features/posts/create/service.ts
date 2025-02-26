@@ -1,6 +1,6 @@
-import { UserEntity } from "@/server/entities/user/entity";
-import { ICreatePostDTO } from "./DTO";
 import { TRPCError } from "@trpc/server";
+import { ICreatePostDTO } from "./DTO";
+import { UserEntity } from "@/server/entities/user/entity";
 import { AuthErrorCode } from "@/shared/error/auth";
 
 const CreatePostService = async ({ repositories, ...data }: ICreatePostDTO) => {
@@ -19,5 +19,5 @@ const CreatePostService = async ({ repositories, ...data }: ICreatePostDTO) => {
     });
   }
 
-//   const post = PostEnt
+  //   const post = PostEnt
 };

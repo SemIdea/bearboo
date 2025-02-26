@@ -1,6 +1,6 @@
 import superjson from "superjson";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { date, ZodError } from "zod";
+import { ZodError } from "zod";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { Context } from "./createContext";
 import { FindUserAndSessionByAccessTokenService } from "./features/auth/session/service";
@@ -50,8 +50,6 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
 
   const sessionCreatedDate = new Date(sessionCreatedTimestamp);
   const EXPIRES = 1000 * 20;
-
-  console.log(Date.now() - sessionCreatedDate.getTime());
 
   if (Date.now() - sessionCreatedDate.getTime() > EXPIRES) {
     throw new TRPCError({

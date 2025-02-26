@@ -17,14 +17,6 @@ const useAuthLogic = () => {
 
   const logout = () => {};
 
-  const { mutate: refreshSession } = trpc.auth.refreshSession.useMutation({
-    onSuccess: (data) => {
-      setSession(data);
-      document.cookie = `accessToken=${data.accessToken}; path=/;`;
-      localStorage.setItem("refreshToken", data.refreshToken);
-    },
-  });
-
   return { session, login, register, logout };
 };
 

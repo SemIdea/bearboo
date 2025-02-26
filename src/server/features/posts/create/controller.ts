@@ -8,5 +8,5 @@ const createPostController = async ({
   input: CreatePostInput;
   ctx: IAPIContextDTO;
 }) => {
-    // const post = await CreatePostService({})
+  // const post = await CreatePostService({})
 };
