@@ -36,6 +36,8 @@ class PrismaSessionModel implements ISessionModel {
   }
 
   async update(id: string, data: Partial<ISessionEntity>) {
+    console.log("PRISMA: ", id, data);
+
     return await prisma.session.update({
       where: {
         id,

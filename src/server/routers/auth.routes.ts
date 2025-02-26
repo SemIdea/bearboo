@@ -12,10 +12,10 @@ const authRoter = t.router({
   loginUser: publicProcedure
     .input(loginUserSchema)
     .mutation(async ({ input, ctx }) => loginUserController({ input, ctx })),
-  refreshSession: publicProcedure
+  refreshSession: t.procedure
     .input(refreshSessionSchema)
     .mutation(async ({ input, ctx }) =>
-      refreshSessionController({ input, ctx }),
+      refreshSessionController({ input, ctx })
     ),
   test: publicProcedure.query(async () => "Hello, World!"),
 });

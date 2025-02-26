@@ -27,11 +27,11 @@ class SessionEntity implements ISessionEntity {
     accessToken,
     repositories,
   }: IFindSessionByAccessTokenDTO) {
-    const cachedSession = await repositories.cache.get(
-      `session:accessToken:${accessToken}`,
-    );
+    // const cachedSession = await repositories.cache.get(
+    //   `session:accessToken:${accessToken}`,
+    // );
 
-    if (cachedSession) return JSON.parse(cachedSession) as ISessionEntity;
+    // if (cachedSession) return JSON.parse(cachedSession) as ISessionEntity;
 
     const session = await repositories.database.findByAccessToken(accessToken);
 

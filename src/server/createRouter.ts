@@ -1,9 +1,11 @@
 import superjson from "superjson";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { ZodError } from "zod";
+import { date, ZodError } from "zod";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { Context } from "./createContext";
 import { FindUserAndSessionByAccessTokenService } from "./features/auth/session/service";
+import { GetTimestampFromID } from "./drivers/snowflake";
+import { AuthErrorCode } from "@/shared/error/auth";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -38,6 +40,25 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   });
 
   if (!user) return next();
+  if (!user.session) return next();
+
+  const sessionCreatedTimestamp = user.session.accessToken
+    ? GetTimestampFromID(user.session.accessToken).timestamp
+    : null;
+
+  if (!sessionCreatedTimestamp) return next();
+
+  const sessionCreatedDate = new Date(sessionCreatedTimestamp);
+  const EXPIRES = 1000 * 20;
+
+  console.log(Date.now() - sessionCreatedDate.getTime());
+
+  if (Date.now() - sessionCreatedDate.getTime() > EXPIRES) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: AuthErrorCode.SESSION_EXPIRED,
+    });
+  }
 
   return next({
     ctx: {
