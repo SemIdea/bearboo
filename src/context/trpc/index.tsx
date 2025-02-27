@@ -1,4 +1,3 @@
-// trpcProvider.tsx
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -19,7 +18,10 @@ export const fetcher = async (
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (!refreshToken) {
-      // navigate to login
+      document.cookie = `accessToken=; path = /; expires = Thu, 01 Jan 1970 00:00:00 GMT`;
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/auth/login";
+
       return response;
     }
 
@@ -38,8 +40,10 @@ export const fetcher = async (
         },
       });
     } catch (error) {
-      // navigate to login
-      // storage.removeRefreshToken();
+      document.cookie = `accessToken=; path = /; expires = Thu, 01 Jan 1970 00:00:00 GMT`;
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/auth/login";
+
       return response;
     }
   }
@@ -51,7 +55,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 1000,
-      // retry: handleRetry,
     },
   },
 });
