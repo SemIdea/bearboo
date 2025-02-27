@@ -45,6 +45,7 @@ type IRefreshSessionDTO = {
   accessToken: string;
   repositories: {
     database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 

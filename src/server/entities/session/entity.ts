@@ -11,7 +11,7 @@ class SessionEntity implements ISessionEntity {
     public id: string,
     public userId: string,
     public accessToken: string,
-    public refreshToken: string,
+    public refreshToken: string
   ) {}
 
   static async create({ id, data, repositories }: ICreateSessionDTO) {
@@ -27,11 +27,11 @@ class SessionEntity implements ISessionEntity {
     accessToken,
     repositories,
   }: IFindSessionByAccessTokenDTO) {
-    // const cachedSession = await repositories.cache.get(
-    //   `session:accessToken:${accessToken}`,
-    // );
+    const cachedSession = await repositories.cache.get(
+      `session:accessToken:${accessToken}`
+    );
 
-    // if (cachedSession) return JSON.parse(cachedSession) as ISessionEntity;
+    if (cachedSession) return JSON.parse(cachedSession) as ISessionEntity;
 
     const session = await repositories.database.findByAccessToken(accessToken);
 
@@ -40,7 +40,7 @@ class SessionEntity implements ISessionEntity {
     await repositories.cache.set(
       `session:accessToken:${accessToken}`,
       JSON.stringify(session),
-      60 * 15,
+      60 * 15
     );
 
     return session;
@@ -50,7 +50,8 @@ class SessionEntity implements ISessionEntity {
     refreshToken,
     repositories,
   }: IFindSessionByRefreshTokenDTO) {
-    const session = repositories.database.findByRefreshToken(refreshToken);
+    const session =
+      await repositories.database.findByRefreshToken(refreshToken);
 
     if (!session) return null;
 
@@ -63,12 +64,18 @@ class SessionEntity implements ISessionEntity {
     accessToken,
     repositories,
   }: IRefreshSessionDTO) {
-    const session = repositories.database.update(id, {
+    const session = await repositories.database.update(id, {
       refreshToken,
       accessToken,
     });
 
     if (!session) return null;
+
+    await repositories.cache.set(
+      `session:accessToken:${accessToken}`,
+      JSON.stringify(session),
+      60 * 15
+    );
 
     return session;
   }

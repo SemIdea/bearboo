@@ -31,6 +31,7 @@ const refreshSessionController = async ({
     repositories: {
       user: ctx.repositories.user,
       database: ctx.repositories.session,
+      cache: ctx.repositories.cache,
     },
   });
 
