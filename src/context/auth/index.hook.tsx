@@ -5,7 +5,13 @@ import { trpc } from "@/app/_trpc/client";
 const useAuthLogic = () => {
   const [session, setSession] = useState<Partial<Session> | null>(null);
 
-  const login = () => {};
+  const { mutate: login } = trpc.auth.loginUser.useMutation({
+    onSuccess: (data) => {
+      setSession(data);
+      document.cookie = `accessToken=${data.accessToken}; path=/;`;
+      localStorage.setItem("refreshToken", data.refreshToken);
+    },
+  });
 
   const { mutate: register } = trpc.auth.registerUser.useMutation({
     onSuccess: (data) => {
