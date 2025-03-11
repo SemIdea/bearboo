@@ -27,6 +27,10 @@ type IAPIContextDTO = {
   };
 };
 
+type IProtectedAPIContextDTO = Omit<IAPIContextDTO, "user"> & {
+  user: IUserWithSession;
+};
+
 const createTRPCContext = ({
   headers,
 }: IInputAPIContextDTO): IAPIContextDTO => {
@@ -36,9 +40,8 @@ const createTRPCContext = ({
       user: userRepository,
       session: sessionRepository,
       post: postRepository,
-      cache: cacheRepository,      
+      cache: cacheRepository,
       hashing: passwordHashingHelper,
-
     },
   };
 };
@@ -46,4 +49,9 @@ const createTRPCContext = ({
 type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 
 export { createTRPCContext };
-export type { IInputAPIContextDTO, IAPIContextDTO, Context };
+export type {
+  IInputAPIContextDTO,
+  IAPIContextDTO,
+  IProtectedAPIContextDTO,
+  Context,
+};
