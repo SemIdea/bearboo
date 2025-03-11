@@ -6,8 +6,8 @@ type IUserEntity = {
   password: string;
 };
 
-type IUserWithSession = Partial<User> & {
-  session: Partial<Session>;
+type IUserWithSession = Omit<User, "password"> & {
+  session: Omit<Session, "userId">;
 };
 
 type IUserModel = {

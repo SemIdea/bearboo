@@ -65,12 +65,12 @@ const FindUserAndSessionByAccessTokenService = async ({
 }: IFindUserAndSessionByAccessTokenDTO) => {
   const { accessToken } = data;
 
-  const session = (await SessionEntity.findByAccessToken({
+  const session = await SessionEntity.findByAccessToken({
     accessToken,
     repositories: {
       ...repositories,
     },
-  })) as Partial<Session>;
+  });
 
   if (!session || !session.userId) {
     throw new TRPCError({
@@ -79,13 +79,13 @@ const FindUserAndSessionByAccessTokenService = async ({
     });
   }
 
-  const user = (await UserEntity.find({
+  const user = await UserEntity.find({
     id: session.userId,
     repositories: {
       ...repositories,
       database: repositories.user,
     },
-  })) as Partial<IUserWithSession>;
+  });
 
   if (!user) {
     throw new TRPCError({
@@ -94,12 +94,13 @@ const FindUserAndSessionByAccessTokenService = async ({
     });
   }
 
-  delete session.userId;
-  delete user.password;
+  const { password, ...userWithoutPassword } = user;
+  const { userId, ...sessionWithoutUserId } = session;
 
-  user.session = session as Omit<Session, "userId">;
-
-  return user as Omit<IUserWithSession, "password">;
+  return {
+    ...userWithoutPassword,
+    session: sessionWithoutUserId,
+  } as IUserWithSession;
 };
 
 const FindSessionByRefreshTokenService = async ({

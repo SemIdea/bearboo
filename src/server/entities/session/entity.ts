@@ -31,7 +31,7 @@ class SessionEntity implements ISessionEntity {
       `session:accessToken:${accessToken}`
     );
 
-    if (cachedSession) return JSON.parse(cachedSession) as ISessionEntity;
+    if (cachedSession) return JSON.parse(cachedSession) as SessionEntity;
 
     const session = await repositories.database.findByAccessToken(accessToken);
 
@@ -43,7 +43,7 @@ class SessionEntity implements ISessionEntity {
       60 * 15
     );
 
-    return session;
+    return session as SessionEntity;
   }
 
   static async findByRefreshToken({
