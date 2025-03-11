@@ -1,12 +1,17 @@
 import { z } from "zod";
 
-const createPostInput = z.object({
+const createPostSchema = z.object({
   title: z.string(),
   content: z.string(),
 });
 
-type CreatePostInput = z.TypeOf<typeof createPostInput>;
+const deletePostSchema = z.object({
+  postId: z.string(),
+});
 
-export { createPostInput };
+type CreatePostInput = z.TypeOf<typeof createPostSchema>;
+type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
 
-export type { CreatePostInput };
+export { createPostSchema, deletePostSchema };
+
+export type { CreatePostInput, DeletePostInput };
