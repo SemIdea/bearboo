@@ -19,6 +19,14 @@ class PrismaPostModel implements IPostModel {
     });
   }
 
+  async findUserPosts(userId: string) {
+    return await prisma.post.findMany({
+      where: {
+        userId,
+      },
+    });
+  }
+
   async update(id: string, data: Partial<IPostEntity>) {
     return await prisma.post.update({
       where: {
