@@ -1,3 +1,4 @@
+import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 import { Post } from "@prisma/client";
 
 type IPostEntity = {
@@ -13,4 +14,17 @@ type IPostModel = {
   delete: (id: string) => Promise<void>;
 };
 
-export type { IPostEntity, IPostModel };
+type ICreatePostDTO = {
+  id: string;
+  data: {
+    userId: string;
+    title: string;
+    content: string;
+  };
+  repositories: {
+    database: IPostModel;
+    cache: ICacheRepositoryAdapter;
+  };
+}
+
+export type { IPostEntity, IPostModel, ICreatePostDTO };

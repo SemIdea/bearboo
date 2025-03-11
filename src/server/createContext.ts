@@ -5,9 +5,11 @@ import { IPasswordHashingHelperAdapter } from "./integrations/helpers/passwordHa
 import {
   cacheRepository,
   passwordHashingHelper,
+  postRepository,
   sessionRepository,
   userRepository,
 } from "./drivers/repositories";
+import { IPostModel } from "./entities/post/DTO";
 
 type IInputAPIContextDTO = {
   headers: Headers;
@@ -17,9 +19,10 @@ type IAPIContextDTO = {
   headers: Headers;
   user?: IUserWithSession;
   repositories: {
-    cache: ICacheRepositoryAdapter;
     user: IUserModel;
     session: ISessionModel;
+    post: IPostModel;
+    cache: ICacheRepositoryAdapter;
     hashing: IPasswordHashingHelperAdapter;
   };
 };
@@ -30,10 +33,12 @@ const createTRPCContext = ({
   return {
     headers,
     repositories: {
-      cache: cacheRepository,
       user: userRepository,
       session: sessionRepository,
+      post: postRepository,
+      cache: cacheRepository,      
       hashing: passwordHashingHelper,
+
     },
   };
 };

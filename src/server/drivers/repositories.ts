@@ -2,9 +2,19 @@ import { RedisCacheRepository } from "../integrations/repositories/cache/impleme
 import { PrismaUserModel } from "../entities/user/repositories/prisma";
 import { PrismaSessionModel } from "../entities/session/repositories/prisma";
 import { BycryptPasswordHashingHelper } from "../integrations/helpers/passwordHashing/implementations/bycrypt";
+import { PrismaPostModel } from "../entities/post/repositories/prisma";
 
 // Singleton instances
-export const cacheRepository = new RedisCacheRepository();
-export const userRepository = new PrismaUserModel();
-export const sessionRepository = new PrismaSessionModel();
-export const passwordHashingHelper = new BycryptPasswordHashingHelper();
+const cacheRepository = new RedisCacheRepository();
+const userRepository = new PrismaUserModel();
+const sessionRepository = new PrismaSessionModel();
+const passwordHashingHelper = new BycryptPasswordHashingHelper();
+const postRepository = new PrismaPostModel();
+
+export {
+    cacheRepository,
+    userRepository,
+    sessionRepository,
+    passwordHashingHelper,
+    postRepository,
+}
