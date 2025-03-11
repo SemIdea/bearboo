@@ -21,8 +21,8 @@ const CreateAuthSessionService = async ({
   const user = await UserEntity.find({
     id: userId,
     repositories: {
+      ...repositories,
       database: repositories.user,
-      cache: repositories.cache,
     },
   });
 
@@ -68,8 +68,7 @@ const FindUserAndSessionByAccessTokenService = async ({
   const session = (await SessionEntity.findByAccessToken({
     accessToken,
     repositories: {
-      database: repositories.database,
-      cache: repositories.cache,
+      ...repositories,
     },
   })) as Partial<Session>;
 
@@ -83,10 +82,10 @@ const FindUserAndSessionByAccessTokenService = async ({
   const user = (await UserEntity.find({
     id: session.userId,
     repositories: {
+      ...repositories,
       database: repositories.user,
-      cache: repositories.cache,
     },
-  })) as IUserWithSession;
+  })) as Partial<IUserWithSession>;
 
   if (!user) {
     throw new TRPCError({

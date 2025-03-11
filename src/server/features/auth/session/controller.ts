@@ -15,7 +15,7 @@ const refreshSessionController = async ({
 }) => {
   const session = await FindSessionByRefreshTokenService({
     repositories: {
-      user: ctx.repositories.user,
+      ...ctx.repositories,
       database: ctx.repositories.session,
     },
     ...input,
@@ -29,9 +29,8 @@ const refreshSessionController = async ({
     newAccessToken,
     newRefreshToken,
     repositories: {
-      user: ctx.repositories.user,
+      ...ctx.repositories,
       database: ctx.repositories.session,
-      cache: ctx.repositories.cache,
     },
   });
 

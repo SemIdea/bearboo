@@ -1,4 +1,4 @@
-import { IAPIContextDTO } from "@/server/createContext";
+import { IProtectedAPIContextDTO } from "@/server/createContext";
 import { CreatePostInput } from "@/server/schema/post.schema";
 import { CreatePostService } from "./service";
 
@@ -7,21 +7,18 @@ const createPostController = async ({
   ctx,
 }: {
   input: CreatePostInput;
-  ctx: IAPIContextDTO;
+  ctx: IProtectedAPIContextDTO;
 }) => {
-  if (!ctx.user || !ctx.user.id) {
-    throw new Error("Unauthorized");
-  }
-
   const post = await CreatePostService({
     userId: ctx.user.id,
     repositories: {
-      user: ctx.repositories.user,
+      ...ctx.repositories,
       database: ctx.repositories.post,
-      cache: ctx.repositories.cache,
     },
     ...input,
   });
 
   return post;
 };
+
+export { createPostController };
