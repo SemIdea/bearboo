@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Authprovider } from "@/context/auth";
 import TrpcProvider from "@/context/trpc";
+import { PostProvider } from "@/context/post";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -21,7 +22,9 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider {...themeProps}>
         <TrpcProvider>
-          <Authprovider>{children}</Authprovider>
+          <Authprovider>
+            <PostProvider>{children}</PostProvider>
+          </Authprovider>
         </TrpcProvider>
       </NextThemesProvider>
     </HeroUIProvider>
