@@ -12,7 +12,7 @@ type IUserWithSession = Omit<User, "password"> & {
 
 type IUserModel = {
   create: (id: string, data: IUserEntity) => Promise<User>;
-  read: (id: string) => Promise<User | null>;
+  find: (id: string) => Promise<User | null>;
   update: (id: string, data: IUserEntity) => Promise<User>;
   delete: (id: string) => Promise<void>;
   findByEmail: (email: string) => Promise<User | null>;

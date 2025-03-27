@@ -11,7 +11,7 @@ class PrismaUserModel implements IUserModel {
     });
   }
 
-  async read(id: string) {
+  async find(id: string) {
     return await prisma.user.findUnique({
       where: {
         id,

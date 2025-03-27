@@ -44,7 +44,7 @@ class UserEntity implements IUserEntity {
 
     if (cachedUser) return JSON.parse(cachedUser);
 
-    const user = await repositories.database.read(id);
+    const user = await repositories.database.find(id);
 
     if (!user) return null;
 
