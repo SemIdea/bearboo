@@ -8,8 +8,8 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   const user = await UserEntity.find({
     id: data.userId,
     repositories: {
+      ...repositories,
       database: repositories.user,
-      cache: repositories.cache,
     },
   });
 
@@ -23,7 +23,7 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   const post = await PostEntity.find({
     id: data.postId,
     repositories: {
-      database: repositories.database,
+      ...repositories,
     },
   });
 
@@ -44,7 +44,7 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   await PostEntity.delete({
     id: data.postId,
     repositories: {
-      database: repositories.database,
+      ...repositories,
     },
   });
 };
