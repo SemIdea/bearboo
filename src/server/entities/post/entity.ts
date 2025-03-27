@@ -1,8 +1,11 @@
 import {
   ICreatePostDTO,
   IDeletePostDTO,
+  IFindAllPostsDTO,
+  IFindPostDTO,
   IFindUserPostsDTO,
   IPostEntity,
+  IUpdatePostDTO,
 } from "./DTO";
 
 class PostEntity implements IPostEntity {
@@ -22,14 +25,29 @@ class PostEntity implements IPostEntity {
     return post;
   }
 
-  static async find({ id, repositories }: { id: string; repositories: any }) {
-    const post = await repositories.database.read(id);
+  static async find({ id, repositories }: IFindPostDTO) {
+    const post = await repositories.database.find(id);
 
     if (!post) {
       return null;
     }
 
     return new PostEntity(post.id, post.userId, post.title, post.content);
+  }
+
+  static async findAll({ repositories }: IFindAllPostsDTO) {
+    const postsData = await repositories.database.findAll();
+
+    if (!postsData) {
+      return null;
+    }
+
+    const posts = postsData.map(
+      (post: any) =>
+        new PostEntity(post.id, post.userId, post.title, post.content)
+    );
+
+    return posts;
   }
 
   static async findUserPosts({ userId, repositories }: IFindUserPostsDTO) {
@@ -45,6 +63,10 @@ class PostEntity implements IPostEntity {
     );
 
     return posts;
+  }
+
+  static async update({ id, data, repositories }: IUpdatePostDTO) {
+    return await repositories.database.update(id, data);
   }
 
   static async delete({ id, repositories }: IDeletePostDTO) {

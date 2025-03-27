@@ -9,7 +9,8 @@ type IPostEntity = {
 
 type IPostModel = {
   create: (id: string, data: IPostEntity) => Promise<Post>;
-  read: (id: string) => Promise<Post | null>;
+  find: (id: string) => Promise<Post | null>;
+  findAll: () => Promise<Post[] | null>;
   findUserPosts: (userId: string) => Promise<Post[] | null>;
   update: (id: string, data: Partial<IPostEntity>) => Promise<Post>;
   delete: (id: string) => Promise<void>;
@@ -28,10 +29,34 @@ type ICreatePostDTO = {
   };
 };
 
+type IFindPostDTO = {
+  id: string;
+  repositories: {
+    database: IPostModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IFindAllPostsDTO = {
+  repositories: {
+    database: IPostModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
 type IFindUserPostsDTO = {
   userId: string;
   repositories: {
     database: IPostModel;
+  };
+};
+
+type IUpdatePostDTO = {
+  id: string;
+  data: Partial<IPostEntity>;
+  repositories: {
+    database: IPostModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 
@@ -46,6 +71,9 @@ export type {
   IPostEntity,
   IPostModel,
   ICreatePostDTO,
+  IFindPostDTO,
+  IFindAllPostsDTO,
   IFindUserPostsDTO,
+  IUpdatePostDTO,
   IDeletePostDTO,
 };

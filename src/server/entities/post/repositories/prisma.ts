@@ -11,12 +11,16 @@ class PrismaPostModel implements IPostModel {
     });
   }
 
-  async read(id: string) {
+  async find(id: string) {
     return await prisma.post.findUnique({
       where: {
         id,
       },
     });
+  }
+
+  async findAll() {
+    return await prisma.post.findMany();
   }
 
   async findUserPosts(userId: string) {
