@@ -1,4 +1,4 @@
-import { Session } from "@prisma/client";
+import { Session, User } from "@prisma/client";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type ISessionEntity = {
@@ -7,9 +7,13 @@ type ISessionEntity = {
   refreshToken: string;
 };
 
+type ISessionWithUser = Omit<Session, "userId"> & {
+  user: Omit<User, "password">;
+};
+
 type ISessionModel = {
   create: (id: string, data: ISessionEntity) => Promise<Session>;
-  read: (id: string) => Promise<Session | null>;
+  find: (id: string) => Promise<Session | null>;
   findByAccessToken: (accessToken: string) => Promise<Session | null>;
   findByRefreshToken: (refreshToken: string) => Promise<Session | null>;
   update: (id: string, data: Partial<ISessionEntity>) => Promise<Session>;
@@ -51,6 +55,7 @@ type IRefreshSessionDTO = {
 
 export type {
   ISessionModel,
+  ISessionWithUser,
   ISessionEntity,
   ICreateSessionDTO,
   IFindSessionByAccessTokenDTO,
