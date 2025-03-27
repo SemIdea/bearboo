@@ -2,6 +2,7 @@ import { CreateAuthSessionService } from "../../auth/session/service";
 import { LoginUserService } from "./service";
 import { LoginUserInput } from "@/server/schema/user.schema";
 import { IAPIContextDTO } from "@/server/createContext";
+import { IUserWithSession } from "@/server/entities/user/DTO";
 
 const loginUserController = async ({
   input,
@@ -29,7 +30,13 @@ const loginUserController = async ({
     },
   });
 
-  return session;
+  const { password, ...userWithoutPassword } = user;
+  const { userId, ...sessionWithoutUserId } = session;
+
+  return {
+    ...sessionWithoutUserId,
+    user: userWithoutPassword,
+  };
 };
 
 export { loginUserController };
