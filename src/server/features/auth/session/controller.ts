@@ -2,7 +2,10 @@ import {
   FindSessionByRefreshTokenService,
   RefreshSessionService,
 } from "./service";
-import { IAPIContextDTO } from "@/server/createContext";
+import {
+  IAPIContextDTO,
+  IProtectedAPIContextDTO,
+} from "@/server/createContext";
 import { RefreshSessionInput } from "@/server/schema/session.schema";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 
@@ -40,4 +43,12 @@ const refreshSessionController = async ({
   };
 };
 
-export { refreshSessionController };
+const getUserFromSessionController = async ({
+  ctx,
+}: {
+  ctx: IProtectedAPIContextDTO;
+}) => {
+  return ctx.user;
+};
+
+export { refreshSessionController, getUserFromSessionController };

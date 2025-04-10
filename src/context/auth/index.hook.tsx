@@ -5,27 +5,32 @@ import { ISessionWithUser } from "@/server/entities/session/DTO";
 const useAuthLogic = () => {
   const [session, setSession] = useState<ISessionWithUser | null>(null);
 
+  const updateAuthData = (data?: ISessionWithUser) => {
+    console.log("updateAuthData", data);
+    if (!data) {
+      setSession(null);
+      document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+      document.cookie = `session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+      localStorage.removeItem("refreshToken");
+      return;
+    }
+    setSession(data);
+    document.cookie = `accessToken=${data.accessToken}; path=/;`;
+    document.cookie = `session=${JSON.stringify(data)}; path=/;`;
+    localStorage.setItem("refreshToken", data.refreshToken);
+  };
+
   const { mutate: login } = trpc.auth.loginUser.useMutation({
-    onSuccess: (data) => {
-      setSession(data);
-      document.cookie = `accessToken=${data.accessToken}; path=/;`;
-      document.cookie = `session=${JSON.stringify(data)}; path=/;`;
-      localStorage.setItem("refreshToken", data.refreshToken);
-    },
+    onSuccess: (data) => updateAuthData(data),
   });
 
   const { mutate: register } = trpc.auth.registerUser.useMutation({
-    onSuccess: (data) => {
-      setSession(data);
-      document.cookie = `accessToken=${data.accessToken}; path=/;`;
-      document.cookie = `session=${JSON.stringify(data)}; path=/;`;
-      localStorage.setItem("refreshToken", data.refreshToken);
-    },
+    onSuccess: (data) => updateAuthData(data),
   });
 
   const logout = () => {};
 
-  return { session, setSession, login, register, logout };
+  return { session, setSession, updateAuthData, login, register, logout };
 };
 
 type UseAuthLogicReturn = ReturnType<typeof useAuthLogic>;

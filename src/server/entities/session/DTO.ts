@@ -7,7 +7,7 @@ type ISessionEntity = {
   refreshToken: string;
 };
 
-type ISessionWithUser = Omit<Session, "userId"> & {
+type ISessionWithUser = Omit<Session, "userId" | "id"> & {
   user: Omit<User, "password">;
 };
 

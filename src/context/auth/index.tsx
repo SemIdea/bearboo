@@ -10,16 +10,24 @@ type ChatProviderProps = {
 };
 
 const Authprovider = ({ children }: ChatProviderProps) => {
-  const { session, setSession, login, register, logout } = useAuthLogic();
+  const { session, setSession, updateAuthData, login, register, logout } =
+    useAuthLogic();
 
   useEffect(() => {
-    const sessionCookie = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("session="));
+    const [accessTokenCookie, sessionCookie] = ["accessToken=", "session="].map(
+      (key) =>
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith(key))
+          ?.split("=")[1]
+    );
 
     if (sessionCookie) {
-      const session = JSON.parse(sessionCookie.split("=")[1]);
+      const session = JSON.parse(sessionCookie);
       setSession(session);
+    }
+
+    if (accessTokenCookie && !session) {
     }
   }, []);
 
@@ -28,6 +36,7 @@ const Authprovider = ({ children }: ChatProviderProps) => {
       value={{
         session,
         setSession,
+        updateAuthData,
         login,
         register,
         logout,
