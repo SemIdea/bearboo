@@ -15,7 +15,7 @@ export interface ProvidersProps {
   themeProps?: ThemeProviderProps;
 }
 
-export function Providers({ children, themeProps }: ProvidersProps) {
+const Providers: React.FC<ProvidersProps> = ({ children, themeProps }) => {
   const router = useRouter();
 
   return (
@@ -29,4 +29,6 @@ export function Providers({ children, themeProps }: ProvidersProps) {
       </NextThemesProvider>
     </HeroUIProvider>
   );
-}
+};
+
+export { Providers };

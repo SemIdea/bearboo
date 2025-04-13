@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/auth";
 
-export default function Register() {
+const Register = () => {
   const { register } = useAuth();
 
   const [email, setEmail] = useState(`user${Date.now()}@example.com`);
@@ -35,4 +35,6 @@ export default function Register() {
       <button type="submit">Register</button>
     </form>
   );
-}
+};
+
+export default Register;
