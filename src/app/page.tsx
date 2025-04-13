@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import { trpc } from "./_trpc/client";
 import { useAuth } from "@/context/auth";
 import { usePost } from "@/context/post";
+import { PostFeed } from "@/components/postFeed";
 
-export default function Home() {
+const Home = () => {
   const { session } = useAuth();
   const { findAllPosts } = usePost();
 
@@ -25,8 +26,9 @@ export default function Home() {
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <h2>Hello World!</h2>
-      <p>Posts</p>
-      <p>{JSON.stringify(posts)}</p>
+
+      <PostFeed />
+
       <p>{JSON.stringify(session)}</p>
       <p>
         {session ? (
@@ -39,4 +41,6 @@ export default function Home() {
       </p>
     </section>
   );
-}
+};
+
+export default Home;
