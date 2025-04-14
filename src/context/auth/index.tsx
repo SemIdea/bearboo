@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useAuthLogic, UseAuthLogicReturn } from "./index.hook";
 
 const AuthContext = createContext<UseAuthLogicReturn>({} as UseAuthLogicReturn);
@@ -10,8 +10,16 @@ type ChatProviderProps = {
 };
 
 const Authprovider = ({ children }: ChatProviderProps) => {
-  const { session, setSession, updateAuthData, login, register, logout } =
-    useAuthLogic();
+  const {
+    session,
+    isLoadingSession,
+    setIsLoadingSession,
+    setSession,
+    updateAuthData,
+    login,
+    register,
+    logout,
+  } = useAuthLogic();
 
   useEffect(() => {
     const [accessTokenCookie, sessionCookie] = ["accessToken=", "session="].map(
@@ -29,12 +37,16 @@ const Authprovider = ({ children }: ChatProviderProps) => {
 
     if (accessTokenCookie && !session) {
     }
+
+    setIsLoadingSession(false);
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
         session,
+        isLoadingSession,
+        setIsLoadingSession,
         setSession,
         updateAuthData,
         login,

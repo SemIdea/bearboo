@@ -3,6 +3,7 @@ import { trpc } from "@/app/_trpc/client";
 import { ISessionWithUser } from "@/server/entities/session/DTO";
 
 const useAuthLogic = () => {
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [session, setSession] = useState<ISessionWithUser | null>(null);
 
   const updateAuthData = (data?: ISessionWithUser) => {
@@ -30,7 +31,16 @@ const useAuthLogic = () => {
 
   const logout = () => {};
 
-  return { session, setSession, updateAuthData, login, register, logout };
+  return {
+    session,
+    isLoadingSession,
+    setSession,
+    setIsLoadingSession,
+    updateAuthData,
+    login,
+    register,
+    logout,
+  };
 };
 
 type UseAuthLogicReturn = ReturnType<typeof useAuthLogic>;
