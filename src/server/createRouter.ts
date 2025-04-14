@@ -65,7 +65,7 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   });
 });
 
-const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
