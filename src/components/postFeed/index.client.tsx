@@ -10,12 +10,10 @@ const Posts = ({ max }: { max: number }) => {
   return (
     <div>
       <p>
-        {isLoading ? (
-          <span>Loading...</span>
-        ) : error ? (
-          <span>Error: {error.message}</span>
-        ) : (
-          <span>No posts available.</span>
+        {isLoading && <span>Loading...</span>}{" "}
+        {error && <span>Error: {error.message}</span>}
+        {!isLoading && !error && posts && posts.length === 0 && (
+          <span>No posts available</span>
         )}
       </p>
       <div>
@@ -25,6 +23,7 @@ const Posts = ({ max }: { max: number }) => {
             <div key={post.id}>
               <h3>{post.title}</h3>
               <p>{post.content}</p>
+              <p>{post.userId}</p>
             </div>
           ))}
       </div>
