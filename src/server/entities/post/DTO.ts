@@ -48,6 +48,7 @@ type IFindUserPostsDTO = {
   userId: string;
   repositories: {
     database: IPostModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 
@@ -64,6 +65,7 @@ type IDeletePostDTO = {
   id: string;
   repositories: {
     database: IPostModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 

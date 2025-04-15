@@ -1,4 +1,10 @@
 import {
+  sessionAccessTokenCacheKey,
+  sessionCacheKey,
+  SessionCacheTTL,
+  sessionRefreshTokenCacheKey,
+} from "@/constants/cache/session";
+import {
   ICreateSessionDTO,
   IFindSessionByAccessTokenDTO,
   IFindSessionByRefreshTokenDTO,
@@ -14,11 +20,55 @@ class SessionEntity implements ISessionEntity {
     public refreshToken: string
   ) {}
 
+  private static async cacheSession(session: SessionEntity, repositories: any) {
+    const { id, accessToken, refreshToken } = session;
+
+    await Promise.all([
+      repositories.cache.set(
+        sessionCacheKey(id),
+        JSON.stringify(session),
+        SessionCacheTTL
+      ),
+      repositories.cache.set(
+        sessionAccessTokenCacheKey(accessToken),
+        id,
+        SessionCacheTTL
+      ),
+      repositories.cache.set(
+        sessionRefreshTokenCacheKey(refreshToken),
+        id,
+        SessionCacheTTL
+      ),
+    ]);
+  }
+
+  private static async resolveSessionFromIndex(
+    indexKey: string,
+    repositories: any
+  ): Promise<SessionEntity | null> {
+    const sessionId = await repositories.cache.get(indexKey);
+    if (!sessionId) return null;
+
+    const cachedSession = await repositories.cache.get(
+      sessionCacheKey(sessionId)
+    );
+    if (cachedSession) return JSON.parse(cachedSession) as SessionEntity;
+
+    const session = await repositories.database.findById(sessionId);
+    if (!session) return null;
+
+    await SessionEntity.cacheSession(session, repositories);
+
+    return session;
+  }
+
   static async create({ id, data, repositories }: ICreateSessionDTO) {
     const { userId, accessToken, refreshToken } = data;
     const newSession = new SessionEntity(id, userId, accessToken, refreshToken);
 
     const session = await repositories.database.create(id, newSession);
+
+    await SessionEntity.cacheSession(session, repositories);
 
     return session;
   }
@@ -27,55 +77,41 @@ class SessionEntity implements ISessionEntity {
     accessToken,
     repositories,
   }: IFindSessionByAccessTokenDTO) {
-    const cachedSession = await repositories.cache.get(
-      `session:accessToken:${accessToken}`
+    return await SessionEntity.resolveSessionFromIndex(
+      sessionAccessTokenCacheKey(accessToken),
+      repositories
     );
-
-    if (cachedSession) return JSON.parse(cachedSession) as SessionEntity;
-
-    const session = await repositories.database.findByAccessToken(accessToken);
-
-    if (!session) return null;
-
-    await repositories.cache.set(
-      `session:accessToken:${accessToken}`,
-      JSON.stringify(session),
-      60 * 15
-    );
-
-    return session as SessionEntity;
   }
 
   static async findByRefreshToken({
     refreshToken,
     repositories,
   }: IFindSessionByRefreshTokenDTO) {
-    const session =
-      await repositories.database.findByRefreshToken(refreshToken);
-
-    if (!session) return null;
-
-    return session;
+    return await SessionEntity.resolveSessionFromIndex(
+      sessionRefreshTokenCacheKey(refreshToken),
+      repositories
+    );
   }
 
   static async refreshSession({
     id,
     refreshToken,
     accessToken,
+    newRefreshToken,
+    newAccessToken,
     repositories,
   }: IRefreshSessionDTO) {
+    await Promise.all([
+      repositories.cache.del(sessionAccessTokenCacheKey(accessToken)),
+      repositories.cache.del(sessionRefreshTokenCacheKey(refreshToken)),
+    ]);
+
     const session = await repositories.database.update(id, {
-      refreshToken,
-      accessToken,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     });
 
-    if (!session) return null;
-
-    await repositories.cache.set(
-      `session:accessToken:${accessToken}`,
-      JSON.stringify(session),
-      60 * 15
-    );
+    await SessionEntity.cacheSession(session, repositories);
 
     return session;
   }

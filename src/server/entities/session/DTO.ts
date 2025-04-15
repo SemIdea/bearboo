@@ -25,6 +25,7 @@ type ICreateSessionDTO = {
   data: ISessionEntity;
   repositories: {
     database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 
@@ -40,6 +41,7 @@ type IFindSessionByRefreshTokenDTO = {
   refreshToken: string;
   repositories: {
     database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 
@@ -47,6 +49,8 @@ type IRefreshSessionDTO = {
   id: string;
   refreshToken: string;
   accessToken: string;
+  newRefreshToken: string;
+  newAccessToken: string;
   repositories: {
     database: ISessionModel;
     cache: ICacheRepositoryAdapter;
