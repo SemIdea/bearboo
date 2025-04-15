@@ -1,7 +1,8 @@
 import { Snowflake, decodeSnowflake } from "@skorotkiewicz/snowflake-id";
-const GenerateSnowflakeUID = async (machineId: number = 1): Promise<string> => {
-  const snowflake = new Snowflake(machineId);
-  const id = await snowflake.generate();
+const snowflakeInstance = new Snowflake(1);
+
+const GenerateSnowflakeUID = async (): Promise<string> => {
+  const id = await snowflakeInstance.generate();
 
   return id;
 };
