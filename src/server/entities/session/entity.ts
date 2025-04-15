@@ -11,6 +11,7 @@ import {
   IRefreshSessionDTO,
   ISessionEntity,
 } from "./DTO";
+import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 class SessionEntity implements ISessionEntity {
   constructor(
@@ -20,8 +21,23 @@ class SessionEntity implements ISessionEntity {
     public refreshToken: string
   ) {}
 
-  private static async cacheSession(session: SessionEntity, repositories: any) {
+  private static async cacheSession(
+    session: SessionEntity,
+    repositories: {
+      cache: ICacheRepositoryAdapter;
+    }
+  ) {
     const { id, accessToken, refreshToken } = session;
+
+    // repositories.cache.mset(
+    //   [
+    //     sessionCacheKey(id),
+    //     sessionAccessTokenCacheKey(accessToken),
+    //     sessionRefreshTokenCacheKey(refreshToken),
+    //   ],
+    //   [JSON.stringify(session), id, id],
+    //   SessionCacheTTL
+    // );
 
     await Promise.all([
       repositories.cache.set(
