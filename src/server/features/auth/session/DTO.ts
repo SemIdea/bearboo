@@ -25,6 +25,7 @@ type IFindSessionByRefreshTokenDTO = {
   repositories: {
     user: IUserModel;
     database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 
