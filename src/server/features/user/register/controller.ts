@@ -1,4 +1,3 @@
-import { Session } from "@prisma/client";
 import { CreateAuthSessionService } from "../../auth/session/service";
 import { RegisterUserService } from "./service";
 import { CreateUserInput } from "@/server/schema/user.schema";
