@@ -21,13 +21,21 @@ class RedisCacheRepository implements ICacheRepositoryAdapter {
     return await this.redisClient.get(key);
   }
 
-  async del(key: string): Promise<void> {
-    await this.redisClient.del(key);
+  async del(keys: string | string[]): Promise<void> {
+    if (Array.isArray(keys)) {
+      await this.redisClient.del(...keys);
+    } else {
+      await this.redisClient.del(keys);
+    }
   }
 
-  async mget(keys: string[]): Promise<string[]> {
+  async mget(keys: string[]): Promise<Record<string, string | null>> {
     const values = await this.redisClient.mget(keys);
-    return values.filter((value) => value !== null) as string[];
+    const result: Record<string, string | null> = {};
+    keys.forEach((key, i) => {
+      result[key] = values[i];
+    });
+    return result;
   }
 
   async mset(keys: string[], values: string[], ex?: number): Promise<void> {

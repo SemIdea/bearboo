@@ -29,6 +29,8 @@ const refreshSessionController = async ({
 
   await RefreshSessionService({
     id: session.id,
+    accessToken: session.accessToken,
+    refreshToken: session.refreshToken,
     newAccessToken,
     newRefreshToken,
     repositories: {

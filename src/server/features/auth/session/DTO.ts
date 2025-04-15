@@ -31,6 +31,8 @@ type IFindSessionByRefreshTokenDTO = {
 
 type IRefreshSessionDTO = {
   id: string;
+  accessToken: string;
+  refreshToken: string;
   newAccessToken: string;
   newRefreshToken: string;
   repositories: {

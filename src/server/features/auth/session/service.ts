@@ -128,8 +128,10 @@ const RefreshSessionService = async ({
 }: IRefreshSessionDTO) => {
   const newSession = await SessionEntity.refreshSession({
     id: data.id,
-    accessToken: data.newAccessToken,
-    refreshToken: data.newRefreshToken,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    newAccessToken: data.newAccessToken,
+    newRefreshToken: data.newRefreshToken,
     repositories,
   });
 

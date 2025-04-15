@@ -29,33 +29,17 @@ class SessionEntity implements ISessionEntity {
   ) {
     const { id, accessToken, refreshToken } = session;
 
-    // repositories.cache.mset(
-    //   [
-    //     sessionCacheKey(id),
-    //     sessionAccessTokenCacheKey(accessToken),
-    //     sessionRefreshTokenCacheKey(refreshToken),
-    //   ],
-    //   [JSON.stringify(session), id, id],
-    //   SessionCacheTTL
-    // );
+    console.log(session);
 
-    await Promise.all([
-      repositories.cache.set(
+    await repositories.cache.mset(
+      [
         sessionCacheKey(id),
-        JSON.stringify(session),
-        SessionCacheTTL
-      ),
-      repositories.cache.set(
         sessionAccessTokenCacheKey(accessToken),
-        id,
-        SessionCacheTTL
-      ),
-      repositories.cache.set(
         sessionRefreshTokenCacheKey(refreshToken),
-        id,
-        SessionCacheTTL
-      ),
-    ]);
+      ],
+      [JSON.stringify(session), id, id],
+      SessionCacheTTL
+    );
   }
 
   private static async resolveSessionFromIndex(
@@ -70,7 +54,9 @@ class SessionEntity implements ISessionEntity {
     );
     if (cachedSession) return JSON.parse(cachedSession) as SessionEntity;
 
-    const session = await repositories.database.findById(sessionId);
+    const session = (await repositories.database.findById(
+      sessionId
+    )) as SessionEntity;
     if (!session) return null;
 
     await SessionEntity.cacheSession(session, repositories);
