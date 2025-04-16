@@ -32,20 +32,32 @@ class RedisCacheRepository implements ICacheRepositoryAdapter {
   async mget(keys: string[]): Promise<Record<string, string | null>> {
     const values = await this.redisClient.mget(keys);
     const result: Record<string, string | null> = {};
+
     keys.forEach((key, i) => {
       result[key] = values[i];
     });
+
     return result;
   }
 
   async mset(keys: string[], values: string[], ex?: number): Promise<void> {
     const multi = this.redisClient.multi();
+
     keys.forEach((key, index) => {
       if (ex) {
         multi.set(key, values[index], "EX", ex);
       } else {
         multi.set(key, values[index]);
       }
+    });
+    await multi.exec();
+  }
+
+  async mdel(keys: string[]): Promise<void> {
+    const multi = this.redisClient.multi();
+
+    keys.forEach((key) => {
+      multi.del(key);
     });
     await multi.exec();
   }
