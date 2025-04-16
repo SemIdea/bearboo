@@ -8,6 +8,4 @@ type IFindAllPostsDTO = {
   };
 };
 
-export type {
-  IFindAllPostsDTO,
-}
+export type { IFindAllPostsDTO };

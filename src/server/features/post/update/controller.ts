@@ -1,6 +1,6 @@
+import { UpdatePostService } from "./service";
 import { IProtectedAPIContextDTO } from "@/server/createContext";
 import { UpdatePostInput } from "@/server/schema/post.schema";
-import { UpdatePostService } from "./service";
 
 const updatePostController = async ({
   input,

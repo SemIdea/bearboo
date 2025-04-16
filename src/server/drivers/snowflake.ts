@@ -8,7 +8,7 @@ const GenerateSnowflakeUID = async (): Promise<string> => {
 };
 
 const GetTimestampFromID = (
-  id: string
+  id: string,
 ): {
   timestamp: string;
   machineId: string;

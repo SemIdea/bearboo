@@ -10,7 +10,7 @@ let trpcClientInstance: ReturnType<typeof trpc.createClient>;
 
 export const fetcher = async (
   info: RequestInfo | URL,
-  options: RequestInit | RequestInit | undefined
+  options: RequestInit | RequestInit | undefined,
 ) => {
   const response = await fetch(info, options);
 

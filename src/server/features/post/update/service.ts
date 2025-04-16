@@ -1,6 +1,6 @@
-import { UserEntity } from "@/server/entities/user/entity";
-import { IUpdatePostDTO } from "./DTO";
 import { TRPCError } from "@trpc/server";
+import { IUpdatePostDTO } from "./DTO";
+import { UserEntity } from "@/server/entities/user/entity";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { PostEntity } from "@/server/entities/post/entity";
 
@@ -42,7 +42,7 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
     });
   }
 
-  const newPost = await PostEntity.update({
+  return await PostEntity.update({
     id: data.postId,
     data: {
       title: data.title,

@@ -1,6 +1,6 @@
-import { UserEntity } from "@/server/entities/user/entity";
-import { IDeletePostDTO } from "./DTO";
 import { TRPCError } from "@trpc/server";
+import { IDeletePostDTO } from "./DTO";
+import { UserEntity } from "@/server/entities/user/entity";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { PostEntity } from "@/server/entities/post/entity";
 

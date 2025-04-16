@@ -3,7 +3,7 @@ import { getUserFromSessionController } from "../features/auth/session/controlle
 
 const sessionRouter = t.router({
   me: protectedProcedure.query(async ({ ctx }) =>
-    getUserFromSessionController({ ctx })
+    getUserFromSessionController({ ctx }),
   ),
 });
 

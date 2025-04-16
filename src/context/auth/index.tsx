@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useAuthLogic, UseAuthLogicReturn } from "./index.hook";
 
 const AuthContext = createContext<UseAuthLogicReturn>({} as UseAuthLogicReturn);
@@ -27,11 +27,12 @@ const Authprovider = ({ children }: ChatProviderProps) => {
         document.cookie
           .split("; ")
           .find((row) => row.startsWith(key))
-          ?.split("=")[1]
+          ?.split("=")[1],
     );
 
     if (sessionCookie) {
       const session = JSON.parse(sessionCookie);
+
       setSession(session);
     }
 

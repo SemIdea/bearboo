@@ -12,9 +12,9 @@ const passwordHashingHelper = new BycryptPasswordHashingHelper();
 const postRepository = new PrismaPostModel();
 
 export {
-    cacheRepository,
-    userRepository,
-    sessionRepository,
-    passwordHashingHelper,
-    postRepository,
-}
+  cacheRepository,
+  userRepository,
+  sessionRepository,
+  passwordHashingHelper,
+  postRepository,
+};

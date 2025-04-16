@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuth } from "@/context/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
 
 type PostData = {
@@ -19,7 +19,7 @@ const useCreatePost = () => {
   const [successMessage, setSuccessMessage] = useState<null | string>(null);
 
   const { mutate: createPost } = trpc.post.createPost.useMutation({
-    onSuccess: (data) => {
+    onSuccess: () => {
       setSuccessMessage("Post created successfully!");
       setErrorMessage(null);
       // router.push("/posts");
@@ -41,7 +41,7 @@ const useCreatePost = () => {
   }, [isLoadingSession]);
 
   const handleCreatePost = async (
-    postData: React.FormEvent<HTMLFormElement>
+    postData: React.FormEvent<HTMLFormElement>,
   ) => {
     postData.preventDefault();
 
@@ -56,6 +56,7 @@ const useCreatePost = () => {
     if (!session) {
       setErrorMessage("You must be logged in to create a post.");
       setIsUploading(false);
+
       return;
     }
 

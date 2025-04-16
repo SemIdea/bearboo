@@ -1,4 +1,3 @@
-import { Session } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import {
   ICreateAuthSessionDTO,

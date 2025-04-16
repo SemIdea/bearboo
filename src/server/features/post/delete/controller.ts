@@ -1,6 +1,6 @@
+import { DeletePostService } from "./service";
 import { IProtectedAPIContextDTO } from "@/server/createContext";
 import { DeletePostInput } from "@/server/schema/post.schema";
-import { DeletePostService } from "./service";
 
 const deletePostController = async ({
   input,

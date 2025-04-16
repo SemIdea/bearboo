@@ -7,12 +7,12 @@ const useAuthLogic = () => {
   const [session, setSession] = useState<ISessionWithUser | null>(null);
 
   const updateAuthData = (data?: ISessionWithUser) => {
-    console.log("updateAuthData", data);
     if (!data) {
       setSession(null);
       document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
       document.cookie = `session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
       localStorage.removeItem("refreshToken");
+
       return;
     }
     setSession(data);

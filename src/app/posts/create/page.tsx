@@ -5,12 +5,13 @@ import { useCreatePost } from "./page.client";
 const Page = () => {
   const { handleCreatePost, isUploading, successMessage, errorMessage } =
     useCreatePost();
+
   return (
     <div>
       <h2>Create Post</h2>
       <form onSubmit={handleCreatePost}>
-        <input type="text" name="title" placeholder="Title" required />
-        <textarea name="content" placeholder="Content" required></textarea>
+        <input required name="title" placeholder="Title" type="text" />
+        <textarea required name="content" placeholder="Content" />
         <button type="submit">Create Post</button>
       </form>
       {isUploading && <p>Uploading...</p>}
