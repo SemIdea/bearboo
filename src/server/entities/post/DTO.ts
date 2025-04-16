@@ -1,5 +1,5 @@
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 import { Post } from "@prisma/client";
+import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IPostEntity = {
   userId: string;
@@ -14,6 +14,30 @@ type IPostModel = {
   findUserPosts: (userId: string) => Promise<Post[] | null>;
   update: (id: string, data: Partial<IPostEntity>) => Promise<Post>;
   delete: (id: string) => Promise<void>;
+};
+
+type ICachePostDTO = {
+  post: Post;
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type ICacheUserPostsDTO = {
+  userId: string;
+  posts: Post[];
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IResolvePostFromIndexDTO = {
+  indexKey: string;
+  indexKeyCaller: (key: string) => string;
+  findOnDatabase: (id: string) => Promise<Post | null>;
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+  };
 };
 
 type ICreatePostDTO = {
@@ -72,6 +96,9 @@ type IDeletePostDTO = {
 export type {
   IPostEntity,
   IPostModel,
+  ICachePostDTO,
+  ICacheUserPostsDTO,
+  IResolvePostFromIndexDTO,
   ICreatePostDTO,
   IFindPostDTO,
   IFindAllPostsDTO,

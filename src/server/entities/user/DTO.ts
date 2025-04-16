@@ -18,6 +18,23 @@ type IUserModel = {
   findByEmail: (email: string) => Promise<User | null>;
 };
 
+type ICacheUserDTO = {
+  user: User;
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IResolveUserFromIndexDTO = {
+  indexKey: string;
+  indexKeyCaller: (string: string) => string;
+  findOnDatabase: (key: string) => Promise<User | null>;
+  repositories: {
+    database: IUserModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
 type ICreateUserDTO = {
   id: string;
   data: IUserEntity;
@@ -47,6 +64,8 @@ export type {
   IUserModel,
   IUserEntity,
   IUserWithSession,
+  ICacheUserDTO,
+  IResolveUserFromIndexDTO,
   ICreateUserDTO,
   IFindUserDTO,
   IFindUserByEmailDTO,

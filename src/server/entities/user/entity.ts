@@ -4,6 +4,8 @@ import {
   ICreateUserDTO,
   IFindUserDTO,
   IFindUserByEmailDTO,
+  ICacheUserDTO,
+  IResolveUserFromIndexDTO,
 } from "./DTO";
 import { verifyUserSchema } from "@/server/schema/user.schema";
 import {
@@ -16,11 +18,59 @@ class UserEntity implements IUserEntity {
   constructor(
     public id: string,
     public email: string,
-    public password: string
+    public password: string,
   ) {}
 
+  private static async cacheUser({
+    user,
+    repositories,
+  }: ICacheUserDTO): Promise<void> {
+    const { id, email } = user;
+
+    await repositories.cache.mset(
+      [userCacheKey(id), userEmailCacheKey(email)],
+      [JSON.stringify(user), id],
+      UserCacheTTL,
+    );
+  }
+
+  private static async resolveUserFromIndex({
+    indexKey,
+    indexKeyCaller,
+    findOnDatabase,
+    repositories,
+  }: IResolveUserFromIndexDTO) {
+    const lookupCacheKey = indexKeyCaller(indexKey);
+    const cachedIndexValue = await repositories.cache.get(lookupCacheKey);
+
+    if (cachedIndexValue) {
+      try {
+        const maybeUser = JSON.parse(cachedIndexValue) as UserEntity;
+
+        if (maybeUser.id) return maybeUser;
+      } catch {
+        const fallbackCacheKey = userCacheKey(cachedIndexValue);
+        const fallbackCachedUser =
+          await repositories.cache.get(fallbackCacheKey);
+
+        if (fallbackCachedUser)
+          return JSON.parse(fallbackCachedUser) as UserEntity;
+      }
+    }
+
+    const userFromDb = await findOnDatabase(indexKey);
+
+    if (!userFromDb) return null;
+
+    await UserEntity.cacheUser({
+      user: userFromDb,
+      repositories,
+    });
+
+    return userFromDb;
+  }
+
   static async create({ id, data, repositories }: ICreateUserDTO) {
-    const cachedUserKey = userCacheKey(id);
     const { email, password } = data;
     const newUser = new UserEntity(id, email, password);
 
@@ -29,7 +79,7 @@ class UserEntity implements IUserEntity {
     } catch (error) {
       if (error instanceof ZodError) {
         throw new Error(
-          `Validation failed: ${error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`
+          `Validation failed: ${error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`,
         );
       }
       throw error;
@@ -37,11 +87,10 @@ class UserEntity implements IUserEntity {
 
     const user = await repositories.database.create(id, newUser);
 
-    await repositories.cache.set(
-      cachedUserKey,
-      JSON.stringify(user),
-      UserCacheTTL
-    );
+    await UserEntity.cacheUser({
+      user,
+      repositories,
+    });
 
     return user;
   }
@@ -50,44 +99,24 @@ class UserEntity implements IUserEntity {
     id,
     repositories,
   }: IFindUserDTO): Promise<UserEntity | null> {
-    const cachedUserKey = userCacheKey(id);
-    const cachedUser = await repositories.cache.get(cachedUserKey);
-
-    if (cachedUser) return JSON.parse(cachedUser);
-
-    const user = await repositories.database.find(id);
-
-    if (!user) return null;
-
-    await repositories.cache.set(
-      cachedUserKey,
-      JSON.stringify(user),
-      UserCacheTTL
-    );
-
-    return user;
+    return await UserEntity.resolveUserFromIndex({
+      indexKey: id,
+      indexKeyCaller: userCacheKey,
+      findOnDatabase: repositories.database.find,
+      repositories,
+    });
   }
 
   static async findByEmail({
     email,
     repositories,
   }: IFindUserByEmailDTO): Promise<UserEntity | null> {
-    const cachedUserKey = userEmailCacheKey(email);
-    const cachedUser = await repositories.cache.get(cachedUserKey);
-
-    if (cachedUser) return JSON.parse(cachedUser);
-
-    const user = await repositories.database.findByEmail(email);
-
-    if (!user) return null;
-
-    await repositories.cache.set(
-      cachedUserKey,
-      JSON.stringify(user),
-      UserCacheTTL
-    );
-
-    return user;
+    return await UserEntity.resolveUserFromIndex({
+      indexKey: email,
+      indexKeyCaller: userEmailCacheKey,
+      findOnDatabase: repositories.database.findByEmail,
+      repositories,
+    });
   }
 }
 

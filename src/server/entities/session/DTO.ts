@@ -20,6 +20,22 @@ type ISessionModel = {
   delete: (id: string) => Promise<void>;
 };
 
+type ICacheSessionDTO = {
+  session: Session;
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IResolveSessionFromIndexDTO = {
+  indexKey: string;
+  indexKeyCaller: (string: string) => string;
+  findOnDatabase: (key: string) => Promise<Session | null>;
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
 type ICreateSessionDTO = {
   id: string;
   data: ISessionEntity;
@@ -61,6 +77,8 @@ export type {
   ISessionModel,
   ISessionWithUser,
   ISessionEntity,
+  ICacheSessionDTO,
+  IResolveSessionFromIndexDTO,
   ICreateSessionDTO,
   IFindSessionByAccessTokenDTO,
   IFindSessionByRefreshTokenDTO,
