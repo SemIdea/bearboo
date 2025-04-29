@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import { useUpdatePost } from "./page.client";
 
 const Page = () => {
-  const { handleUpdatePost, isUploading, successMessage, errorMessage, post } =
-    useUpdatePost();
+  const {
+    handleUpdatePost,
+    handleDeletePost,
+    isUploading,
+    successMessage,
+    errorMessage,
+    post,
+  } = useUpdatePost();
 
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
@@ -40,6 +46,7 @@ const Page = () => {
         />
         <button type="submit">Edit Post</button>
       </form>
+      <button onClick={handleDeletePost}>Delete Post</button>
       {isUploading && <p>Uploading...</p>}
       {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
       {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}

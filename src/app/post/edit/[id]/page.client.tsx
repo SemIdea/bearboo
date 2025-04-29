@@ -39,11 +39,27 @@ const useUpdatePost = () => {
     },
   });
 
+  const { mutate: deletePost } = trpc.post.deletePost.useMutation({
+    onSuccess: () => {
+      setSuccessMessage("Post deleted successfully!");
+      setErrorMessage(null);
+      router.push("/");
+    },
+    onError: (error) => {
+      setErrorMessage("Failed to delete post. Please try again.");
+      setSuccessMessage(null);
+      console.error("Error creating post:", error);
+    },
+    onSettled: () => {
+      setIsUploading(false);
+    },
+  });
+
   const { data } = trpc.post.findPost.useQuery(
     { postId: postId as string },
     {
       enabled: !!postId,
-    },
+    }
   );
 
   useEffect(() => {
@@ -65,7 +81,7 @@ const useUpdatePost = () => {
   }, [data]);
 
   const handleUpdatePost = async (
-    postData: React.FormEvent<HTMLFormElement>,
+    postData: React.FormEvent<HTMLFormElement>
   ) => {
     // Improve. Verify all data before sending
     postData.preventDefault();
@@ -91,8 +107,23 @@ const useUpdatePost = () => {
     });
   };
 
+  const handleDeletePost = async () => {
+    if (!session)
+      return setErrorMessage("You must be logged in to update a post.");
+
+    if (!postId)
+      return setErrorMessage("Post ID is required to update a post.");
+
+    setIsUploading(true);
+
+    deletePost({
+      postId,
+    });
+  };
+
   return {
     handleUpdatePost,
+    handleDeletePost,
     isUploading,
     successMessage,
     errorMessage,
