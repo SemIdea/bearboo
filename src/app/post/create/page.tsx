@@ -11,6 +11,8 @@ const Page = () => {
       <h2>Create Post</h2>
       <form onSubmit={handleCreatePost}>
         <input required name="title" placeholder="Title" type="text" />
+        <br />
+        <br />
         <textarea required name="content" placeholder="Content" />
         <button type="submit">Create Post</button>
       </form>

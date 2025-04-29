@@ -29,6 +29,8 @@ const Page = () => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+        <br />
+        <br />
         <textarea
           required
           name="content"
