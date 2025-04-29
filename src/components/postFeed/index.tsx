@@ -5,6 +5,7 @@ const PostFeed = () => (
     <h2>
       <b>Posts</b>
     </h2>
+    <br />
     <Posts max={20} />
   </div>
 );
