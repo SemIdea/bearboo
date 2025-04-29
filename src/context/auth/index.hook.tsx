@@ -1,28 +1,28 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import { ISessionWithUser } from "@/server/entities/session/DTO";
+import { setAuthData, clearAuthData } from "@/utils/authStorage";
 
 const useAuthLogic = () => {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [session, setSession] = useState<ISessionWithUser | null>(null);
+  const router = useRouter();
 
   const updateAuthData = (data?: ISessionWithUser) => {
     if (!data) {
       setSession(null);
-      document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-      document.cookie = `session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-      localStorage.removeItem("refreshToken");
+      clearAuthData();
 
       return;
     }
     setSession(data);
-    document.cookie = `accessToken=${data.accessToken}; path=/;`;
-    document.cookie = `session=${JSON.stringify(data)}; path=/;`;
-    localStorage.setItem("refreshToken", data.refreshToken);
+    setAuthData(data);
+    router.push("/");
   };
 
   const { mutate: login } = trpc.auth.loginUser.useMutation({
-    onSuccess: (data) => updateAuthData(data),
+    onSuccess: (data) => setAuthData(data),
   });
 
   const { mutate: register } = trpc.auth.registerUser.useMutation({
@@ -36,7 +36,6 @@ const useAuthLogic = () => {
     isLoadingSession,
     setSession,
     setIsLoadingSession,
-    updateAuthData,
     login,
     register,
     logout,
