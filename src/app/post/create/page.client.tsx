@@ -45,6 +45,9 @@ const useCreatePost = () => {
   ) => {
     postData.preventDefault();
 
+    if (!session)
+      return setErrorMessage("You must be logged in to update a post.");
+
     setIsUploading(true);
 
     const formData = new FormData(postData.currentTarget);
@@ -52,13 +55,6 @@ const useCreatePost = () => {
       title: formData.get("title") as string,
       content: formData.get("content") as string,
     };
-
-    if (!session) {
-      setErrorMessage("You must be logged in to create a post.");
-      setIsUploading(false);
-
-      return;
-    }
 
     createPost({
       ...data,
