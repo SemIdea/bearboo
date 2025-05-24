@@ -1,8 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { useAuth } from "@/context/auth";
 
-export default function Login() {
+const Login = () => 
   const { login } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -12,10 +13,10 @@ export default function Login() {
     e.preventDefault();
 
     login({
-        email,
-        password
+      email,
+      password,
     });
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -33,5 +34,7 @@ export default function Login() {
       />
       <button type="submit">Login</button>
     </form>
-  )
-}
+  );
+};
+
+export default Login;

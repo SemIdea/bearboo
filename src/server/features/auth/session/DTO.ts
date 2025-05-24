@@ -25,11 +25,14 @@ type IFindSessionByRefreshTokenDTO = {
   repositories: {
     user: IUserModel;
     database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
   };
 };
 
 type IRefreshSessionDTO = {
   id: string;
+  accessToken: string;
+  refreshToken: string;
   newAccessToken: string;
   newRefreshToken: string;
   repositories: {

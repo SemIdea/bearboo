@@ -11,7 +11,7 @@ class PrismaSessionModel implements ISessionModel {
     });
   }
 
-  async read(id: string) {
+  async find(id: string) {
     return await prisma.session.findUnique({
       where: {
         id,

@@ -1,4 +1,3 @@
-import { Session } from "@prisma/client";
 import { CreateAuthSessionService } from "../../auth/session/service";
 import { RegisterUserService } from "./service";
 import { CreateUserInput } from "@/server/schema/user.schema";
@@ -20,18 +19,22 @@ const registerUserController = async ({
     ...input,
   });
 
-  const session = (await CreateAuthSessionService({
+  const session = await CreateAuthSessionService({
     repositories: {
       user: ctx.repositories.user,
       database: ctx.repositories.session,
       cache: ctx.repositories.cache,
     },
     userId: user.id,
-  })) as Partial<Session>;
+  });
 
-  delete session.userId;
+  const { password, ...userWithoutPassword } = user;
+  const { userId, ...sessionWithoutUserId } = session;
 
-  return session as Omit<Session, "id">;
+  return {
+    ...sessionWithoutUserId,
+    user: userWithoutPassword,
+  };
 };
 
 export { registerUserController };

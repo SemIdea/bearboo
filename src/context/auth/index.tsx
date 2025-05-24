@@ -1,21 +1,55 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useAuthLogic, UseAuthLogicReturn } from "./index.hook";
 
 const AuthContext = createContext<UseAuthLogicReturn>({} as UseAuthLogicReturn);
 
-interface ChatProviderProps {
+type ChatProviderProps = {
   children: React.ReactNode;
-}
+};
 
 const Authprovider = ({ children }: ChatProviderProps) => {
-  const { session, login, register, logout } = useAuthLogic();
+  const {
+    session,
+    isLoadingSession,
+    setIsLoadingSession,
+    setSession,
+    updateAuthData,
+    login,
+    register,
+    logout,
+  } = useAuthLogic();
+
+  useEffect(() => {
+    const [accessTokenCookie, sessionCookie] = ["accessToken=", "session="].map(
+      (key) =>
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith(key))
+          ?.split("=")[1],
+    );
+
+    if (sessionCookie) {
+      const session = JSON.parse(sessionCookie);
+
+      setSession(session);
+    }
+
+    if (accessTokenCookie && !session) {
+    }
+
+    setIsLoadingSession(false);
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         session,
+        isLoadingSession,
+        setIsLoadingSession,
+        setSession,
+        updateAuthData,
         login,
         register,
         logout,

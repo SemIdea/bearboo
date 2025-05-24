@@ -1,29 +1,45 @@
-import { Session } from "@prisma/client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
+import { ISessionWithUser } from "@/server/entities/session/DTO";
+import { setAuthData, clearAuthData } from "@/utils/authStorage";
 
 const useAuthLogic = () => {
-  const [session, setSession] = useState<Partial<Session> | null>(null);
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const [session, setSession] = useState<ISessionWithUser | null>(null);
+  const router = useRouter();
+
+  const updateAuthData = (data?: ISessionWithUser) => {
+    if (!data) {
+      setSession(null);
+      clearAuthData();
+
+      return;
+    }
+    setSession(data);
+    setAuthData(data);
+    router.push("/");
+  };
 
   const { mutate: login } = trpc.auth.loginUser.useMutation({
-    onSuccess: (data) => {
-      setSession(data);
-      document.cookie = `accessToken=${data.accessToken}; path=/;`;
-      localStorage.setItem("refreshToken", data.refreshToken);
-    },
+    onSuccess: (data) => setAuthData(data),
   });
 
   const { mutate: register } = trpc.auth.registerUser.useMutation({
-    onSuccess: (data) => {
-      setSession(data);
-      document.cookie = `accessToken=${data.accessToken}; path=/;`;
-      localStorage.setItem("refreshToken", data.refreshToken);
-    },
+    onSuccess: (data) => updateAuthData(data),
   });
 
   const logout = () => {};
 
-  return { session, login, register, logout };
+  return {
+    session,
+    isLoadingSession,
+    setSession,
+    setIsLoadingSession,
+    login,
+    register,
+    logout,
+  };
 };
 
 type UseAuthLogicReturn = ReturnType<typeof useAuthLogic>;

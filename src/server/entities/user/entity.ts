@@ -4,8 +4,15 @@ import {
   ICreateUserDTO,
   IFindUserDTO,
   IFindUserByEmailDTO,
+  ICacheUserDTO,
+  IResolveUserFromIndexDTO,
 } from "./DTO";
 import { verifyUserSchema } from "@/server/schema/user.schema";
+import {
+  userCacheKey,
+  UserCacheTTL,
+  userEmailCacheKey,
+} from "@/constants/cache/user";
 
 class UserEntity implements IUserEntity {
   constructor(
@@ -13,6 +20,55 @@ class UserEntity implements IUserEntity {
     public email: string,
     public password: string,
   ) {}
+
+  private static async cacheUser({
+    user,
+    repositories,
+  }: ICacheUserDTO): Promise<void> {
+    const { id, email } = user;
+
+    await repositories.cache.mset(
+      [userCacheKey(id), userEmailCacheKey(email)],
+      [JSON.stringify(user), id],
+      UserCacheTTL,
+    );
+  }
+
+  private static async resolveUserFromIndex({
+    indexKey,
+    indexKeyCaller,
+    findOnDatabase,
+    repositories,
+  }: IResolveUserFromIndexDTO) {
+    const lookupCacheKey = indexKeyCaller(indexKey);
+    const cachedIndexValue = await repositories.cache.get(lookupCacheKey);
+
+    if (cachedIndexValue) {
+      try {
+        const maybeUser = JSON.parse(cachedIndexValue) as UserEntity;
+
+        if (maybeUser.id) return maybeUser;
+      } catch {
+        const fallbackCacheKey = userCacheKey(cachedIndexValue);
+        const fallbackCachedUser =
+          await repositories.cache.get(fallbackCacheKey);
+
+        if (fallbackCachedUser)
+          return JSON.parse(fallbackCachedUser) as UserEntity;
+      }
+    }
+
+    const userFromDb = await findOnDatabase(indexKey);
+
+    if (!userFromDb) return null;
+
+    await UserEntity.cacheUser({
+      user: userFromDb,
+      repositories,
+    });
+
+    return userFromDb;
+  }
 
   static async create({ id, data, repositories }: ICreateUserDTO) {
     const { email, password } = data;
@@ -31,7 +87,10 @@ class UserEntity implements IUserEntity {
 
     const user = await repositories.database.create(id, newUser);
 
-    await repositories.cache.set(`user:${id}`, JSON.stringify(user), 60 * 15);
+    await UserEntity.cacheUser({
+      user,
+      repositories,
+    });
 
     return user;
   }
@@ -40,38 +99,24 @@ class UserEntity implements IUserEntity {
     id,
     repositories,
   }: IFindUserDTO): Promise<UserEntity | null> {
-    const cachedUser = await repositories.cache.get(`user:${id}`);
-
-    if (cachedUser) return JSON.parse(cachedUser);
-
-    const user = await repositories.database.read(id);
-
-    if (!user) return null;
-
-    await repositories.cache.set(`user:${id}`, JSON.stringify(user), 60 * 15);
-
-    return user;
+    return await UserEntity.resolveUserFromIndex({
+      indexKey: id,
+      indexKeyCaller: userCacheKey,
+      findOnDatabase: repositories.database.find,
+      repositories,
+    });
   }
 
   static async findByEmail({
     email,
     repositories,
   }: IFindUserByEmailDTO): Promise<UserEntity | null> {
-    const cachedUser = await repositories.cache.get(`user:email:${email}`);
-
-    if (cachedUser) return JSON.parse(cachedUser);
-
-    const user = await repositories.database.findByEmail(email);
-
-    if (!user) return null;
-
-    await repositories.cache.set(
-      `user:email:${email}`,
-      JSON.stringify(user),
-      60 * 15,
-    );
-
-    return user;
+    return await UserEntity.resolveUserFromIndex({
+      indexKey: email,
+      indexKeyCaller: userEmailCacheKey,
+      findOnDatabase: repositories.database.findByEmail,
+      repositories,
+    });
   }
 }
 

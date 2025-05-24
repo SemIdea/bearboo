@@ -6,16 +6,33 @@ type IUserEntity = {
   password: string;
 };
 
-type IUserWithSession = Partial<User> & {
-  session: Partial<Session>;
+type IUserWithSession = Omit<User, "password"> & {
+  session: Omit<Session, "userId">;
 };
 
 type IUserModel = {
   create: (id: string, data: IUserEntity) => Promise<User>;
-  read: (id: string) => Promise<User | null>;
+  find: (id: string) => Promise<User | null>;
   update: (id: string, data: IUserEntity) => Promise<User>;
   delete: (id: string) => Promise<void>;
   findByEmail: (email: string) => Promise<User | null>;
+};
+
+type ICacheUserDTO = {
+  user: User;
+  repositories: {
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IResolveUserFromIndexDTO = {
+  indexKey: string;
+  indexKeyCaller: (string: string) => string;
+  findOnDatabase: (key: string) => Promise<User | null>;
+  repositories: {
+    database: IUserModel;
+    cache: ICacheRepositoryAdapter;
+  };
 };
 
 type ICreateUserDTO = {
@@ -47,6 +64,8 @@ export type {
   IUserModel,
   IUserEntity,
   IUserWithSession,
+  ICacheUserDTO,
+  IResolveUserFromIndexDTO,
   ICreateUserDTO,
   IFindUserDTO,
   IFindUserByEmailDTO,

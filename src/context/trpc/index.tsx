@@ -18,7 +18,8 @@ export const fetcher = async (
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (!refreshToken) {
-      document.cookie = `accessToken=; path = /; expires = Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+      document.cookie = `session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
       localStorage.removeItem("refreshToken");
       window.location.href = "/auth/login";
 
@@ -40,7 +41,8 @@ export const fetcher = async (
         },
       });
     } catch (error) {
-      document.cookie = `accessToken=; path = /; expires = Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+      document.cookie = `session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
       localStorage.removeItem("refreshToken");
       window.location.href = "/auth/login";
 
@@ -59,11 +61,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function TrpcProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
   const url =
     process.env.NEXT_PUBLIC_APP_DOMAIN &&
     !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
@@ -95,4 +93,6 @@ export default function TrpcProvider({
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </trpc.Provider>
   );
-}
+};
+
+export default TrpcProvider;

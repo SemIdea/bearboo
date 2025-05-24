@@ -1,12 +1,34 @@
 import { z } from "zod";
 
-const createPostInput = z.object({
+const createPostSchema = z.object({
   title: z.string(),
   content: z.string(),
 });
 
-type CreatePostInput = z.TypeOf<typeof createPostInput>;
+const findPostSchema = z.object({
+  postId: z.string(),
+});
 
-export { createPostInput };
+const updatePostSchema = z.object({
+  postId: z.string(),
+  title: z.string(),
+  content: z.string(),
+});
 
-export type { CreatePostInput };
+const deletePostSchema = z.object({
+  postId: z.string(),
+});
+
+type CreatePostInput = z.TypeOf<typeof createPostSchema>;
+type FindPostInput = z.TypeOf<typeof findPostSchema>;
+type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
+type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
+
+export { createPostSchema, findPostSchema, updatePostSchema, deletePostSchema };
+
+export type {
+  CreatePostInput,
+  FindPostInput,
+  UpdatePostInput,
+  DeletePostInput,
+};

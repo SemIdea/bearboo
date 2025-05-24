@@ -29,7 +29,13 @@ const loginUserController = async ({
     },
   });
 
-  return session;
+  const { password, ...userWithoutPassword } = user;
+  const { userId, ...sessionWithoutUserId } = session;
+
+  return {
+    ...sessionWithoutUserId,
+    user: userWithoutPassword,
+  };
 };
 
 export { loginUserController };

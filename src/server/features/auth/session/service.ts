@@ -1,4 +1,3 @@
-import { Session } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import {
   ICreateAuthSessionDTO,
@@ -21,8 +20,8 @@ const CreateAuthSessionService = async ({
   const user = await UserEntity.find({
     id: userId,
     repositories: {
+      ...repositories,
       database: repositories.user,
-      cache: repositories.cache,
     },
   });
 
@@ -65,13 +64,12 @@ const FindUserAndSessionByAccessTokenService = async ({
 }: IFindUserAndSessionByAccessTokenDTO) => {
   const { accessToken } = data;
 
-  const session = (await SessionEntity.findByAccessToken({
+  const session = await SessionEntity.findByAccessToken({
     accessToken,
     repositories: {
-      database: repositories.database,
-      cache: repositories.cache,
+      ...repositories,
     },
-  })) as Partial<Session>;
+  });
 
   if (!session || !session.userId) {
     throw new TRPCError({
@@ -80,13 +78,13 @@ const FindUserAndSessionByAccessTokenService = async ({
     });
   }
 
-  const user = (await UserEntity.find({
+  const user = await UserEntity.find({
     id: session.userId,
     repositories: {
+      ...repositories,
       database: repositories.user,
-      cache: repositories.cache,
     },
-  })) as IUserWithSession;
+  });
 
   if (!user) {
     throw new TRPCError({
@@ -95,12 +93,13 @@ const FindUserAndSessionByAccessTokenService = async ({
     });
   }
 
-  delete session.userId;
-  delete user.password;
+  const { password, ...userWithoutPassword } = user;
+  const { userId, ...sessionWithoutUserId } = session;
 
-  user.session = session as Omit<Session, "userId">;
-
-  return user as Omit<IUserWithSession, "password">;
+  return {
+    ...userWithoutPassword,
+    session: sessionWithoutUserId,
+  } as IUserWithSession;
 };
 
 const FindSessionByRefreshTokenService = async ({
@@ -128,8 +127,10 @@ const RefreshSessionService = async ({
 }: IRefreshSessionDTO) => {
   const newSession = await SessionEntity.refreshSession({
     id: data.id,
-    accessToken: data.newAccessToken,
-    refreshToken: data.newRefreshToken,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    newAccessToken: data.newAccessToken,
+    newRefreshToken: data.newRefreshToken,
     repositories,
   });
 
