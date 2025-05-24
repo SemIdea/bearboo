@@ -21,7 +21,7 @@ class PostEntity implements IPostEntity {
     public id: string,
     public userId: string,
     public title: string,
-    public content: string
+    public content: string,
   ) {}
 
   private static async cachePost({ post, repositories }: ICachePostDTO) {
@@ -30,7 +30,7 @@ class PostEntity implements IPostEntity {
     await repositories.cache.mset(
       [postCacheKey(id)],
       [JSON.stringify(post)],
-      PostCacheTTL
+      PostCacheTTL,
     );
   }
 
@@ -47,7 +47,7 @@ class PostEntity implements IPostEntity {
       [
         posts.map((post) => post.id).join(","),
         ...posts.map((post) => JSON.stringify(post)),
-      ]
+      ],
     );
   }
 
@@ -76,6 +76,7 @@ class PostEntity implements IPostEntity {
     }
 
     const postFromDb = await findOnDatabase(indexKey);
+
     if (!postFromDb) return null;
 
     await PostEntity.cachePost({
@@ -117,7 +118,7 @@ class PostEntity implements IPostEntity {
 
     const posts = postsData.map(
       (post: any) =>
-        new PostEntity(post.id, post.userId, post.title, post.content)
+        new PostEntity(post.id, post.userId, post.title, post.content),
     );
 
     for (const post of posts) {
@@ -126,7 +127,7 @@ class PostEntity implements IPostEntity {
       await repositories.cache.set(
         cachedPostQuery,
         JSON.stringify(post),
-        PostCacheTTL
+        PostCacheTTL,
       );
     }
 
@@ -158,7 +159,7 @@ class PostEntity implements IPostEntity {
       updated.id,
       updated.userId,
       updated.title,
-      updated.content
+      updated.content,
     );
 
     await PostEntity.cachePost({

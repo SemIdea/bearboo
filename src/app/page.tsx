@@ -6,7 +6,6 @@ import { useAuth } from "@/context/auth";
 import { PostFeed } from "@/components/postFeed";
 
 const Home = () => {
-  const router = useRouter();
   const { session } = useAuth();
 
   // const { data: testQuery } = trpc.auth.test.useQuery();
@@ -40,7 +39,7 @@ const Home = () => {
       <Link href={"post/create"}>
         <h2>Create post</h2>
       </Link>
-      
+
       <PostFeed />
     </section>
   );

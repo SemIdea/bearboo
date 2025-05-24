@@ -6,7 +6,6 @@ import { useAuth } from "@/context/auth";
 import { usePost } from "@/context/post";
 
 const Posts = ({ max }: { max: number }) => {
-  const router = useRouter();
   const { findAllPosts } = usePost();
 
   const { session } = useAuth();

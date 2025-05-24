@@ -59,7 +59,7 @@ const useUpdatePost = () => {
     { postId: postId as string },
     {
       enabled: !!postId,
-    }
+    },
   );
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const useUpdatePost = () => {
   }, [data]);
 
   const handleUpdatePost = async (
-    postData: React.FormEvent<HTMLFormElement>
+    postData: React.FormEvent<HTMLFormElement>,
   ) => {
     // Improve. Verify all data before sending
     postData.preventDefault();

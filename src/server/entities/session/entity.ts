@@ -19,7 +19,7 @@ class SessionEntity implements ISessionEntity {
     public id: string,
     public userId: string,
     public accessToken: string,
-    public refreshToken: string
+    public refreshToken: string,
   ) {}
 
   private static async cacheSession({
@@ -35,7 +35,7 @@ class SessionEntity implements ISessionEntity {
         sessionRefreshTokenCacheKey(refreshToken),
       ],
       [JSON.stringify(session), id, id],
-      SessionCacheTTL
+      SessionCacheTTL,
     );
   }
 
