@@ -1,8 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { useAuth } from "@/context/auth";
 
-const Login = () => {
+const Login = () => 
   const { login } = useAuth();
 
   const [email, setEmail] = useState("");
