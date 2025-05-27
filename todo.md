@@ -13,6 +13,7 @@ Post:
     - [x] Create page (`/post/create`)
     - [x] Edit page (`/post/edit/[id]`)
     - [ ] Read single post page (`/post/[id]`)
+      - [ ] Handle when post not found
     - [ ] Delete (button component)
     - [x] List page or feed (postFeed component)
   Server:
