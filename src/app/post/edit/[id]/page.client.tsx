@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
 
+type Params = {
+  id: string;
+};
+
 type PostData = {
   title: string;
   content: string;
@@ -14,10 +18,9 @@ type PostData = {
 // Improve. If the user is not the owner of the post, do something
 const useUpdatePost = () => {
   const router = useRouter();
-  const params = useParams();
+  const { id: postId } = useParams<Params>();
   const { session, isLoadingSession } = useAuth();
 
-  const [postId, setPostId] = useState<string | null>(null);
   const [post, setPost] = useState<Post | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -55,7 +58,7 @@ const useUpdatePost = () => {
     },
   });
 
-  const { data } = trpc.post.findPost.useQuery(
+  const { data: postData } = trpc.post.findPost.useQuery(
     { postId: postId as string },
     {
       enabled: !!postId,
@@ -69,16 +72,10 @@ const useUpdatePost = () => {
   }, [isLoadingSession]);
 
   useEffect(() => {
-    if (params?.id && typeof params.id === "string") {
-      setPostId(params.id);
+    if (postData) {
+      setPost(postData);
     }
-  }, [params]);
-
-  useEffect(() => {
-    if (data) {
-      setPost(data);
-    }
-  }, [data]);
+  }, [postData]);
 
   const handleUpdatePost = async (
     postData: React.FormEvent<HTMLFormElement>,
