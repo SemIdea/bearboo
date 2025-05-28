@@ -1,5 +1,7 @@
+"use client";
+
 import { Post } from "@prisma/client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 
@@ -8,6 +10,7 @@ type Params = {
 };
 
 const useGetPost = () => {
+  const router = useRouter();
   const { id: postId } = useParams<Params>();
 
   const [post, setPost] = useState<Post | null>(null);
@@ -21,10 +24,13 @@ const useGetPost = () => {
     );
 
   useEffect(() => {
-    if (!isPostLoading && postData) {
-      setPost(postData);
+    if (!isPostLoading) {
+      if (postData) {
+        setPost(postData);
+      } else {
+        router.push("/");
+      }
     }
-    // todo: handle case when post don't exist
   }, [postData, isPostLoading]);
 
   return {
