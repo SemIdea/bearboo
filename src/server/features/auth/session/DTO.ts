@@ -29,6 +29,16 @@ type IFindSessionByRefreshTokenDTO = {
   };
 };
 
+type IDeleteSessionDTO = {
+  userId: string;
+  sessionId: string;
+  repositories: {
+    user: IUserModel;
+    database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
 type IRefreshSessionDTO = {
   id: string;
   accessToken: string;
@@ -46,5 +56,6 @@ export type {
   ICreateAuthSessionDTO,
   IFindUserAndSessionByAccessTokenDTO,
   IFindSessionByRefreshTokenDTO,
+  IDeleteSessionDTO,
   IRefreshSessionDTO,
 };
