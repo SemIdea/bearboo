@@ -2,19 +2,19 @@ User:
   UI:
     - [x] Login page (`/auth/login`)
     - [x] Register page (`/auth/register`)
-    - [ ] Logout trigger (button/action)
+    - [x] Logout trigger (button/action)
   Server:
     - [x] Login (features/user/login)
     - [x] Register (features/user/register)
-    - [ ] Logout (features/auth/session)
+    - [x] Logout (features/auth/session)
 
 Post:
   UI:
     - [x] Create page (`/post/create`)
     - [x] Edit page (`/post/edit/[id]`)
-    - [ ] Read single post page (`/post/[id]`)
-      - [ ] Handle when post not found
-    - [ ] Delete (button component)
+    - [x] Read single post page (`/post/[id]`)
+      - [x] Handle when post not found
+    - [x] Delete (button component)
     - [x] List page or feed (postFeed component)
   Server:
     - [x] Create

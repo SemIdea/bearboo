@@ -1,4 +1,5 @@
 import {
+  DeleteSessionService,
   FindSessionByRefreshTokenService,
   RefreshSessionService,
 } from "./service";
@@ -53,4 +54,25 @@ const getUserFromSessionController = async ({
   return ctx.user;
 };
 
-export { refreshSessionController, getUserFromSessionController };
+const logoutUserFromSessionController = async ({
+  ctx,
+}: {
+  ctx: IProtectedAPIContextDTO;
+}) => {
+  const session = ctx.user.session;
+
+  await DeleteSessionService({
+    userId: ctx.user.id,
+    sessionId: session.id,
+    repositories: {
+      ...ctx.repositories,
+      database: ctx.repositories.session,
+    },
+  });
+};
+
+export {
+  refreshSessionController,
+  getUserFromSessionController,
+  logoutUserFromSessionController,
+};

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import {
   ICreateAuthSessionDTO,
+  IDeleteSessionDTO,
   IFindSessionByRefreshTokenDTO,
   IFindUserAndSessionByAccessTokenDTO,
   IRefreshSessionDTO,
@@ -144,9 +145,58 @@ const RefreshSessionService = async ({
   return newSession;
 };
 
+const DeleteSessionService = async ({
+  repositories,
+  ...data
+}: IDeleteSessionDTO) => {
+  const user = await UserEntity.find({
+    id: data.userId,
+    repositories: {
+      ...repositories,
+      database: repositories.user,
+    },
+  });
+
+  if (!user) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: AuthErrorCode.USER_NOT_FOUD,
+    });
+  }
+
+  const session = await SessionEntity.find({
+    id: data.sessionId,
+    repositories: {
+      ...repositories,
+    },
+  });
+
+  if (!session) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Session not found",
+    });
+  }
+
+  if (session.userId !== user.id) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You can't delete this session",
+    });
+  }
+
+  await SessionEntity.delete({
+    id: data.sessionId,
+    repositories: {
+      ...repositories,
+    },
+  });
+};
+
 export {
   CreateAuthSessionService,
   FindUserAndSessionByAccessTokenService,
   FindSessionByRefreshTokenService,
   RefreshSessionService,
+  DeleteSessionService,
 };

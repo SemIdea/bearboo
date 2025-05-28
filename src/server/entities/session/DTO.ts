@@ -45,6 +45,14 @@ type ICreateSessionDTO = {
   };
 };
 
+type IFindSessionByIdDTO = {
+  id: string;
+  repositories: {
+    database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
 type IFindSessionByAccessTokenDTO = {
   accessToken: string;
   repositories: {
@@ -55,6 +63,14 @@ type IFindSessionByAccessTokenDTO = {
 
 type IFindSessionByRefreshTokenDTO = {
   refreshToken: string;
+  repositories: {
+    database: ISessionModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+type IDeletePostDTO = {
+  id: string;
   repositories: {
     database: ISessionModel;
     cache: ICacheRepositoryAdapter;
@@ -80,7 +96,9 @@ export type {
   ICacheSessionDTO,
   IResolveSessionFromIndexDTO,
   ICreateSessionDTO,
+  IFindSessionByIdDTO,
   IFindSessionByAccessTokenDTO,
   IFindSessionByRefreshTokenDTO,
+  IDeletePostDTO,
   IRefreshSessionDTO,
 };

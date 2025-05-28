@@ -5,7 +5,7 @@ import { useAuth } from "@/context/auth";
 import { PostFeed } from "@/components/postFeed";
 
 const Home = () => {
-  const { session } = useAuth();
+  const { session, logout } = useAuth();
 
   // const { data: testQuery } = trpc.auth.test.useQuery();
 
@@ -17,9 +17,18 @@ const Home = () => {
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <p>
         {session ? (
-          <span>
-            You are logged in as <strong>{session.user.email}</strong>
-          </span>
+          <>
+            <span>
+              You are logged in as <strong>{session.user.email}</strong>
+            </span>
+            <span
+              className="ml-2 text-blue-500 cursor-pointer hover:underline"
+              role="button"
+              onClick={() => logout()}
+            >
+              <b>Log Out</b>
+            </span>
+          </>
         ) : (
           <>
             <span>You are not logged in</span>

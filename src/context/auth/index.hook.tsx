@@ -29,7 +29,13 @@ const useAuthLogic = () => {
     onSuccess: (data) => updateAuthData(data),
   });
 
-  const logout = () => {};
+  const { mutate: logout } = trpc.auth.session.logout.useMutation({
+    onSuccess: () => {
+      clearAuthData();
+      setSession(null);
+      router.push("/");
+    },
+  });
 
   return {
     session,

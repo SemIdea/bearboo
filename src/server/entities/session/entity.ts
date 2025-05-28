@@ -1,7 +1,9 @@
 import {
   ICacheSessionDTO,
   ICreateSessionDTO,
+  IDeletePostDTO,
   IFindSessionByAccessTokenDTO,
+  IFindSessionByIdDTO,
   IFindSessionByRefreshTokenDTO,
   IRefreshSessionDTO,
   IResolveSessionFromIndexDTO,
@@ -89,6 +91,25 @@ class SessionEntity implements ISessionEntity {
     return session;
   }
 
+  static async find({ id, repositories }: IFindSessionByIdDTO) {
+    const cachedSession = await repositories.cache.get(sessionCacheKey(id));
+
+    if (cachedSession) {
+      return JSON.parse(cachedSession) as SessionEntity;
+    }
+
+    const sessionFromDb = await repositories.database.find(id);
+
+    if (!sessionFromDb) return null;
+
+    await SessionEntity.cacheSession({
+      session: sessionFromDb,
+      repositories,
+    });
+
+    return sessionFromDb;
+  }
+
   static async findByAccessToken({
     accessToken,
     repositories,
@@ -137,6 +158,16 @@ class SessionEntity implements ISessionEntity {
     });
 
     return session;
+  }
+
+  static async delete({ id, repositories }: IDeletePostDTO) {
+    await repositories.cache.mdel([
+      sessionCacheKey(id),
+      sessionAccessTokenCacheKey(id),
+      sessionRefreshTokenCacheKey(id),
+    ]);
+
+    return await repositories.database.delete(id);
   }
 }
 
