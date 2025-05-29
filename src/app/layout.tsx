@@ -32,10 +32,10 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
+          fontSans.variable
         )}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+        <Providers>
           <div className="relative flex flex-col h-screen">{children}</div>
         </Providers>
       </body>
