@@ -22,7 +22,7 @@ const useAuthLogic = () => {
   };
 
   const { mutate: login } = trpc.auth.loginUser.useMutation({
-    onSuccess: (data) => setAuthData(data),
+    onSuccess: (data) => updateAuthData(data),
   });
 
   const { mutate: register } = trpc.auth.registerUser.useMutation({
@@ -30,11 +30,7 @@ const useAuthLogic = () => {
   });
 
   const { mutate: logout } = trpc.auth.session.logout.useMutation({
-    onSuccess: () => {
-      clearAuthData();
-      setSession(null);
-      router.push("/");
-    },
+    onSuccess: () => updateAuthData(),
   });
 
   return {
