@@ -31,11 +31,13 @@ const Posts = ({ max }: { max: number }) => {
                   </h3>
                 </Link>
               )}
-              <h3>{post.title}</h3>
-              <p>{post.content}</p>
-              <p>{post.userId}</p>
-              <p>{post.id}</p>
-              <br />
+              <Link href={`/post/${post.id}`}>
+                <h3>{post.title}</h3>
+                <p>{post.content}</p>
+                <p>{post.userId}</p>
+                <p>{post.id}</p>
+                <br />
+              </Link>
             </div>
           ))}
       </div>
