@@ -6,7 +6,7 @@ const Page = () => {
   const { post, isPostLoading } = useGetPost();
 
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <h2>Post Details</h2>
       {isPostLoading ? (
         <p>Loading...</p>

@@ -24,7 +24,7 @@ const Page = () => {
   }, [post]);
 
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <h2>Edit Post</h2>
       <form onSubmit={(e) => handleUpdatePost(e)}>
         <input
