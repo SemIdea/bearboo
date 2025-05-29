@@ -25,8 +25,8 @@ UI:
 - [x] Single post page (`/post/[id]`)
 - [x] Delete button component
 - [x] Post feed component
-- [ ] Homepage feed (`app/page.tsx`)
-- [ ] Edit/Delete buttons visibility (owner only)
+- [x] Homepage feed (`app/page.tsx`)
+- [x] Edit/Delete buttons visibility (owner only)
 - [ ] Draft/Published status toggle UI
 - [ ] Category/tag input field
 
