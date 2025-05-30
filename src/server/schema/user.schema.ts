@@ -32,8 +32,18 @@ const loginUserSchema = z.object({
     .min(8, "Invalid Email or password"),
 });
 
+const getUserProfileSchema = z.object({
+  id: z.string(),
+});
+
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
+type GetUserProfileInput = z.TypeOf<typeof getUserProfileSchema>;
 
-export { verifyUserSchema, registerUserSchema, loginUserSchema };
-export type { CreateUserInput, LoginUserInput };
+export {
+  verifyUserSchema,
+  registerUserSchema,
+  loginUserSchema,
+  getUserProfileSchema,
+};
+export type { CreateUserInput, LoginUserInput, GetUserProfileInput };
