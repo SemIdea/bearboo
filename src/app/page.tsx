@@ -18,9 +18,9 @@ const Home = () => {
       <p>
         {session ? (
           <>
-            <span>
+            <Link href={`user/${session.user.id}`}>
               You are logged in as <strong>{session.user.email}</strong>
-            </span>
+            </Link>
             <span
               className="ml-2 text-blue-500 cursor-pointer hover:underline"
               role="button"
