@@ -17,6 +17,7 @@ import {
 } from "@/constants/cache/session";
 
 class SessionEntity implements ISessionEntity {
+  private static shouldCacheSession = true;
   constructor(
     public id: string,
     public userId: string,
@@ -28,6 +29,7 @@ class SessionEntity implements ISessionEntity {
     session,
     repositories,
   }: ICacheSessionDTO) {
+    if (!SessionEntity.shouldCacheSession) return;
     const { id, accessToken, refreshToken } = session;
 
     await repositories.cache.mset(

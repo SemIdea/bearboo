@@ -17,6 +17,7 @@ import {
 } from "@/constants/cache/post";
 
 class PostEntity implements IPostEntity {
+  private static shouldCachePost = false;
   constructor(
     public id: string,
     public userId: string,
@@ -25,6 +26,7 @@ class PostEntity implements IPostEntity {
   ) {}
 
   private static async cachePost({ post, repositories }: ICachePostDTO) {
+    if (!PostEntity.shouldCachePost) return;
     const { id } = post;
 
     await repositories.cache.mset(
@@ -39,6 +41,7 @@ class PostEntity implements IPostEntity {
     posts,
     repositories,
   }: ICacheUserPostsDTO) {
+    if (!PostEntity.shouldCachePost) return;
     await repositories.cache.mset(
       [
         userPostsCacheKey(userId),
