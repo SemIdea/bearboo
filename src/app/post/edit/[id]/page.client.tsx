@@ -67,7 +67,7 @@ const useUpdatePost = () => {
 
   useEffect(() => {
     if (!isLoadingSession && !session) {
-      router.push("auth/login");
+      router.push("/auth/login");
     }
   }, [isLoadingSession]);
 
