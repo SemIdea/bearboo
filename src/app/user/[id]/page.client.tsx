@@ -11,14 +11,21 @@ const useGetUserProfile = () => {
   const { id: userId } = useParams<Params>();
 
   const { data: user, isLoading: isUserLoading } = trpc.user.profile.useQuery(
-    { id: userId },
+    { userId: userId },
     {
       enabled: !!userId,
-    },
+    }
+  );
+
+  const { data: posts, isLoading: isPostsLoading } = trpc.user.posts.useQuery(
+    { userId: userId },
+    { enabled: !!userId }
   );
 
   return {
     user,
+    posts,
+    isPostsLoading,
     isUserLoading,
   };
 };
