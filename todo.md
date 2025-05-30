@@ -67,10 +67,10 @@ Server:
 - [x] Snowflake ID generator
 - [x] Password hashing
 - [x] Cache adapter
-- [ ] Input validation (Zod integration)
+- [x] Input validation (Zod integration)
 - [ ] Content sanitization (XSS prevention)
 - [ ] Pagination implementation
-- [ ] HTTPS enforcement (production)
+- [x] HTTPS enforcement (production)
 
 ---
 
@@ -78,7 +78,7 @@ Server:
 UI:
 - [ ] Main navigation header
 - [ ] Footer component
-- [ ] Layout wrapper (persistent across pages)
+- [x] Layout wrapper (persistent across pages)
 - [ ] Responsive mobile menu
 
 Server: (None)
