@@ -33,17 +33,28 @@ const loginUserSchema = z.object({
 });
 
 const getUserProfileSchema = z.object({
-  id: z.string(),
+  userId: z.string(),
+});
+
+const getUserPostsSchema = z.object({
+  userId: z.string(),
 });
 
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
 type GetUserProfileInput = z.TypeOf<typeof getUserProfileSchema>;
+type GetUserPostsInput = z.TypeOf<typeof getUserPostsSchema>;
 
 export {
   verifyUserSchema,
   registerUserSchema,
   loginUserSchema,
   getUserProfileSchema,
+  getUserPostsSchema,
 };
-export type { CreateUserInput, LoginUserInput, GetUserProfileInput };
+export type {
+  CreateUserInput,
+  LoginUserInput,
+  GetUserProfileInput,
+  GetUserPostsInput,
+};

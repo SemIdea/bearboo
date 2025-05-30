@@ -10,11 +10,11 @@ const createPostController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const post = await CreatePostService({
-    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post,
     },
+    userId: ctx.user.id,
     ...input,
   });
 

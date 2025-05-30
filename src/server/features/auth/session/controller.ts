@@ -62,12 +62,12 @@ const logoutUserFromSessionController = async ({
   const session = ctx.user.session;
 
   await DeleteSessionService({
-    userId: ctx.user.id,
-    sessionId: session.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.session,
     },
+    userId: ctx.user.id,
+    sessionId: session.id,
   });
 };
 

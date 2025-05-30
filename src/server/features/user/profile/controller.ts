@@ -9,18 +9,18 @@ const getUserProfileController = async ({
   input: GetUserProfileInput;
   ctx: IAPIContextDTO;
 }) => {
-  if (ctx.user && input.id == ctx.user.id) {
+  if (ctx.user && input.userId == ctx.user.id) {
     const { session, ...userWithoutSession } = ctx.user;
 
     return userWithoutSession;
   }
 
   const profile = await GetUserProfileService({
-    userId: input.id,
     repositories: {
+      ...ctx.repositories,
       database: ctx.repositories.user,
-      cache: ctx.repositories.cache,
     },
+    userId: input.userId,
   });
 
   return profile;

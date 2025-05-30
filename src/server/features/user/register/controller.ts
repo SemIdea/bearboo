@@ -12,18 +12,17 @@ const registerUserController = async ({
 }) => {
   const user = await RegisterUserService({
     repositories: {
+      ...ctx.repositories,
       database: ctx.repositories.user,
-      cache: ctx.repositories.cache,
-      hashing: ctx.repositories.hashing,
     },
     ...input,
   });
 
   const session = await CreateAuthSessionService({
     repositories: {
-      user: ctx.repositories.user,
+      ...ctx.repositories,
       database: ctx.repositories.session,
-      cache: ctx.repositories.cache,
+      user: ctx.repositories.user,
     },
     userId: user.id,
   });
