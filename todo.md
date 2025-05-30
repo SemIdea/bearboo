@@ -3,7 +3,7 @@ UI:
 - [x] Login page (`/auth/login`)
 - [x] Register page (`/auth/register`)
 - [x] Logout button/action
-- [ ] Profile page (`/user/[id]`)
+- [x] Profile page (`/user/[id]`)
 - [ ] Navigation header component (shows auth state)
 - [ ] Password reset page (UI only)
 
@@ -11,10 +11,10 @@ Server:
 - [x] Login controller
 - [x] Register controller
 - [x] Logout endpoint
-- [ ] Get user profile data
+- [x] Get user profile data
 - [ ] Password reset endpoint
-- [ ] Protected routes middleware
-- [ ] Session expiration handling
+- [x] Protected routes middleware
+- [x] Session expiration handling
 
 ---
 
@@ -50,8 +50,8 @@ Server:
 - [x] Session creation
 - [x] Session validation
 - [x] Refresh token
-- [ ] Complete logout (token invalidation)
-- [ ] Token expiration enforcement
+- [x] Complete logout (token invalidation)
+- [x] Token expiration enforcement
 - [ ] Rate limiting (authentication endpoints)
 - [ ] Concurrent session prevention
 
