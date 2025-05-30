@@ -4,7 +4,7 @@ import {
   logoutUserFromSessionController,
 } from "../features/auth/session/controller";
 
-const sessionRouter = t.router({
+const SessionRouter = t.router({
   me: protectedProcedure.query(async ({ ctx }) =>
     getUserFromSessionController({ ctx }),
   ),
@@ -13,4 +13,4 @@ const sessionRouter = t.router({
   ),
 });
 
-export { sessionRouter };
+export { SessionRouter };

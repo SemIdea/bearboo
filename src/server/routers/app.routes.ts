@@ -1,10 +1,12 @@
 import { t } from "../createRouter";
-import AuthRoter from "./auth.routes";
+import { AuthRouter } from "./auth.routes";
 import { PostRouter } from "./post.routes";
+import { UserRouter } from "./user.routes";
 
 const appRouter = t.router({
-  auth: AuthRoter,
+  auth: AuthRouter,
   post: PostRouter,
+  user: UserRouter,
 });
 
 type AppRouter = typeof appRouter;
