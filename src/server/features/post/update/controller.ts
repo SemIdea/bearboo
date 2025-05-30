@@ -10,11 +10,11 @@ const updatePostController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const post = await UpdatePostService({
-    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post,
     },
+    userId: ctx.user.id,
     ...input,
   });
 

@@ -10,11 +10,11 @@ const findPostController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const post = await ReadPostService({
-    postId: input.postId,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post,
     },
+    ...input
   });
 
   return post;
