@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useGetPost } from "./page.client";
 
 const Page = () => {
@@ -11,10 +12,15 @@ const Page = () => {
       {isPostLoading ? (
         <p>Loading...</p>
       ) : post ? (
-        <div>
-          <h3>{post.title}</h3>
-          <p>{post.content}</p>
-        </div>
+        <>
+          <div>
+            <h3>{post.title}</h3>
+            <p>{post.content}</p>
+          </div>
+          <div>
+            <Link href={`/user/${post.userId}`}>Author: {post.userId}</Link>
+          </div>
+        </>
       ) : (
         <p>Post not found.</p>
       )}

@@ -15,11 +15,11 @@ const PostRouter = t.router({
   createPost: protectedProcedure
     .input(createPostSchema)
     .mutation(async ({ input, ctx }) => createPostController({ input, ctx })),
-  findPost: protectedProcedure
+  findPost: publicProcedure
     .input(findPostSchema)
     .query(async ({ input, ctx }) => findPostController({ input, ctx })),
   findAllPost: publicProcedure.query(async ({ ctx }) =>
-    findAllPostsController({ ctx }),
+    findAllPostsController({ ctx })
   ),
   updatePost: protectedProcedure
     .input(updatePostSchema)

@@ -1,5 +1,8 @@
 import { ReadPostService } from "./service";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
+import {
+  IAPIContextDTO,
+  IProtectedAPIContextDTO,
+} from "@/server/createContext";
 import { FindPostInput } from "@/server/schema/post.schema";
 
 const findPostController = async ({
@@ -7,14 +10,14 @@ const findPostController = async ({
   ctx,
 }: {
   input: FindPostInput;
-  ctx: IProtectedAPIContextDTO;
+  ctx: IAPIContextDTO;
 }) => {
   const post = await ReadPostService({
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post,
     },
-    ...input
+    ...input,
   });
 
   return post;
