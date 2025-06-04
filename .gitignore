@@ -38,3 +38,5 @@ data/postgres/*
 data/redis/*
 !data/postgres/.gitkeep
 !data/redis/.gitkeep
+
+todo.md
