@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/auth";
 import { PostFeed } from "@/components/postFeed";
+import { SearchPost } from "@/components/ui/searchPost";
 
 const Home = () => {
   const { session, logout } = useAuth();
@@ -43,6 +44,8 @@ const Home = () => {
           </>
         )}
       </p>
+
+      <SearchPost />
 
       <Link href={"post/create"}>
         <h2>Create post</h2>
