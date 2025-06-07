@@ -1,0 +1,17 @@
+echo "🔍 Running ESLint on staged files..."
+
+# Get only staged JS/TS files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|tsx)$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "✅ No JS/TS staged files to lint."
+  exit 0
+fi
+
+# Run ESLint with --fix on just the staged files
+eslint --fix $STAGED_FILES
+
+# Re-add fixed files to the commit
+echo "$STAGED_FILES" | xargs git add
+
+echo "✅ ESLint passed and staged files updated."

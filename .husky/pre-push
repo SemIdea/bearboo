@@ -1,0 +1,17 @@
+# Temporarily disable exit on error
+set +e
+
+docker compose -f docker-compose-test.yml up --build --abort-on-container-exit --exit-code-from app
+STATUS=$?
+
+# Re-enable exit on error (optional)
+set -e
+
+docker compose -f docker-compose-test.yml down
+
+if [ $STATUS -ne 0 ]; then
+  echo "❌ Tests failed. Push aborted."
+  exit 1
+fi
+
+echo "✅ Tests passed. Proceeding with push."
