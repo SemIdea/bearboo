@@ -1,4 +1,5 @@
 import { IPostModel } from "@/server/entities/post/DTO";
+import { IUserModel } from "@/server/entities/user/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IGetUserPostsDTO = {
@@ -8,6 +9,7 @@ type IGetUserPostsDTO = {
 
 type IGetUserPostsRepositories = {
   database: IPostModel;
+  user: IUserModel;
   cache: ICacheRepositoryAdapter;
 };
 
