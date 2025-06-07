@@ -1,5 +1,7 @@
+import { TRPCError } from "@trpc/server";
 import { IGetUserProfileDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
+import { AuthErrorCode } from "@/shared/error/auth";
 
 const GetUserProfileService = async ({
   repositories,
@@ -13,7 +15,10 @@ const GetUserProfileService = async ({
   });
 
   if (!userProfile) {
-    throw new Error("User profile not found");
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: AuthErrorCode.USER_NOT_FOUD,
+    });
   }
 
   const { password, ...userWithoutPassword } = userProfile;

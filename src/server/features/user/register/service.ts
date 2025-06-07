@@ -1,6 +1,8 @@
+import { TRPCError } from "@trpc/server";
 import { IRegisterUserDTO } from "./DTO";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { UserEntity } from "@/server/entities/user/entity";
+import { AuthErrorCode } from "@/shared/error/auth";
 
 const RegisterUserService = async ({
   repositories,
@@ -14,7 +16,10 @@ const RegisterUserService = async ({
   });
 
   if (existingUser) {
-    throw new Error("User already exists");
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: AuthErrorCode.USER_ALREADY_EXISTS,
+    });
   }
 
   const userId = await GenerateSnowflakeUID();
