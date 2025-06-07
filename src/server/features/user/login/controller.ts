@@ -15,8 +15,7 @@ const loginUserController = async ({
       ...ctx.repositories,
       database: ctx.repositories.user,
     },
-    email: input.email,
-    password: input.email,
+    ...input,
   });
 
   const session = await CreateAuthSessionService({

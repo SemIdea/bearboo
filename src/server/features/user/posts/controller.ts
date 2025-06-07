@@ -1,5 +1,5 @@
-import { IAPIContextDTO } from "@/server/createContext";
 import { GetUserPostsService } from "./service";
+import { IAPIContextDTO } from "@/server/createContext";
 
 const getUserPostsController = async ({
   input,

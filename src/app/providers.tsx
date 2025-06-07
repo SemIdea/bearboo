@@ -16,10 +16,10 @@ export interface ProvidersProps {
 const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
     <NextThemesProvider
+      disableTransitionOnChange
+      enableSystem
       attribute="class"
       defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
     >
       <TrpcProvider>
         <Authprovider>

@@ -1,7 +1,7 @@
 const SearchPost = () => {
   return (
     <div>
-      <input type="text" placeholder="Search Post" />
+      <input placeholder="Search Post" type="text" />
     </div>
   );
 };
