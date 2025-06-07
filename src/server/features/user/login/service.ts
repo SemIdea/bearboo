@@ -18,7 +18,12 @@ const LoginUserService = async ({ repositories, ...data }: ILoginUserDTO) => {
     });
   }
 
-  if (!repositories.hashing.compare(user.password, password)) {
+  const isSamePassword = await repositories.hashing.compare(
+    password,
+    user.password,
+  );
+
+  if (!isSamePassword) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: AuthErrorCode.INVALID_CREDENTIALS,
