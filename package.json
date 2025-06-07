@@ -6,8 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest",
-    "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
+    "test": "vitest run --reporter verbose",
+    "test:docker": "docker compose -f docker-compose-test.yml up --build",
+    "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix",
+    "prepare": "husky"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
@@ -38,6 +40,7 @@
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "vite-tsconfig-paths": "^5.1.4",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -59,6 +62,7 @@
     "eslint-plugin-react": "^7.23.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unused-imports": "4.1.4",
+    "husky": "^9.1.7",
     "postcss": "8.4.49",
     "prettier": "3.3.3",
     "tailwind-variants": "0.1.20",
