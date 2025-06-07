@@ -7,7 +7,13 @@ export default defineConfig({
       "@": "/src",
     },
   },
+
   test: {
     include: ["**.setup.test.ts", "**.test.ts"],
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
   },
 });
