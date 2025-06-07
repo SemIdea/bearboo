@@ -10,6 +10,7 @@ import {
   IResolvePostFromIndexDTO,
   IUpdatePostDTO,
 } from "./DTO";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 import {
   postCacheKey,
   userPostsCacheKey,
@@ -17,7 +18,6 @@ import {
 } from "@/constants/cache/post";
 
 class PostEntity implements IPostEntity {
-  private static shouldCachePost = false;
   constructor(
     public id: string,
     public userId: string,
@@ -26,7 +26,7 @@ class PostEntity implements IPostEntity {
   ) {}
 
   private static async cachePost({ post, repositories }: ICachePostDTO) {
-    if (!PostEntity.shouldCachePost) return;
+    if (!isFeatureEnabled("enablePostCaching")) return;
     const { id } = post;
 
     await repositories.cache.mset(
@@ -41,7 +41,7 @@ class PostEntity implements IPostEntity {
     posts,
     repositories,
   }: ICacheUserPostsDTO) {
-    if (!PostEntity.shouldCachePost) return;
+    if (!isFeatureEnabled("enablePostCaching")) return;
     await repositories.cache.mset(
       [
         userPostsCacheKey(userId),
@@ -144,7 +144,7 @@ class PostEntity implements IPostEntity {
 
     const postsData = await repositories.database.findUserPosts(userId);
 
-    if (!postsData) return null;
+    if (!postsData) return [] as PostEntity[];
 
     await PostEntity.cacheUserPosts({
       userId,

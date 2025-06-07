@@ -13,9 +13,9 @@ import {
   UserCacheTTL,
   userEmailCacheKey,
 } from "@/constants/cache/user";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 class UserEntity implements IUserEntity {
-  private static shouldCacheUser = true;
   constructor(
     public id: string,
     public email: string,
@@ -26,7 +26,7 @@ class UserEntity implements IUserEntity {
     user,
     repositories,
   }: ICacheUserDTO): Promise<void> {
-    if (!UserEntity.shouldCacheUser) return;
+    if (!isFeatureEnabled("enableUserCaching")) return;
     const { id, email } = user;
 
     await repositories.cache.mset(
