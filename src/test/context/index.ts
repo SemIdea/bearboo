@@ -83,7 +83,7 @@ const createAuthenticatedUser = async () => {
   };
 };
 
-const testContext = async (): Promise<TestContext> => {
+const testContext = (): TestContext => {
   const ctx: TestContext = {
     headers: new Headers(),
     repositories: {
