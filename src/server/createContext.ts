@@ -15,9 +15,7 @@ type IInputAPIContextDTO = {
   headers: Headers;
 };
 
-type IAPIContextDTO = {
-  headers: Headers;
-  user?: IUserWithSession;
+type IBaseContextDTO = IInputAPIContextDTO & {
   repositories: {
     user: IUserModel;
     session: ISessionModel;
@@ -27,7 +25,11 @@ type IAPIContextDTO = {
   };
 };
 
-type IProtectedAPIContextDTO = Omit<IAPIContextDTO, "user"> & {
+type IAPIContextDTO = IBaseContextDTO & {
+  user?: IUserWithSession;
+};
+
+type IProtectedAPIContextDTO = IBaseContextDTO & {
   user: IUserWithSession;
 };
 
@@ -51,6 +53,7 @@ type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 export { createTRPCContext };
 export type {
   IInputAPIContextDTO,
+  IBaseContextDTO,
   IAPIContextDTO,
   IProtectedAPIContextDTO,
   Context,
