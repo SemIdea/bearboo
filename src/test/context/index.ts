@@ -1,5 +1,6 @@
 // test/context/index.ts
 
+import { Session, User } from "@prisma/client";
 import { IUserModel } from "@/server/entities/user/DTO";
 import { ISessionModel } from "@/server/entities/session/DTO";
 import { IPostModel } from "@/server/entities/post/DTO";
@@ -33,6 +34,15 @@ type TestContext = {
     session: typeof SessionEntity;
     post: typeof PostEntity;
   };
+  createAuthenticatedUser: () => Promise<{
+    user: User & {
+      input: {
+        email: string;
+        password: string;
+      };
+    };
+    session: Session;
+  }>;
 };
 
 const generateSnowflakeUuidWithRandom = async (): Promise<string> => {
@@ -42,8 +52,39 @@ const generateSnowflakeUuidWithRandom = async (): Promise<string> => {
   return id + random.toString();
 };
 
-const testContext = (): TestContext => {
+const createAuthenticatedUser = async () => {
+  const userId = await generateSnowflakeUuidWithRandom();
+  const userInput = {
+    email: `${userId}@example.com`,
+    password: "password123",
+  };
+
+  const user = await userRepository.create(userId, {
+    ...userInput,
+    password: await passwordHashingHelper.hash(userInput.password),
+  });
+
+  const sessionId = await generateSnowflakeUuidWithRandom();
+  const accessToken = await generateSnowflakeUuidWithRandom();
+  const refreshToken = await generateSnowflakeUuidWithRandom();
+
+  const session = await sessionRepository.create(sessionId, {
+    userId,
+    accessToken,
+    refreshToken,
+  });
+
   return {
+    user: {
+      ...user,
+      input: userInput,
+    },
+    session,
+  };
+};
+
+const testContext = async (): Promise<TestContext> => {
+  const ctx: TestContext = {
     headers: new Headers(),
     repositories: {
       user: userRepository,
@@ -58,7 +99,10 @@ const testContext = (): TestContext => {
       session: SessionEntity,
       post: PostEntity,
     },
+    createAuthenticatedUser,
   };
+
+  return ctx;
 };
 
 export { testContext };
