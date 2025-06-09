@@ -1,33 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { createPostController } from "./controller";
-import { passwordHashingHelper } from "@/server/drivers/repositories";
 import { testContext } from "@/test/context";
 
 describe("Create Post Controller Unitary Testing", () => {
   const ctx = testContext();
 
   test("Should create a post successfully", async () => {
-    const userId = await ctx.repositories.uuid();
-    const userInput = {
-      email: `${userId}example.com`,
-      password: "password123",
-    };
-
-    await ctx.repositories.user.create(userId, {
-      ...userInput,
-      password: await passwordHashingHelper.hash(userInput.password),
-    });
-
-    const sessionId = await ctx.repositories.uuid();
-    const accesToken = await ctx.repositories.uuid();
-    const refreshToken = await ctx.repositories.uuid();
-
-    const session = await ctx.repositories.session.create(sessionId, {
-      userId,
-      accessToken: accesToken,
-      refreshToken: refreshToken,
-    });
-
+    const { user, session } = await ctx.createAuthenticatedUser();
     const input = {
       title: "Test Post",
       content: "This is a test post content.",
@@ -38,8 +17,8 @@ describe("Create Post Controller Unitary Testing", () => {
       ctx: {
         ...ctx,
         user: {
-          id: userId,
-          email: userInput.email,
+          id: user.id,
+          email: user.email,
           session,
         },
         repositories: {
@@ -52,6 +31,6 @@ describe("Create Post Controller Unitary Testing", () => {
     expect(result).toBeDefined();
     expect(result.title).toEqual(input.title);
     expect(result.content).toEqual(input.content);
-    expect(result.userId).toEqual(userId);
+    expect(result.userId).toEqual(user.id);
   });
 });

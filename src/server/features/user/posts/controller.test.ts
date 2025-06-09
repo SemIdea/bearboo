@@ -9,16 +9,9 @@ describe("User Posts Controller Unitary Testing", () => {
   var userId: string;
 
   beforeAll(async () => {
-    userId = await ctx.repositories.uuid();
-    const user = {
-      email: `${userId}@example.com`,
-      password: "password123",
-    };
+    const { user } = await ctx.createAuthenticatedUser();
 
-    await ctx.repositories.user.create(userId, {
-      ...user,
-      password: await ctx.repositories.hashing.hash(user.password),
-    });
+    userId = user.id;
   });
 
   test("Should return an empty list when user has no posts", async () => {

@@ -8,23 +8,17 @@ describe("Register User Controller Unitary Testing", () => {
   const ctx = testContext();
 
   test("Should return user profile if user exists", async () => {
-    const uuid = await ctx.repositories.uuid();
-    const input = {
-      email: `${uuid}@example.com`,
-      password: "password123",
-    };
-
-    await ctx.repositories.user.create(uuid, input);
+    const { user } = await ctx.createAuthenticatedUser();
 
     const result = await getUserProfileController({
       input: {
-        userId: uuid,
+        userId: user.id,
       },
       ctx,
     });
 
     expect(result).toBeTruthy();
-    expect(result.id).toEqual(uuid);
+    expect(result.id).toEqual(user.id);
   });
 
   test("Should throw error if user does not exist", async () => {

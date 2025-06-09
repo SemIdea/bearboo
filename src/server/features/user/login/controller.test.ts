@@ -8,29 +8,20 @@ describe("Login User Controller Unitary Testing", () => {
   const ctx = testContext();
 
   test("Should return a session if valid credentials", async () => {
-    const uuid = await ctx.repositories.uuid();
-    const user = {
-      email: `${uuid}@example.com`,
-      password: "password123",
-    };
-
-    await ctx.repositories.user.create(uuid, {
-      ...user,
-      password: await ctx.repositories.hashing.hash(user.password),
-    });
+    const { user } = await ctx.createAuthenticatedUser();
 
     const result = await loginUserController({
-      input: user,
+      input: user.input,
       ctx,
     });
 
     expect(result).toBeDefined();
-    expect(result.user.id).toEqual(uuid);
+    expect(result.user.id).toEqual(user.id);
 
     const session = await ctx.repositories.session.find(result.id);
 
     expect(session).toBeDefined();
-    expect(session!.userId).toEqual(uuid);
+    expect(session!.userId).toEqual(user.id);
   });
 
   test("Should throw an error if user does not exist", async () => {
