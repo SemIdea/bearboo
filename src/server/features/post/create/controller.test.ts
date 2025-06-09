@@ -1,14 +1,13 @@
 import { describe, expect, test } from "vitest";
 import { createPostController } from "./controller";
 import { passwordHashingHelper } from "@/server/drivers/repositories";
-import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { testContext } from "@/test/context";
 
 describe("Create Post Controller Unitary Testing", () => {
   const ctx = testContext();
 
   test("Should create a post successfully", async () => {
-    const userId = await GenerateSnowflakeUID();
+    const userId = await ctx.repositories.uuid();
     const userInput = {
       email: `${userId}example.com`,
       password: "password123",
@@ -19,9 +18,9 @@ describe("Create Post Controller Unitary Testing", () => {
       password: await passwordHashingHelper.hash(userInput.password),
     });
 
-    const sessionId = await GenerateSnowflakeUID();
-    const accesToken = await GenerateSnowflakeUID();
-    const refreshToken = await GenerateSnowflakeUID();
+    const sessionId = await ctx.repositories.uuid();
+    const accesToken = await ctx.repositories.uuid();
+    const refreshToken = await ctx.repositories.uuid();
 
     const session = await ctx.repositories.session.create(sessionId, {
       userId,

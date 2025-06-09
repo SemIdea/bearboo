@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { loginUserController } from "./controller";
-import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { testContext } from "@/test/context";
 import { AuthErrorCode } from "@/shared/error/auth";
 
@@ -9,7 +8,7 @@ describe("Login User Controller Unitary Testing", () => {
   const ctx = testContext();
 
   test("Should return a session if valid credentials", async () => {
-    const uuid = await GenerateSnowflakeUID();
+    const uuid = await ctx.repositories.uuid();
     const user = {
       email: `${uuid}@example.com`,
       password: "password123",
@@ -35,7 +34,7 @@ describe("Login User Controller Unitary Testing", () => {
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = await GenerateSnowflakeUID();
+    const uuid = await ctx.repositories.uuid();
     const user = {
       email: `${uuid}@example.com`,
       password: "password123",

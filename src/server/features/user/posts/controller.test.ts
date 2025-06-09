@@ -1,7 +1,6 @@
 import { beforeAll, describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { getUserPostsController } from "./controller";
-import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { testContext } from "@/test/context";
 import { AuthErrorCode } from "@/shared/error/auth";
 
@@ -10,7 +9,7 @@ describe("User Posts Controller Unitary Testing", () => {
   var userId: string;
 
   beforeAll(async () => {
-    userId = await GenerateSnowflakeUID();
+    userId = await ctx.repositories.uuid();
     const user = {
       email: `${userId}@example.com`,
       password: "password123",
@@ -33,7 +32,7 @@ describe("User Posts Controller Unitary Testing", () => {
   });
 
   test("Should return all posts from a user", async () => {
-    const postId = await GenerateSnowflakeUID();
+    const postId = await ctx.repositories.uuid();
 
     await ctx.repositories.post.create(postId, {
       userId,
@@ -52,7 +51,7 @@ describe("User Posts Controller Unitary Testing", () => {
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = await GenerateSnowflakeUID();
+    const uuid = await ctx.repositories.uuid();
 
     await expect(
       getUserPostsController({

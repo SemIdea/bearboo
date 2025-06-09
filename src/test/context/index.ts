@@ -16,6 +16,7 @@ import {
 import { UserEntity } from "@/server/entities/user/entity";
 import { SessionEntity } from "@/server/entities/session/entity";
 import { PostEntity } from "@/server/entities/post/entity";
+import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 
 type TestContext = {
   headers: Headers;
@@ -25,12 +26,20 @@ type TestContext = {
     post: IPostModel;
     cache: ICacheRepositoryAdapter;
     hashing: IPasswordHashingHelperAdapter;
+    uuid: () => Promise<string>;
   };
   entities: {
     user: typeof UserEntity;
     session: typeof SessionEntity;
     post: typeof PostEntity;
   };
+};
+
+const generateSnowflakeUuidWithRandom = async (): Promise<string> => {
+  const id = await GenerateSnowflakeUID();
+  const random = Math.floor(Math.random() * 1000);
+
+  return id + random.toString();
 };
 
 const testContext = (): TestContext => {
@@ -42,6 +51,7 @@ const testContext = (): TestContext => {
       post: postRepository,
       cache: cacheRepository,
       hashing: passwordHashingHelper,
+      uuid: generateSnowflakeUuidWithRandom,
     },
     entities: {
       user: UserEntity,

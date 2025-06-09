@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { getUserProfileController } from "./controller";
-import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { testContext } from "@/test/context/";
 import { AuthErrorCode } from "@/shared/error/auth";
 
@@ -9,7 +8,7 @@ describe("Register User Controller Unitary Testing", () => {
   const ctx = testContext();
 
   test("Should return user profile if user exists", async () => {
-    const uuid = await GenerateSnowflakeUID();
+    const uuid = await ctx.repositories.uuid();
     const input = {
       email: `${uuid}@example.com`,
       password: "password123",
@@ -29,7 +28,7 @@ describe("Register User Controller Unitary Testing", () => {
   });
 
   test("Should throw error if user does not exist", async () => {
-    const uuid = await GenerateSnowflakeUID();
+    const uuid = await ctx.repositories.uuid();
 
     await expect(
       getUserProfileController({

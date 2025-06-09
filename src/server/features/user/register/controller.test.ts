@@ -1,14 +1,13 @@
 import { describe, expect, test } from "vitest";
 
 import { registerUserController } from "./controller";
-import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { testContext } from "@/test/context/";
 
 describe("Register User Controller Unitary Testing", () => {
   const ctx = testContext();
 
   test("Should verify if user is registered", async () => {
-    const uuid = await GenerateSnowflakeUID();
+    const uuid = await ctx.repositories.uuid();
     const input = {
       email: `${uuid}@example.com`,
       password: "password123",
