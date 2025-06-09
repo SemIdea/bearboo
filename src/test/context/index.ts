@@ -1,5 +1,3 @@
-// test/context/index.ts
-
 import { Session, User } from "@prisma/client";
 import { IUserModel } from "@/server/entities/user/DTO";
 import { ISessionModel } from "@/server/entities/session/DTO";
@@ -19,30 +17,57 @@ import { SessionEntity } from "@/server/entities/session/entity";
 import { PostEntity } from "@/server/entities/post/entity";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 
+type AuthenticatedUser = {
+  user: User & {
+    input: {
+      email: string;
+      password: string;
+    };
+  };
+  session: Session;
+};
+
+type CreateAuthenticatedUser = () => Promise<AuthenticatedUser>;
+
+type ICreateAuthenticatedContext = {
+  ctx: TestContext;
+  user: User;
+  session: Session;
+};
+
+type AuthenticatedContext = TestContext & {
+  user: {
+    id: string;
+    email: string;
+    session: Session;
+  };
+};
+
+type CreateAuthenticatedContext = (
+  params: ICreateAuthenticatedContext,
+) => AuthenticatedContext;
+
+type Repositories = {
+  user: IUserModel;
+  session: ISessionModel;
+  post: IPostModel;
+  cache: ICacheRepositoryAdapter;
+  hashing: IPasswordHashingHelperAdapter;
+  uuid: () => Promise<string>;
+};
+
+type Entities = {
+  user: typeof UserEntity;
+  session: typeof SessionEntity;
+  post: typeof PostEntity;
+};
+
 type TestContext = {
   headers: Headers;
-  repositories: {
-    user: IUserModel;
-    session: ISessionModel;
-    post: IPostModel;
-    cache: ICacheRepositoryAdapter;
-    hashing: IPasswordHashingHelperAdapter;
-    uuid: () => Promise<string>;
-  };
-  entities: {
-    user: typeof UserEntity;
-    session: typeof SessionEntity;
-    post: typeof PostEntity;
-  };
-  createAuthenticatedUser: () => Promise<{
-    user: User & {
-      input: {
-        email: string;
-        password: string;
-      };
-    };
-    session: Session;
-  }>;
+  repositories: Repositories;
+  entities: Entities;
+  createAuthenticatedUser: CreateAuthenticatedUser;
+  createAuthenticatedContext: CreateAuthenticatedContext;
 };
 
 const generateSnowflakeUuidWithRandom = async (): Promise<string> => {
@@ -83,6 +108,21 @@ const createAuthenticatedUser = async () => {
   };
 };
 
+const createAuthenticatedContext = ({
+  ctx,
+  session,
+  user,
+}: ICreateAuthenticatedContext) => {
+  return {
+    ...ctx,
+    user: {
+      id: user.id,
+      email: user.email,
+      session,
+    },
+  };
+};
+
 const testContext = (): TestContext => {
   const ctx: TestContext = {
     headers: new Headers(),
@@ -100,6 +140,7 @@ const testContext = (): TestContext => {
       post: PostEntity,
     },
     createAuthenticatedUser,
+    createAuthenticatedContext,
   };
 
   return ctx;
