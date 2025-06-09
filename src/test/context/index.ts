@@ -1,9 +1,4 @@
 import { Session, User } from "@prisma/client";
-import { IUserModel } from "@/server/entities/user/DTO";
-import { ISessionModel } from "@/server/entities/session/DTO";
-import { IPostModel } from "@/server/entities/post/DTO";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
-import { IPasswordHashingHelperAdapter } from "@/server/integrations/helpers/passwordHashing/adapter";
 
 import {
   cacheRepository,
@@ -14,137 +9,88 @@ import {
 } from "@/server/drivers/repositories";
 import { UserEntity } from "@/server/entities/user/entity";
 import { SessionEntity } from "@/server/entities/session/entity";
-import { PostEntity } from "@/server/entities/post/entity";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
+import { IBaseContextDTO } from "@/server/createContext";
 
-type AuthenticatedUser = {
-  user: User & {
-    input: {
-      email: string;
-      password: string;
+type IAuthenticatedUserDTO = User & {
+  truePassword: string;
+  session: Session;
+};
+
+type ITestContextDTO = IBaseContextDTO & {
+  user?: IAuthenticatedUserDTO;
+  generateSnowflakeUuid: () => Promise<string>;
+  createAuthenticatedUser: () => Promise<void>;
+};
+
+type IControllerContextDTO = ITestContextDTO & {
+  user: IAuthenticatedUserDTO;
+};
+
+class TestContext {
+  headers = new Headers();
+  repositories = {
+    user: userRepository,
+    session: sessionRepository,
+    post: postRepository,
+    cache: cacheRepository,
+    hashing: passwordHashingHelper,
+  };
+
+  user?: IAuthenticatedUserDTO;
+
+  async generateSnowflakeUuid() {
+    const id = await GenerateSnowflakeUID();
+    const random = Math.floor(Math.random() * 1000);
+
+    return id + random.toString();
+  }
+
+  async createAuthenticatedUser() {
+    const userId = await this.generateSnowflakeUuid();
+    const userData = {
+      email: `${userId}@example.com`,
+      password: "password123",
     };
-  };
-  session: Session;
-};
 
-type CreateAuthenticatedUser = () => Promise<AuthenticatedUser>;
+    const user = await UserEntity.create({
+      id: userId,
+      data: {
+        ...userData,
+        password: await this.repositories.hashing.hash(userData.password),
+      },
+      repositories: {
+        ...this.repositories,
+        database: this.repositories.user,
+      },
+    });
 
-type ICreateAuthenticatedContext = {
-  ctx: TestContext;
-  user: User;
-  session: Session;
-};
+    const sessionId = await this.generateSnowflakeUuid();
+    const accessToken = await this.generateSnowflakeUuid();
+    const refreshToken = await this.generateSnowflakeUuid();
 
-type AuthenticatedContext = TestContext & {
-  user: {
-    id: string;
-    email: string;
-    session: Session;
-  };
-};
+    const session = await SessionEntity.create({
+      id: sessionId,
+      data: {
+        userId: user.id,
+        accessToken,
+        refreshToken,
+      },
+      repositories: {
+        ...this.repositories,
+        database: this.repositories.session,
+      },
+    });
 
-type CreateAuthenticatedContext = (
-  params: ICreateAuthenticatedContext,
-) => AuthenticatedContext;
+    this.user = { ...user, truePassword: userData.password, session };
+  }
+}
 
-type Repositories = {
-  user: IUserModel;
-  session: ISessionModel;
-  post: IPostModel;
-  cache: ICacheRepositoryAdapter;
-  hashing: IPasswordHashingHelperAdapter;
-  uuid: () => Promise<string>;
-};
+function isControllerContext(
+  ctx: ITestContextDTO,
+): ctx is IControllerContextDTO {
+  return ctx.user !== undefined;
+}
 
-type Entities = {
-  user: typeof UserEntity;
-  session: typeof SessionEntity;
-  post: typeof PostEntity;
-};
-
-type TestContext = {
-  headers: Headers;
-  repositories: Repositories;
-  entities: Entities;
-  createAuthenticatedUser: CreateAuthenticatedUser;
-  createAuthenticatedContext: CreateAuthenticatedContext;
-};
-
-const generateSnowflakeUuidWithRandom = async (): Promise<string> => {
-  const id = await GenerateSnowflakeUID();
-  const random = Math.floor(Math.random() * 1000);
-
-  return id + random.toString();
-};
-
-const createAuthenticatedUser = async () => {
-  const userId = await generateSnowflakeUuidWithRandom();
-  const userInput = {
-    email: `${userId}@example.com`,
-    password: "password123",
-  };
-
-  const user = await userRepository.create(userId, {
-    ...userInput,
-    password: await passwordHashingHelper.hash(userInput.password),
-  });
-
-  const sessionId = await generateSnowflakeUuidWithRandom();
-  const accessToken = await generateSnowflakeUuidWithRandom();
-  const refreshToken = await generateSnowflakeUuidWithRandom();
-
-  const session = await sessionRepository.create(sessionId, {
-    userId,
-    accessToken,
-    refreshToken,
-  });
-
-  return {
-    user: {
-      ...user,
-      input: userInput,
-    },
-    session,
-  };
-};
-
-const createAuthenticatedContext = ({
-  ctx,
-  session,
-  user,
-}: ICreateAuthenticatedContext) => {
-  return {
-    ...ctx,
-    user: {
-      id: user.id,
-      email: user.email,
-      session,
-    },
-  };
-};
-
-const testContext = (): TestContext => {
-  const ctx: TestContext = {
-    headers: new Headers(),
-    repositories: {
-      user: userRepository,
-      session: sessionRepository,
-      post: postRepository,
-      cache: cacheRepository,
-      hashing: passwordHashingHelper,
-      uuid: generateSnowflakeUuidWithRandom,
-    },
-    entities: {
-      user: UserEntity,
-      session: SessionEntity,
-      post: PostEntity,
-    },
-    createAuthenticatedUser,
-    createAuthenticatedContext,
-  };
-
-  return ctx;
-};
-
-export { testContext };
-export type { TestContext };
+export { TestContext, isControllerContext };
+export type { ITestContextDTO, IControllerContextDTO };
