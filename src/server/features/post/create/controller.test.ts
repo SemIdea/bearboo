@@ -1,24 +1,26 @@
 import { describe, expect, test } from "vitest";
 import { createPostController } from "./controller";
-import { testContext } from "@/test/context";
+import { isControllerContext, TestContext } from "@/test/context";
 
-describe("Create Post Controller Unitary Testing", () => {
-  const ctx = testContext();
+describe("Create Post Controller Unitary Testing", async () => {
+  const ctx = new TestContext();
+
+  await ctx.createAuthenticatedUser();
+
+  if (!isControllerContext(ctx)) {
+    throw new Error("User is not authenticated");
+  }
 
   test("Should create a post successfully", async () => {
-    const { user, session } = await ctx.createAuthenticatedUser();
+    const user = ctx.user;
     const input = {
       title: "Test Post",
       content: "This is a test post content.",
     };
 
     const result = await createPostController({
+      ctx,
       input,
-      ctx: ctx.createAuthenticatedContext({
-        ctx,
-        session,
-        user,
-      }),
     });
 
     expect(result).toBeDefined();

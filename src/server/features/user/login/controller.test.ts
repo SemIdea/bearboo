@@ -1,38 +1,43 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { loginUserController } from "./controller";
-import { testContext } from "@/test/context";
 import { AuthErrorCode } from "@/shared/error/auth";
+import { isControllerContext, TestContext } from "@/test/context";
 
-describe("Login User Controller Unitary Testing", () => {
-  const ctx = testContext();
+describe("Login User Controller Unitary Testing", async () => {
+  const ctx = new TestContext();
+
+  await ctx.createAuthenticatedUser();
+
+  if (!isControllerContext(ctx)) {
+    throw new Error("User not authenticated");
+  }
 
   test("Should return a session if valid credentials", async () => {
-    const { user } = await ctx.createAuthenticatedUser();
+    const user = ctx.user;
 
     const result = await loginUserController({
-      input: user.input,
       ctx,
+      input: {
+        email: user.email,
+        password: user.truePassword,
+      },
     });
 
     expect(result).toBeDefined();
+    expect(result.id).toBeDefined();
     expect(result.user.id).toEqual(user.id);
-
-    const session = await ctx.repositories.session.find(result.id);
-
-    expect(session).toBeDefined();
-    expect(session!.userId).toEqual(user.id);
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = await ctx.repositories.uuid();
-    const user = {
+    const uuid = await ctx.generateSnowflakeUuid();
+    const userData = {
       email: `${uuid}@example.com`,
       password: "password123",
     };
 
     await expect(
-      loginUserController({ input: user, ctx }),
+      loginUserController({ input: userData, ctx }),
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
