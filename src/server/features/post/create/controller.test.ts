@@ -14,18 +14,11 @@ describe("Create Post Controller Unitary Testing", () => {
 
     const result = await createPostController({
       input,
-      ctx: {
-        ...ctx,
-        user: {
-          id: user.id,
-          email: user.email,
-          session,
-        },
-        repositories: {
-          ...ctx.repositories,
-          post: ctx.repositories.post,
-        },
-      },
+      ctx: ctx.createAuthenticatedContext({
+        ctx,
+        session,
+        user,
+      }),
     });
 
     expect(result).toBeDefined();
