@@ -11,8 +11,8 @@ const findPostSchema = z.object({
 
 const updatePostSchema = z.object({
   postId: z.string(),
-  title: z.string(),
-  content: z.string()
+  title: z.string().optional(),
+  content: z.string().optional()
 });
 
 const deletePostSchema = z.object({

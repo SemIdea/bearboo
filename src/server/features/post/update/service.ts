@@ -5,9 +5,14 @@ import { PostEntity } from "@/server/entities/post/entity";
 import { UserErrorCode } from "@/shared/error/user";
 import { PostErrorCode } from "@/shared/error/post";
 
-const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
+const UpdatePostService = async ({
+  repositories,
+  userId,
+  postId,
+  ...data
+}: IUpdatePostDTO) => {
   const user = await UserEntity.find({
-    id: data.userId,
+    id: userId,
     repositories: {
       ...repositories,
       database: repositories.user
@@ -22,7 +27,7 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
   }
 
   const post = await PostEntity.find({
-    id: data.postId,
+    id: postId,
     repositories: {
       ...repositories
     }
@@ -44,11 +49,8 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
   }
 
   return await PostEntity.update({
-    id: data.postId,
-    data: {
-      title: data.title,
-      content: data.content
-    },
+    id: postId,
+    data,
     repositories
   });
 };

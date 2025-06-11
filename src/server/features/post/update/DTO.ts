@@ -5,8 +5,8 @@ import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cach
 type IUpdatePostDTO = {
   userId: string;
   postId: string;
-  title: string;
-  content: string;
+  title?: string;
+  content?: string;
   repositories: {
     user: IUserModel;
     database: IPostModel;
