@@ -3,6 +3,7 @@ import { IDeletePostDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
 import { PostEntity } from "@/server/entities/post/entity";
 import { UserErrorCode } from "@/shared/error/user";
+import { PostErrorCode } from "@/shared/error/post";
 
 const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   const user = await UserEntity.find({
@@ -30,7 +31,7 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   if (!post) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: "Post not found",
+      message: PostErrorCode.POST_NOT_FOUND,
     });
   }
 
