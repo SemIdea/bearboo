@@ -17,7 +17,7 @@ const Authprovider = ({ children }: ChatProviderProps) => {
     setSession,
     login,
     register,
-    logout,
+    logout
   } = useAuthLogic();
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Authprovider = ({ children }: ChatProviderProps) => {
         document.cookie
           .split("; ")
           .find((row) => row.startsWith(key))
-          ?.split("=")[1],
+          ?.split("=")[1]
     );
 
     if (sessionCookie) {
@@ -50,7 +50,7 @@ const Authprovider = ({ children }: ChatProviderProps) => {
         setSession,
         login,
         register,
-        logout,
+        logout
       }}
     >
       {children}

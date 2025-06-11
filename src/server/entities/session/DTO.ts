@@ -100,5 +100,5 @@ export type {
   IFindSessionByAccessTokenDTO,
   IFindSessionByRefreshTokenDTO,
   IDeletePostDTO,
-  IRefreshSessionDTO,
+  IRefreshSessionDTO
 };

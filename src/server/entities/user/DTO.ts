@@ -68,5 +68,5 @@ export type {
   IResolveUserFromIndexDTO,
   ICreateUserDTO,
   IFindUserDTO,
-  IFindUserByEmailDTO,
+  IFindUserByEmailDTO
 };

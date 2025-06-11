@@ -10,7 +10,7 @@ const Page = () => {
     isUploading,
     successMessage,
     errorMessage,
-    post,
+    post
   } = useUpdatePost();
 
   const [title, setTitle] = useState<string>("");

@@ -6,16 +6,16 @@ class PrismaPostModel implements IPostModel {
     return await prisma.post.create({
       data: {
         id,
-        ...data,
-      },
+        ...data
+      }
     });
   }
 
   async find(id: string) {
     return await prisma.post.findUnique({
       where: {
-        id,
-      },
+        id
+      }
     });
   }
 
@@ -26,27 +26,27 @@ class PrismaPostModel implements IPostModel {
   async findUserPosts(userId: string) {
     return await prisma.post.findMany({
       where: {
-        userId,
-      },
+        userId
+      }
     });
   }
 
   async update(id: string, data: Partial<IPostEntity>) {
     return await prisma.post.update({
       where: {
-        id,
+        id
       },
       data: {
-        ...data,
-      },
+        ...data
+      }
     });
   }
 
   async delete(id: string) {
     await prisma.post.delete({
       where: {
-        id,
-      },
+        id
+      }
     });
   }
 }

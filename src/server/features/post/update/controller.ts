@@ -4,7 +4,7 @@ import { UpdatePostInput } from "@/server/schema/post.schema";
 
 const updatePostController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: UpdatePostInput;
   ctx: IProtectedAPIContextDTO;
@@ -12,10 +12,10 @@ const updatePostController = async ({
   const post = await UpdatePostService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.post,
+      database: ctx.repositories.post
     },
     userId: ctx.user.id,
-    ...input,
+    ...input
   });
 
   return post;

@@ -7,7 +7,7 @@ import {
   passwordHashingHelper,
   postRepository,
   sessionRepository,
-  userRepository,
+  userRepository
 } from "./drivers/repositories";
 import { IPostModel } from "./entities/post/DTO";
 
@@ -34,7 +34,7 @@ type IProtectedAPIContextDTO = IBaseContextDTO & {
 };
 
 const createTRPCContext = ({
-  headers,
+  headers
 }: IInputAPIContextDTO): IAPIContextDTO => {
   return {
     headers,
@@ -43,8 +43,8 @@ const createTRPCContext = ({
       session: sessionRepository,
       post: postRepository,
       cache: cacheRepository,
-      hashing: passwordHashingHelper,
-    },
+      hashing: passwordHashingHelper
+    }
   };
 };
 
@@ -56,5 +56,5 @@ export type {
   IBaseContextDTO,
   IAPIContextDTO,
   IProtectedAPIContextDTO,
-  Context,
+  Context
 };

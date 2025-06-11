@@ -7,14 +7,14 @@ import {
   IFindSessionByRefreshTokenDTO,
   IRefreshSessionDTO,
   IResolveSessionFromIndexDTO,
-  ISessionEntity,
+  ISessionEntity
 } from "./DTO";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 import {
   sessionAccessTokenCacheKey,
   sessionCacheKey,
   SessionCacheTTL,
-  sessionRefreshTokenCacheKey,
+  sessionRefreshTokenCacheKey
 } from "@/constants/cache/session";
 
 class SessionEntity implements ISessionEntity {
@@ -22,12 +22,12 @@ class SessionEntity implements ISessionEntity {
     public id: string,
     public userId: string,
     public accessToken: string,
-    public refreshToken: string,
+    public refreshToken: string
   ) {}
 
   private static async cacheSession({
     session,
-    repositories,
+    repositories
   }: ICacheSessionDTO) {
     if (!isFeatureEnabled("enableSessionCaching")) return;
     const { id, accessToken, refreshToken } = session;
@@ -36,10 +36,10 @@ class SessionEntity implements ISessionEntity {
       [
         sessionCacheKey(id),
         sessionAccessTokenCacheKey(accessToken),
-        sessionRefreshTokenCacheKey(refreshToken),
+        sessionRefreshTokenCacheKey(refreshToken)
       ],
       [JSON.stringify(session), id, id],
-      SessionCacheTTL,
+      SessionCacheTTL
     );
   }
 
@@ -47,7 +47,7 @@ class SessionEntity implements ISessionEntity {
     indexKey,
     indexKeyCaller,
     findOnDatabase,
-    repositories,
+    repositories
   }: IResolveSessionFromIndexDTO) {
     const lookupCacheKey = indexKeyCaller(indexKey);
     const cachedIndexValue = await repositories.cache.get(lookupCacheKey);
@@ -73,7 +73,7 @@ class SessionEntity implements ISessionEntity {
 
     await SessionEntity.cacheSession({
       session: sessionFromDb,
-      repositories,
+      repositories
     });
 
     return sessionFromDb;
@@ -87,7 +87,7 @@ class SessionEntity implements ISessionEntity {
 
     await SessionEntity.cacheSession({
       session,
-      repositories,
+      repositories
     });
 
     return session;
@@ -106,7 +106,7 @@ class SessionEntity implements ISessionEntity {
 
     await SessionEntity.cacheSession({
       session: sessionFromDb,
-      repositories,
+      repositories
     });
 
     return sessionFromDb;
@@ -114,25 +114,25 @@ class SessionEntity implements ISessionEntity {
 
   static async findByAccessToken({
     accessToken,
-    repositories,
+    repositories
   }: IFindSessionByAccessTokenDTO) {
     return await SessionEntity.resolveSessionFromIndex({
       indexKey: accessToken,
       indexKeyCaller: sessionAccessTokenCacheKey,
       findOnDatabase: repositories.database.findByAccessToken,
-      repositories,
+      repositories
     });
   }
 
   static async findByRefreshToken({
     refreshToken,
-    repositories,
+    repositories
   }: IFindSessionByRefreshTokenDTO) {
     return await SessionEntity.resolveSessionFromIndex({
       indexKey: refreshToken,
       indexKeyCaller: sessionRefreshTokenCacheKey,
       findOnDatabase: repositories.database.findByRefreshToken,
-      repositories,
+      repositories
     });
   }
 
@@ -142,21 +142,21 @@ class SessionEntity implements ISessionEntity {
     accessToken,
     newRefreshToken,
     newAccessToken,
-    repositories,
+    repositories
   }: IRefreshSessionDTO) {
     await repositories.cache.mdel([
       sessionAccessTokenCacheKey(accessToken),
-      sessionRefreshTokenCacheKey(refreshToken),
+      sessionRefreshTokenCacheKey(refreshToken)
     ]);
 
     const session = await repositories.database.update(id, {
       accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
+      refreshToken: newRefreshToken
     });
 
     await SessionEntity.cacheSession({
       session,
-      repositories,
+      repositories
     });
 
     return session;
@@ -166,7 +166,7 @@ class SessionEntity implements ISessionEntity {
     await repositories.cache.mdel([
       sessionCacheKey(id),
       sessionAccessTokenCacheKey(id),
-      sessionRefreshTokenCacheKey(id),
+      sessionRefreshTokenCacheKey(id)
     ]);
 
     return await repositories.database.delete(id);

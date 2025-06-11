@@ -5,13 +5,13 @@ import {
   IFindUserDTO,
   IFindUserByEmailDTO,
   ICacheUserDTO,
-  IResolveUserFromIndexDTO,
+  IResolveUserFromIndexDTO
 } from "./DTO";
 import { verifyUserSchema } from "@/server/schema/user.schema";
 import {
   userCacheKey,
   UserCacheTTL,
-  userEmailCacheKey,
+  userEmailCacheKey
 } from "@/constants/cache/user";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 
@@ -19,12 +19,12 @@ class UserEntity implements IUserEntity {
   constructor(
     public id: string,
     public email: string,
-    public password: string,
+    public password: string
   ) {}
 
   private static async cacheUser({
     user,
-    repositories,
+    repositories
   }: ICacheUserDTO): Promise<void> {
     if (!isFeatureEnabled("enableUserCaching")) return;
     const { id, email } = user;
@@ -32,7 +32,7 @@ class UserEntity implements IUserEntity {
     await repositories.cache.mset(
       [userCacheKey(id), userEmailCacheKey(email)],
       [JSON.stringify(user), id],
-      UserCacheTTL,
+      UserCacheTTL
     );
   }
 
@@ -40,7 +40,7 @@ class UserEntity implements IUserEntity {
     indexKey,
     indexKeyCaller,
     findOnDatabase,
-    repositories,
+    repositories
   }: IResolveUserFromIndexDTO) {
     const lookupCacheKey = indexKeyCaller(indexKey);
     const cachedIndexValue = await repositories.cache.get(lookupCacheKey);
@@ -66,7 +66,7 @@ class UserEntity implements IUserEntity {
 
     await UserEntity.cacheUser({
       user: userFromDb,
-      repositories,
+      repositories
     });
 
     return userFromDb;
@@ -81,7 +81,7 @@ class UserEntity implements IUserEntity {
     } catch (error) {
       if (error instanceof ZodError) {
         throw new Error(
-          `Validation failed: ${error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`,
+          `Validation failed: ${error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`
         );
       }
       throw error;
@@ -91,7 +91,7 @@ class UserEntity implements IUserEntity {
 
     await UserEntity.cacheUser({
       user,
-      repositories,
+      repositories
     });
 
     return user;
@@ -99,25 +99,25 @@ class UserEntity implements IUserEntity {
 
   static async find({
     id,
-    repositories,
+    repositories
   }: IFindUserDTO): Promise<UserEntity | null> {
     return await UserEntity.resolveUserFromIndex({
       indexKey: id,
       indexKeyCaller: userCacheKey,
       findOnDatabase: repositories.database.find,
-      repositories,
+      repositories
     });
   }
 
   static async findByEmail({
     email,
-    repositories,
+    repositories
   }: IFindUserByEmailDTO): Promise<UserEntity | null> {
     return await UserEntity.resolveUserFromIndex({
       indexKey: email,
       indexKeyCaller: userEmailCacheKey,
       findOnDatabase: repositories.database.findByEmail,
-      repositories,
+      repositories
     });
   }
 }

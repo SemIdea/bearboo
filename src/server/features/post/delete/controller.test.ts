@@ -21,19 +21,19 @@ describe("Delete Post Controller Unitary Testing", async () => {
       data: {
         title: "Test Post",
         content: "This is a test post.",
-        userId: ctx.user.id,
+        userId: ctx.user.id
       },
       repositories: {
         ...ctx.repositories,
-        database: ctx.repositories.post,
-      },
+        database: ctx.repositories.post
+      }
     });
 
     await deletePostController({
       ctx,
       input: {
-        postId: post.id,
-      },
+        postId: post.id
+      }
     });
 
     const result = await ctx.repositories.post.find(post.id);
@@ -48,14 +48,14 @@ describe("Delete Post Controller Unitary Testing", async () => {
       deletePostController({
         ctx,
         input: {
-          postId,
-        },
-      }),
+          postId
+        }
+      })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: PostErrorCode.POST_NOT_FOUND,
-      }),
+        message: PostErrorCode.POST_NOT_FOUND
+      })
     );
   });
 });

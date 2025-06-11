@@ -20,7 +20,7 @@ const PostProvider = ({ children }: PostProviderProps) => {
         findPost,
         findAllPosts,
         updatePost,
-        deletePost,
+        deletePost
       }}
     >
       {children}

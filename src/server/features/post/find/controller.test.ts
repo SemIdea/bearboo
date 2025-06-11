@@ -21,19 +21,19 @@ describe("Find Post Controller Unitary Testing", async () => {
       data: {
         title: "Test Post",
         content: "This is a test post.",
-        userId: ctx.user.id,
+        userId: ctx.user.id
       },
       repositories: {
         ...ctx.repositories,
-        database: ctx.repositories.post,
-      },
+        database: ctx.repositories.post
+      }
     });
 
     const result = await findPostController({
       ctx,
       input: {
-        postId: post.id,
-      },
+        postId: post.id
+      }
     });
 
     expect(result).toEqual(post);
@@ -46,14 +46,14 @@ describe("Find Post Controller Unitary Testing", async () => {
       findPostController({
         ctx,
         input: {
-          postId,
-        },
-      }),
+          postId
+        }
+      })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: PostErrorCode.POST_NOT_FOUND,
-      }),
+        message: PostErrorCode.POST_NOT_FOUND
+      })
     );
   });
 });

@@ -10,5 +10,5 @@ export {
   SessionCacheTTL,
   sessionCacheKey,
   sessionAccessTokenCacheKey,
-  sessionRefreshTokenCacheKey,
+  sessionRefreshTokenCacheKey
 };
