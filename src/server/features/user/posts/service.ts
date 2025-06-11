@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { IGetUserPostsDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
 import { PostEntity } from "@/server/entities/post/entity";
-import { AuthErrorCode } from "@/shared/error/auth";
+import { UserErrorCode } from "@/shared/error/user";
 
 const GetUserPostsService = async ({
   repositories,
@@ -19,7 +19,7 @@ const GetUserPostsService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD,
     });
   }
 

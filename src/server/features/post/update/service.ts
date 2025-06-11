@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { IUpdatePostDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
-import { AuthErrorCode } from "@/shared/error/auth";
 import { PostEntity } from "@/server/entities/post/entity";
+import { UserErrorCode } from "@/shared/error/user";
+import { PostErrorCode } from "@/shared/error/post";
 
 const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
   const user = await UserEntity.find({
@@ -16,7 +17,7 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD,
     });
   }
 
@@ -30,7 +31,7 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
   if (!post) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.POST_NOT_FOUND,
+      message: PostErrorCode.POST_NOT_FOUND,
     });
   }
 

@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { ICreatePostDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
-import { AuthErrorCode } from "@/shared/error/auth";
 import { PostEntity } from "@/server/entities/post/entity";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
+import { UserErrorCode } from "@/shared/error/user";
 
 const CreatePostService = async ({ repositories, ...data }: ICreatePostDTO) => {
   const user = await UserEntity.find({
@@ -17,7 +17,7 @@ const CreatePostService = async ({ repositories, ...data }: ICreatePostDTO) => {
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD,
     });
   }
 

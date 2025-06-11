@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { IDeletePostDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
-import { AuthErrorCode } from "@/shared/error/auth";
 import { PostEntity } from "@/server/entities/post/entity";
+import { UserErrorCode } from "@/shared/error/user";
 
 const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   const user = await UserEntity.find({
@@ -16,7 +16,7 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD,
     });
   }
 

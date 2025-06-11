@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { ILoginUserDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
 import { AuthErrorCode } from "@/shared/error/auth";
+import { UserErrorCode } from "@/shared/error/user";
 
 const LoginUserService = async ({ repositories, ...data }: ILoginUserDTO) => {
   const { email, password } = data;
@@ -14,7 +15,7 @@ const LoginUserService = async ({ repositories, ...data }: ILoginUserDTO) => {
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD,
     });
   }
 

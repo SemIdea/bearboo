@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { loginUserController } from "./controller";
-import { AuthErrorCode } from "@/shared/error/auth";
 import { isControllerContext, TestContext } from "@/test/context";
+import { UserErrorCode } from "@/shared/error/user";
 
 describe("Login User Controller Unitary Testing", async () => {
   const ctx = new TestContext();
@@ -41,7 +41,7 @@ describe("Login User Controller Unitary Testing", async () => {
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: AuthErrorCode.USER_NOT_FOUD,
+        message: UserErrorCode.USER_NOT_FOUD,
       }),
     );
   });
