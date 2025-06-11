@@ -117,7 +117,7 @@ class PostEntity implements IPostEntity {
   static async findAll({ repositories }: IFindAllPostsDTO) {
     const postsData = await repositories.database.findAll();
 
-    if (!postsData) return null;
+    if (!postsData) return [] as PostEntity[];
 
     const posts = postsData.map(
       (post: any) =>
