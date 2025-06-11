@@ -3,7 +3,7 @@ import { getUserPostsController } from "../features/user/posts/controller";
 import { getUserProfileController } from "../features/user/profile/controller";
 import {
   getUserPostsSchema,
-  getUserProfileSchema,
+  getUserProfileSchema
 } from "../schema/user.schema";
 
 const UserRouter = t.router({
@@ -12,7 +12,7 @@ const UserRouter = t.router({
     .query(async ({ input, ctx }) => getUserProfileController({ input, ctx })),
   posts: publicProcedure
     .input(getUserPostsSchema)
-    .query(async ({ input, ctx }) => getUserPostsController({ input, ctx })),
+    .query(async ({ input, ctx }) => getUserPostsController({ input, ctx }))
 });
 
 export { UserRouter };

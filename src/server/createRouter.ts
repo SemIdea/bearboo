@@ -14,11 +14,10 @@ const t = initTRPC.context<Context>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null
+      }
     };
-  },
+  }
 });
 
 const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
@@ -35,8 +34,8 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
     repositories: {
       cache: ctx.repositories.cache,
       user: ctx.repositories.user,
-      database: ctx.repositories.session,
-    },
+      database: ctx.repositories.session
+    }
   });
 
   if (!user) return next();
@@ -54,14 +53,14 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (Date.now() - sessionCreatedDate.getTime() > EXPIRES) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.SESSION_EXPIRED,
+      message: AuthErrorCode.SESSION_EXPIRED
     });
   }
 
   return next({
     ctx: {
-      user: user,
-    },
+      user: user
+    }
   });
 });
 
@@ -69,14 +68,14 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "Unauthorized",
+      message: "Unauthorized"
     });
   }
 
   return next({
     ctx: {
-      user: ctx.user,
-    },
+      user: ctx.user
+    }
   });
 });
 

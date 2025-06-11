@@ -20,8 +20,8 @@ describe("Login User Controller Unitary Testing", async () => {
       ctx,
       input: {
         email: user.email,
-        password: user.truePassword,
-      },
+        password: user.truePassword
+      }
     });
 
     expect(result).toBeDefined();
@@ -33,16 +33,16 @@ describe("Login User Controller Unitary Testing", async () => {
     const uuid = await ctx.generateSnowflakeUuid();
     const userData = {
       email: `${uuid}@example.com`,
-      password: "password123",
+      password: "password123"
     };
 
     await expect(
-      loginUserController({ input: userData, ctx }),
+      loginUserController({ input: userData, ctx })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUD,
-      }),
+        message: UserErrorCode.USER_NOT_FOUD
+      })
     );
   });
 });

@@ -4,7 +4,7 @@ import {
   IDeleteSessionDTO,
   IFindSessionByRefreshTokenDTO,
   IFindUserAndSessionByAccessTokenDTO,
-  IRefreshSessionDTO,
+  IRefreshSessionDTO
 } from "./DTO";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { SessionEntity } from "@/server/entities/session/entity";
@@ -23,37 +23,37 @@ const CreateAuthSessionService = async ({
     id: userId,
     repositories: {
       ...repositories,
-      database: repositories.user,
-    },
+      database: repositories.user
+    }
   });
 
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 
   const [sessionId, accessToken, refreshToken] = await Promise.all([
     GenerateSnowflakeUID(),
     GenerateSnowflakeUID(),
-    GenerateSnowflakeUID(),
+    GenerateSnowflakeUID()
   ]);
 
   const session = await SessionEntity.create({
     data: {
       userId,
       accessToken,
-      refreshToken,
+      refreshToken
     },
     id: sessionId,
-    repositories,
+    repositories
   });
 
   if (!session) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_CREATE_ERROR,
+      message: AuthErrorCode.SESSION_CREATE_ERROR
     });
   }
 
@@ -69,14 +69,14 @@ const FindUserAndSessionByAccessTokenService = async ({
   const session = await SessionEntity.findByAccessToken({
     accessToken,
     repositories: {
-      ...repositories,
-    },
+      ...repositories
+    }
   });
 
   if (!session || !session.userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN,
+      message: AuthErrorCode.INVALID_TOKEN
     });
   }
 
@@ -84,14 +84,14 @@ const FindUserAndSessionByAccessTokenService = async ({
     id: session.userId,
     repositories: {
       ...repositories,
-      database: repositories.user,
-    },
+      database: repositories.user
+    }
   });
 
   if (!user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN,
+      message: AuthErrorCode.INVALID_TOKEN
     });
   }
 
@@ -100,7 +100,7 @@ const FindUserAndSessionByAccessTokenService = async ({
 
   return {
     ...userWithoutPassword,
-    session: sessionWithoutUserId,
+    session: sessionWithoutUserId
   } as IUserWithSession;
 };
 
@@ -110,13 +110,13 @@ const FindSessionByRefreshTokenService = async ({
 }: IFindSessionByRefreshTokenDTO) => {
   const session = await SessionEntity.findByRefreshToken({
     repositories,
-    ...data,
+    ...data
   });
 
   if (!session) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.INVALID_TOKEN,
+      message: AuthErrorCode.INVALID_TOKEN
     });
   }
 
@@ -133,13 +133,13 @@ const RefreshSessionService = async ({
     refreshToken: data.refreshToken,
     newAccessToken: data.newAccessToken,
     newRefreshToken: data.newRefreshToken,
-    repositories,
+    repositories
   });
 
   if (!newSession) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_UPDATE_ERROR,
+      message: AuthErrorCode.SESSION_UPDATE_ERROR
     });
   }
 
@@ -154,43 +154,43 @@ const DeleteSessionService = async ({
     id: data.userId,
     repositories: {
       ...repositories,
-      database: repositories.user,
-    },
+      database: repositories.user
+    }
   });
 
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 
   const session = await SessionEntity.find({
     id: data.sessionId,
     repositories: {
-      ...repositories,
-    },
+      ...repositories
+    }
   });
 
   if (!session) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: "Session not found",
+      message: "Session not found"
     });
   }
 
   if (session.userId !== user.id) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: "You can't delete this session",
+      message: "You can't delete this session"
     });
   }
 
   await SessionEntity.delete({
     id: data.sessionId,
     repositories: {
-      ...repositories,
-    },
+      ...repositories
+    }
   });
 };
 
@@ -199,5 +199,5 @@ export {
   FindUserAndSessionByAccessTokenService,
   FindSessionByRefreshTokenService,
   RefreshSessionService,
-  DeleteSessionService,
+  DeleteSessionService
 };

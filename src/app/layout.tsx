@@ -10,19 +10,19 @@ import { fontSans } from "@/config/fonts";
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
+    template: `%s - ${siteConfig.name}`
   },
   description: siteConfig.description,
   icons: {
-    icon: "/favicon.ico",
-  },
+    icon: "/favicon.ico"
+  }
 };
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
+    { media: "(prefers-color-scheme: dark)", color: "black" }
+  ]
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -32,7 +32,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
+          fontSans.variable
         )}
       >
         <Providers>

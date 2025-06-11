@@ -15,12 +15,12 @@ describe("Create Post Controller Unitary Testing", async () => {
     const user = ctx.user;
     const input = {
       title: "Test Post",
-      content: "This is a test post content.",
+      content: "This is a test post content."
     };
 
     const result = await createPostController({
       ctx,
-      input,
+      input
     });
 
     expect(result).toBeDefined();

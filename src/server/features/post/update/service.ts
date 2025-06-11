@@ -10,28 +10,28 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
     id: data.userId,
     repositories: {
       ...repositories,
-      database: repositories.user,
-    },
+      database: repositories.user
+    }
   });
 
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 
   const post = await PostEntity.find({
     id: data.postId,
     repositories: {
-      ...repositories,
-    },
+      ...repositories
+    }
   });
 
   if (!post) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: PostErrorCode.POST_NOT_FOUND,
+      message: PostErrorCode.POST_NOT_FOUND
     });
   }
 
@@ -39,7 +39,7 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
   if (post.userId !== user.id) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: "You can't update this post",
+      message: "You can't update this post"
     });
   }
 
@@ -47,9 +47,9 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
     id: data.postId,
     data: {
       title: data.title,
-      content: data.content,
+      content: data.content
     },
-    repositories,
+    repositories
   });
 };
 

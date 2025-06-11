@@ -22,15 +22,15 @@ const useAuthLogic = () => {
   };
 
   const { mutate: login } = trpc.auth.loginUser.useMutation({
-    onSuccess: (data) => updateAuthData(data),
+    onSuccess: (data) => updateAuthData(data)
   });
 
   const { mutate: register } = trpc.auth.registerUser.useMutation({
-    onSuccess: (data) => updateAuthData(data),
+    onSuccess: (data) => updateAuthData(data)
   });
 
   const { mutate: logout } = trpc.auth.session.logout.useMutation({
-    onSuccess: () => updateAuthData(),
+    onSuccess: () => updateAuthData()
   });
 
   return {
@@ -40,7 +40,7 @@ const useAuthLogic = () => {
     setIsLoadingSession,
     login,
     register,
-    logout,
+    logout
   };
 };
 

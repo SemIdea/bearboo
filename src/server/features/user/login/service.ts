@@ -9,25 +9,25 @@ const LoginUserService = async ({ repositories, ...data }: ILoginUserDTO) => {
 
   const user = await UserEntity.findByEmail({
     email,
-    repositories,
+    repositories
   });
 
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 
   const isSamePassword = await repositories.hashing.compare(
     password,
-    user.password,
+    user.password
   );
 
   if (!isSamePassword) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_CREDENTIALS,
+      message: AuthErrorCode.INVALID_CREDENTIALS
     });
   }
 

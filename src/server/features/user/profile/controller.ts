@@ -4,7 +4,7 @@ import { GetUserProfileInput } from "@/server/schema/user.schema";
 
 const getUserProfileController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: GetUserProfileInput;
   ctx: IAPIContextDTO;
@@ -18,9 +18,9 @@ const getUserProfileController = async ({
   const profile = await GetUserProfileService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.user,
+      database: ctx.repositories.user
     },
-    userId: input.userId,
+    userId: input.userId
   });
 
   return profile;

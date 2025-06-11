@@ -6,41 +6,41 @@ class PrismaUserModel implements IUserModel {
     return await prisma.user.create({
       data: {
         id,
-        ...data,
-      },
+        ...data
+      }
     });
   }
 
   async find(id: string) {
     return await prisma.user.findUnique({
       where: {
-        id,
-      },
+        id
+      }
     });
   }
 
   async update(id: string, data: IUserEntity) {
     return await prisma.user.update({
       where: {
-        id,
+        id
       },
-      data,
+      data
     });
   }
 
   async delete(id: string): Promise<void> {
     await prisma.user.delete({
       where: {
-        id,
-      },
+        id
+      }
     });
   }
 
   async findByEmail(email: string) {
     return await prisma.user.findUnique({
       where: {
-        email,
-      },
+        email
+      }
     });
   }
 }

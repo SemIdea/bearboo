@@ -1,18 +1,18 @@
 import {
   DeleteSessionService,
   FindSessionByRefreshTokenService,
-  RefreshSessionService,
+  RefreshSessionService
 } from "./service";
 import {
   IAPIContextDTO,
-  IProtectedAPIContextDTO,
+  IProtectedAPIContextDTO
 } from "@/server/createContext";
 import { RefreshSessionInput } from "@/server/schema/session.schema";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 
 const refreshSessionController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: RefreshSessionInput;
   ctx: IAPIContextDTO;
@@ -20,9 +20,9 @@ const refreshSessionController = async ({
   const session = await FindSessionByRefreshTokenService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.session,
+      database: ctx.repositories.session
     },
-    ...input,
+    ...input
   });
 
   const newAccessToken = await GenerateSnowflakeUID();
@@ -36,18 +36,18 @@ const refreshSessionController = async ({
     newRefreshToken,
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.session,
-    },
+      database: ctx.repositories.session
+    }
   });
 
   return {
     accessToken: newAccessToken,
-    refreshToken: newRefreshToken,
+    refreshToken: newRefreshToken
   };
 };
 
 const getUserFromSessionController = async ({
-  ctx,
+  ctx
 }: {
   ctx: IProtectedAPIContextDTO;
 }) => {
@@ -55,7 +55,7 @@ const getUserFromSessionController = async ({
 };
 
 const logoutUserFromSessionController = async ({
-  ctx,
+  ctx
 }: {
   ctx: IProtectedAPIContextDTO;
 }) => {
@@ -64,15 +64,15 @@ const logoutUserFromSessionController = async ({
   await DeleteSessionService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.session,
+      database: ctx.repositories.session
     },
     userId: ctx.user.id,
-    sessionId: session.id,
+    sessionId: session.id
   });
 };
 
 export {
   refreshSessionController,
   getUserFromSessionController,
-  logoutUserFromSessionController,
+  logoutUserFromSessionController
 };

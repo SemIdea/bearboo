@@ -6,7 +6,7 @@ import { appRouter } from "@/server/routers/app.routes";
 
 const createContext = async (req: NextRequest) => {
   return createTRPCContext({
-    headers: req.headers,
+    headers: req.headers
   });
 };
 
@@ -15,7 +15,7 @@ const handler = (req: NextRequest) => {
     endpoint: "/api/trpc",
     req,
     router: appRouter,
-    createContext: () => createContext(req),
+    createContext: () => createContext(req)
     // onError: IS_DEVELOPMENT
     //   ? ({ path, error }) => {
     //       console.error(

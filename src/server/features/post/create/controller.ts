@@ -4,7 +4,7 @@ import { CreatePostInput } from "@/server/schema/post.schema";
 
 const createPostController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: CreatePostInput;
   ctx: IProtectedAPIContextDTO;
@@ -12,10 +12,10 @@ const createPostController = async ({
   const post = await CreatePostService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.post,
+      database: ctx.repositories.post
     },
     userId: ctx.user.id,
-    ...input,
+    ...input
   });
 
   return post;

@@ -10,7 +10,7 @@ let trpcClientInstance: ReturnType<typeof trpc.createClient>;
 
 export const fetcher = async (
   info: RequestInfo | URL,
-  options: RequestInit | RequestInit | undefined,
+  options: RequestInit | RequestInit | undefined
 ) => {
   const response = await fetch(info, options);
 
@@ -28,7 +28,7 @@ export const fetcher = async (
 
     try {
       const data = await trpcClientInstance.auth.refreshSession.mutate({
-        refreshToken,
+        refreshToken
       });
 
       document.cookie = `accessToken=${data.accessToken}; path=/;`;
@@ -37,8 +37,8 @@ export const fetcher = async (
       return await fetch(info, {
         ...options,
         headers: {
-          ...options?.headers,
-        },
+          ...options?.headers
+        }
       });
     } catch (error) {
       document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
@@ -56,9 +56,9 @@ export const fetcher = async (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 1000,
-    },
-  },
+      staleTime: 5 * 1000
+    }
+  }
 });
 
 const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
@@ -72,14 +72,14 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
     const client = trpc.createClient({
       links: [
         loggerLink({
-          enabled: () => true,
+          enabled: () => true
         }),
         httpBatchLink({
           transformer: superjson,
           url: "/api/trpc",
-          fetch: fetcher,
-        }),
-      ],
+          fetch: fetcher
+        })
+      ]
     });
 
     // Save a reference for our direct calls.

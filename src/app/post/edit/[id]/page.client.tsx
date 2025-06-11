@@ -39,7 +39,7 @@ const useUpdatePost = () => {
     },
     onSettled: () => {
       setIsUploading(false);
-    },
+    }
   });
 
   const { mutate: deletePost } = trpc.post.deletePost.useMutation({
@@ -55,14 +55,14 @@ const useUpdatePost = () => {
     },
     onSettled: () => {
       setIsUploading(false);
-    },
+    }
   });
 
   const { data: postData } = trpc.post.findPost.useQuery(
     { postId: postId as string },
     {
-      enabled: !!postId,
-    },
+      enabled: !!postId
+    }
   );
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const useUpdatePost = () => {
   }, [postData]);
 
   const handleUpdatePost = async (
-    postData: React.FormEvent<HTMLFormElement>,
+    postData: React.FormEvent<HTMLFormElement>
   ) => {
     // Improve. Verify all data before sending
     postData.preventDefault();
@@ -95,12 +95,12 @@ const useUpdatePost = () => {
 
     const data: PostData = {
       title: formData.get("title") as string,
-      content: formData.get("content") as string,
+      content: formData.get("content") as string
     };
 
     updatePost({
       ...data,
-      postId,
+      postId
     });
   };
 
@@ -114,7 +114,7 @@ const useUpdatePost = () => {
     setIsUploading(true);
 
     deletePost({
-      postId,
+      postId
     });
   };
 
@@ -124,7 +124,7 @@ const useUpdatePost = () => {
     isUploading,
     successMessage,
     errorMessage,
-    post,
+    post
   };
 };
 

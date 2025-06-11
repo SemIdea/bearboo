@@ -10,14 +10,14 @@ const CreatePostService = async ({ repositories, ...data }: ICreatePostDTO) => {
     id: data.userId,
     repositories: {
       database: repositories.user,
-      cache: repositories.cache,
-    },
+      cache: repositories.cache
+    }
   });
 
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 
@@ -28,12 +28,12 @@ const CreatePostService = async ({ repositories, ...data }: ICreatePostDTO) => {
     data: {
       userId: data.userId,
       title: data.title,
-      content: data.content,
+      content: data.content
     },
     repositories: {
       database: repositories.database,
-      cache: repositories.cache,
-    },
+      cache: repositories.cache
+    }
   });
 
   return post;

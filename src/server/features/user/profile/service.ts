@@ -11,13 +11,13 @@ const GetUserProfileService = async ({
 
   const userProfile = await UserEntity.find({
     id: userId,
-    repositories,
+    repositories
   });
 
   if (!userProfile) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 

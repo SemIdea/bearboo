@@ -16,5 +16,5 @@ export {
   userRepository,
   sessionRepository,
   passwordHashingHelper,
-  postRepository,
+  postRepository
 };

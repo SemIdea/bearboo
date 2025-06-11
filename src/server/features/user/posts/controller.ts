@@ -4,7 +4,7 @@ import { IAPIContextDTO } from "@/server/createContext";
 
 const getUserPostsController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: GetUserPostsInput;
   ctx: IAPIContextDTO;
@@ -12,9 +12,9 @@ const getUserPostsController = async ({
   const posts = GetUserPostsService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.post,
+      database: ctx.repositories.post
     },
-    ...input,
+    ...input
   });
 
   return posts;

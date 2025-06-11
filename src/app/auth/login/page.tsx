@@ -14,7 +14,7 @@ const Login = () => {
 
     login({
       email,
-      password,
+      password
     });
   };
 

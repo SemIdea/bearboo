@@ -19,8 +19,8 @@ describe("Register User Controller Unitary Testing", async () => {
     const result = await getUserProfileController({
       ctx,
       input: {
-        userId: user.id,
-      },
+        userId: user.id
+      }
     });
 
     expect(result).toBeTruthy();
@@ -34,14 +34,14 @@ describe("Register User Controller Unitary Testing", async () => {
       getUserProfileController({
         ctx,
         input: {
-          userId: uuid,
-        },
-      }),
+          userId: uuid
+        }
+      })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUD,
-      }),
+        message: UserErrorCode.USER_NOT_FOUD
+      })
     );
   });
 });

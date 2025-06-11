@@ -4,7 +4,7 @@ import { FindPostInput } from "@/server/schema/post.schema";
 
 const findPostController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: FindPostInput;
   ctx: IAPIContextDTO;
@@ -12,9 +12,9 @@ const findPostController = async ({
   const post = await ReadPostService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.post,
+      database: ctx.repositories.post
     },
-    ...input,
+    ...input
   });
 
   return post;
