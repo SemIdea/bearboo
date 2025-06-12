@@ -104,5 +104,5 @@ export type {
   IFindAllPostsDTO,
   IFindUserPostsDTO,
   IUpdatePostDTO,
-  IDeletePostDTO,
+  IDeletePostDTO
 };

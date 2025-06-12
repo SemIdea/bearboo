@@ -3,41 +3,41 @@ import { z } from "zod";
 const verifyUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(8)
 });
 
 const registerUserSchema = z.object({
   email: z
     .string({
-      required_error: "Email is required",
+      required_error: "Email is required"
     })
     .email("Invalid Email"),
   password: z
     .string({
-      required_error: "Password is required",
+      required_error: "Password is required"
     })
-    .min(8, "Password must be at least 8 characters long"),
+    .min(8, "Password must be at least 8 characters long")
 });
 
 const loginUserSchema = z.object({
   email: z
     .string({
-      required_error: "Email is required",
+      required_error: "Email is required"
     })
     .email("Invalid Email or password"),
   password: z
     .string({
-      required_error: "Password is required",
+      required_error: "Password is required"
     })
-    .min(8, "Invalid Email or password"),
+    .min(8, "Invalid Email or password")
 });
 
 const getUserProfileSchema = z.object({
-  userId: z.string(),
+  userId: z.string()
 });
 
 const getUserPostsSchema = z.object({
-  userId: z.string(),
+  userId: z.string()
 });
 
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
@@ -50,11 +50,11 @@ export {
   registerUserSchema,
   loginUserSchema,
   getUserProfileSchema,
-  getUserPostsSchema,
+  getUserPostsSchema
 };
 export type {
   CreateUserInput,
   LoginUserInput,
   GetUserProfileInput,
-  GetUserPostsInput,
+  GetUserPostsInput
 };

@@ -6,7 +6,7 @@ import { UserRouter } from "./user.routes";
 const appRouter = t.router({
   auth: AuthRouter,
   post: PostRouter,
-  user: UserRouter,
+  user: UserRouter
 });
 
 type AppRouter = typeof appRouter;

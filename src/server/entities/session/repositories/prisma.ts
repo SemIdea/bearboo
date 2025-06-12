@@ -6,49 +6,49 @@ class PrismaSessionModel implements ISessionModel {
     return await prisma.session.create({
       data: {
         id,
-        ...data,
-      },
+        ...data
+      }
     });
   }
 
   async find(id: string) {
     return await prisma.session.findUnique({
       where: {
-        id,
-      },
+        id
+      }
     });
   }
 
   async findByAccessToken(accessToken: string) {
     return await prisma.session.findFirst({
       where: {
-        accessToken,
-      },
+        accessToken
+      }
     });
   }
 
   async findByRefreshToken(refreshToken: string) {
     return await prisma.session.findFirst({
       where: {
-        refreshToken,
-      },
+        refreshToken
+      }
     });
   }
 
   async update(id: string, data: Partial<ISessionEntity>) {
     return await prisma.session.update({
       where: {
-        id,
+        id
       },
-      data,
+      data
     });
   }
 
   async delete(id: string): Promise<void> {
     await prisma.session.delete({
       where: {
-        id,
-      },
+        id
+      }
     });
   }
 }

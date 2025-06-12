@@ -8,13 +8,13 @@ import {
   IFindUserPostsDTO,
   IPostEntity,
   IResolvePostFromIndexDTO,
-  IUpdatePostDTO,
+  IUpdatePostDTO
 } from "./DTO";
 import { isFeatureEnabled } from "@/lib/featureFlags";
 import {
   postCacheKey,
   userPostsCacheKey,
-  PostCacheTTL,
+  PostCacheTTL
 } from "@/constants/cache/post";
 
 class PostEntity implements IPostEntity {
@@ -22,7 +22,7 @@ class PostEntity implements IPostEntity {
     public id: string,
     public userId: string,
     public title: string,
-    public content: string,
+    public content: string
   ) {}
 
   private static async cachePost({ post, repositories }: ICachePostDTO) {
@@ -32,25 +32,25 @@ class PostEntity implements IPostEntity {
     await repositories.cache.mset(
       [postCacheKey(id)],
       [JSON.stringify(post)],
-      PostCacheTTL,
+      PostCacheTTL
     );
   }
 
   private static async cacheUserPosts({
     userId,
     posts,
-    repositories,
+    repositories
   }: ICacheUserPostsDTO) {
     if (!isFeatureEnabled("enablePostCaching")) return;
     await repositories.cache.mset(
       [
         userPostsCacheKey(userId),
-        ...posts.map((post) => postCacheKey(post.id)),
+        ...posts.map((post) => postCacheKey(post.id))
       ],
       [
         posts.map((post) => post.id).join(","),
-        ...posts.map((post) => JSON.stringify(post)),
-      ],
+        ...posts.map((post) => JSON.stringify(post))
+      ]
     );
   }
 
@@ -58,7 +58,7 @@ class PostEntity implements IPostEntity {
     indexKey,
     indexKeyCaller,
     findOnDatabase,
-    repositories,
+    repositories
   }: IResolvePostFromIndexDTO) {
     const lookupCacheKey = indexKeyCaller(indexKey);
     const cachedIndexValue = await repositories.cache.get(lookupCacheKey);
@@ -84,7 +84,7 @@ class PostEntity implements IPostEntity {
 
     await PostEntity.cachePost({
       post: postFromDb,
-      repositories,
+      repositories
     });
 
     return postFromDb;
@@ -98,7 +98,7 @@ class PostEntity implements IPostEntity {
 
     await PostEntity.cachePost({
       post,
-      repositories,
+      repositories
     });
 
     return post;
@@ -109,7 +109,7 @@ class PostEntity implements IPostEntity {
       indexKey: id,
       indexKeyCaller: postCacheKey,
       findOnDatabase: repositories.database.find,
-      repositories,
+      repositories
     });
   }
 
@@ -117,11 +117,11 @@ class PostEntity implements IPostEntity {
   static async findAll({ repositories }: IFindAllPostsDTO) {
     const postsData = await repositories.database.findAll();
 
-    if (!postsData) return null;
+    if (!postsData) return [] as PostEntity[];
 
     const posts = postsData.map(
       (post: any) =>
-        new PostEntity(post.id, post.userId, post.title, post.content),
+        new PostEntity(post.id, post.userId, post.title, post.content)
     );
 
     for (const post of posts) {
@@ -130,7 +130,7 @@ class PostEntity implements IPostEntity {
       await repositories.cache.set(
         cachedPostQuery,
         JSON.stringify(post),
-        PostCacheTTL,
+        PostCacheTTL
       );
     }
 
@@ -149,7 +149,7 @@ class PostEntity implements IPostEntity {
     await PostEntity.cacheUserPosts({
       userId,
       posts: postsData,
-      repositories,
+      repositories
     });
 
     return postsData as PostEntity[];
@@ -162,12 +162,12 @@ class PostEntity implements IPostEntity {
       updated.id,
       updated.userId,
       updated.title,
-      updated.content,
+      updated.content
     );
 
     await PostEntity.cachePost({
       post: postEntity,
-      repositories,
+      repositories
     });
 
     return updated;

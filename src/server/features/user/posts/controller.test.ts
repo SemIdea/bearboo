@@ -19,7 +19,7 @@ describe("User Posts Controller Unitary Testing", async () => {
   test("Should return an empty list when user has no posts", async () => {
     const result = await getUserPostsController({
       ctx,
-      input: { userId: user.id },
+      input: { userId: user.id }
     });
 
     expect(result).toBeDefined();
@@ -32,19 +32,19 @@ describe("User Posts Controller Unitary Testing", async () => {
     await PostEntity.create({
       repositories: {
         ...ctx.repositories,
-        database: ctx.repositories.post,
+        database: ctx.repositories.post
       },
       id: postId,
       data: {
         title: "Test Post",
         content: "This is a test post",
-        userId: user.id,
-      },
+        userId: user.id
+      }
     });
 
     const result = await getUserPostsController({
       ctx,
-      input: { userId: user.id },
+      input: { userId: user.id }
     });
 
     expect(result).toBeDefined();
@@ -58,13 +58,13 @@ describe("User Posts Controller Unitary Testing", async () => {
     await expect(
       getUserPostsController({
         ctx,
-        input: { userId: uuid },
-      }),
+        input: { userId: uuid }
+      })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUD,
-      }),
+        message: UserErrorCode.USER_NOT_FOUD
+      })
     );
   });
 });

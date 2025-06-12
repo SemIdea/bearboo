@@ -5,7 +5,7 @@ import { IAPIContextDTO } from "@/server/createContext";
 
 const registerUserController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: CreateUserInput;
   ctx: IAPIContextDTO;
@@ -13,18 +13,18 @@ const registerUserController = async ({
   const user = await RegisterUserService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.user,
+      database: ctx.repositories.user
     },
-    ...input,
+    ...input
   });
 
   const session = await CreateAuthSessionService({
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.session,
-      user: ctx.repositories.user,
+      user: ctx.repositories.user
     },
-    userId: user.id,
+    userId: user.id
   });
 
   const { password, ...userWithoutPassword } = user;
@@ -32,7 +32,7 @@ const registerUserController = async ({
 
   return {
     ...sessionWithoutUserId,
-    user: userWithoutPassword,
+    user: userWithoutPassword
   };
 };
 

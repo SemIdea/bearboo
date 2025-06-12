@@ -5,7 +5,7 @@ import {
   passwordHashingHelper,
   postRepository,
   sessionRepository,
-  userRepository,
+  userRepository
 } from "@/server/drivers/repositories";
 import { UserEntity } from "@/server/entities/user/entity";
 import { SessionEntity } from "@/server/entities/session/entity";
@@ -34,7 +34,7 @@ class TestContext {
     session: sessionRepository,
     post: postRepository,
     cache: cacheRepository,
-    hashing: passwordHashingHelper,
+    hashing: passwordHashingHelper
   };
 
   user?: IAuthenticatedUserDTO;
@@ -50,19 +50,19 @@ class TestContext {
     const userId = await this.generateSnowflakeUuid();
     const userData = {
       email: `${userId}@example.com`,
-      password: "password123",
+      password: "password123"
     };
 
     const user = await UserEntity.create({
       id: userId,
       data: {
         ...userData,
-        password: await this.repositories.hashing.hash(userData.password),
+        password: await this.repositories.hashing.hash(userData.password)
       },
       repositories: {
         ...this.repositories,
-        database: this.repositories.user,
-      },
+        database: this.repositories.user
+      }
     });
 
     const sessionId = await this.generateSnowflakeUuid();
@@ -74,12 +74,12 @@ class TestContext {
       data: {
         userId: user.id,
         accessToken,
-        refreshToken,
+        refreshToken
       },
       repositories: {
         ...this.repositories,
-        database: this.repositories.session,
-      },
+        database: this.repositories.session
+      }
     });
 
     this.user = { ...user, truePassword: userData.password, session };
@@ -87,7 +87,7 @@ class TestContext {
 }
 
 function isControllerContext(
-  ctx: ITestContextDTO,
+  ctx: ITestContextDTO
 ): ctx is IControllerContextDTO {
   return ctx.user !== undefined;
 }

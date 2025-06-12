@@ -12,13 +12,13 @@ const RegisterUserService = async ({
 
   const existingUser = await UserEntity.findByEmail({
     email,
-    repositories,
+    repositories
   });
 
   if (existingUser) {
     throw new TRPCError({
       code: "CONFLICT",
-      message: UserErrorCode.USER_ALREADY_EXISTS,
+      message: UserErrorCode.USER_ALREADY_EXISTS
     });
   }
 
@@ -28,10 +28,10 @@ const RegisterUserService = async ({
   const user = await UserEntity.create({
     data: {
       email,
-      password: hashedPassword,
+      password: hashedPassword
     },
     id: userId,
-    repositories,
+    repositories
   });
 
   return user;

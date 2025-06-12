@@ -10,7 +10,7 @@ describe("Register User Controller Unitary Testing", () => {
     const uuid = await ctx.generateSnowflakeUuid();
     const input = {
       email: `${uuid}@example.com`,
-      password: "password123",
+      password: "password123"
     };
 
     const result = await registerUserController({ input, ctx });

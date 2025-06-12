@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { deletePostController } from "./controller";
-import { isControllerContext, TestContext } from "@/test/context";
+import { findPostController } from "./controller";
 import { PostEntity } from "@/server/entities/post/entity";
+import { isControllerContext, TestContext } from "@/test/context";
 import { PostErrorCode } from "@/shared/error/post";
 
-describe("Delete Post Controller Unitary Testing", async () => {
+describe("Find Post Controller Unitary Testing", async () => {
   const ctx = new TestContext();
 
   await ctx.createAuthenticatedUser();
@@ -14,7 +14,7 @@ describe("Delete Post Controller Unitary Testing", async () => {
     throw new Error("User not authenticated");
   }
 
-  test("Should delete a post successfully", async () => {
+  test("Should find a post by ID", async () => {
     const postId = await ctx.generateSnowflakeUuid();
     const post = await PostEntity.create({
       id: postId,
@@ -29,23 +29,21 @@ describe("Delete Post Controller Unitary Testing", async () => {
       }
     });
 
-    await deletePostController({
+    const result = await findPostController({
       ctx,
       input: {
         postId: post.id
       }
     });
 
-    const result = await ctx.repositories.post.find(post.id);
-
-    expect(result).toBeNull();
+    expect(result).toEqual(post);
   });
 
   test("Should throw an error if post does not exist", async () => {
     const postId = await ctx.generateSnowflakeUuid();
 
     await expect(
-      deletePostController({
+      findPostController({
         ctx,
         input: {
           postId

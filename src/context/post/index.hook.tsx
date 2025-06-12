@@ -15,7 +15,7 @@ const usePostLogic = () => {
     findPost,
     findAllPosts,
     updatePost,
-    deletePost,
+    deletePost
   };
 };
 

@@ -4,7 +4,7 @@ import { DeletePostInput } from "@/server/schema/post.schema";
 
 const deletePostController = async ({
   input,
-  ctx,
+  ctx
 }: {
   input: DeletePostInput;
   ctx: IProtectedAPIContextDTO;
@@ -12,10 +12,10 @@ const deletePostController = async ({
   const post = await DeletePostService({
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.post,
+      database: ctx.repositories.post
     },
     userId: ctx.user.id,
-    ...input,
+    ...input
   });
 
   return post;

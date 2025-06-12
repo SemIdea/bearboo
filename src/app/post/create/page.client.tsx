@@ -31,7 +31,7 @@ const useCreatePost = () => {
     },
     onSettled: () => {
       setIsUploading(false);
-    },
+    }
   });
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const useCreatePost = () => {
   }, [isLoadingSession]);
 
   const handleCreatePost = async (
-    postData: React.FormEvent<HTMLFormElement>,
+    postData: React.FormEvent<HTMLFormElement>
   ) => {
     postData.preventDefault();
 
@@ -53,11 +53,11 @@ const useCreatePost = () => {
     const formData = new FormData(postData.currentTarget);
     const data: PostData = {
       title: formData.get("title") as string,
-      content: formData.get("content") as string,
+      content: formData.get("content") as string
     };
 
     createPost({
-      ...data,
+      ...data
     });
   };
 
@@ -65,7 +65,7 @@ const useCreatePost = () => {
     handleCreatePost,
     isUploading,
     errorMessage,
-    successMessage,
+    successMessage
   };
 };
 

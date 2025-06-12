@@ -2,21 +2,21 @@ import { z } from "zod";
 
 const createPostSchema = z.object({
   title: z.string(),
-  content: z.string(),
+  content: z.string()
 });
 
 const findPostSchema = z.object({
-  postId: z.string(),
+  postId: z.string()
 });
 
 const updatePostSchema = z.object({
   postId: z.string(),
-  title: z.string(),
-  content: z.string(),
+  title: z.string().optional(),
+  content: z.string().optional()
 });
 
 const deletePostSchema = z.object({
-  postId: z.string(),
+  postId: z.string()
 });
 
 type CreatePostInput = z.TypeOf<typeof createPostSchema>;
@@ -30,5 +30,5 @@ export type {
   CreatePostInput,
   FindPostInput,
   UpdatePostInput,
-  DeletePostInput,
+  DeletePostInput
 };

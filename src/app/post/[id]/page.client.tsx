@@ -19,8 +19,8 @@ const useGetPost = () => {
     trpc.post.findPost.useQuery(
       { postId: postId },
       {
-        enabled: !!postId,
-      },
+        enabled: !!postId
+      }
     );
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const useGetPost = () => {
 
   return {
     post,
-    isPostLoading,
+    isPostLoading
   };
 };
 

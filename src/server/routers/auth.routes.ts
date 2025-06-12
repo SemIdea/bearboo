@@ -16,10 +16,10 @@ const AuthRouter = t.router({
   refreshSession: t.procedure
     .input(refreshSessionSchema)
     .mutation(async ({ input, ctx }) =>
-      refreshSessionController({ input, ctx }),
+      refreshSessionController({ input, ctx })
     ),
   session: SessionRouter,
-  test: publicProcedure.query(async () => "Hello, World!"),
+  test: publicProcedure.query(async () => "Hello, World!")
 });
 
 export { AuthRouter };

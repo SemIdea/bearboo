@@ -4,16 +4,16 @@ import { defineConfig } from "vite";
 export default defineConfig({
   resolve: {
     alias: {
-      "@": "/src",
-    },
+      "@": "/src"
+    }
   },
 
   test: {
     include: ["**.setup.test.ts", "**.test.ts"],
     poolOptions: {
       threads: {
-        singleThread: true,
-      },
-    },
-  },
+        singleThread: true
+      }
+    }
+  }
 });

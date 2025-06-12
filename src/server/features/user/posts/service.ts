@@ -12,20 +12,20 @@ const GetUserPostsService = async ({
     id: data.userId,
     repositories: {
       ...repositories,
-      database: repositories.user,
-    },
+      database: repositories.user
+    }
   });
 
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD,
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 
   const posts = await PostEntity.findUserPosts({
     userId: data.userId,
-    repositories,
+    repositories
   });
 
   return posts;
