@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import MDEditor from "@uiw/react-md-editor";
 import { useGetPost } from "./page.client";
 
 const Page = () => {
@@ -16,6 +17,10 @@ const Page = () => {
           <div>
             <h3>{post.title}</h3>
             <p>{post.content}</p>
+            <MDEditor.Markdown
+              className="markdown w-[800px]"
+              source={post.content}
+            />
           </div>
           <div>
             <Link href={`/user/${post.userId}`}>Author: {post.userId}</Link>
