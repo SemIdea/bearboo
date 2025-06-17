@@ -19,10 +19,10 @@ const useCreatePost = () => {
   const [successMessage, setSuccessMessage] = useState<null | string>(null);
 
   const { mutate: createPost } = trpc.post.createPost.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       setSuccessMessage("Post created successfully!");
       setErrorMessage(null);
-      // router.push("/posts");
+      router.push(`/posts/${data.id}`);
     },
     onError: (error) => {
       setErrorMessage("Failed to create post. Please try again.");
@@ -40,29 +40,8 @@ const useCreatePost = () => {
     }
   }, [isLoadingSession]);
 
-  const handleCreatePost = async (
-    postData: React.FormEvent<HTMLFormElement>
-  ) => {
-    postData.preventDefault();
-
-    if (!session)
-      return setErrorMessage("You must be logged in to update a post.");
-
-    setIsUploading(true);
-
-    const formData = new FormData(postData.currentTarget);
-    const data: PostData = {
-      title: formData.get("title") as string,
-      content: formData.get("content") as string
-    };
-
-    createPost({
-      ...data
-    });
-  };
-
   return {
-    handleCreatePost,
+    createPost,
     isUploading,
     errorMessage,
     successMessage
