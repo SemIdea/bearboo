@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run --reporter verbose",
-    "test:docker": "docker compose -f docker-compose-test.yml up --build",
     "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docker:test": "docker compose -f docker-compose-test.yml up --build",
+    "docker:dev": "docker compose -f docker-compose-dev.yml up --build"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
@@ -23,6 +24,7 @@
     "@trpc/next": "^11.0.0-rc.789",
     "@trpc/react-query": "^11.0.0-rc.789",
     "@trpc/server": "^11.0.0-rc.789",
+    "@uiw/react-md-editor": "^4.0.7",
     "autoprefixer": "10.4.19",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.1",
@@ -30,7 +32,7 @@
     "framer-motion": "11.13.1",
     "intl-messageformat": "^10.5.0",
     "ioredis": "^5.5.0",
-    "lucide-react": "^0.511.0",
+    "lucide-react": "^0.514.0",
     "next": "15.0.4",
     "next-themes": "^0.4.4",
     "nodejs-snowflake": "^2.0.1",
