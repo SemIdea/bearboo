@@ -46,6 +46,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@next/eslint-plugin-next": "15.0.4",
     "@react-types/shared": "3.25.0",
     "@types/bcrypt": "^5.0.2",
