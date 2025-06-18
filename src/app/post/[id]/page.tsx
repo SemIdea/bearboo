@@ -16,7 +16,6 @@ const Page = () => {
         <>
           <div>
             <h3>{post.title}</h3>
-            <p>{post.content}</p>
             <MDEditor.Markdown
               className="markdown w-[800px]"
               source={post.content}
