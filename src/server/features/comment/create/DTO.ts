@@ -1,0 +1,16 @@
+import { ICommentModel } from "@/server/entities/comment/DTO";
+import { IUserModel } from "@/server/entities/user/DTO";
+import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
+
+type ICreateCommentDTO = {
+  userId: string;
+  postId: string;
+  content: string;
+  repositories: {
+    user: IUserModel;
+    database: ICommentModel;
+    cache: ICacheRepositoryAdapter;
+  };
+};
+
+export type { ICreateCommentDTO };
