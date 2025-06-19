@@ -4,12 +4,14 @@ import { ISessionModel } from "./entities/session/DTO";
 import { IPasswordHashingHelperAdapter } from "./integrations/helpers/passwordHashing/adapter";
 import {
   cacheRepository,
+  commentRepository,
   passwordHashingHelper,
   postRepository,
   sessionRepository,
   userRepository
 } from "./drivers/repositories";
 import { IPostModel } from "./entities/post/DTO";
+import { ICommentModel } from "./entities/comment/DTO";
 
 type IInputAPIContextDTO = {
   headers: Headers;
@@ -22,6 +24,7 @@ type IBaseContextDTO = IInputAPIContextDTO & {
     post: IPostModel;
     cache: ICacheRepositoryAdapter;
     hashing: IPasswordHashingHelperAdapter;
+    comment: ICommentModel;
   };
 };
 
@@ -43,7 +46,8 @@ const createTRPCContext = ({
       session: sessionRepository,
       post: postRepository,
       cache: cacheRepository,
-      hashing: passwordHashingHelper
+      hashing: passwordHashingHelper,
+      comment: commentRepository
     }
   };
 };

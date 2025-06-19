@@ -22,7 +22,7 @@ const useCreatePost = () => {
     onSuccess: (data) => {
       setSuccessMessage("Post created successfully!");
       setErrorMessage(null);
-      router.push(`/posts/${data.id}`);
+      router.push(`/post/${data.id}`);
     },
     onError: (error) => {
       setErrorMessage("Failed to create post. Please try again.");

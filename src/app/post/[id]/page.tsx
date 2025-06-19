@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import MDEditor from "@uiw/react-md-editor";
-import { useGetPost } from "./page.client";
+import { useGetComments, useGetPost } from "./page.client";
+import { CreateCommentSection } from "@/components/createCommentComment";
 
 const Page = () => {
   const { post, isPostLoading } = useGetPost();
+  const { comments, isCommentsLoading } = useGetComments();
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
@@ -24,6 +26,21 @@ const Page = () => {
           <div>
             <Link href={`/user/${post.userId}`}>Author: {post.userId}</Link>
           </div>
+          <div>
+            <h2>Comments</h2>
+            {comments.length > 0 ? (
+              comments.map((comment) => (
+                <div key={comment.id} className="mb-4">
+                  <p>
+                    <strong>{comment.userId}</strong>: {comment.content}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p>No comments yet.</p>
+            )}
+          </div>
+          <CreateCommentSection />
         </>
       ) : (
         <p>Post not found.</p>

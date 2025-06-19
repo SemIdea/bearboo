@@ -13,6 +13,7 @@ model User {
   password String
   sessions Session[]
   Post     Post[]
+  comments Comment[]
 }
 
 model Session {
@@ -24,9 +25,19 @@ model Session {
 }
 
 model Post {
+  id       String    @id
+  userId   String
+  user     User      @relation(fields: [userId], references: [id])
+  title    String
+  content  String
+  comments Comment[]
+}
+
+model Comment {
   id      String @id
+  postId  String
+  post    Post   @relation(fields: [postId], references: [id])
   userId  String
   user    User   @relation(fields: [userId], references: [id])
-  title   String
   content String
 }
