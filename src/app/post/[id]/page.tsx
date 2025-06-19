@@ -3,6 +3,7 @@
 import Link from "next/link";
 import MDEditor from "@uiw/react-md-editor";
 import { useGetComments, useGetPost } from "./page.client";
+import { CreateCommentSection } from "@/components/createCommentComment";
 
 const Page = () => {
   const { post, isPostLoading } = useGetPost();
@@ -39,6 +40,7 @@ const Page = () => {
               <p>No comments yet.</p>
             )}
           </div>
+          <CreateCommentSection />
         </>
       ) : (
         <p>Post not found.</p>
