@@ -2,6 +2,7 @@ import { Session, User } from "@prisma/client";
 
 import {
   cacheRepository,
+  commentRepository,
   passwordHashingHelper,
   postRepository,
   sessionRepository,
@@ -34,7 +35,8 @@ class TestContext {
     session: sessionRepository,
     post: postRepository,
     cache: cacheRepository,
-    hashing: passwordHashingHelper
+    hashing: passwordHashingHelper,
+    comment: commentRepository
   };
 
   user?: IAuthenticatedUserDTO;
