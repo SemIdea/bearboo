@@ -5,11 +5,13 @@ import {
   createPostSchema,
   deletePostSchema,
   findPostSchema,
+  revalidatePostSchema,
   updatePostSchema
 } from "../schema/post.schema";
 import { findPostController } from "../features/post/find/controller";
 import { updatePostController } from "../features/post/update/controller";
 import { findAllPostsController } from "../features/post/findAll/controller";
+import { revalidatePostController } from "../features/post/revalidate/controller";
 
 const PostRouter = t.router({
   createPost: protectedProcedure
@@ -24,6 +26,11 @@ const PostRouter = t.router({
   updatePost: protectedProcedure
     .input(updatePostSchema)
     .mutation(async ({ input, ctx }) => updatePostController({ input, ctx })),
+  revalidatePost: protectedProcedure
+    .input(revalidatePostSchema)
+    .mutation(async ({ input, ctx }) =>
+      revalidatePostController({ input, ctx })
+    ),
   deletePost: protectedProcedure
     .input(deletePostSchema)
     .mutation(async ({ input, ctx }) => deletePostController({ input, ctx }))
