@@ -14,10 +14,11 @@ import { IPostModel } from "./entities/post/DTO";
 import { ICommentModel } from "./entities/comment/DTO";
 
 type IInputAPIContextDTO = {
-  headers: Headers;
+  headers?: Headers;
 };
 
 type IBaseContextDTO = IInputAPIContextDTO & {
+  headers: Headers;
   repositories: {
     user: IUserModel;
     session: ISessionModel;
@@ -40,7 +41,7 @@ const createTRPCContext = ({
   headers
 }: IInputAPIContextDTO): IAPIContextDTO => {
   return {
-    headers,
+    headers: headers != null ? headers : new Headers(),
     repositories: {
       user: userRepository,
       session: sessionRepository,
