@@ -27,8 +27,13 @@ const useUpdatePost = () => {
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [successMessage, setSuccessMessage] = useState<null | string>(null);
 
+  const { mutate: revalidatePost } = trpc.post.revalidatePost.useMutation();
+
   const { mutate: updatePost } = trpc.post.updatePost.useMutation({
     onSuccess: () => {
+      revalidatePost({
+        postId
+      });
       setSuccessMessage("Post updated successfully!");
       setErrorMessage(null);
     },
