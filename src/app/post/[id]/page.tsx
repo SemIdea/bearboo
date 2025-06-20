@@ -4,10 +4,20 @@ import { Comments, PostMDView } from "./page.client";
 import { CreateCommentSection } from "@/components/createCommentComment";
 import { createCaller } from "@/server/caller";
 
-const Page = async ({ params }: { params: { id: string } }) => {
+type PageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export const revalidate = 3600; // 1 hour
+export const dynamic = "error";
+
+const Page = async (props: PageProps) => {
+  const params = await props.params;
   const caller = createCaller();
 
-  const { id } = await params;
+  const { id } = params;
 
   const post: Post | null = await caller.post.findPost({ postId: id });
 
