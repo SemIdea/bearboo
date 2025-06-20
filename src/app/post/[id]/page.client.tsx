@@ -1,7 +1,7 @@
 "use client";
 
-import { Post } from "@prisma/client";
-import { useParams, useRouter } from "next/navigation";
+import MDEditor from "@uiw/react-md-editor";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { CommentEntity } from "@/server/entities/comment/entity";
@@ -10,38 +10,7 @@ type Params = {
   id: string;
 };
 
-const useGetPost = () => {
-  const router = useRouter();
-  const { id: postId } = useParams<Params>();
-
-  const [post, setPost] = useState<Post | null>(null);
-
-  const { data: postData, isLoading: isPostLoading } =
-    trpc.post.findPost.useQuery(
-      { postId: postId },
-      {
-        enabled: !!postId
-      }
-    );
-
-  useEffect(() => {
-    if (!isPostLoading) {
-      if (postData) {
-        setPost(postData);
-      } else {
-        router.push("/");
-      }
-    }
-  }, [postData, isPostLoading]);
-
-  return {
-    post,
-    isPostLoading
-  };
-};
-
 const useGetComments = () => {
-  const router = useRouter();
   const { id: postId } = useParams<Params>();
 
   const [comments, setComments] = useState<CommentEntity[] | []>([]);
@@ -55,12 +24,8 @@ const useGetComments = () => {
     );
 
   useEffect(() => {
-    if (!isCommentsLoading) {
-      if (commentsData) {
-        setComments(commentsData);
-      } else {
-        router.push("/");
-      }
+    if (!isCommentsLoading && commentsData) {
+      setComments(commentsData);
     }
   }, [commentsData, isCommentsLoading]);
 
@@ -70,4 +35,33 @@ const useGetComments = () => {
   };
 };
 
-export { useGetPost, useGetComments };
+const Comments = () => {
+  const { comments, isCommentsLoading } = useGetComments();
+
+  if (isCommentsLoading) {
+    return <p>Loading comments...</p>;
+  }
+
+  if (comments.length === 0) {
+    return <p>No comments yet.</p>;
+  }
+
+  return (
+    <div>
+      <h2>Comments</h2>
+      {comments.map((comment) => (
+        <div key={comment.id} className="mb-4">
+          <p>
+            <strong>{comment.userId}</strong>: {comment.content}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const PostMDView = ({ source }: { source: string }) => {
+  return <MDEditor.Markdown className="markdown w-[800px]" source={source} />;
+};
+
+export { Comments, PostMDView };

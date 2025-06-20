@@ -1,50 +1,30 @@
-"use client";
-
 import Link from "next/link";
-import MDEditor from "@uiw/react-md-editor";
-import { useGetComments, useGetPost } from "./page.client";
+import { Post } from "@prisma/client";
+import { Comments, PostMDView } from "./page.client";
 import { CreateCommentSection } from "@/components/createCommentComment";
+import { createCaller } from "@/server/caller";
 
-const Page = () => {
-  const { post, isPostLoading } = useGetPost();
-  const { comments, isCommentsLoading } = useGetComments();
+const Page = async ({ params }: { params: { id: string } }) => {
+  const caller = createCaller();
+
+  const { id } = await params;
+
+  const post: Post | null = await caller.post.findPost({ postId: id });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <h2>Post Details</h2>
-      {isPostLoading ? (
-        <p>Loading...</p>
-      ) : post ? (
-        <>
-          <div>
-            <h3>{post.title}</h3>
-            <MDEditor.Markdown
-              className="markdown w-[800px]"
-              source={post.content}
-            />
-          </div>
-          <div>
-            <Link href={`/user/${post.userId}`}>Author: {post.userId}</Link>
-          </div>
-          <div>
-            <h2>Comments</h2>
-            {comments.length > 0 ? (
-              comments.map((comment) => (
-                <div key={comment.id} className="mb-4">
-                  <p>
-                    <strong>{comment.userId}</strong>: {comment.content}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p>No comments yet.</p>
-            )}
-          </div>
-          <CreateCommentSection />
-        </>
-      ) : (
-        <p>Post not found.</p>
-      )}
+      <>
+        <div>
+          <h3>{post.title}</h3>
+          <PostMDView source={post.content} />
+        </div>
+        <div>
+          <Link href={`/user/${post.userId}`}>Author: {post.userId}</Link>
+        </div>
+        <Comments />
+        <CreateCommentSection />
+      </>
     </div>
   );
 };
