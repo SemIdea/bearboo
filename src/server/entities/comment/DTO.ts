@@ -1,4 +1,4 @@
-import { Comment } from "@prisma/client";
+import { CommentEntity } from "./entity";
 
 type ICommentEntity = {
   postId: string;
@@ -7,13 +7,10 @@ type ICommentEntity = {
 };
 
 type ICommentModel = {
-  create: (id: string, data: ICommentEntity) => Promise<Comment>;
-  findById: (id: string) => Promise<Comment | null>;
-  findAllByPostId: (postId: string) => Promise<Comment[] | null>;
-  update: (
-    id: string,
-    data: Partial<ICommentEntity>
-  ) => Promise<Comment | null>;
+  create: (id: string, data: ICommentEntity) => Promise<CommentEntity>;
+  findById: (id: string) => Promise<CommentEntity | null>;
+  findAllByPostId: (postId: string) => Promise<CommentEntity[] | null>;
+  update: (id: string, data: Partial<ICommentEntity>) => Promise<CommentEntity>;
   delete: (id: string) => Promise<void>;
 };
 
@@ -43,6 +40,16 @@ type IFindAllByPostIdDTO = {
   };
 };
 
+type IUpdateCommentDTO = {
+  id: string;
+  data: {
+    content: string;
+  };
+  repositories: {
+    database: ICommentModel;
+  };
+};
+
 type IDeleteCommentDTO = {
   id: string;
   repositories: {
@@ -56,5 +63,6 @@ export type {
   ICreateCommentDTO,
   IFindCommentByIdDTO,
   IFindAllByPostIdDTO,
+  IUpdateCommentDTO,
   IDeleteCommentDTO
 };
