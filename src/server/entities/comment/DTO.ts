@@ -10,6 +10,7 @@ type ICommentModel = {
   create: (id: string, data: ICommentEntity) => Promise<CommentEntity>;
   findById: (id: string) => Promise<CommentEntity | null>;
   findAllByPostId: (postId: string) => Promise<CommentEntity[] | null>;
+  findAllByUserId: (userId: string) => Promise<CommentEntity[] | null>;
   update: (id: string, data: Partial<ICommentEntity>) => Promise<CommentEntity>;
   delete: (id: string) => Promise<void>;
 };
@@ -40,6 +41,13 @@ type IFindAllByPostIdDTO = {
   };
 };
 
+type IFindAllByUserIdDTO = {
+  userId: string;
+  repositories: {
+    database: ICommentModel;
+  };
+};
+
 type IUpdateCommentDTO = {
   id: string;
   data: {
@@ -63,6 +71,7 @@ export type {
   ICreateCommentDTO,
   IFindCommentByIdDTO,
   IFindAllByPostIdDTO,
+  IFindAllByUserIdDTO,
   IUpdateCommentDTO,
   IDeleteCommentDTO
 };

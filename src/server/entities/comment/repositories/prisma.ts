@@ -27,6 +27,14 @@ class PrismaCommentModel implements ICommentModel {
     });
   }
 
+  async findAllByUserId(userId: string) {
+    return await prisma.comment.findMany({
+      where: {
+        userId
+      }
+    });
+  }
+
   async update(id: string, data: Partial<ICommentEntity>) {
     return await prisma.comment.update({
       where: {

@@ -3,6 +3,7 @@ import {
   ICreateCommentDTO,
   IDeleteCommentDTO,
   IFindAllByPostIdDTO,
+  IFindAllByUserIdDTO,
   IFindCommentByIdDTO,
   IUpdateCommentDTO
 } from "./DTO";
@@ -36,6 +37,16 @@ class CommentEntity implements ICommentEntity {
 
   static async findAllByPostId({ postId, repositories }: IFindAllByPostIdDTO) {
     const comments = await repositories.database.findAllByPostId(postId);
+
+    if (!comments) {
+      return [] as CommentEntity[];
+    }
+
+    return comments;
+  }
+
+  static async findAllByUserId({ userId, repositories }: IFindAllByUserIdDTO) {
+    const comments = await repositories.database.findAllByUserId(userId);
 
     if (!comments) {
       return [] as CommentEntity[];
