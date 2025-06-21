@@ -29,8 +29,22 @@ type ICreateCommentDTO = {
   };
 };
 
+type IFindCommentByIdDTO = {
+  id: string;
+  repositories: {
+    database: ICommentModel;
+  };
+};
+
 type IFindAllByPostIdDTO = {
   postId: string;
+  repositories: {
+    database: ICommentModel;
+  };
+};
+
+type IDeleteCommentDTO = {
+  id: string;
   repositories: {
     database: ICommentModel;
   };
@@ -40,5 +54,7 @@ export type {
   ICommentEntity,
   ICommentModel,
   ICreateCommentDTO,
-  IFindAllByPostIdDTO
+  IFindCommentByIdDTO,
+  IFindAllByPostIdDTO,
+  IDeleteCommentDTO
 };
