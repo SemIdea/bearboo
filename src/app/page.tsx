@@ -19,7 +19,7 @@ const Home = () => {
       <p>
         {session ? (
           <>
-            <Link href={`user/${session.user.id}`}>
+            <Link href={`/user/${session.user.id}`}>
               You are logged in as <strong>{session.user.email}</strong>
             </Link>
             <span
@@ -34,11 +34,11 @@ const Home = () => {
           <>
             <span>You are not logged in</span>
             <br />
-            <Link href={"auth/login"}>
+            <Link href={"/auth/login"}>
               <b>Log In</b>
             </Link>
             <br />
-            <Link href={"auth/register"}>
+            <Link href={"/auth/register"}>
               <b>Register</b>
             </Link>
           </>
@@ -47,7 +47,7 @@ const Home = () => {
 
       <SearchPost />
 
-      <Link href={"post/create"}>
+      <Link href={"/post/create"}>
         <h2>Create post</h2>
       </Link>
 
