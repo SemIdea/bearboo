@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { IDeleteCommentDTO } from "./DTO";
 import { CommentEntity } from "@/server/entities/comment/entity";
+import { CommentErrorCode } from "@/shared/error/comment";
 
 const DeleteCommentService = async ({
   repositories,
