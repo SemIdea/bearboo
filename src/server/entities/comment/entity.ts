@@ -3,7 +3,8 @@ import {
   ICreateCommentDTO,
   IDeleteCommentDTO,
   IFindAllByPostIdDTO,
-  IFindCommentByIdDTO
+  IFindCommentByIdDTO,
+  IUpdateCommentDTO
 } from "./DTO";
 
 class CommentEntity implements ICommentEntity {
@@ -24,40 +25,29 @@ class CommentEntity implements ICommentEntity {
   }
 
   static async find({ id, repositories }: IFindCommentByIdDTO) {
-    const commentData = await repositories.database.findById(id);
+    const comment = await repositories.database.findById(id);
 
-    if (!commentData) {
+    if (!comment) {
       return null;
     }
-
-    const comment = new CommentEntity(
-      commentData.id,
-      commentData.postId,
-      commentData.userId,
-      commentData.content
-    );
 
     return comment;
   }
 
   static async findAllByPostId({ postId, repositories }: IFindAllByPostIdDTO) {
-    const commentsData = await repositories.database.findAllByPostId(postId);
+    const comments = await repositories.database.findAllByPostId(postId);
 
-    if (!commentsData) {
+    if (!comments) {
       return [] as CommentEntity[];
     }
 
-    const comments = commentsData.map(
-      (comment) =>
-        new CommentEntity(
-          comment.id,
-          comment.postId,
-          comment.userId,
-          comment.content
-        )
-    );
-
     return comments;
+  }
+
+  static async update({ id, data, repositories }: IUpdateCommentDTO) {
+    const comment = await repositories.database.update(id, data);
+
+    return comment;
   }
 
   static async delete({ id, repositories }: IDeleteCommentDTO) {
