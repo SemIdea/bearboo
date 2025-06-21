@@ -2,3 +2,5 @@ enum CommentErrorCode {
   COMMENT_NOT_FOUND = "COMMENT_NOT_FOUND",
   COMMENT_NOT_BELONG_TO_USER = "COMMENT_NOT_BELONG_TO_USER"
 }
+
+export { CommentErrorCode };
