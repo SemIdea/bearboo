@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Post } from "@prisma/client";
 import { Comments, PostMDView } from "./page.client";
-import { CreateCommentSection } from "@/components/createCommentComment";
 import { createCaller } from "@/server/caller";
 
 type PageProps = {
@@ -33,7 +32,6 @@ const Page = async (props: PageProps) => {
           <Link href={`/user/${post.userId}`}>Author: {post.userId}</Link>
         </div>
         <Comments />
-        <CreateCommentSection />
       </>
     </div>
   );
