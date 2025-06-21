@@ -5,26 +5,26 @@ const createCommentschema = z.object({
   content: z.string().min(1, "Content cannot be empty")
 });
 
-const deleteCommentSchema = z.object({
-  id: z.string()
-});
-
 const findAllCommentsByPostSchema = z.object({
   postId: z.string()
 });
 
+const deleteCommentSchema = z.object({
+  id: z.string()
+});
+
 type CreateCommentInput = z.TypeOf<typeof createCommentschema>;
-type DeleteCommentInput = z.TypeOf<typeof deleteCommentSchema>;
 type FindAllCommentsByPostInput = z.TypeOf<typeof findAllCommentsByPostSchema>;
+type DeleteCommentInput = z.TypeOf<typeof deleteCommentSchema>;
 
 export {
   createCommentschema,
-  deleteCommentSchema,
-  findAllCommentsByPostSchema
+  findAllCommentsByPostSchema,
+  deleteCommentSchema
 };
 
 export type {
   CreateCommentInput,
-  DeleteCommentInput,
-  FindAllCommentsByPostInput
+  FindAllCommentsByPostInput,
+  DeleteCommentInput
 };
