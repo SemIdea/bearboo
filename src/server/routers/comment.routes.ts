@@ -23,9 +23,9 @@ const CommentRouter = t.router({
     ),
   updateComment: protectedProcedure
     .input(updateCommentSchema)
-    .mutation(async ({ input, ctx }) => {
-      updateCommentController({ input, ctx });
-    }),
+    .mutation(async ({ input, ctx }) =>
+      updateCommentController({ input, ctx })
+    ),
   deleteComment: protectedProcedure
     .input(deleteCommentSchema)
     .mutation(async ({ input, ctx }) => deleteCommentController({ input, ctx }))
