@@ -1,5 +1,3 @@
-import { Session, User } from "@prisma/client";
-
 import {
   cacheRepository,
   commentRepository,
@@ -13,9 +11,9 @@ import { SessionEntity } from "@/server/entities/session/entity";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { IBaseContextDTO } from "@/server/createContext";
 
-type IAuthenticatedUserDTO = User & {
+type IAuthenticatedUserDTO = UserEntity & {
   truePassword: string;
-  session: Session;
+  session: SessionEntity;
 };
 
 type ITestContextDTO = IBaseContextDTO & {
