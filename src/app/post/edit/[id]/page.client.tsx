@@ -1,10 +1,10 @@
 "use client";
 
-import { Post } from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
+import { PostEntity } from "@/server/entities/post/entity";
 
 type Params = {
   id: string;
@@ -21,7 +21,7 @@ const useUpdatePost = () => {
   const { id: postId } = useParams<Params>();
   const { session, isLoadingSession } = useAuth();
 
-  const [post, setPost] = useState<Post | null>(null);
+  const [post, setPost] = useState<PostEntity | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
