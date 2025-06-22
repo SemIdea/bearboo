@@ -23,11 +23,10 @@ const UpdatePostService = async ({
     });
   }
 
-  // Fix Error Message
   if (post.userId !== userId) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: "You can't update this post"
+      message: PostErrorCode.POST_UPDATE_FORBIDDEN
     });
   }
 
