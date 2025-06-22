@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Post } from "@prisma/client";
 import { Comments, PostMDView } from "./page.client";
 import { createCaller } from "@/server/caller";
 
@@ -18,7 +17,7 @@ const Page = async (props: PageProps) => {
 
   const { id } = params;
 
-  const post: Post | null = await caller.post.findPost({ postId: id });
+  const post = await caller.post.findPost({ postId: id });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
