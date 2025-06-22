@@ -6,7 +6,6 @@ import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Authprovider } from "@/context/auth";
 import TrpcProvider from "@/context/trpc";
-import { PostProvider } from "@/context/post";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -22,9 +21,7 @@ const Providers: React.FC<ProvidersProps> = ({ children }) => {
       defaultTheme="system"
     >
       <TrpcProvider>
-        <Authprovider>
-          <PostProvider>{children}</PostProvider>
-        </Authprovider>
+        <Authprovider>{children}</Authprovider>
       </TrpcProvider>
     </NextThemesProvider>
   );
