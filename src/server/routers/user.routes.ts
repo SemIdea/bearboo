@@ -12,7 +12,7 @@ const UserRouter = t.router({
   profile: publicProcedure
     .input(getUserProfileSchema)
     .query(async ({ input, ctx }) => getUserProfileController({ input, ctx })),
-  posts: publicProcedure
+    posts: publicProcedure
     .input(getUserPostsSchema)
     .query(async ({ input, ctx }) => getUserPostsController({ input, ctx })),
   comments: publicProcedure
