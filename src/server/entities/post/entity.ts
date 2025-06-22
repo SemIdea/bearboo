@@ -138,35 +138,28 @@ class PostEntity implements IPostEntity {
   }
 
   static async findUserPosts({ userId, repositories }: IFindUserPostsDTO) {
-    const cachedPosts = await repositories.cache.get(userPostsCacheKey(userId));
+    const cachedUserPosts = await repositories.cache.get(
+      userPostsCacheKey(userId)
+    );
 
-    if (cachedPosts) return JSON.parse(cachedPosts) as PostEntity[];
+    if (cachedUserPosts) return JSON.parse(cachedUserPosts) as PostEntity[];
 
-    const postsData = await repositories.database.findUserPosts(userId);
-
-    if (!postsData) return [] as PostEntity[];
+    const userPosts = await repositories.database.findUserPosts(userId);
 
     await PostEntity.cacheUserPosts({
       userId,
-      posts: postsData,
+      posts: userPosts,
       repositories
     });
 
-    return postsData as PostEntity[];
+    return userPosts;
   }
 
   static async update({ id, data, repositories }: IUpdatePostDTO) {
     const updated = await repositories.database.update(id, data);
 
-    const postEntity = new PostEntity(
-      updated.id,
-      updated.userId,
-      updated.title,
-      updated.content
-    );
-
     await PostEntity.cachePost({
-      post: postEntity,
+      post: updated,
       repositories
     });
 
