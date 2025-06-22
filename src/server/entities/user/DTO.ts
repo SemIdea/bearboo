@@ -1,4 +1,5 @@
-import { Session, User } from "@prisma/client";
+import { SessionEntity } from "../session/entity";
+import { UserEntity } from "./entity";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IUserEntity = {
@@ -6,20 +7,20 @@ type IUserEntity = {
   password: string;
 };
 
-type IUserWithSession = Omit<User, "password"> & {
-  session: Omit<Session, "userId">;
+type IUserWithSession = Omit<UserEntity, "password"> & {
+  session: Omit<SessionEntity, "userId">;
 };
 
 type IUserModel = {
-  create: (id: string, data: IUserEntity) => Promise<User>;
-  find: (id: string) => Promise<User | null>;
-  update: (id: string, data: IUserEntity) => Promise<User>;
+  create: (id: string, data: IUserEntity) => Promise<UserEntity>;
+  find: (id: string) => Promise<UserEntity | null>;
+  update: (id: string, data: IUserEntity) => Promise<UserEntity>;
   delete: (id: string) => Promise<void>;
-  findByEmail: (email: string) => Promise<User | null>;
+  findByEmail: (email: string) => Promise<UserEntity | null>;
 };
 
 type ICacheUserDTO = {
-  user: User;
+  user: UserEntity;
   repositories: {
     cache: ICacheRepositoryAdapter;
   };
@@ -28,7 +29,7 @@ type ICacheUserDTO = {
 type IResolveUserFromIndexDTO = {
   indexKey: string;
   indexKeyCaller: (string: string) => string;
-  findOnDatabase: (key: string) => Promise<User | null>;
+  findOnDatabase: (key: string) => Promise<UserEntity | null>;
   repositories: {
     database: IUserModel;
     cache: ICacheRepositoryAdapter;
