@@ -2,27 +2,31 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/auth";
-import { usePost } from "@/context/post";
+import { trpc } from "@/app/_trpc/client";
 
 const Posts = ({ max }: { max: number }) => {
-  const { findAllPosts } = usePost();
-
   const { session } = useAuth();
-  const { data: posts, isLoading, error } = findAllPosts();
+
+  const {
+    data: allPosts,
+    isLoading: isAllPostsLoading,
+    error: allPostsError
+  } = trpc.post.findAllPosts.useQuery();
 
   return (
     <div>
       <p>
-        {isLoading && <span>Loading...</span>}{" "}
-        {error && <span>Error: {error.message}</span>}
-        {!isLoading && !error && posts && posts.length === 0 && (
-          <span>No posts available</span>
-        )}
+        {isAllPostsLoading && <span>Loading...</span>}{" "}
+        {allPostsError && <span>Error: {allPostsError.message}</span>}
+        {!isAllPostsLoading &&
+          !allPostsError &&
+          allPosts &&
+          allPosts.length === 0 && <span>No posts available</span>}
       </p>
       <div>
-        {posts &&
-          posts.length > 0 &&
-          posts.slice(0, max).map((post) => (
+        {allPosts &&
+          allPosts.length > 0 &&
+          allPosts.slice(0, max).map((post) => (
             <div key={post.id}>
               {post.userId == session?.user.id && (
                 <Link href={`/post/edit/${post.id}`}>

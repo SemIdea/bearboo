@@ -20,7 +20,7 @@ const PostRouter = t.router({
   findPost: publicProcedure
     .input(findPostSchema)
     .query(async ({ input, ctx }) => findPostController({ input, ctx })),
-  findAllPost: publicProcedure.query(async ({ ctx }) =>
+  findAllPosts: publicProcedure.query(async ({ ctx }) =>
     findAllPostsController({ ctx })
   ),
   updatePost: protectedProcedure
