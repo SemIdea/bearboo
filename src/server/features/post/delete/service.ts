@@ -18,10 +18,10 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
     });
   }
 
-  if (post.userId !== user.id) {
+  if (post.userId !== data.userId) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: "You can't delete this post"
+      message: PostErrorCode.POST_DELETE_FORBIDDEN
     });
   }
 
