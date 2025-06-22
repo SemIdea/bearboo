@@ -1,4 +1,5 @@
-import { Session, User } from "@prisma/client";
+import { UserEntity } from "../user/entity";
+import { SessionEntity } from "./entity";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type ISessionEntity = {
@@ -7,21 +8,21 @@ type ISessionEntity = {
   refreshToken: string;
 };
 
-type ISessionWithUser = Omit<Session, "userId" | "id"> & {
-  user: Omit<User, "password">;
+type ISessionWithUser = Omit<SessionEntity, "userId" | "id"> & {
+  user: Omit<UserEntity, "password">;
 };
 
 type ISessionModel = {
-  create: (id: string, data: ISessionEntity) => Promise<Session>;
-  find: (id: string) => Promise<Session | null>;
-  findByAccessToken: (accessToken: string) => Promise<Session | null>;
-  findByRefreshToken: (refreshToken: string) => Promise<Session | null>;
-  update: (id: string, data: Partial<ISessionEntity>) => Promise<Session>;
+  create: (id: string, data: ISessionEntity) => Promise<SessionEntity>;
+  find: (id: string) => Promise<SessionEntity | null>;
+  findByAccessToken: (accessToken: string) => Promise<SessionEntity | null>;
+  findByRefreshToken: (refreshToken: string) => Promise<SessionEntity | null>;
+  update: (id: string, data: Partial<ISessionEntity>) => Promise<SessionEntity>;
   delete: (id: string) => Promise<void>;
 };
 
 type ICacheSessionDTO = {
-  session: Session;
+  session: SessionEntity;
   repositories: {
     cache: ICacheRepositoryAdapter;
   };
@@ -30,7 +31,7 @@ type ICacheSessionDTO = {
 type IResolveSessionFromIndexDTO = {
   indexKey: string;
   indexKeyCaller: (string: string) => string;
-  findOnDatabase: (key: string) => Promise<Session | null>;
+  findOnDatabase: (key: string) => Promise<SessionEntity | null>;
   repositories: {
     cache: ICacheRepositoryAdapter;
   };
