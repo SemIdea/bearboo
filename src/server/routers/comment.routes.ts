@@ -1,7 +1,7 @@
 import { protectedProcedure, publicProcedure, t } from "../createRouter";
 import { createCommentController } from "../features/comment/create/controller";
 import { deleteCommentController } from "../features/comment/delete/controller";
-import { findAllCommentsByPostController } from "../features/comment/find/controller";
+import { findAllCommentsByPostController } from "../features/comment/findAll/controller";
 import { updateCommentController } from "../features/comment/update/controller";
 import {
   createCommentschema,
