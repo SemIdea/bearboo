@@ -26,7 +26,7 @@ class CommentEntity implements ICommentEntity {
   }
 
   static async find({ id, repositories }: IFindCommentByIdDTO) {
-    const comment = await repositories.database.findById(id);
+    const comment = await repositories.database.find(id);
 
     if (!comment) {
       return null;
