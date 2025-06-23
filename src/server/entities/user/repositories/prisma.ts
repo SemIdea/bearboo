@@ -19,7 +19,7 @@ class PrismaUserModel implements IUserModel {
     });
   }
 
-  async update(id: string, data: IUserEntity) {
+  async update(id: string, data: Partial<IUserEntity>) {
     return await prisma.user.update({
       where: {
         id

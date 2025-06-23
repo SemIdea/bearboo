@@ -20,7 +20,7 @@ type ICommentModel = IBaseModel<CommentEntity, "id"> & {
 };
 
 type ICreateCommentDTO = CreateDTO<
-  CommentEntity,
+  ICommentEntity,
   {
     database: ICommentModel;
   }
