@@ -1,3 +1,11 @@
+import {
+  CreateDTO,
+  DeleteDTO,
+  FindDTO,
+  UpdateDTO,
+  WithRepositories
+} from "../base/DTO";
+import { IBaseModel } from "../base/model";
 import { CommentEntity } from "./entity";
 
 type ICommentEntity = {
@@ -6,40 +14,27 @@ type ICommentEntity = {
   content: string;
 };
 
-type ICommentModel = {
-  create: (id: string, data: ICommentEntity) => Promise<CommentEntity>;
-  findById: (id: string) => Promise<CommentEntity | null>;
+type ICommentModel = IBaseModel<CommentEntity, "id"> & {
   findAllByPostId: (postId: string) => Promise<CommentEntity[] | null>;
   findAllByUserId: (userId: string) => Promise<CommentEntity[] | null>;
-  update: (id: string, data: Partial<ICommentEntity>) => Promise<CommentEntity>;
-  delete: (id: string) => Promise<void>;
 };
 
-type ICreateCommentDTO = {
-  id: string;
-  data: {
-    postId: string;
-    userId: string;
-    content: string;
-  };
-  repositories: {
+type ICreateCommentDTO = CreateDTO<
+  CommentEntity,
+  {
     database: ICommentModel;
-  };
-};
+  }
+>;
 
-type IFindCommentByIdDTO = {
-  id: string;
-  repositories: {
-    database: ICommentModel;
-  };
-};
+type IFindCommentByIdDTO = FindDTO<{
+  database: ICommentModel;
+}>;
 
 type IFindAllByPostIdDTO = {
   postId: string;
-  repositories: {
-    database: ICommentModel;
-  };
-};
+} & WithRepositories<{
+  database: ICommentModel;
+}>;
 
 type IFindAllByUserIdDTO = {
   userId: string;
@@ -48,22 +43,16 @@ type IFindAllByUserIdDTO = {
   };
 };
 
-type IUpdateCommentDTO = {
-  id: string;
-  data: {
-    content: string;
-  };
-  repositories: {
+type IUpdateCommentDTO = UpdateDTO<
+  ICommentEntity,
+  {
     database: ICommentModel;
-  };
-};
+  }
+>;
 
-type IDeleteCommentDTO = {
-  id: string;
-  repositories: {
-    database: ICommentModel;
-  };
-};
+type IDeleteCommentDTO = DeleteDTO<{
+  database: ICommentModel;
+}>;
 
 export type {
   ICommentEntity,

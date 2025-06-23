@@ -1,3 +1,5 @@
+import { CreateDTO, FindDTO, WithRepositories } from "../base/DTO";
+import { IBaseModel } from "../base/model";
 import { SessionEntity } from "../session/entity";
 import { UserEntity } from "./entity";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
@@ -11,7 +13,7 @@ type IUserWithSession = Omit<UserEntity, "password"> & {
   session: Omit<SessionEntity, "userId">;
 };
 
-type IUserModel = {
+type IUserModel = IBaseModel<UserEntity, "id"> & {
   create: (id: string, data: IUserEntity) => Promise<UserEntity>;
   find: (id: string) => Promise<UserEntity | null>;
   update: (id: string, data: IUserEntity) => Promise<UserEntity>;
@@ -36,30 +38,25 @@ type IResolveUserFromIndexDTO = {
   };
 };
 
-type ICreateUserDTO = {
-  id: string;
-  data: IUserEntity;
-  repositories: {
+type ICreateUserDTO = CreateDTO<
+  IUserEntity,
+  {
     database: IUserModel;
     cache: ICacheRepositoryAdapter;
-  };
-};
+  }
+>;
 
-type IFindUserDTO = {
-  id: string;
-  repositories: {
-    database: IUserModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+type IFindUserDTO = FindDTO<{
+  database: IUserModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 type IFindUserByEmailDTO = {
   email: string;
-  repositories: {
-    database: IUserModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+} & WithRepositories<{
+  database: IUserModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 export type {
   IUserModel,
