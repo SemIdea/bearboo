@@ -1,3 +1,11 @@
+import {
+  CreateDTO,
+  DeleteDTO,
+  FindDTO,
+  UpdateDTO,
+  WithRepositories
+} from "../base/DTO";
+import { IBaseModel } from "../base/model";
 import { PostEntity } from "./entity";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
@@ -7,13 +15,9 @@ type IPostEntity = {
   content: string;
 };
 
-type IPostModel = {
-  create: (id: string, data: IPostEntity) => Promise<PostEntity>;
-  find: (id: string) => Promise<PostEntity | null>;
+type IPostModel = IBaseModel<PostEntity, "id"> & {
   findAll: () => Promise<PostEntity[]>;
   findUserPosts: (userId: string) => Promise<PostEntity[]>;
-  update: (id: string, data: Partial<IPostEntity>) => Promise<PostEntity>;
-  delete: (id: string) => Promise<void>;
 };
 
 type ICachePostDTO = {
@@ -40,58 +44,43 @@ type IResolvePostFromIndexDTO = {
   };
 };
 
-type ICreatePostDTO = {
-  id: string;
-  data: {
-    userId: string;
-    title: string;
-    content: string;
-  };
-  repositories: {
+type ICreatePostDTO = CreateDTO<
+  IPostEntity,
+  {
     database: IPostModel;
     cache: ICacheRepositoryAdapter;
-  };
-};
+  }
+>;
 
-type IFindPostDTO = {
-  id: string;
-  repositories: {
-    database: IPostModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+type IFindPostDTO = FindDTO<{
+  database: IPostModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
-type IFindAllPostsDTO = {
-  repositories: {
-    database: IPostModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+type IFindAllPostsDTO = WithRepositories<{
+  database: IPostModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 type IFindUserPostsDTO = {
   userId: string;
-  repositories: {
-    database: IPostModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+} & WithRepositories<{
+  database: IPostModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
-type IUpdatePostDTO = {
-  id: string;
-  data: Partial<IPostEntity>;
-  repositories: {
+type IUpdatePostDTO = UpdateDTO<
+  IPostEntity,
+  {
     database: IPostModel;
     cache: ICacheRepositoryAdapter;
-  };
-};
+  }
+>;
 
-type IDeletePostDTO = {
-  id: string;
-  repositories: {
-    database: IPostModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+type IDeletePostDTO = DeleteDTO<{
+  database: IPostModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 export type {
   IPostEntity,

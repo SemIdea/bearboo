@@ -11,7 +11,7 @@ class PrismaCommentModel implements ICommentModel {
     });
   }
 
-  async findById(id: string) {
+  async find(id: string) {
     return await prisma.comment.findUnique({
       where: {
         id

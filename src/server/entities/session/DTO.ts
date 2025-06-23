@@ -1,3 +1,5 @@
+import { CreateDTO, DeleteDTO, FindDTO, WithRepositories } from "../base/DTO";
+import { IBaseModel } from "../base/model";
 import { UserEntity } from "../user/entity";
 import { SessionEntity } from "./entity";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
@@ -12,13 +14,9 @@ type ISessionWithUser = Omit<SessionEntity, "userId" | "id"> & {
   user: Omit<UserEntity, "password">;
 };
 
-type ISessionModel = {
-  create: (id: string, data: ISessionEntity) => Promise<SessionEntity>;
-  find: (id: string) => Promise<SessionEntity | null>;
+type ISessionModel = IBaseModel<SessionEntity, "id"> & {
   findByAccessToken: (accessToken: string) => Promise<SessionEntity | null>;
   findByRefreshToken: (refreshToken: string) => Promise<SessionEntity | null>;
-  update: (id: string, data: Partial<ISessionEntity>) => Promise<SessionEntity>;
-  delete: (id: string) => Promise<void>;
 };
 
 type ICacheSessionDTO = {
@@ -37,46 +35,32 @@ type IResolveSessionFromIndexDTO = {
   };
 };
 
-type ICreateSessionDTO = {
-  id: string;
-  data: ISessionEntity;
-  repositories: {
+type ICreateSessionDTO = CreateDTO<
+  ISessionEntity,
+  {
     database: ISessionModel;
     cache: ICacheRepositoryAdapter;
-  };
-};
+  }
+>;
 
-type IFindSessionByIdDTO = {
-  id: string;
-  repositories: {
-    database: ISessionModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+type IFindSessionByIdDTO = FindDTO<{
+  database: ISessionModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 type IFindSessionByAccessTokenDTO = {
   accessToken: string;
-  repositories: {
-    database: ISessionModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+} & WithRepositories<{
+  database: ISessionModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 type IFindSessionByRefreshTokenDTO = {
   refreshToken: string;
-  repositories: {
-    database: ISessionModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
-
-type IDeletePostDTO = {
-  id: string;
-  repositories: {
-    database: ISessionModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+} & WithRepositories<{
+  database: ISessionModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 type IRefreshSessionDTO = {
   id: string;
@@ -84,11 +68,15 @@ type IRefreshSessionDTO = {
   accessToken: string;
   newRefreshToken: string;
   newAccessToken: string;
-  repositories: {
-    database: ISessionModel;
-    cache: ICacheRepositoryAdapter;
-  };
-};
+} & WithRepositories<{
+  database: ISessionModel;
+  cache: ICacheRepositoryAdapter;
+}>;
+
+type IDeletePostDTO = DeleteDTO<{
+  database: ISessionModel;
+  cache: ICacheRepositoryAdapter;
+}>;
 
 export type {
   ISessionModel,
