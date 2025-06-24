@@ -9,7 +9,7 @@ const GetUserProfileService = async ({
 }: IGetUserProfileDTO) => {
   const { userId } = data;
 
-  const userProfile = await UserEntity.find({
+  const userProfile = await UserEntity.read({
     id: userId,
     repositories
   });

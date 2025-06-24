@@ -1,6 +1,6 @@
 import {
   DeleteSessionService,
-  FindSessionByRefreshTokenService,
+  ReadSessionByRefreshTokenService,
   RefreshSessionService
 } from "./service";
 import {
@@ -17,7 +17,7 @@ const refreshSessionController = async ({
   input: RefreshSessionInput;
   ctx: IAPIContextDTO;
 }) => {
-  const session = await FindSessionByRefreshTokenService({
+  const session = await ReadSessionByRefreshTokenService({
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.session

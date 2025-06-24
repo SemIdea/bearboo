@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { findAllCommentsByPostController } from "./controller";
+import { readAllCommentsByPostController } from "./controller";
 import { CommentEntity } from "@/server/entities/comment/entity";
 import { PostEntity } from "@/server/entities/post/entity";
 import { isControllerContext, TestContext } from "@/test/context";
 
-describe("Find All Comments Controller Unitary Testing", async () => {
+describe("Read All Comments Controller Unitary Testing", async () => {
   const ctx = new TestContext();
 
   await ctx.createAuthenticatedUser();
@@ -13,7 +13,7 @@ describe("Find All Comments Controller Unitary Testing", async () => {
     throw new Error("User is not authenticated");
   }
 
-  test("Should find all comments successfully", async () => {
+  test("Should read all comments successfully", async () => {
     const user = ctx.user;
 
     const postId = await ctx.generateSnowflakeUuid();
@@ -49,7 +49,7 @@ describe("Find All Comments Controller Unitary Testing", async () => {
       postId
     };
 
-    const result = await findAllCommentsByPostController({
+    const result = await readAllCommentsByPostController({
       ctx,
       input
     });
@@ -84,7 +84,7 @@ describe("Find All Comments Controller Unitary Testing", async () => {
       postId
     };
 
-    const result = await findAllCommentsByPostController({
+    const result = await readAllCommentsByPostController({
       ctx,
       input
     });

@@ -6,7 +6,7 @@ const UpdateCommentService = async ({
   repositories,
   ...data
 }: IUpdateCommentDTO) => {
-  const comment = await CommentEntity.find({
+  const comment = await CommentEntity.read({
     ...data,
     repositories
   });

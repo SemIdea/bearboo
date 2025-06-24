@@ -11,7 +11,7 @@ type ICreateAuthSessionDTO = {
   };
 };
 
-type IFindUserAndSessionByAccessTokenDTO = {
+type IReadUserAndSessionByAccessTokenDTO = {
   accessToken: string;
   repositories: {
     user: IUserModel;
@@ -20,7 +20,7 @@ type IFindUserAndSessionByAccessTokenDTO = {
   };
 };
 
-type IFindSessionByRefreshTokenDTO = {
+type IReadSessionByRefreshTokenDTO = {
   refreshToken: string;
   repositories: {
     user: IUserModel;
@@ -54,8 +54,8 @@ type IRefreshSessionDTO = {
 
 export type {
   ICreateAuthSessionDTO,
-  IFindUserAndSessionByAccessTokenDTO,
-  IFindSessionByRefreshTokenDTO,
+  IReadUserAndSessionByAccessTokenDTO,
+  IReadSessionByRefreshTokenDTO,
   IDeleteSessionDTO,
   IRefreshSessionDTO
 };

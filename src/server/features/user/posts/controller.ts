@@ -1,12 +1,12 @@
 import { GetUserPostsService } from "./service";
-import { GetUserPostsInput } from "@/server/schema/user.schema";
+import { ReadUserPostsInput } from "@/server/schema/user.schema";
 import { IAPIContextDTO } from "@/server/createContext";
 
 const getUserPostsController = async ({
   input,
   ctx
 }: {
-  input: GetUserPostsInput;
+  input: ReadUserPostsInput;
   ctx: IAPIContextDTO;
 }) => {
   const posts = GetUserPostsService({

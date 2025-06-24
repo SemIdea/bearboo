@@ -32,36 +32,36 @@ const loginUserSchema = z.object({
     .min(8, "Invalid Email or password")
 });
 
-const getUserProfileSchema = z.object({
+const readUserProfileSchema = z.object({
   userId: z.string()
 });
 
-const getUserPostsSchema = z.object({
+const readUserPostsSchema = z.object({
   userId: z.string()
 });
 
-const getUserCommentsSchema = z.object({
+const readUserCommentsSchema = z.object({
   userId: z.string()
 });
 
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
-type GetUserProfileInput = z.TypeOf<typeof getUserProfileSchema>;
-type GetUserPostsInput = z.TypeOf<typeof getUserPostsSchema>;
-type GetUserCommentsInput = z.TypeOf<typeof getUserCommentsSchema>;
+type ReadUserProfileInput = z.TypeOf<typeof readUserProfileSchema>;
+type ReadUserPostsInput = z.TypeOf<typeof readUserPostsSchema>;
+type ReadUserCommentsInput = z.TypeOf<typeof readUserCommentsSchema>;
 
 export {
   verifyUserSchema,
   registerUserSchema,
   loginUserSchema,
-  getUserProfileSchema,
-  getUserPostsSchema,
-  getUserCommentsSchema
+  readUserProfileSchema,
+  readUserPostsSchema,
+  readUserCommentsSchema
 };
 export type {
   CreateUserInput,
   LoginUserInput,
-  GetUserProfileInput,
-  GetUserPostsInput,
-  GetUserCommentsInput
+  ReadUserProfileInput,
+  ReadUserPostsInput,
+  ReadUserCommentsInput
 };

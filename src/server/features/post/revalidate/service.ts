@@ -8,7 +8,7 @@ const RevalidatePostService = async ({
   repositories,
   ...data
 }: IRevalidatePostDTO) => {
-  const post = await PostEntity.find({
+  const post = await PostEntity.read({
     id: data.postId,
     repositories: {
       ...repositories

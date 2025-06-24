@@ -1,12 +1,12 @@
 import { ReadPostService } from "./service";
 import { IAPIContextDTO } from "@/server/createContext";
-import { FindPostInput } from "@/server/schema/post.schema";
+import { ReadPostInput } from "@/server/schema/post.schema";
 
-const findPostController = async ({
+const readPostController = async ({
   input,
   ctx
 }: {
-  input: FindPostInput;
+  input: ReadPostInput;
   ctx: IAPIContextDTO;
 }) => {
   const post = await ReadPostService({
@@ -20,4 +20,4 @@ const findPostController = async ({
   return post;
 };
 
-export { findPostController };
+export { readPostController };

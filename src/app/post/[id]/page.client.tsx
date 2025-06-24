@@ -162,7 +162,7 @@ const Comments = () => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
   const { data: commentsData, isLoading: isCommentsLoading } =
-    trpc.comment.findAllCommentsByPost.useQuery(
+    trpc.comment.readAllCommentsByPost.useQuery(
       { postId },
       { enabled: !!postId }
     );

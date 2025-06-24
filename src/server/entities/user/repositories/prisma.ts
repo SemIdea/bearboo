@@ -2,7 +2,7 @@ import { IUserModel, IUserEntity } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaUserModel implements IUserModel {
-  async create(id: string, data: IUserEntity) {
+  async create(id: string, data: Omit<IUserEntity, "id">) {
     return await prisma.user.create({
       data: {
         id,
@@ -11,10 +11,18 @@ class PrismaUserModel implements IUserModel {
     });
   }
 
-  async find(id: string) {
+  async read(id: string) {
     return await prisma.user.findUnique({
       where: {
         id
+      }
+    });
+  }
+
+  async readByEmail(email: string) {
+    return await prisma.user.findUnique({
+      where: {
+        email
       }
     });
   }
@@ -28,20 +36,18 @@ class PrismaUserModel implements IUserModel {
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await prisma.user.delete({
-      where: {
-        id
-      }
-    });
-  }
+  async delete(id: string): Promise<boolean> {
+    try {
+      await prisma.user.delete({
+        where: {
+          id
+        }
+      });
 
-  async findByEmail(email: string) {
-    return await prisma.user.findUnique({
-      where: {
-        email
-      }
-    });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

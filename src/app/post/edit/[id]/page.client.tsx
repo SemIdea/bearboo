@@ -63,7 +63,7 @@ const useUpdatePost = () => {
     }
   });
 
-  const { data: postData } = trpc.post.findPost.useQuery(
+  const { data: postData } = trpc.post.readPost.useQuery(
     { postId: postId as string },
     {
       enabled: !!postId

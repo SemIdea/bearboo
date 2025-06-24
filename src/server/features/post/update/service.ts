@@ -9,7 +9,7 @@ const UpdatePostService = async ({
   postId,
   ...data
 }: IUpdatePostDTO) => {
-  const post = await PostEntity.find({
+  const post = await PostEntity.read({
     id: postId,
     repositories: {
       ...repositories

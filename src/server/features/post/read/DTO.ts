@@ -1,7 +1,7 @@
 import { IPostModel } from "@/server/entities/post/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
-type IFindPostDTO = {
+type IReadPostDTO = {
   postId: string;
   repositories: {
     database: IPostModel;
@@ -9,4 +9,4 @@ type IFindPostDTO = {
   };
 };
 
-export type { IFindPostDTO };
+export type { IReadPostDTO };

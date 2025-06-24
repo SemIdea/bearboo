@@ -10,7 +10,7 @@ const RegisterUserService = async ({
 }: IRegisterUserDTO) => {
   const { email, password } = data;
 
-  const existingUser = await UserEntity.findByEmail({
+  const existingUser = await UserEntity.readByEmail({
     email,
     repositories
   });

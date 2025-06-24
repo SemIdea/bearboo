@@ -3,7 +3,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { Context } from "./createContext";
-import { FindUserAndSessionByAccessTokenService } from "./features/auth/session/service";
+import { ReadUserAndSessionByAccessTokenService } from "./features/auth/session/service";
 import { GetTimestampFromID } from "./drivers/snowflake";
 import { AuthErrorCode } from "@/shared/error/auth";
 
@@ -29,7 +29,7 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
 
   if (!accessToken) return next();
 
-  const user = await FindUserAndSessionByAccessTokenService({
+  const user = await ReadUserAndSessionByAccessTokenService({
     accessToken,
     repositories: {
       cache: ctx.repositories.cache,

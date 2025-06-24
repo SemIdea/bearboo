@@ -2,7 +2,7 @@ import { IPostEntity, IPostModel } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaPostModel implements IPostModel {
-  async create(id: string, data: IPostEntity) {
+  async create(id: string, data: Omit<IPostEntity, "id">) {
     return await prisma.post.create({
       data: {
         id,
@@ -11,7 +11,7 @@ class PrismaPostModel implements IPostModel {
     });
   }
 
-  async find(id: string) {
+  async read(id: string) {
     return await prisma.post.findUnique({
       where: {
         id
@@ -19,11 +19,11 @@ class PrismaPostModel implements IPostModel {
     });
   }
 
-  async findAll() {
+  async readAll() {
     return await prisma.post.findMany();
   }
 
-  async findUserPosts(userId: string) {
+  async readUserPosts(userId: string) {
     return await prisma.post.findMany({
       where: {
         userId
@@ -42,12 +42,18 @@ class PrismaPostModel implements IPostModel {
     });
   }
 
-  async delete(id: string) {
-    await prisma.post.delete({
-      where: {
-        id
-      }
-    });
+  async delete(id: string): Promise<boolean> {
+    try {
+      await prisma.post.delete({
+        where: {
+          id
+        }
+      });
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

@@ -2,7 +2,7 @@ import { ISessionEntity, ISessionModel } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaSessionModel implements ISessionModel {
-  async create(id: string, data: ISessionEntity) {
+  async create(id: string, data: Omit<ISessionEntity, "id">) {
     return await prisma.session.create({
       data: {
         id,
@@ -11,7 +11,7 @@ class PrismaSessionModel implements ISessionModel {
     });
   }
 
-  async find(id: string) {
+  async read(id: string) {
     return await prisma.session.findUnique({
       where: {
         id
@@ -19,7 +19,7 @@ class PrismaSessionModel implements ISessionModel {
     });
   }
 
-  async findByAccessToken(accessToken: string) {
+  async readByAccessToken(accessToken: string) {
     return await prisma.session.findFirst({
       where: {
         accessToken
@@ -27,7 +27,7 @@ class PrismaSessionModel implements ISessionModel {
     });
   }
 
-  async findByRefreshToken(refreshToken: string) {
+  async readByRefreshToken(refreshToken: string) {
     return await prisma.session.findFirst({
       where: {
         refreshToken
@@ -44,12 +44,18 @@ class PrismaSessionModel implements ISessionModel {
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await prisma.session.delete({
-      where: {
-        id
-      }
-    });
+  async delete(id: string): Promise<boolean> {
+    try {
+      await prisma.session.delete({
+        where: {
+          id
+        }
+      });
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
 
