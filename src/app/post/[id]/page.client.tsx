@@ -4,27 +4,27 @@ import MDEditor from "@uiw/react-md-editor";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
-import { CommentEntity } from "@/server/entities/comment/entity";
 import { useAuth } from "@/context/auth";
+import { ICommentEntity } from "@/server/entities/comment/DTO";
 
 type Params = {
   id: string;
 };
 
 type IBaseCommentDTO = {
-  setComments: React.Dispatch<React.SetStateAction<CommentEntity[]>>;
+  setComments: React.Dispatch<React.SetStateAction<ICommentEntity[]>>;
 };
 
 type ICreateCommentDTO = IBaseCommentDTO;
 
 type ICommentItemDTO = IBaseCommentDTO & {
-  comment: CommentEntity;
+  comment: ICommentEntity;
   isOwner: boolean;
   onEdit: () => void;
 };
 
 type IUpdateCommentItemDTO = IBaseCommentDTO & {
-  comment: CommentEntity;
+  comment: ICommentEntity;
   onCancel: () => void;
 };
 
@@ -158,7 +158,7 @@ const Comments = () => {
   const { id: postId } = useParams<Params>();
   const { session } = useAuth();
 
-  const [comments, setComments] = useState<CommentEntity[]>([]);
+  const [comments, setComments] = useState<ICommentEntity[]>([]);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
   const { data: commentsData, isLoading: isCommentsLoading } =
