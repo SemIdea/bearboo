@@ -14,6 +14,9 @@ const useCreatePost = () => {
   const router = useRouter();
   const { session, isLoadingSession } = useAuth();
 
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [successMessage, setSuccessMessage] = useState<null | string>(null);
@@ -40,11 +43,31 @@ const useCreatePost = () => {
     }
   }, [isLoadingSession]);
 
+  const handleCreatePost = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!title || !content) {
+      return alert("Title and content are required.");
+    }
+
+    setIsUploading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    createPost({
+      title,
+      content
+    } as PostData);
+  };
+
   return {
-    createPost,
+    title,
+    setTitle,
+    content,
+    setContent,
     isUploading,
     errorMessage,
-    successMessage
+    successMessage,
+    handleCreatePost
   };
 };
 
