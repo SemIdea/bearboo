@@ -11,22 +11,22 @@ import {
 } from "../schema/comment.schema";
 
 const CommentRouter = t.router({
-  createComment: protectedProcedure
+  create: protectedProcedure
     .input(createCommentschema)
     .mutation(async ({ input, ctx }) =>
       createCommentController({ input, ctx })
     ),
-  readAllCommentsByPost: publicProcedure
+  readAllByPost: publicProcedure
     .input(readAllCommentsByPostSchema)
     .query(async ({ input, ctx }) =>
       readAllCommentsByPostController({ input, ctx })
     ),
-  updateComment: protectedProcedure
+  update: protectedProcedure
     .input(updateCommentSchema)
     .mutation(async ({ input, ctx }) =>
       updateCommentController({ input, ctx })
     ),
-  deleteComment: protectedProcedure
+  delete: protectedProcedure
     .input(deleteCommentSchema)
     .mutation(async ({ input, ctx }) => deleteCommentController({ input, ctx }))
 });

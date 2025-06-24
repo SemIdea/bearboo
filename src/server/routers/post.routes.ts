@@ -14,24 +14,24 @@ import { readAllPostsController } from "../features/post/readAll/controller";
 import { revalidatePostController } from "../features/post/revalidate/controller";
 
 const PostRouter = t.router({
-  createPost: protectedProcedure
+  create: protectedProcedure
     .input(createPostSchema)
     .mutation(async ({ input, ctx }) => createPostController({ input, ctx })),
-  readPost: publicProcedure
+  read: publicProcedure
     .input(readPostSchema)
     .query(async ({ input, ctx }) => readPostController({ input, ctx })),
-  readAllPosts: publicProcedure.query(async ({ ctx }) =>
+  readAll: publicProcedure.query(async ({ ctx }) =>
     readAllPostsController({ ctx })
   ),
-  updatePost: protectedProcedure
+  update: protectedProcedure
     .input(updatePostSchema)
     .mutation(async ({ input, ctx }) => updatePostController({ input, ctx })),
-  revalidatePost: protectedProcedure
+  revalidate: protectedProcedure
     .input(revalidatePostSchema)
     .mutation(async ({ input, ctx }) =>
       revalidatePostController({ input, ctx })
     ),
-  deletePost: protectedProcedure
+  delete: protectedProcedure
     .input(deletePostSchema)
     .mutation(async ({ input, ctx }) => deletePostController({ input, ctx }))
 });

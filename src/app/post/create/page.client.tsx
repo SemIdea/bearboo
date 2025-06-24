@@ -21,7 +21,7 @@ const useCreatePost = () => {
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [successMessage, setSuccessMessage] = useState<null | string>(null);
 
-  const { mutate: createPost } = trpc.post.createPost.useMutation({
+  const { mutate: createPost } = trpc.post.create.useMutation({
     onSuccess: (data) => {
       setSuccessMessage("Post created successfully!");
       setErrorMessage(null);

@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
-import { PostEntity } from "@/server/entities/post/entity";
+import { IPostEntity } from "@/server/entities/post/DTO";
 
 type Params = {
   id: string;
@@ -21,15 +21,15 @@ const useUpdatePost = () => {
   const { id: postId } = useParams<Params>();
   const { session, isLoadingSession } = useAuth();
 
-  const [post, setPost] = useState<PostEntity | null>(null);
+  const [post, setPost] = useState<IPostEntity | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [successMessage, setSuccessMessage] = useState<null | string>(null);
 
-  const { mutate: revalidatePost } = trpc.post.revalidatePost.useMutation();
+  const { mutate: revalidatePost } = trpc.post.revalidate.useMutation();
 
-  const { mutate: updatePost } = trpc.post.updatePost.useMutation({
+  const { mutate: updatePost } = trpc.post.update.useMutation({
     onSuccess: () => {
       revalidatePost({
         postId
@@ -47,7 +47,7 @@ const useUpdatePost = () => {
     }
   });
 
-  const { mutate: deletePost } = trpc.post.deletePost.useMutation({
+  const { mutate: deletePost } = trpc.post.delete.useMutation({
     onSuccess: () => {
       setSuccessMessage("Post deleted successfully!");
       setErrorMessage(null);
@@ -63,7 +63,7 @@ const useUpdatePost = () => {
     }
   });
 
-  const { data: postData } = trpc.post.readPost.useQuery(
+  const { data: postData } = trpc.post.read.useQuery(
     { postId: postId as string },
     {
       enabled: !!postId

@@ -35,7 +35,7 @@ const CreateCommentItem = ({ setComments }: ICreateCommentDTO) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const { mutate: createComment } = trpc.comment.createComment.useMutation({
+  const { mutate: createComment } = trpc.comment.create.useMutation({
     onSuccess: (data) => {
       setSuccessMessage("Comment created successfully!");
       setComment("");
@@ -86,7 +86,7 @@ const CommentItem = ({
   onEdit,
   setComments
 }: ICommentItemDTO) => {
-  const { mutate: deleteComment } = trpc.comment.deleteComment.useMutation({
+  const { mutate: deleteComment } = trpc.comment.delete.useMutation({
     onSuccess: () => {
       setComments((prevComments) =>
         prevComments.filter((c) => c.id !== comment.id)
@@ -121,7 +121,7 @@ const EditCommentItem = ({
 }: IUpdateCommentItemDTO) => {
   const [editedContent, setEditedContent] = useState(comment.content);
 
-  const { mutate: updateComment } = trpc.comment.updateComment.useMutation({
+  const { mutate: updateComment } = trpc.comment.update.useMutation({
     onSuccess: (data) => {
       setComments((prevComments) =>
         prevComments.map((c) =>
@@ -162,10 +162,7 @@ const Comments = () => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
   const { data: commentsData, isLoading: isCommentsLoading } =
-    trpc.comment.readAllCommentsByPost.useQuery(
-      { postId },
-      { enabled: !!postId }
-    );
+    trpc.comment.readAllByPost.useQuery({ postId }, { enabled: !!postId });
 
   useEffect(() => {
     if (commentsData) setComments(commentsData);
