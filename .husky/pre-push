@@ -1,3 +1,5 @@
+yarn lint
+
 # Temporarily disable exit on error
 set +e
 
