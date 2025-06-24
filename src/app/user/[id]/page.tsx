@@ -1,5 +1,5 @@
-import { createCaller } from "@/server/caller";
 import { UserComments, UserPosts } from "./page.client";
+import { createCaller } from "@/server/caller";
 
 type PageProps = {
   params: Promise<{
