@@ -1,22 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/context/auth";
+import { useRegisterForm } from "./page.client";
 
 const Register = () => {
-  const { register } = useAuth();
-
-  const [email, setEmail] = useState(`user${Date.now()}@example.com`);
-  const [password, setPassword] = useState(`pass${Date.now()}`);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    register({
-      email,
-      password
-    });
-  };
+  const { email, setEmail, password, setPassword, handleSubmit } =
+    useRegisterForm();
 
   return (
     <form onSubmit={handleSubmit}>
