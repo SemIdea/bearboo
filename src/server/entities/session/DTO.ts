@@ -1,4 +1,5 @@
 import { IEntityDatabaseRepository } from "../base/entity";
+import { IUserEntity } from "../user/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type ISessionEntity = {
@@ -9,7 +10,7 @@ type ISessionEntity = {
 };
 
 type ISessionWithUser = Omit<ISessionEntity, "userId" | "id"> & {
-  user: Omit<ISessionEntity, "password">;
+  user: Omit<IUserEntity, "password">;
 };
 
 type ISessionExtraRepositories = {

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect } from "react";
 import { useAuthLogic, UseAuthLogicReturn } from "./index.hook";
+import { ISessionWithUser } from "@/server/entities/session/DTO";
 
 const AuthContext = createContext<UseAuthLogicReturn>({} as UseAuthLogicReturn);
 
@@ -30,12 +31,9 @@ const Authprovider = ({ children }: ChatProviderProps) => {
     );
 
     if (sessionCookie) {
-      const session = JSON.parse(sessionCookie);
+      const session = JSON.parse(sessionCookie) as ISessionWithUser;
 
       setSession(session);
-    }
-
-    if (accessTokenCookie && !session) {
     }
 
     setIsLoadingSession(false);

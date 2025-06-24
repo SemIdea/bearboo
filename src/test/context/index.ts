@@ -10,10 +10,12 @@ import { UserEntity } from "@/server/entities/user/entity";
 import { SessionEntity } from "@/server/entities/session/entity";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { IBaseContextDTO } from "@/server/createContext";
+import { IUserEntity } from "@/server/entities/user/DTO";
+import { ISessionEntity } from "@/server/entities/session/DTO";
 
-type IAuthenticatedUserDTO = UserEntity & {
+type IAuthenticatedUserDTO = IUserEntity & {
   truePassword: string;
-  session: SessionEntity;
+  session: ISessionEntity;
 };
 
 type ITestContextDTO = IBaseContextDTO & {

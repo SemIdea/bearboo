@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { IUpdateCommentDTO } from "./DTO";
 import { CommentEntity } from "@/server/entities/comment/entity";
+import { CommentErrorCode } from "@/shared/error/comment";
 
 const UpdateCommentService = async ({
   repositories,
