@@ -7,7 +7,7 @@ const DeleteCommentService = async ({
   repositories,
   ...data
 }: IDeleteCommentDTO) => {
-  const comment = await CommentEntity.find({
+  const comment = await CommentEntity.read({
     ...data,
     repositories: {
       ...repositories

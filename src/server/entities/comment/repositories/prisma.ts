@@ -2,7 +2,7 @@ import { ICommentEntity, ICommentModel } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaCommentModel implements ICommentModel {
-  async create(id: string, data: ICommentEntity) {
+  async create(id: string, data: Omit<ICommentEntity, "id">) {
     return await prisma.comment.create({
       data: {
         id,
@@ -11,7 +11,7 @@ class PrismaCommentModel implements ICommentModel {
     });
   }
 
-  async find(id: string) {
+  async read(id: string) {
     return await prisma.comment.findUnique({
       where: {
         id
@@ -19,7 +19,7 @@ class PrismaCommentModel implements ICommentModel {
     });
   }
 
-  async findAllByPostId(postId: string) {
+  async readAllByPostId(postId: string) {
     return await prisma.comment.findMany({
       where: {
         postId
@@ -27,7 +27,7 @@ class PrismaCommentModel implements ICommentModel {
     });
   }
 
-  async findAllByUserId(userId: string) {
+  async readAllByUserId(userId: string) {
     return await prisma.comment.findMany({
       where: {
         userId
@@ -46,12 +46,18 @@ class PrismaCommentModel implements ICommentModel {
     });
   }
 
-  async delete(id: string) {
-    await prisma.comment.delete({
-      where: {
-        id
-      }
-    });
+  async delete(id: string): Promise<boolean> {
+    try {
+      await prisma.comment.delete({
+        where: {
+          id
+        }
+      });
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
 

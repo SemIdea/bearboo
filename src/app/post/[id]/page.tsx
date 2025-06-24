@@ -17,7 +17,7 @@ const Page = async (props: PageProps) => {
 
   const { id } = params;
 
-  const post = await caller.post.findPost({ postId: id });
+  const post = await caller.post.readPost({ postId: id });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">

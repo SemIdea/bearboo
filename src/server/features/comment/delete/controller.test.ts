@@ -55,7 +55,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
       input
     });
 
-    const result = await CommentEntity.find({
+    const result = await CommentEntity.read({
       id: commentId,
       repositories: {
         ...ctx.repositories,

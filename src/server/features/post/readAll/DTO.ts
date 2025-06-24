@@ -1,11 +1,11 @@
 import { IPostModel } from "@/server/entities/post/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
-type IFindAllPostsDTO = {
+type IreadAllPostsDTO = {
   repositories: {
     database: IPostModel;
     cache: ICacheRepositoryAdapter;
   };
 };
 
-export type { IFindAllPostsDTO };
+export type { IreadAllPostsDTO };

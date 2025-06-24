@@ -8,7 +8,7 @@ const GetUserPostsService = async ({
   repositories,
   ...data
 }: IGetUserPostsDTO) => {
-  const user = await UserEntity.find({
+  const user = await UserEntity.read({
     id: data.userId,
     repositories: {
       ...repositories,
@@ -23,7 +23,7 @@ const GetUserPostsService = async ({
     });
   }
 
-  const posts = await PostEntity.findUserPosts({
+  const posts = await PostEntity.readUserPosts({
     userId: data.userId,
     repositories
   });

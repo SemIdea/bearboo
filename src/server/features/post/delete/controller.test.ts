@@ -36,7 +36,7 @@ describe("Delete Post Controller Unitary Testing", async () => {
       }
     });
 
-    const result = await ctx.repositories.post.find(post.id);
+    const result = await ctx.repositories.post.read(post.id);
 
     expect(result).toBeNull();
   });

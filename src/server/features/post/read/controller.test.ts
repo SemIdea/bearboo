@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { findPostController } from "./controller";
+import { readPostController } from "./controller";
 import { PostEntity } from "@/server/entities/post/entity";
 import { isControllerContext, TestContext } from "@/test/context";
 import { PostErrorCode } from "@/shared/error/post";
 
-describe("Find Post Controller Unitary Testing", async () => {
+describe("Read Post Controller Unitary Testing", async () => {
   const ctx = new TestContext();
 
   await ctx.createAuthenticatedUser();
@@ -14,7 +14,7 @@ describe("Find Post Controller Unitary Testing", async () => {
     throw new Error("User not authenticated");
   }
 
-  test("Should find a post by ID", async () => {
+  test("Should read a post by ID", async () => {
     const postId = await ctx.generateSnowflakeUuid();
     const post = await PostEntity.create({
       id: postId,
@@ -29,7 +29,7 @@ describe("Find Post Controller Unitary Testing", async () => {
       }
     });
 
-    const result = await findPostController({
+    const result = await readPostController({
       ctx,
       input: {
         postId: post.id
@@ -43,7 +43,7 @@ describe("Find Post Controller Unitary Testing", async () => {
     const postId = await ctx.generateSnowflakeUuid();
 
     await expect(
-      findPostController({
+      readPostController({
         ctx,
         input: {
           postId

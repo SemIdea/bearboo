@@ -5,7 +5,7 @@ const createPostSchema = z.object({
   content: z.string()
 });
 
-const findPostSchema = z.object({
+const readPostSchema = z.object({
   postId: z.string()
 });
 
@@ -24,14 +24,14 @@ const revalidatePostSchema = z.object({
 });
 
 type CreatePostInput = z.TypeOf<typeof createPostSchema>;
-type FindPostInput = z.TypeOf<typeof findPostSchema>;
+type ReadPostInput = z.TypeOf<typeof readPostSchema>;
 type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
 type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
 type RevalidatePostInput = z.TypeOf<typeof revalidatePostSchema>;
 
 export {
   createPostSchema,
-  findPostSchema,
+  readPostSchema,
   updatePostSchema,
   deletePostSchema,
   revalidatePostSchema
@@ -39,7 +39,7 @@ export {
 
 export type {
   CreatePostInput,
-  FindPostInput,
+  ReadPostInput,
   UpdatePostInput,
   DeletePostInput,
   RevalidatePostInput

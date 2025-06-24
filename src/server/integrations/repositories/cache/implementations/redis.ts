@@ -9,57 +9,62 @@ class RedisCacheRepository implements ICacheRepositoryAdapter {
     this.redisClient = createRedisClient();
   }
 
-  async set(key: string, value: string, ex?: number): Promise<void> {
+  async set(key: string, value: string, ex?: number): Promise<boolean> {
+    let result: string | null;
+
     if (ex) {
-      await this.redisClient.set(key, value, "EX", ex);
+      result = await this.redisClient.set(key, value, "EX", ex);
     } else {
-      await this.redisClient.set(key, value);
+      result = await this.redisClient.set(key, value);
     }
+
+    return result === "OK";
   }
 
   async get(key: string): Promise<string | null> {
     return await this.redisClient.get(key);
   }
 
-  async del(keys: string | string[]): Promise<void> {
+  async del(keys: string | string[]): Promise<boolean> {
+    let result: number;
+
     if (Array.isArray(keys)) {
-      await this.redisClient.del(...keys);
+      result = await this.redisClient.del(...keys);
     } else {
-      await this.redisClient.del(keys);
+      result = await this.redisClient.del(keys);
     }
+
+    return result > 0;
   }
 
-  async mget(keys: string[]): Promise<Record<string, string | null>> {
+  async bulkGet(keys: string[]): Promise<string[]> {
     const values = await this.redisClient.mget(keys);
-    const result: Record<string, string | null> = {};
 
-    keys.forEach((key, i) => {
-      result[key] = values[i];
-    });
-
-    return result;
+    return values.map((v) => v ?? "");
   }
 
-  async mset(keys: string[], values: string[], ex?: number): Promise<void> {
+  async bulkSet(
+    values: { key: string; value: string; ttl?: number }[]
+  ): Promise<boolean> {
     const multi = this.redisClient.multi();
 
-    keys.forEach((key, index) => {
-      if (ex) {
-        multi.set(key, values[index], "EX", ex);
+    values.forEach(({ key, value, ttl }) => {
+      if (ttl) {
+        multi.set(key, value, "EX", ttl);
       } else {
-        multi.set(key, values[index]);
+        multi.set(key, value);
       }
     });
-    await multi.exec();
+
+    const results = await multi.exec();
+
+    return results ? results.every(([err]) => !err) : false;
   }
 
-  async mdel(keys: string[]): Promise<void> {
-    const multi = this.redisClient.multi();
+  async bulkDel(keys: string[]): Promise<boolean> {
+    const result = await this.redisClient.del(...keys);
 
-    keys.forEach((key) => {
-      multi.del(key);
-    });
-    await multi.exec();
+    return result > 0;
   }
 }
 

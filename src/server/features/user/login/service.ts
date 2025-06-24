@@ -7,7 +7,7 @@ import { UserErrorCode } from "@/shared/error/user";
 const LoginUserService = async ({ repositories, ...data }: ILoginUserDTO) => {
   const { email, password } = data;
 
-  const user = await UserEntity.findByEmail({
+  const user = await UserEntity.readByEmail({
     email,
     repositories
   });

@@ -1,10 +1,10 @@
 import { TRPCError } from "@trpc/server";
-import { IFindPostDTO } from "./DTO";
+import { IReadPostDTO } from "./DTO";
 import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";
 
-const ReadPostService = async ({ repositories, ...data }: IFindPostDTO) => {
-  const post = await PostEntity.find({
+const ReadPostService = async ({ repositories, ...data }: IReadPostDTO) => {
+  const post = await PostEntity.read({
     id: data.postId,
     repositories: {
       ...repositories

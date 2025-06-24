@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server";
 import {
   ICreateAuthSessionDTO,
   IDeleteSessionDTO,
-  IFindSessionByRefreshTokenDTO,
-  IFindUserAndSessionByAccessTokenDTO,
+  IReadSessionByRefreshTokenDTO,
+  IReadUserAndSessionByAccessTokenDTO,
   IRefreshSessionDTO
 } from "./DTO";
 import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
@@ -19,11 +19,12 @@ const CreateAuthSessionService = async ({
 }: ICreateAuthSessionDTO) => {
   const { userId } = data;
 
-  const user = await UserEntity.find({
+  const user = await UserEntity.read({
     id: userId,
     repositories: {
       ...repositories,
-      database: repositories.user
+      database: repositories.user,
+      cache: repositories.cache
     }
   });
 
@@ -60,13 +61,13 @@ const CreateAuthSessionService = async ({
   return session;
 };
 
-const FindUserAndSessionByAccessTokenService = async ({
+const ReadUserAndSessionByAccessTokenService = async ({
   repositories,
   ...data
-}: IFindUserAndSessionByAccessTokenDTO) => {
+}: IReadUserAndSessionByAccessTokenDTO) => {
   const { accessToken } = data;
 
-  const session = await SessionEntity.findByAccessToken({
+  const session = await SessionEntity.readByAccessToken({
     accessToken,
     repositories: {
       ...repositories
@@ -80,7 +81,7 @@ const FindUserAndSessionByAccessTokenService = async ({
     });
   }
 
-  const user = await UserEntity.find({
+  const user = await UserEntity.read({
     id: session.userId,
     repositories: {
       ...repositories,
@@ -104,11 +105,11 @@ const FindUserAndSessionByAccessTokenService = async ({
   } as IUserWithSession;
 };
 
-const FindSessionByRefreshTokenService = async ({
+const ReadSessionByRefreshTokenService = async ({
   repositories,
   ...data
-}: IFindSessionByRefreshTokenDTO) => {
-  const session = await SessionEntity.findByRefreshToken({
+}: IReadSessionByRefreshTokenDTO) => {
+  const session = await SessionEntity.readByRefreshToken({
     repositories,
     ...data
   });
@@ -130,7 +131,6 @@ const RefreshSessionService = async ({
   const newSession = await SessionEntity.refreshSession({
     id: data.id,
     accessToken: data.accessToken,
-    refreshToken: data.refreshToken,
     newAccessToken: data.newAccessToken,
     newRefreshToken: data.newRefreshToken,
     repositories
@@ -150,7 +150,7 @@ const DeleteSessionService = async ({
   repositories,
   ...data
 }: IDeleteSessionDTO) => {
-  const user = await UserEntity.find({
+  const user = await UserEntity.read({
     id: data.userId,
     repositories: {
       ...repositories,
@@ -165,7 +165,7 @@ const DeleteSessionService = async ({
     });
   }
 
-  const session = await SessionEntity.find({
+  const session = await SessionEntity.read({
     id: data.sessionId,
     repositories: {
       ...repositories
@@ -196,8 +196,8 @@ const DeleteSessionService = async ({
 
 export {
   CreateAuthSessionService,
-  FindUserAndSessionByAccessTokenService,
-  FindSessionByRefreshTokenService,
+  ReadUserAndSessionByAccessTokenService,
+  ReadSessionByRefreshTokenService,
   RefreshSessionService,
   DeleteSessionService
 };

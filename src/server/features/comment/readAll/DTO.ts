@@ -1,10 +1,10 @@
 import { ICommentModel } from "@/server/entities/comment/DTO";
 
-type IFindAllCommentsByPostIdDTO = {
+type IReadAllCommentsByPostIdDTO = {
   postId: string;
   repositories: {
     database: ICommentModel;
   };
 };
 
-export type { IFindAllCommentsByPostIdDTO };
+export type { IReadAllCommentsByPostIdDTO };

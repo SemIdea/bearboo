@@ -1,12 +1,12 @@
 import { GetUserProfileService } from "./service";
 import { IAPIContextDTO } from "@/server/createContext";
-import { GetUserProfileInput } from "@/server/schema/user.schema";
+import { ReadUserProfileInput } from "@/server/schema/user.schema";
 
 const getUserProfileController = async ({
   input,
   ctx
 }: {
-  input: GetUserProfileInput;
+  input: ReadUserProfileInput;
   ctx: IAPIContextDTO;
 }) => {
   if (ctx.user && input.userId == ctx.user.id) {

@@ -1,176 +1,25 @@
+import { BaseEntity } from "../base/entity";
 import {
-  ICachePostDTO,
-  ICacheUserPostsDTO,
-  ICreatePostDTO,
-  IDeletePostDTO,
-  IFindAllPostsDTO,
-  IFindPostDTO,
-  IFindUserPostsDTO,
   IPostEntity,
-  IResolvePostFromIndexDTO,
-  IUpdatePostDTO
+  IPostModel,
+  IReadAllPostsDTO,
+  IReadUserPostsDTO
 } from "./DTO";
-import { isFeatureEnabled } from "@/lib/featureFlags";
-import {
-  postCacheKey,
-  userPostsCacheKey,
-  PostCacheTTL
-} from "@/constants/cache/post";
 
-class PostEntity implements IPostEntity {
-  constructor(
-    public id: string,
-    public userId: string,
-    public title: string,
-    public content: string
-  ) {}
-
-  private static async cachePost({ post, repositories }: ICachePostDTO) {
-    if (!isFeatureEnabled("enablePostCaching")) return;
-    const { id } = post;
-
-    await repositories.cache.mset(
-      [postCacheKey(id)],
-      [JSON.stringify(post)],
-      PostCacheTTL
-    );
-  }
-
-  private static async cacheUserPosts({
-    userId,
-    posts,
-    repositories
-  }: ICacheUserPostsDTO) {
-    if (!isFeatureEnabled("enablePostCaching")) return;
-    await repositories.cache.mset(
-      [
-        userPostsCacheKey(userId),
-        ...posts.map((post) => postCacheKey(post.id))
-      ],
-      [
-        posts.map((post) => post.id).join(","),
-        ...posts.map((post) => JSON.stringify(post))
-      ]
-    );
-  }
-
-  private static async resolvePostFromIndex({
-    indexKey,
-    indexKeyCaller,
-    findOnDatabase,
-    repositories
-  }: IResolvePostFromIndexDTO) {
-    const lookupCacheKey = indexKeyCaller(indexKey);
-    const cachedIndexValue = await repositories.cache.get(lookupCacheKey);
-
-    if (cachedIndexValue) {
-      try {
-        const maybePost = JSON.parse(cachedIndexValue) as PostEntity;
-
-        if (maybePost.id) return maybePost;
-      } catch (error) {
-        const fallbackCacheKey = postCacheKey(cachedIndexValue);
-        const fallbackCachePost =
-          await repositories.cache.get(fallbackCacheKey);
-
-        if (fallbackCachePost)
-          return JSON.parse(fallbackCachePost) as PostEntity;
-      }
-    }
-
-    const postFromDb = await findOnDatabase(indexKey);
-
-    if (!postFromDb) return null;
-
-    await PostEntity.cachePost({
-      post: postFromDb,
-      repositories
-    });
-
-    return postFromDb;
-  }
-
-  static async create({ id, data, repositories }: ICreatePostDTO) {
-    const { userId, title, content } = data;
-    const newPost = new PostEntity(id, userId, title, content);
-
-    const post = await repositories.database.create(id, newPost);
-
-    await PostEntity.cachePost({
-      post,
-      repositories
-    });
-
-    return post;
-  }
-
-  static async find({ id, repositories }: IFindPostDTO) {
-    return await PostEntity.resolvePostFromIndex({
-      indexKey: id,
-      indexKeyCaller: postCacheKey,
-      findOnDatabase: repositories.database.find,
-      repositories
-    });
-  }
-
-  // Don't cache this, create a find newest posts method instead and cache that
-  static async findAll({ repositories }: IFindAllPostsDTO) {
-    const postsData = await repositories.database.findAll();
-
-    if (!postsData) return [] as PostEntity[];
-
-    const posts = postsData.map(
-      (post: any) =>
-        new PostEntity(post.id, post.userId, post.title, post.content)
-    );
-
-    for (const post of posts) {
-      const cachedPostQuery = postCacheKey(post.id);
-
-      await repositories.cache.set(
-        cachedPostQuery,
-        JSON.stringify(post),
-        PostCacheTTL
-      );
-    }
+class PostEntityClass extends BaseEntity<IPostEntity, IPostModel> {
+  async readAll({ repositories }: IReadAllPostsDTO) {
+    const posts = await repositories.database.readAll();
 
     return posts;
   }
 
-  static async findUserPosts({ userId, repositories }: IFindUserPostsDTO) {
-    const cachedUserPosts = await repositories.cache.get(
-      userPostsCacheKey(userId)
-    );
-
-    if (cachedUserPosts) return JSON.parse(cachedUserPosts) as PostEntity[];
-
-    const userPosts = await repositories.database.findUserPosts(userId);
-
-    await PostEntity.cacheUserPosts({
-      userId,
-      posts: userPosts,
-      repositories
-    });
+  async readUserPosts({ userId, repositories }: IReadUserPostsDTO) {
+    const userPosts = await repositories.database.readUserPosts(userId);
 
     return userPosts;
   }
-
-  static async update({ id, data, repositories }: IUpdatePostDTO) {
-    const updated = await repositories.database.update(id, data);
-
-    await PostEntity.cachePost({
-      post: updated,
-      repositories
-    });
-
-    return updated;
-  }
-
-  static async delete({ id, repositories }: IDeletePostDTO) {
-    await repositories.cache.mdel([postCacheKey(id)]);
-
-    return await repositories.database.delete(id);
-  }
 }
+
+const PostEntity = new PostEntityClass({});
 
 export { PostEntity };

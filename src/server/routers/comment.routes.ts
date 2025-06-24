@@ -1,13 +1,13 @@
 import { protectedProcedure, publicProcedure, t } from "../createRouter";
 import { createCommentController } from "../features/comment/create/controller";
 import { deleteCommentController } from "../features/comment/delete/controller";
-import { findAllCommentsByPostController } from "../features/comment/findAll/controller";
+import { readAllCommentsByPostController } from "../features/comment/readAll/controller";
 import { updateCommentController } from "../features/comment/update/controller";
 import {
   createCommentschema,
-  deleteCommentSchema,
-  findAllCommentsByPostSchema,
-  updateCommentSchema
+  readAllCommentsByPostSchema,
+  updateCommentSchema,
+  deleteCommentSchema
 } from "../schema/comment.schema";
 
 const CommentRouter = t.router({
@@ -16,10 +16,10 @@ const CommentRouter = t.router({
     .mutation(async ({ input, ctx }) =>
       createCommentController({ input, ctx })
     ),
-  findAllCommentsByPost: publicProcedure
-    .input(findAllCommentsByPostSchema)
+  readAllCommentsByPost: publicProcedure
+    .input(readAllCommentsByPostSchema)
     .query(async ({ input, ctx }) =>
-      findAllCommentsByPostController({ input, ctx })
+      readAllCommentsByPostController({ input, ctx })
     ),
   updateComment: protectedProcedure
     .input(updateCommentSchema)
