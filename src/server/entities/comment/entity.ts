@@ -1,69 +1,40 @@
+import { BaseEntity } from "../base/entity";
 import {
   ICommentEntity,
-  ICreateCommentDTO,
-  IDeleteCommentDTO,
-  IFindAllByPostIdDTO,
-  IFindAllByUserIdDTO,
-  IFindCommentByIdDTO,
-  IUpdateCommentDTO
+  IReadAllByPostIdDTO,
+  IReadAllByUserIdDTO
 } from "./DTO";
 
-class CommentEntity implements ICommentEntity {
-  constructor(
-    public id: string,
-    public postId: string,
-    public userId: string,
-    public content: string
-  ) {}
+type ICommentRepositories = {
+  readAllByPostId: (postId: string) => Promise<ICommentEntity[] | null>;
+  readAllByUserId: (userId: string) => Promise<ICommentEntity[] | null>;
+};
 
-  static async create({ id, data, repositories }: ICreateCommentDTO) {
-    const { userId, postId, content } = data;
-    const newComment = new CommentEntity(id, postId, userId, content);
-
-    const comment = await repositories.database.create(id, newComment);
-
-    return comment;
-  }
-
-  static async find({ id, repositories }: IFindCommentByIdDTO) {
-    const comment = await repositories.database.find(id);
-
-    if (!comment) {
-      return null;
-    }
-
-    return comment;
-  }
-
-  static async findAllByPostId({ postId, repositories }: IFindAllByPostIdDTO) {
-    const comments = await repositories.database.findAllByPostId(postId);
+class CommentEntityClass extends BaseEntity<
+  ICommentEntity,
+  ICommentRepositories
+> {
+  async readAllByPostId({ postId, repositories }: IReadAllByPostIdDTO) {
+    const comments = await repositories.database.readAllByPostId(postId);
 
     if (!comments) {
-      return [] as CommentEntity[];
+      return [] as ICommentEntity[];
     }
 
     return comments;
   }
 
-  static async findAllByUserId({ userId, repositories }: IFindAllByUserIdDTO) {
-    const comments = await repositories.database.findAllByUserId(userId);
+  async readAllByUserId({ userId, repositories }: IReadAllByUserIdDTO) {
+    const comments = await repositories.database.readAllByUserId(userId);
 
     if (!comments) {
-      return [] as CommentEntity[];
+      return [] as ICommentEntity[];
     }
 
     return comments;
-  }
-
-  static async update({ id, data, repositories }: IUpdateCommentDTO) {
-    const comment = await repositories.database.update(id, data);
-
-    return comment;
-  }
-
-  static async delete({ id, repositories }: IDeleteCommentDTO) {
-    return await repositories.database.delete(id);
   }
 }
+
+const CommentEntity = new CommentEntityClass({});
 
 export { CommentEntity };
