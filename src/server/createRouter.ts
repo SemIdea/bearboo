@@ -1,9 +1,7 @@
 import superjson from "superjson";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
-import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { Context } from "./createContext";
-import { ReadUserAndSessionByAccessTokenService } from "./features/auth/session/service";
 import { GetTimestampFromID } from "./drivers/snowflake";
 import { AuthErrorCode } from "@/shared/error/auth";
 
@@ -21,22 +19,7 @@ const t = initTRPC.context<Context>().create({
 });
 
 const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
-  const cookies = ctx.headers.get("cookie");
-
-  if (!cookies) return next();
-  const cookieStore = parseCookie(cookies);
-  const accessToken = cookieStore.get("accessToken") || null;
-
-  if (!accessToken) return next();
-
-  const user = await ReadUserAndSessionByAccessTokenService({
-    accessToken,
-    repositories: {
-      cache: ctx.repositories.cache,
-      user: ctx.repositories.user,
-      database: ctx.repositories.session
-    }
-  });
+  const user = ctx.user;
 
   if (!user) return next();
   if (!user.session) return next();

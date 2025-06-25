@@ -12,9 +12,11 @@ import {
 } from "./drivers/repositories";
 import { IPostModel } from "./entities/post/DTO";
 import { ICommentModel } from "./entities/comment/DTO";
+import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { ReadUserAndSessionByAccessTokenService } from "./features/auth/session/service";
 
 type IInputAPIContextDTO = {
-  headers?: Headers;
+  headers: Headers;
 };
 
 type IBaseContextDTO = IInputAPIContextDTO & {
@@ -37,11 +39,11 @@ type IProtectedAPIContextDTO = IBaseContextDTO & {
   user: IUserWithSession;
 };
 
-const createTRPCContext = ({
+const createTRPCContext = async ({
   headers
-}: IInputAPIContextDTO): IAPIContextDTO => {
-  return {
-    headers: headers != null ? headers : new Headers(),
+}: IInputAPIContextDTO): Promise<IAPIContextDTO> => {
+  const ctx: IAPIContextDTO = {
+    headers,
     repositories: {
       user: userRepository,
       session: sessionRepository,
@@ -51,6 +53,29 @@ const createTRPCContext = ({
       comment: commentRepository
     }
   };
+
+  const cookies = headers.get("cookie");
+
+  if (!cookies) return ctx;
+  const cookieStore = parseCookie(cookies);
+  const accessToken = cookieStore.get("accessToken") || null;
+
+  if (!accessToken) return ctx;
+
+  const user = await ReadUserAndSessionByAccessTokenService({
+    accessToken,
+    repositories: {
+      cache: ctx.repositories.cache,
+      user: ctx.repositories.user,
+      database: ctx.repositories.session
+    }
+  });
+
+  if (!user) return ctx;
+
+  ctx.user = user;
+
+  return ctx;
 };
 
 type Context = Awaited<ReturnType<typeof createTRPCContext>>;
