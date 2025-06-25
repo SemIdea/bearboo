@@ -1,12 +1,12 @@
 import { protectedProcedure, t } from "../createRouter";
 import {
-  getUserFromSessionController,
+  readUserFromSessionController,
   logoutUserFromSessionController
 } from "../features/auth/session/controller";
 
 const SessionRouter = t.router({
   me: protectedProcedure.query(async ({ ctx }) =>
-    getUserFromSessionController({ ctx })
+    readUserFromSessionController({ ctx })
   ),
   logout: protectedProcedure.mutation(async ({ ctx }) =>
     logoutUserFromSessionController({ ctx })

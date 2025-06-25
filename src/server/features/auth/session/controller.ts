@@ -46,7 +46,7 @@ const refreshSessionController = async ({
   };
 };
 
-const getUserFromSessionController = async ({
+const readUserFromSessionController = async ({
   ctx
 }: {
   ctx: IProtectedAPIContextDTO;
@@ -73,6 +73,6 @@ const logoutUserFromSessionController = async ({
 
 export {
   refreshSessionController,
-  getUserFromSessionController,
+  readUserFromSessionController,
   logoutUserFromSessionController
 };

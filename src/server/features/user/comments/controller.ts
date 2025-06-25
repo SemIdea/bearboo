@@ -1,14 +1,15 @@
-import { GetUserCommentsService } from "./service";
+import { ReadUserCommentsInput } from "@/server/schema/user.schema";
+import { ReadUserCommentsService } from "./service";
 import { IAPIContextDTO } from "@/server/createContext";
 
-const getUserCommentsController = async ({
+const readUserCommentsController = async ({
   input,
   ctx
 }: {
-  input: any;
+  input: ReadUserCommentsInput;
   ctx: IAPIContextDTO;
 }) => {
-  const comments = GetUserCommentsService({
+  const comments = ReadUserCommentsService({
     ...input,
     repositories: {
       ...ctx.repositories,
@@ -19,4 +20,4 @@ const getUserCommentsController = async ({
   return comments;
 };
 
-export { getUserCommentsController };
+export { readUserCommentsController };

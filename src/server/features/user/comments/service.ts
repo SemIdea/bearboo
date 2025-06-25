@@ -1,7 +1,7 @@
 import { IGetUserCommentsDTO } from "./DTO";
 import { CommentEntity } from "@/server/entities/comment/entity";
 
-const GetUserCommentsService = async ({
+const ReadUserCommentsService = async ({
   repositories,
   ...data
 }: IGetUserCommentsDTO) => {
@@ -13,4 +13,4 @@ const GetUserCommentsService = async ({
   return comments;
 };
 
-export { GetUserCommentsService };
+export { ReadUserCommentsService };

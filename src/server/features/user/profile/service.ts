@@ -3,7 +3,7 @@ import { IGetUserProfileDTO } from "./DTO";
 import { UserEntity } from "@/server/entities/user/entity";
 import { UserErrorCode } from "@/shared/error/user";
 
-const GetUserProfileService = async ({
+const ReadUserProfileService = async ({
   repositories,
   ...data
 }: IGetUserProfileDTO) => {
@@ -26,4 +26,4 @@ const GetUserProfileService = async ({
   return userWithoutPassword;
 };
 
-export { GetUserProfileService };
+export { ReadUserProfileService };

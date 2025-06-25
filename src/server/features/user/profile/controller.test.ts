@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { getUserProfileController } from "./controller";
+import { readUserProfileController } from "./controller";
 import { isControllerContext, TestContext } from "@/test/context";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -16,7 +16,7 @@ describe("Register User Controller Unitary Testing", async () => {
   test("Should return user profile if user exists", async () => {
     const user = ctx.user;
 
-    const result = await getUserProfileController({
+    const result = await readUserProfileController({
       ctx,
       input: {
         userId: user.id
@@ -31,7 +31,7 @@ describe("Register User Controller Unitary Testing", async () => {
     const uuid = await ctx.generateSnowflakeUuid();
 
     await expect(
-      getUserProfileController({
+      readUserProfileController({
         ctx,
         input: {
           userId: uuid

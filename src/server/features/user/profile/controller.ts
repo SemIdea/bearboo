@@ -1,8 +1,8 @@
-import { GetUserProfileService } from "./service";
+import { ReadUserProfileService } from "./service";
 import { IAPIContextDTO } from "@/server/createContext";
 import { ReadUserProfileInput } from "@/server/schema/user.schema";
 
-const getUserProfileController = async ({
+const readUserProfileController = async ({
   input,
   ctx
 }: {
@@ -15,7 +15,7 @@ const getUserProfileController = async ({
     return userWithoutSession;
   }
 
-  const profile = await GetUserProfileService({
+  const profile = await ReadUserProfileService({
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.user
@@ -26,4 +26,4 @@ const getUserProfileController = async ({
   return profile;
 };
 
-export { getUserProfileController };
+export { readUserProfileController };

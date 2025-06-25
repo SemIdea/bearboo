@@ -1,7 +1,7 @@
 import { IreadAllPostsDTO } from "./DTO";
 import { PostEntity } from "@/server/entities/post/entity";
 
-const readAllPostsService = async ({ repositories }: IreadAllPostsDTO) => {
+const ReadAllPostsService = async ({ repositories }: IreadAllPostsDTO) => {
   const posts = await PostEntity.readAll({
     repositories
   });
@@ -9,4 +9,4 @@ const readAllPostsService = async ({ repositories }: IreadAllPostsDTO) => {
   return posts;
 };
 
-export { readAllPostsService };
+export { ReadAllPostsService };
