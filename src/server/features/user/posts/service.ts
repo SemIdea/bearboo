@@ -9,7 +9,7 @@ const GetUserPostsService = async ({
   ...data
 }: IGetUserPostsDTO) => {
   const user = await UserEntity.read({
-    id: data.userId,
+    id: data.id,
     repositories: {
       ...repositories,
       database: repositories.user
@@ -24,7 +24,7 @@ const GetUserPostsService = async ({
   }
 
   const posts = await PostEntity.readUserPosts({
-    userId: data.userId,
+    userId: data.id,
     repositories
   });
 

@@ -5,12 +5,12 @@ import { PostErrorCode } from "@/shared/error/post";
 
 const UpdatePostService = async ({
   repositories,
+  id,
   userId,
-  postId,
   ...data
 }: IUpdatePostDTO) => {
   const post = await PostEntity.read({
-    id: postId,
+    id,
     repositories: {
       ...repositories
     }
@@ -31,7 +31,7 @@ const UpdatePostService = async ({
   }
 
   return await PostEntity.update({
-    id: postId,
+    id,
     data,
     repositories
   });

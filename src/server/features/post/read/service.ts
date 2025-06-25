@@ -5,7 +5,7 @@ import { PostErrorCode } from "@/shared/error/post";
 
 const ReadPostService = async ({ repositories, ...data }: IReadPostDTO) => {
   const post = await PostEntity.read({
-    id: data.postId,
+    id: data.id,
     repositories: {
       ...repositories
     }

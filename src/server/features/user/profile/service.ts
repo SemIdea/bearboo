@@ -7,10 +7,10 @@ const ReadUserProfileService = async ({
   repositories,
   ...data
 }: IGetUserProfileDTO) => {
-  const { userId } = data;
+  const { id } = data;
 
   const userProfile = await UserEntity.read({
-    id: userId,
+    id,
     repositories
   });
 

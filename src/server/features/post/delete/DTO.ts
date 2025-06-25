@@ -3,8 +3,8 @@ import { IUserModel } from "@/server/entities/user/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IDeletePostDTO = {
+  id: string;
   userId: string;
-  postId: string;
   repositories: {
     user: IUserModel;
     database: IPostModel;

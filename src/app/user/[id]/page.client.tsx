@@ -9,10 +9,10 @@ type Params = {
 };
 
 const UserPosts = () => {
-  const { id: userId } = useParams<Params>();
+  const { id } = useParams<Params>();
 
   const { data: posts, isLoading: isPostsLoading } = trpc.user.posts.useQuery({
-    userId: userId
+    id
   });
 
   return (
@@ -39,11 +39,11 @@ const UserPosts = () => {
 };
 
 const UserComments = () => {
-  const { id: userId } = useParams<Params>();
+  const { id } = useParams<Params>();
 
   const { data: comments, isLoading: isCommentsLoading } =
     trpc.user.comments.useQuery({
-      userId: userId
+      id
     });
 
   return (

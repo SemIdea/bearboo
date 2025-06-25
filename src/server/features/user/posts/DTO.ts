@@ -3,7 +3,7 @@ import { IUserModel } from "@/server/entities/user/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IGetUserPostsDTO = {
-  userId: string;
+  id: string;
   repositories: IGetUserPostsRepositories;
 };
 

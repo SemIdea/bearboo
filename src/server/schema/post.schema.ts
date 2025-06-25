@@ -6,21 +6,21 @@ const createPostSchema = z.object({
 });
 
 const readPostSchema = z.object({
-  postId: z.string()
+  id: z.string()
 });
 
 const updatePostSchema = z.object({
-  postId: z.string(),
+  id: z.string(),
   title: z.string().optional(),
   content: z.string().optional()
 });
 
 const deletePostSchema = z.object({
-  postId: z.string()
+  id: z.string()
 });
 
 const revalidatePostSchema = z.object({
-  postId: z.string()
+  id: z.string()
 });
 
 type CreatePostInput = z.TypeOf<typeof createPostSchema>;

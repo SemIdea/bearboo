@@ -5,7 +5,7 @@ import { PostErrorCode } from "@/shared/error/post";
 
 const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   const post = await PostEntity.read({
-    id: data.postId,
+    id: data.id,
     repositories: {
       ...repositories
     }
@@ -26,7 +26,7 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   }
 
   await PostEntity.delete({
-    id: data.postId,
+    id: data.id,
     repositories: {
       ...repositories
     }

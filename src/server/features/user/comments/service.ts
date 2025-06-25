@@ -6,7 +6,7 @@ const ReadUserCommentsService = async ({
   ...data
 }: IGetUserCommentsDTO) => {
   const comments = await CommentEntity.readAllByUserId({
-    ...data,
+    userId: data.id,
     repositories
   });
 

@@ -9,7 +9,7 @@ const RevalidatePostService = async ({
   ...data
 }: IRevalidatePostDTO) => {
   const post = await PostEntity.read({
-    id: data.postId,
+    id: data.id,
     repositories: {
       ...repositories
     }
@@ -29,7 +29,7 @@ const RevalidatePostService = async ({
     });
   }
 
-  revalidatePath(`/post/${data.postId}`);
+  revalidatePath(`/post/${data.id}`);
 
   return post;
 };

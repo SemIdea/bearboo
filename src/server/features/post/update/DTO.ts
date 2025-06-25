@@ -3,8 +3,8 @@ import { IUserModel } from "@/server/entities/user/DTO";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IUpdatePostDTO = {
+  id: string;
   userId: string;
-  postId: string;
   title?: string;
   content?: string;
   repositories: {

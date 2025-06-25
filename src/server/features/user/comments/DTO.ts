@@ -1,7 +1,7 @@
 import { ICommentModel } from "@/server/entities/comment/DTO";
 
 type IGetUserCommentsDTO = {
-  userId: string;
+  id: string;
   repositories: {
     database: ICommentModel;
   };

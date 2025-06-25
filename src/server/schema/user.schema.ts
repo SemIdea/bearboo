@@ -33,15 +33,15 @@ const loginUserSchema = z.object({
 });
 
 const readUserProfileSchema = z.object({
-  userId: z.string()
+  id: z.string()
 });
 
 const readUserPostsSchema = z.object({
-  userId: z.string()
+  id: z.string()
 });
 
 const readUserCommentsSchema = z.object({
-  userId: z.string()
+  id: z.string()
 });
 
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
