@@ -9,11 +9,11 @@ type PageProps = {
 
 const Page = async (props: PageProps) => {
   const params = await props.params;
-  const caller = createCaller();
+  const caller = await createCaller();
 
   const { id } = params;
 
-  const user = await caller.user.profile({ userId: id });
+  const user = await caller.user.profile({ id });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">

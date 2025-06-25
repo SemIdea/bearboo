@@ -13,11 +13,11 @@ export const dynamic = "error";
 
 const Page = async (props: PageProps) => {
   const params = await props.params;
-  const caller = createCaller();
+  const caller = await createCaller();
 
   const { id } = params;
 
-  const post = await caller.post.read({ postId: id });
+  const post = await caller.post.read({ id: id });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
