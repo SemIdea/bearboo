@@ -15,9 +15,9 @@ describe("Delete Post Controller Unitary Testing", async () => {
   }
 
   test("Should delete a post successfully", async () => {
-    const postId = await ctx.generateSnowflakeUuid();
-    const post = await PostEntity.create({
-      id: postId,
+    const id = await ctx.generateSnowflakeUuid();
+    await PostEntity.create({
+      id,
       data: {
         title: "Test Post",
         content: "This is a test post.",
@@ -32,23 +32,23 @@ describe("Delete Post Controller Unitary Testing", async () => {
     await deletePostController({
       ctx,
       input: {
-        postId: post.id
+        id
       }
     });
 
-    const result = await ctx.repositories.post.read(post.id);
+    const result = await ctx.repositories.post.read(id);
 
     expect(result).toBeNull();
   });
 
   test("Should throw an error if post does not exist", async () => {
-    const postId = await ctx.generateSnowflakeUuid();
+    const id = await ctx.generateSnowflakeUuid();
 
     await expect(
       deletePostController({
         ctx,
         input: {
-          postId
+          id: id
         }
       })
     ).rejects.toThrowError(

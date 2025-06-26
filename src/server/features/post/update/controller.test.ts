@@ -13,9 +13,9 @@ describe("Update Post Controller Unitary Testing", async () => {
   }
 
   test("Should update a post successfully", async () => {
-    const postId = await ctx.generateSnowflakeUuid();
+    const id = await ctx.generateSnowflakeUuid();
     const post = await PostEntity.create({
-      id: postId,
+      id,
       data: {
         title: "Original Title",
         content: "Original Content",
@@ -30,7 +30,7 @@ describe("Update Post Controller Unitary Testing", async () => {
     const result = await updatePostController({
       ctx,
       input: {
-        postId: post.id,
+        id,
         content: "Updated Content",
         title: "Updated Title"
       }

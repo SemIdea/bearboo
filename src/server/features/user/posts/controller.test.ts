@@ -19,7 +19,7 @@ describe("User Posts Controller Unitary Testing", async () => {
   test("Should return an empty list when user has no posts", async () => {
     const result = await getUserPostsController({
       ctx,
-      input: { userId: user.id }
+      input: { id: user.id }
     });
 
     expect(result).toBeDefined();
@@ -44,7 +44,7 @@ describe("User Posts Controller Unitary Testing", async () => {
 
     const result = await getUserPostsController({
       ctx,
-      input: { userId: user.id }
+      input: { id: user.id }
     });
 
     expect(result).toBeDefined();
@@ -58,7 +58,7 @@ describe("User Posts Controller Unitary Testing", async () => {
     await expect(
       getUserPostsController({
         ctx,
-        input: { userId: uuid }
+        input: { id: uuid }
       })
     ).rejects.toThrowError(
       new TRPCError({

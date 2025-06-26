@@ -19,7 +19,7 @@ describe("Register User Controller Unitary Testing", async () => {
     const result = await readUserProfileController({
       ctx,
       input: {
-        userId: user.id
+        id: user.id
       }
     });
 
@@ -34,7 +34,7 @@ describe("Register User Controller Unitary Testing", async () => {
       readUserProfileController({
         ctx,
         input: {
-          userId: uuid
+          id: uuid
         }
       })
     ).rejects.toThrowError(
