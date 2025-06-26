@@ -1,27 +1,18 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
 import { IPostEntity } from "@/server/entities/post/DTO";
 
-type Params = {
-  id: string;
-};
-
-type PostData = {
-  title: string;
-  content: string;
-};
-
-// Improve. If the user is not the owner of the post, do something
-const useUpdatePost = () => {
+const useUpdatePost = (post: IPostEntity) => {
   const router = useRouter();
-  const { id: postId } = useParams<Params>();
+  const { id } = post;
   const { session, isLoadingSession } = useAuth();
 
-  const [post, setPost] = useState<IPostEntity | null>(null);
+  const [title, setTitle] = useState(post.title);
+  const [content, setContent] = useState(post.content);
 
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
@@ -32,7 +23,7 @@ const useUpdatePost = () => {
   const { mutate: updatePost } = trpc.post.update.useMutation({
     onSuccess: () => {
       revalidatePost({
-        postId
+        id
       });
       setSuccessMessage("Post updated successfully!");
       setErrorMessage(null);
@@ -63,49 +54,22 @@ const useUpdatePost = () => {
     }
   });
 
-  const { data: postData } = trpc.post.read.useQuery(
-    { postId: postId as string },
-    {
-      enabled: !!postId
-    }
-  );
-
   useEffect(() => {
     if (!isLoadingSession && !session) {
       router.push("/auth/login");
     }
   }, [isLoadingSession]);
 
-  useEffect(() => {
-    if (postData) {
-      setPost(postData);
-    }
-  }, [postData]);
-
   const handleUpdatePost = async (
     postData: React.FormEvent<HTMLFormElement>
   ) => {
-    // Improve. Verify all data before sending
     postData.preventDefault();
-
-    if (!session)
-      return setErrorMessage("You must be logged in to update a post.");
-
-    if (!postId)
-      return setErrorMessage("Post ID is required to update a post.");
-
     setIsUploading(true);
 
-    const formData = new FormData(postData.currentTarget);
-
-    const data: PostData = {
-      title: formData.get("title") as string,
-      content: formData.get("content") as string
-    };
-
     updatePost({
-      ...data,
-      postId
+      title,
+      content,
+      id
     });
   };
 
@@ -113,24 +77,72 @@ const useUpdatePost = () => {
     if (!session)
       return setErrorMessage("You must be logged in to update a post.");
 
-    if (!postId)
-      return setErrorMessage("Post ID is required to update a post.");
+    if (!id) return setErrorMessage("Post ID is required to update a post.");
 
     setIsUploading(true);
 
     deletePost({
-      postId
+      id
     });
   };
 
   return {
-    handleUpdatePost,
-    handleDeletePost,
+    title,
+    content,
     isUploading,
     successMessage,
     errorMessage,
-    post
+    setTitle,
+    setContent,
+    handleUpdatePost,
+    handleDeletePost
   };
 };
 
-export { useUpdatePost };
+const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
+  const {
+    title,
+    content,
+    isUploading,
+    errorMessage,
+    successMessage,
+    setTitle,
+    setContent,
+    handleUpdatePost,
+    handleDeletePost
+  } = useUpdatePost(post);
+
+  return (
+    <>
+      <form onSubmit={handleUpdatePost}>
+        <input
+          required
+          name="title"
+          placeholder="Title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <br />
+        <br />
+        <textarea
+          required
+          name="content"
+          placeholder="Content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <button type="submit" disabled={isUploading}>
+          {isUploading ? "Updating..." : "Edit Post"}
+        </button>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {successMessage && <p className="text-green-500">{successMessage}</p>}
+      </form>
+      <button onClick={() => handleDeletePost()} disabled={isUploading}>
+        {isUploading ? "Deleting..." : "Delete Post"}
+      </button>
+    </>
+  );
+};
+
+export { UpdatePostForm };

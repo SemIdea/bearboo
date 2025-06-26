@@ -1,55 +1,28 @@
-"use client";
+import { createCaller, createDynamicCaller } from "@/server/caller";
+import { UpdatePostForm } from "./page.client";
 
-import { useEffect, useState } from "react";
-import { useUpdatePost } from "./page.client";
+type PageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
-const Page = () => {
-  const {
-    handleUpdatePost,
-    handleDeletePost,
-    isUploading,
-    successMessage,
-    errorMessage,
-    post
-  } = useUpdatePost();
+const Page = async (props: PageProps) => {
+  const params = await props.params;
+  const { id } = params;
 
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
+  const { caller, ctx } = await createDynamicCaller({
+    pathName: `/post/edit/${id}`
+  });
 
-  useEffect(() => {
-    if (post) {
-      setTitle(post.title);
-      setContent(post.content);
-    }
-  }, [post]);
+  const user = ctx.user;
+  const post = await caller.post.read({ id });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <h2>Edit Post</h2>
-      <form onSubmit={(e) => handleUpdatePost(e)}>
-        <input
-          required
-          name="title"
-          placeholder="Title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <br />
-        <br />
-        <textarea
-          required
-          name="content"
-          placeholder="Content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <button type="submit">Edit Post</button>
-      </form>
-      <button onClick={handleDeletePost}>Delete Post</button>
-      {isUploading && <p>Uploading...</p>}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      {JSON.stringify(ctx.user, null, 2)}
+      <UpdatePostForm post={post} />
     </div>
   );
 };
