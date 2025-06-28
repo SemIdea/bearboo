@@ -1,20 +1,7 @@
-import { Snowflake, decodeSnowflake } from "@skorotkiewicz/snowflake-id";
-const snowflakeInstance = new Snowflake(1);
+import { v4 as uuidv4 } from "uuid";
 
-const GenerateSnowflakeUID = async (): Promise<string> => {
-  const id = await snowflakeInstance.generate();
-
-  return id;
+const GenerateSnowflakeUID = () => {
+  return uuidv4();
 };
 
-const GetTimestampFromID = (
-  id: string
-): {
-  timestamp: string;
-  machineId: string;
-  sequence: string;
-} => {
-  return decodeSnowflake(id);
-};
-
-export { GenerateSnowflakeUID, GetTimestampFromID };
+export { GenerateSnowflakeUID };

@@ -8,36 +8,44 @@ datasource db {
 }
 
 model User {
-  id       String    @id
-  email    String    @unique
-  password String
-  sessions Session[]
-  Post     Post[]
-  comments Comment[]
+  id        String    @id
+  email     String    @unique
+  password  String
+  sessions  Session[]
+  Post      Post[]
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Session {
-  id           String @id
+  id           String   @id
   userId       String
-  user         User   @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
   accessToken  String
   refreshToken String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Post {
-  id       String    @id
-  userId   String
-  user     User      @relation(fields: [userId], references: [id])
-  title    String
-  content  String
-  comments Comment[]
+  id        String    @id
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  title     String
+  content   String
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Comment {
-  id      String @id
-  postId  String
-  post    Post   @relation(fields: [postId], references: [id])
-  userId  String
-  user    User   @relation(fields: [userId], references: [id])
-  content String
+  id        String   @id
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
