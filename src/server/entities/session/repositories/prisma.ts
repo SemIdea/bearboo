@@ -2,7 +2,10 @@ import { ISessionEntity, ISessionModel } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaSessionModel implements ISessionModel {
-  async create(id: string, data: Omit<ISessionEntity, "id">) {
+  async create(
+    id: string,
+    data: Omit<ISessionEntity, "id" | "createdAt" | "updatedAt">
+  ) {
     return await prisma.session.create({
       data: {
         id,

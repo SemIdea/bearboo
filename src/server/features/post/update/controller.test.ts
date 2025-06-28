@@ -13,7 +13,7 @@ describe("Update Post Controller Unitary Testing", async () => {
   }
 
   test("Should update a post successfully", async () => {
-    const id = await ctx.generateSnowflakeUuid();
+    const id = ctx.generateSnowflakeUuid();
     const post = await PostEntity.create({
       id,
       data: {
@@ -39,7 +39,8 @@ describe("Update Post Controller Unitary Testing", async () => {
     expect(result).toEqual({
       ...post,
       content: "Updated Content",
-      title: "Updated Title"
+      title: "Updated Title",
+      updatedAt: result.updatedAt,
     });
   });
 });

@@ -10,8 +10,8 @@ import {
 } from "../schema/post.schema";
 import { readPostController } from "../features/post/read/controller";
 import { updatePostController } from "../features/post/update/controller";
-import { readAllPostsController } from "../features/post/readAll/controller";
 import { revalidatePostController } from "../features/post/revalidate/controller";
+import { readRecentPostsController } from "../features/post/readRecent/controller";
 
 const PostRouter = t.router({
   create: protectedProcedure
@@ -20,8 +20,8 @@ const PostRouter = t.router({
   read: publicProcedure
     .input(readPostSchema)
     .query(async ({ input, ctx }) => readPostController({ input, ctx })),
-  readAll: publicProcedure.query(async ({ ctx }) =>
-    readAllPostsController({ ctx })
+  readRecent: publicProcedure.query(async ({ ctx }) =>
+    readRecentPostsController({ ctx })
   ),
   update: protectedProcedure
     .input(updatePostSchema)

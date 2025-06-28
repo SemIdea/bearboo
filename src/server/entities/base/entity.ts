@@ -1,5 +1,8 @@
 type IEntityDatabaseRepository<Entity, R extends IEntityRepositoriesBasic> = {
-  create: (id: string, data: Omit<Entity, "id">) => Promise<Entity>;
+  create: (
+    id: string,
+    data: Omit<Entity, "id" | "createdAt" | "updatedAt">
+  ) => Promise<Entity>;
   read: (id: string) => Promise<Entity | null>;
   update: (id: string, data: Partial<Omit<Entity, "id">>) => Promise<Entity>;
   delete: (id: string) => Promise<boolean>;
@@ -39,7 +42,7 @@ type IEntityRepositories<Entity, Repos extends IEntityRepositoriesBasic> = {
 
 type IEntityCreateReq<Entity, Repos extends IEntityRepositoriesBasic> = {
   id: string;
-  data: Omit<Entity, "id">;
+  data: Omit<Entity, "id" | "createdAt" | "updatedAt">;
   repositories: IEntityRepositories<Entity, Repos>;
 };
 

@@ -16,7 +16,7 @@ describe("Read All Comments Controller Unitary Testing", async () => {
   test("Should read all comments successfully", async () => {
     const user = ctx.user;
 
-    const postId = await ctx.generateSnowflakeUuid();
+    const postId = ctx.generateSnowflakeUuid();
 
     await PostEntity.create({
       id: postId,
@@ -31,7 +31,7 @@ describe("Read All Comments Controller Unitary Testing", async () => {
       }
     });
 
-    const commentId = await ctx.generateSnowflakeUuid();
+    const commentId = ctx.generateSnowflakeUuid();
     const comment = await CommentEntity.create({
       id: commentId,
       data: {
@@ -65,7 +65,7 @@ describe("Read All Comments Controller Unitary Testing", async () => {
   test("Should return an empty array if no comments exist for the post", async () => {
     const user = ctx.user;
 
-    const postId = await ctx.generateSnowflakeUuid();
+    const postId = ctx.generateSnowflakeUuid();
 
     await PostEntity.create({
       id: postId,

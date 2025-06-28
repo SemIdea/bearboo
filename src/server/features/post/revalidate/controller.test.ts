@@ -18,7 +18,7 @@ describe("Revalidate Post Controller Unitary Testing", async () => {
 
   test("Should revalidate a post successfully", async () => {
     const user = ctx.user;
-    const postId = await ctx.generateSnowflakeUuid();
+    const postId = ctx.generateSnowflakeUuid();
 
     const post = await PostEntity.create({
       id: postId,

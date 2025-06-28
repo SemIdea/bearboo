@@ -30,7 +30,7 @@ describe("Login User Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = await ctx.generateSnowflakeUuid();
+    const uuid = ctx.generateSnowflakeUuid();
     const userData = {
       email: `${uuid}@example.com`,
       password: "password123"

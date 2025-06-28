@@ -7,8 +7,8 @@ import {
 } from "./DTO";
 
 class PostEntityClass extends BaseEntity<IPostEntity, IPostModel> {
-  async readAll({ repositories }: IReadAllPostsDTO) {
-    const posts = await repositories.database.readAll();
+  async readRecent({ repositories }: IReadAllPostsDTO) {
+    const posts = await repositories.database.readRecents(30);
 
     return posts;
   }

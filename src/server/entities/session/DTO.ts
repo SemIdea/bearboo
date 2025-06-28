@@ -7,6 +7,8 @@ type ISessionEntity = {
   userId: string;
   accessToken: string;
   refreshToken: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type ISessionWithUser = Omit<ISessionEntity, "userId" | "id"> & {

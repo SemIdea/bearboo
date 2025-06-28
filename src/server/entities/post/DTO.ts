@@ -6,10 +6,12 @@ type IPostEntity = {
   userId: string;
   title: string;
   content: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type IPostExtraRepositories = {
-  readAll: () => Promise<IPostEntity[]>;
+  readRecents: (count: number) => Promise<IPostEntity[]>;
   readUserPosts: (userId: string) => Promise<IPostEntity[]>;
 };
 
