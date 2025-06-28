@@ -1,11 +1,5 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  output: "standalone",
-  experimental: {
-    typedRoutes: true,
-    authInterrupts: true
-  }
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

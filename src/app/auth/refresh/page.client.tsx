@@ -15,7 +15,7 @@ const SessionRefresher = () => {
       document.cookie = `accessToken=${data.accessToken}; path=/;`;
       localStorage.setItem("refreshToken", data.refreshToken);
 
-      router.push(redirect as any);
+      router.push(redirect);
     },
     onError: () => {
       clearAuthData();
