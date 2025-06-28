@@ -15,7 +15,7 @@ describe("Read Post Controller Unitary Testing", async () => {
   }
 
   test("Should read a post by ID", async () => {
-    const id = await ctx.generateSnowflakeUuid();
+    const id = ctx.generateSnowflakeUuid();
     const post = await PostEntity.create({
       id,
       data: {
@@ -40,7 +40,7 @@ describe("Read Post Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if post does not exist", async () => {
-    const id = await ctx.generateSnowflakeUuid();
+    const id = ctx.generateSnowflakeUuid();
 
     await expect(
       readPostController({

@@ -20,7 +20,7 @@ type IAuthenticatedUserDTO = IUserEntity & {
 
 type ITestContextDTO = IBaseContextDTO & {
   user?: IAuthenticatedUserDTO;
-  generateSnowflakeUuid: () => Promise<string>;
+  generateSnowflakeUuid: () => string;
   createAuthenticatedUser: () => Promise<void>;
 };
 
@@ -41,11 +41,12 @@ class TestContext {
 
   user?: IAuthenticatedUserDTO;
 
-  async generateSnowflakeUuid() {
-    const id = await GenerateSnowflakeUID();
-    const random = Math.floor(Math.random() * 1000);
+  generateSnowflakeUuid() {
+    const id = GenerateSnowflakeUID();
+    // const random = Math.floor(Math.random() * 1000);
 
-    return id + random.toString();
+    // return id + random.toString();
+    return id;
   }
 
   async createAuthenticatedUser() {

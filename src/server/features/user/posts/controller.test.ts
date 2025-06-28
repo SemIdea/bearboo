@@ -27,20 +27,24 @@ describe("User Posts Controller Unitary Testing", async () => {
   });
 
   test("Should return all posts from a user", async () => {
-    const postId = await ctx.generateSnowflakeUuid();
+    const postIds: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      const postId = ctx.generateSnowflakeUuid();
+      postIds.push(postId);
 
-    await PostEntity.create({
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      },
-      id: postId,
-      data: {
-        title: "Test Post",
-        content: "This is a test post",
-        userId: user.id
-      }
-    });
+      await PostEntity.create({
+        repositories: {
+          ...ctx.repositories,
+          database: ctx.repositories.post
+        },
+        id: postId,
+        data: {
+          title: `Test Post ${i + 1}`,
+          content: `This is test post number ${i + 1}`,
+          userId: user.id
+        }
+      });
+    }
 
     const result = await getUserPostsController({
       ctx,
@@ -48,12 +52,12 @@ describe("User Posts Controller Unitary Testing", async () => {
     });
 
     expect(result).toBeDefined();
-    expect(result.length).toEqual(1);
-    expect(result[0].id).toEqual(postId);
+    expect(result.length).toEqual(10);
+    expect(result.map((post) => post.id)).toEqual(postIds);
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = await ctx.generateSnowflakeUuid();
+    const uuid = ctx.generateSnowflakeUuid();
 
     await expect(
       getUserPostsController({

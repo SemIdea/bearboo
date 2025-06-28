@@ -31,7 +31,7 @@ describe("User Comments Controller Unitary Testing", async () => {
   test("Should read user comments successfully", async () => {
     const user = ctx.user;
 
-    const postId = await ctx.generateSnowflakeUuid();
+    const postId = ctx.generateSnowflakeUuid();
     await PostEntity.create({
       id: postId,
       data: {
@@ -45,7 +45,7 @@ describe("User Comments Controller Unitary Testing", async () => {
       }
     });
 
-    const commentId = await ctx.generateSnowflakeUuid();
+    const commentId = ctx.generateSnowflakeUuid();
     const comment = await CommentEntity.create({
       id: commentId,
       data: {
@@ -75,7 +75,7 @@ describe("User Comments Controller Unitary Testing", async () => {
   });
 
   test("Should return an error if user does not exist", async () => {
-    const userId = await ctx.generateSnowflakeUuid();
+    const userId = ctx.generateSnowflakeUuid();
 
     await expect(
       readUserCommentsController({
