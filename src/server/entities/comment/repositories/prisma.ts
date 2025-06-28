@@ -2,7 +2,10 @@ import { ICommentEntity, ICommentModel } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaCommentModel implements ICommentModel {
-  async create(id: string, data: Omit<ICommentEntity, "id">) {
+  async create(
+    id: string,
+    data: Omit<ICommentEntity, "id" | "createdAt" | "updatedAt">
+  ) {
     return await prisma.comment.create({
       data: {
         id,

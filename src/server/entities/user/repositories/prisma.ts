@@ -2,7 +2,10 @@ import { IUserModel, IUserEntity } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaUserModel implements IUserModel {
-  async create(id: string, data: Omit<IUserEntity, "id">) {
+  async create(
+    id: string,
+    data: Omit<IUserEntity, "id" | "createdAt" | "updatedAt">
+  ) {
     return await prisma.user.create({
       data: {
         id,
