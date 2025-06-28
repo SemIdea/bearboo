@@ -2,7 +2,10 @@ import { IPostEntity, IPostModel } from "../DTO";
 import { prisma } from "@/server/drivers/prisma";
 
 class PrismaPostModel implements IPostModel {
-  async create(id: string, data: Omit<IPostEntity, "id">) {
+  async create(
+    id: string,
+    data: Omit<IPostEntity, "id" | "createdAt" | "updatedAt">
+  ) {
     return await prisma.post.create({
       data: {
         id,

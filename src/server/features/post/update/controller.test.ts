@@ -39,7 +39,8 @@ describe("Update Post Controller Unitary Testing", async () => {
     expect(result).toEqual({
       ...post,
       content: "Updated Content",
-      title: "Updated Title"
+      title: "Updated Title",
+      updatedAt: result.updatedAt,
     });
   });
 });
