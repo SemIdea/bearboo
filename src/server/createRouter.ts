@@ -2,7 +2,6 @@ import superjson from "superjson";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
 import { Context } from "./createContext";
-import { GetTimestampFromID } from "./drivers/snowflake";
 import { AuthErrorCode } from "@/shared/error/auth";
 
 const t = initTRPC.context<Context>().create({
@@ -24,9 +23,7 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!user) return next();
   if (!user.session) return next();
 
-  const sessionCreatedTimestamp = user.session.accessToken
-    ? GetTimestampFromID(user.session.accessToken).timestamp
-    : null;
+  const sessionCreatedTimestamp = user.session.createdAt;
 
   if (!sessionCreatedTimestamp) return next();
 

@@ -19,8 +19,13 @@ class PrismaPostModel implements IPostModel {
     });
   }
 
-  async readAll() {
-    return await prisma.post.findMany();
+  async readRecents(count: number) {
+    return await prisma.post.findMany({
+      take: count,
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
   }
 
   async readUserPosts(userId: string) {

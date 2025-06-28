@@ -11,7 +11,7 @@ const Posts = ({ max }: { max: number }) => {
     data: allPosts,
     isLoading: isAllPostsLoading,
     error: allPostsError
-  } = trpc.post.readAll.useQuery();
+  } = trpc.post.readRecent.useQuery();
 
   return (
     <div>
