@@ -2,10 +2,11 @@ services:
   app:
     build:
       context: .
-      target: dev
+      target: production
     hostname: app
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
+      REDIS_URL: "redis://cache:6379/0"
     expose:
       - "3000"
     depends_on:

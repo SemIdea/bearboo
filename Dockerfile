@@ -46,9 +46,15 @@ CMD ["sh", "-c", "npx prisma db push && yarn dev"]
 
 # Builder stage
 FROM base AS builder
+
+ENV NODE_ENV=development
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
 COPY . .
+
 RUN yarn build
 
 # Production image
