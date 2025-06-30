@@ -6,6 +6,7 @@ import { useState } from "react";
 import superjson from "superjson";
 import { trpc } from "@/app/_trpc/client";
 import { clearAuthData } from "@/utils/authStorage";
+import { TRPCError } from "@trpc/server";
 
 let trpcClientInstance: ReturnType<typeof trpc.createClient>;
 
@@ -19,34 +20,31 @@ export const fetcher = async (
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (!refreshToken) {
-      document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-      document.cookie = `session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-      localStorage.removeItem("refreshToken");
-      window.location.href = "/auth/login";
-
-      return response;
-    }
-
-    try {
-      const data = await trpcClientInstance.auth.refreshSession.mutate({
-        refreshToken
-      });
-
-      document.cookie = `accessToken=${data.accessToken}; path=/;`;
-      localStorage.setItem("refreshToken", data.refreshToken);
-
-      return await fetch(info, {
-        ...options,
-        headers: {
-          ...options?.headers
-        }
-      });
-    } catch (error) {
       clearAuthData();
       window.location.href = "/auth/login";
 
       return response;
     }
+
+    const data = await trpcClientInstance.auth.refreshSession
+      .mutate({
+        refreshToken
+      })
+      .catch((error) => {
+        clearAuthData();
+        window.location.href = "/auth/login";
+        throw error;
+      });
+
+    document.cookie = `accessToken=${data.accessToken}; path=/;`;
+    localStorage.setItem("refreshToken", data.refreshToken);
+
+    return await fetch(info, {
+      ...options,
+      headers: {
+        ...options?.headers
+      }
+    });
   }
 
   return response;
