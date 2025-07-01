@@ -10,8 +10,18 @@ type IPostEntity = {
   updatedAt: Date;
 };
 
+type IPostEntityWithRelations = IPostEntity & {
+  user: {
+    id: string;
+    email: string;
+  };
+  comments: {
+    id: string;
+  }[];
+};
+
 type IPostExtraRepositories = {
-  readRecents: (count: number) => Promise<IPostEntity[]>;
+  readRecents: (count: number) => Promise<IPostEntityWithRelations[]>;
   readUserPosts: (userId: string) => Promise<IPostEntity[]>;
 };
 
