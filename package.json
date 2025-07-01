@@ -28,6 +28,7 @@
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "11.13.1",
     "intl-messageformat": "^10.5.0",
     "ioredis": "^5.5.0",
