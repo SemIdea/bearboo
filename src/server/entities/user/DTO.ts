@@ -4,8 +4,10 @@ import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cach
 
 type IUserEntity = {
   id: string;
+  name: string;
   email: string;
   password: string;
+  bio?: string | null;
 };
 
 type IUserWithSession = Omit<IUserEntity, "password"> & {

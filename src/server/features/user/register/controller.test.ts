@@ -10,6 +10,7 @@ describe("Register User Controller Unitary Testing", () => {
     const uuid = ctx.generateSnowflakeUuid();
     const input = {
       email: `${uuid}@example.com`,
+      name: "Test User",
       password: "password123"
     };
 
@@ -17,5 +18,6 @@ describe("Register User Controller Unitary Testing", () => {
 
     expect(result).toBeTruthy();
     expect(result.user.email).toEqual(input.email);
+    expect(result.user.name).toEqual(input.name);
   });
 });

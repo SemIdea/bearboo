@@ -8,10 +8,8 @@ const RegisterUserService = async ({
   repositories,
   ...data
 }: IRegisterUserDTO) => {
-  const { email, password } = data;
-
   const existingUser = await UserEntity.readByEmail({
-    email,
+    email: data.email,
     repositories
   });
 
@@ -23,11 +21,11 @@ const RegisterUserService = async ({
   }
 
   const userId = await GenerateSnowflakeUID();
-  const hashedPassword = await repositories.hashing.hash(password);
+  const hashedPassword = await repositories.hashing.hash(data.password);
 
   const user = await UserEntity.create({
     data: {
-      email,
+      ...data,
       password: hashedPassword
     },
     id: userId,
