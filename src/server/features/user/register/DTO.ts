@@ -4,6 +4,7 @@ import { IPasswordHashingHelperAdapter } from "@/server/integrations/helpers/pas
 
 type IRegisterUserDTO = {
   email: string;
+  name: string;
   password: string;
   repositories: IRegisterUserRepositories;
 };

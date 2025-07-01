@@ -53,6 +53,7 @@ class TestContext {
     const userId = await this.generateSnowflakeUuid();
     const userData = {
       email: `${userId}@example.com`,
+      name: "Test User",
       password: "password123"
     };
 
