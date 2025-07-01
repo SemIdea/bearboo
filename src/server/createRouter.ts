@@ -23,14 +23,14 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!user) return next();
   if (!user.session) return next();
 
-  const sessionCreatedTimestamp = user.session.createdAt;
+  const sessionUpdatedTimestamp = user.session.updatedAt;
 
-  if (!sessionCreatedTimestamp) return next();
+  if (!sessionUpdatedTimestamp) return next();
 
-  const sessionCreatedDate = new Date(sessionCreatedTimestamp);
+  const sessionUpdatedDate = new Date(sessionUpdatedTimestamp);
   const EXPIRES = 1000 * 20;
 
-  if (Date.now() - sessionCreatedDate.getTime() > EXPIRES) {
+  if (Date.now() - sessionUpdatedDate.getTime() > EXPIRES) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: AuthErrorCode.SESSION_EXPIRED
