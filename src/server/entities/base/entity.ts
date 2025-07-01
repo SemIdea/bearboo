@@ -119,16 +119,20 @@ class BaseEntity<
 > {
   cache?: CacheConfig<BaseIndex>;
   index?: IndexConfig<BaseIndex, Indexes>;
+  shouldCache?: boolean;
 
   constructor({
     cache,
-    index
+    index,
+    shouldCache
   }: {
     cache?: CacheConfig<BaseIndex>;
     index?: IndexConfig<BaseIndex, Indexes>;
+    shouldCache?: boolean;
   }) {
     this.cache = cache;
     this.index = index;
+    this.shouldCache = shouldCache;
   }
 
   resolveKey(template: string, data: Entity) {
@@ -138,8 +142,11 @@ class BaseEntity<
     );
   }
 
-  async cacheEntity({ data, repositories }: ICacheEntityReq<Entity>) {
-    if (!this.cache || !repositories.cache) return;
+  async cacheEntity({
+    data,
+    repositories
+  }: ICacheEntityReq<Entity>): Promise<void> {
+    if (!this.cache || !repositories.cache || !this.shouldCache) return;
 
     const keysToCreate = [
       {
@@ -169,7 +176,7 @@ class BaseEntity<
     id,
     repositories
   }: IReadCachedEntityReq): Promise<Entity | null> {
-    if (!this.cache || !repositories.cache) return null;
+    if (!this.cache || !repositories.cache || !this.shouldCache) return null;
 
     const indexPattern = this.cache.key;
 
@@ -187,7 +194,7 @@ class BaseEntity<
     indexValue,
     repositories
   }: IReadCachedEntityByIndexReq<Indexes>): Promise<Entity | null> {
-    if (!this.index || !this.index[indexName]) return null;
+    if (!this.index || !this.index[indexName] || !this.shouldCache) return null;
 
     const indexPattern = this.index[indexName].key;
 
@@ -220,7 +227,7 @@ class BaseEntity<
     data,
     repositories
   }: IDeleteCacheEntityReq<Entity>): Promise<void> {
-    if (!this.cache || !repositories.cache) return;
+    if (!this.cache || !repositories.cache || !this.shouldCache) return;
 
     const mainKey = this.resolveKey(this.cache.key, data);
     const keysToDelete = [mainKey];

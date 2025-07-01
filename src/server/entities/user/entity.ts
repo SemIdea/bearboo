@@ -1,3 +1,4 @@
+import { isFeatureEnabled } from "@/lib/featureFlags";
 import { BaseEntity } from "../base/entity";
 import { IUserEntity, IReadUserByEmailDTO, IUserModel } from "./DTO";
 import { UserCacheTTL } from "@/constants/cache/user";
@@ -34,6 +35,7 @@ class UserEntityClass extends BaseEntity<
 
   constructor() {
     super({
+      shouldCache: isFeatureEnabled("enableUserCaching"),
       cache: {
         key: "user:%id%",
         ttl: UserCacheTTL

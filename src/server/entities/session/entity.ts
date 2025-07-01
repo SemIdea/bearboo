@@ -1,3 +1,4 @@
+import { isFeatureEnabled } from "@/lib/featureFlags";
 import { BaseEntity } from "../base/entity";
 import {
   IReadSessionByAccessTokenDTO,
@@ -103,6 +104,7 @@ class SessionEntityClass extends BaseEntity<
 
   constructor() {
     super({
+      shouldCache: isFeatureEnabled("enableSessionCaching"),
       cache: {
         key: "session:%id%",
         ttl: SessionCacheTTL
