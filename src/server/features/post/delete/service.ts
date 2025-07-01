@@ -26,7 +26,8 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   }
 
   await PostEntity.delete({
-    id: data.id,
+    id: post.id,
+    data: post,
     repositories: {
       ...repositories
     }

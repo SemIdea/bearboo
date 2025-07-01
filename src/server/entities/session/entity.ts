@@ -6,13 +6,14 @@ import {
   ISessionEntity,
   ISessionModel
 } from "./DTO";
-import {
-  sessionAccessTokenCacheKey,
-  sessionCacheKey,
-  SessionCacheTTL
-} from "@/constants/cache/session";
+import { SessionCacheTTL } from "@/constants/cache/session";
 
-class SessionEntityClass extends BaseEntity<ISessionEntity, ISessionModel> {
+class SessionEntityClass extends BaseEntity<
+  ISessionEntity,
+  ISessionModel,
+  "session",
+  "accessToken" | "refreshToken"
+> {
   async readByAccessToken({
     accessToken,
     repositories
@@ -69,18 +70,25 @@ class SessionEntityClass extends BaseEntity<ISessionEntity, ISessionModel> {
   async refreshSession({
     id,
     accessToken,
+    refreshToken,
     newRefreshToken,
     newAccessToken,
     repositories
   }: IRefreshSessionDTO) {
-    await this.bulkDeleteCachedEntities({
-      indexes: [id, accessToken],
-      repositories
-    });
-
     const session = await repositories.database.update(id, {
       refreshToken: newRefreshToken,
       accessToken: newAccessToken
+    });
+
+    await this.deleteCachedEntity({
+      data: {
+        ...session,
+        accessToken,
+        refreshToken
+      },
+      repositories: {
+        cache: repositories.cache!
+      }
     });
 
     await this.cacheEntity({
@@ -96,12 +104,16 @@ class SessionEntityClass extends BaseEntity<ISessionEntity, ISessionModel> {
   constructor() {
     super({
       cache: {
-        key: sessionCacheKey("%id%"),
+        key: "session:%id%",
         ttl: SessionCacheTTL
       },
       index: {
         accessToken: {
-          key: sessionAccessTokenCacheKey("%accessToken%"),
+          key: "session:accessToken:%accessToken%",
+          ttl: SessionCacheTTL
+        },
+        refreshToken: {
+          key: "session:refreshToken:%refreshToken%",
           ttl: SessionCacheTTL
         }
       }

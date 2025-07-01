@@ -131,6 +131,7 @@ const RefreshSessionService = async ({
   const newSession = await SessionEntity.refreshSession({
     id: data.id,
     accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
     newAccessToken: data.newAccessToken,
     newRefreshToken: data.newRefreshToken,
     repositories
@@ -187,7 +188,8 @@ const DeleteSessionService = async ({
   }
 
   await SessionEntity.delete({
-    id: data.sessionId,
+    id: session.id,
+    data: session,
     repositories: {
       ...repositories
     }

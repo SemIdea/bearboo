@@ -29,7 +29,8 @@ const DeleteCommentService = async ({
   }
 
   return await CommentEntity.delete({
-    ...data,
+    id: comment.id,
+    data: comment,
     repositories: {
       ...repositories
     }
