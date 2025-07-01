@@ -27,6 +27,19 @@ class PrismaPostModel implements IPostModel {
       take: count,
       orderBy: {
         createdAt: "desc"
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true
+          }
+        },
+        comments: {
+          select: {
+            id: true
+          }
+        }
       }
     });
   }
