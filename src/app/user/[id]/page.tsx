@@ -21,6 +21,7 @@ const Page = async (props: PageProps) => {
 
       <div className="text-center">
         <p>Email: {user.email}</p>
+        <p>Name: {user.name}</p>
         <p>Id: {user.id}</p>
       </div>
 

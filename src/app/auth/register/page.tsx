@@ -3,16 +3,29 @@
 import { useRegisterForm } from "./page.client";
 
 const Register = () => {
-  const { email, setEmail, password, setPassword, handleSubmit } =
-    useRegisterForm();
+  const {
+    email,
+    setEmail,
+    name,
+    setName,
+    password,
+    setPassword,
+    handleSubmit
+  } = useRegisterForm();
 
   return (
     <form onSubmit={handleSubmit}>
       <input
-        placeholder="Username"
+        placeholder="Email"
         type="text"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        placeholder="Name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
       />
       <input
         placeholder="Password"
