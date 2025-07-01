@@ -12,6 +12,11 @@ const registerUserSchema = z.object({
       required_error: "Email is required"
     })
     .email("Invalid Email"),
+  name: z
+    .string({
+      required_error: "Name is required"
+    })
+    .min(3, "Name must be at least 3 characters long"),
   password: z
     .string({
       required_error: "Password is required"
