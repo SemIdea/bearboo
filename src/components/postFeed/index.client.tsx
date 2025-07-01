@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
+import { formatDistance } from "date-fns";
 
 const Posts = ({ max }: { max: number }) => {
   const { session } = useAuth();
@@ -37,9 +38,13 @@ const Posts = ({ max }: { max: number }) => {
               )}
               <Link href={`/post/${post.id}`}>
                 <h3>{post.title}</h3>
-                <p>{post.content}</p>
-                <p>{post.userId}</p>
-                <p>{post.id}</p>
+                <p>{post.user.email}</p>
+                <p>{post.comments.length} comments</p>
+                <p>
+                  {formatDistance(new Date(post.createdAt), new Date(), {
+                    addSuffix: true
+                  })}
+                </p>
                 <br />
               </Link>
             </div>
