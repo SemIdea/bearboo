@@ -1,19 +1,18 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/app/_trpc/client";
+import { useAuth } from "@/context/auth";
 
 type Params = {
   id: string;
 };
 
-const UserPosts = () => {
-  const { id } = useParams<Params>();
-
-  const { data: posts, isLoading: isPostsLoading } = trpc.user.posts.useQuery({
-    id
-  });
+const UserPosts = ({ id }: { id: string }) => {
+  const { data: posts, isLoading: isPostsLoading } =
+    trpc.user.readPosts.useQuery({
+      id
+    });
 
   return (
     <div>
@@ -38,11 +37,9 @@ const UserPosts = () => {
   );
 };
 
-const UserComments = () => {
-  const { id } = useParams<Params>();
-
+const UserComments = ({ id }: { id: string }) => {
   const { data: comments, isLoading: isCommentsLoading } =
-    trpc.user.comments.useQuery({
+    trpc.user.readComments.useQuery({
       id
     });
 
@@ -69,4 +66,20 @@ const UserComments = () => {
   );
 };
 
-export { UserPosts, UserComments };
+const UpdateUserSection = ({ id }: Params) => {
+  const { session, isLoadingSession } = useAuth();
+
+  if (isLoadingSession || !session || session.user.id !== id) {
+    return null;
+  }
+
+  return (
+    <div className="mt-6">
+      <Link href={`/user/profile`} className="text-blue-500">
+        Update Profile
+      </Link>
+    </div>
+  );
+};
+
+export { UserPosts, UserComments, UpdateUserSection };
