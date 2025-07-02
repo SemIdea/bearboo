@@ -2,7 +2,7 @@ import { GetUserPostsService } from "./service";
 import { ReadUserPostsInput } from "@/server/schema/user.schema";
 import { IAPIContextDTO } from "@/server/createContext";
 
-const getUserPostsController = async ({
+const readUserPostsController = async ({
   input,
   ctx
 }: {
@@ -20,4 +20,4 @@ const getUserPostsController = async ({
   return posts;
 };
 
-export { getUserPostsController };
+export { readUserPostsController };

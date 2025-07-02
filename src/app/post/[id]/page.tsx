@@ -19,11 +19,11 @@ const Page = async (props: PageProps) => {
   const { id } = params;
 
   const post = await caller.post.read({ id: id });
-  const user = await caller.user.profile({ id: post.userId });
+  const user = await caller.user.read({ id: post.userId });
 
   const isUpdated =
     new Date(post.createdAt).getTime() !== new Date(post.updatedAt).getTime();
-    
+
   const createdAt = formatDistance(new Date(post.createdAt), new Date(), {
     addSuffix: true
   });
