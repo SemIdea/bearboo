@@ -3,12 +3,20 @@ import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cach
 
 type IGetUserProfileDTO = {
   id: string;
-  repositories: IGetUserProfileRepositories;
+  repositories: IUserProfileRepositories;
 };
 
-type IGetUserProfileRepositories = {
+type IUpdateUserProfileDTO = {
+  id: string;
+  name?: string;
+  email?: string;
+  bio?: string;
+  repositories: IUserProfileRepositories;
+};
+
+type IUserProfileRepositories = {
   database: IUserModel;
   cache: ICacheRepositoryAdapter;
 };
 
-export type { IGetUserProfileDTO, IGetUserProfileRepositories };
+export type { IGetUserProfileDTO, IUpdateUserProfileDTO };
