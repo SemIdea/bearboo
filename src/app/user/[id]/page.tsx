@@ -1,4 +1,4 @@
-import { UserComments, UserPosts } from "./page.client";
+import { UpdateUserSection, UserComments, UserPosts } from "./page.client";
 import { createCaller } from "@/server/caller";
 
 type PageProps = {
@@ -13,7 +13,7 @@ const Page = async (props: PageProps) => {
 
   const { id } = params;
 
-  const user = await caller.user.profile({ id });
+  const user = await caller.user.read({ id });
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
@@ -22,11 +22,13 @@ const Page = async (props: PageProps) => {
       <div className="text-center">
         <p>Email: {user.email}</p>
         <p>Name: {user.name}</p>
+        <p>Bio: {user.bio}</p>
         <p>Id: {user.id}</p>
       </div>
 
-      <UserPosts />
-      <UserComments />
+      <UserPosts id={id} />
+      <UserComments id={id} />
+      <UpdateUserSection id={id} />
     </div>
   );
 };
