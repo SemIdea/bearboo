@@ -1,23 +1,34 @@
-import { publicProcedure, t } from "../createRouter";
+import { protectedProcedure, publicProcedure, t } from "../createRouter";
 import { readUserCommentsController } from "../features/user/comments/controller";
-import { getUserPostsController } from "../features/user/posts/controller";
-import { readUserProfileController } from "../features/user/profile/controller";
+import { readUserPostsController } from "../features/user/posts/controller";
+import {
+  readUserProfileController,
+  updateUserProfileController
+} from "../features/user/profile/controller";
 import {
   readUserCommentsSchema,
   readUserPostsSchema,
-  readUserProfileSchema
+  readUserProfileSchema,
+  updateUserProfileSchema
 } from "../schema/user.schema";
 
 const UserRouter = t.router({
-  profile: publicProcedure
+  read: publicProcedure
     .input(readUserProfileSchema)
     .query(async ({ input, ctx }) => readUserProfileController({ input, ctx })),
-  posts: publicProcedure
+  readPosts: publicProcedure
     .input(readUserPostsSchema)
-    .query(async ({ input, ctx }) => getUserPostsController({ input, ctx })),
-  comments: publicProcedure
+    .query(async ({ input, ctx }) => readUserPostsController({ input, ctx })),
+  readComments: publicProcedure
     .input(readUserCommentsSchema)
-    .query(async ({ input, ctx }) => readUserCommentsController({ input, ctx }))
+    .query(async ({ input, ctx }) =>
+      readUserCommentsController({ input, ctx })
+    ),
+  update: protectedProcedure
+    .input(updateUserProfileSchema)
+    .mutation(async ({ input, ctx }) =>
+      updateUserProfileController({ input, ctx })
+    )
 });
 
 export { UserRouter };
