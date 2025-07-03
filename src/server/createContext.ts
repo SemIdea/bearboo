@@ -1,19 +1,8 @@
-import { IUserModel, IUserWithSession } from "./entities/user/DTO";
-import { ICacheRepositoryAdapter } from "./integrations/repositories/cache/adapter";
-import { ISessionModel } from "./entities/session/DTO";
-import { IPasswordHashingHelperAdapter } from "./integrations/helpers/passwordHashing/adapter";
-import {
-  cacheRepository,
-  commentRepository,
-  passwordHashingHelper,
-  postRepository,
-  sessionRepository,
-  userRepository
-} from "./drivers/repositories";
-import { IPostModel } from "./entities/post/DTO";
-import { ICommentModel } from "./entities/comment/DTO";
+import { IUserWithSession } from "./entities/user/DTO";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { ReadUserAndSessionByAccessTokenService } from "./features/auth/session/service";
+import { IRepositories, repositories } from "./container/repositories";
+import { IHelpers, helpers } from "./container/helpers";
 
 type IInputAPIContextDTO = {
   headers: Headers;
@@ -21,14 +10,8 @@ type IInputAPIContextDTO = {
 
 type IBaseContextDTO = IInputAPIContextDTO & {
   headers: Headers;
-  repositories: {
-    user: IUserModel;
-    session: ISessionModel;
-    post: IPostModel;
-    cache: ICacheRepositoryAdapter;
-    hashing: IPasswordHashingHelperAdapter;
-    comment: ICommentModel;
-  };
+  repositories: IRepositories;
+  helpers: IHelpers;
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
@@ -44,14 +27,8 @@ const createTRPCContext = async ({
 }: IInputAPIContextDTO): Promise<IAPIContextDTO> => {
   const ctx: IAPIContextDTO = {
     headers,
-    repositories: {
-      user: userRepository,
-      session: sessionRepository,
-      post: postRepository,
-      cache: cacheRepository,
-      hashing: passwordHashingHelper,
-      comment: commentRepository
-    }
+    repositories,
+    helpers
   };
 
   const cookies = headers.get("cookie");
@@ -65,8 +42,7 @@ const createTRPCContext = async ({
   const user = await ReadUserAndSessionByAccessTokenService({
     accessToken,
     repositories: {
-      cache: ctx.repositories.cache,
-      user: ctx.repositories.user,
+      ...ctx.repositories,
       database: ctx.repositories.session
     }
   });

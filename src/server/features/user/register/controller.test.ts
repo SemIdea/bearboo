@@ -7,7 +7,7 @@ describe("Register User Controller Unitary Testing", () => {
   const ctx = new TestContext();
 
   test("Should verify if user is registered", async () => {
-    const uuid = ctx.generateSnowflakeUuid();
+    const uuid = ctx.helpers.uid.generate();
     const input = {
       email: `${uuid}@example.com`,
       name: "Test User",

@@ -1,5 +1,6 @@
 import { ISessionModel } from "@/server/entities/session/DTO";
 import { IUserModel } from "@/server/entities/user/DTO";
+import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type ICreateAuthSessionDTO = {
@@ -8,6 +9,9 @@ type ICreateAuthSessionDTO = {
     user: IUserModel;
     database: ISessionModel;
     cache: ICacheRepositoryAdapter;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
   };
 };
 
@@ -30,8 +34,8 @@ type IReadSessionByRefreshTokenDTO = {
 };
 
 type IDeleteSessionDTO = {
+  id: string;
   userId: string;
-  sessionId: string;
   repositories: {
     user: IUserModel;
     database: ISessionModel;
@@ -43,12 +47,13 @@ type IRefreshSessionDTO = {
   id: string;
   accessToken: string;
   refreshToken: string;
-  newAccessToken: string;
-  newRefreshToken: string;
   repositories: {
     user: IUserModel;
     database: ISessionModel;
     cache: ICacheRepositoryAdapter;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
   };
 };
 

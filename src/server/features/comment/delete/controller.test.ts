@@ -16,7 +16,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
   test("Should delete a comment successfully", async () => {
     const user = ctx.user;
 
-    const postId = ctx.generateSnowflakeUuid();
+    const postId = ctx.helpers.uid.generate();
 
     await PostEntity.create({
       id: postId,
@@ -31,7 +31,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
       }
     });
 
-    const commentId = ctx.generateSnowflakeUuid();
+    const commentId = ctx.helpers.uid.generate();
 
     await CommentEntity.create({
       id: commentId,
