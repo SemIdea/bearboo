@@ -50,7 +50,7 @@ describe("Profile User Controller Unitary Testing", async () => {
   });
 
   test("Should throw error if user does not exist", async () => {
-    const uuid = ctx.generateSnowflakeUuid();
+    const uuid = ctx.helpers.uid.generate();
 
     await expect(
       readUserProfileController({

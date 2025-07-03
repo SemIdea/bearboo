@@ -29,7 +29,7 @@ describe("User Posts Controller Unitary Testing", async () => {
   test("Should return all posts from a user", async () => {
     const postIds: string[] = [];
     for (let i = 0; i < 10; i++) {
-      const postId = ctx.generateSnowflakeUuid();
+      const postId = ctx.helpers.uid.generate();
       postIds.push(postId);
 
       await PostEntity.create({
@@ -57,7 +57,7 @@ describe("User Posts Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = ctx.generateSnowflakeUuid();
+    const uuid = ctx.helpers.uid.generate();
 
     await expect(
       readUserPostsController({

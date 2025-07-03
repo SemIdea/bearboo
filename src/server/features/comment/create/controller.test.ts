@@ -15,7 +15,7 @@ describe("Create Comment Controller Unitary Testing", async () => {
   test("Should create a comment successfully", async () => {
     const user = ctx.user;
 
-    const postId = ctx.generateSnowflakeUuid();
+    const postId = ctx.helpers.uid.generate();
 
     await PostEntity.create({
       id: postId,
