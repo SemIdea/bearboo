@@ -68,24 +68,16 @@ class SessionEntityClass extends BaseEntity<
     return session;
   }
 
-  async refreshSession({
-    id,
-    accessToken,
-    refreshToken,
-    newRefreshToken,
-    newAccessToken,
-    repositories
-  }: IRefreshSessionDTO) {
+  async refreshSession({ id, data, repositories }: IRefreshSessionDTO) {
     const session = await repositories.database.update(id, {
-      refreshToken: newRefreshToken,
-      accessToken: newAccessToken
+      refreshToken: data.newRefreshToken,
+      accessToken: data.newAccessToken
     });
 
     await this.deleteCachedEntity({
       data: {
         ...session,
-        accessToken,
-        refreshToken
+        ...data
       },
       repositories: {
         cache: repositories.cache!

@@ -22,11 +22,11 @@ const readUserProfileController = async ({
   }
 
   const profile = await ReadUserProfileService({
+    ...input,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.user
-    },
-    ...input
+    }
   });
 
   return profile;
@@ -40,12 +40,12 @@ const updateUserProfileController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const updatedProfile = await UpdateUserProfileService({
+    ...input,
+    id: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.user
-    },
-    ...input,
-    id: ctx.user.id
+    }
   });
 
   return updatedProfile;

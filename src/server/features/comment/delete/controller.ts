@@ -10,12 +10,12 @@ const deleteCommentController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const comment = await DeleteCommentService({
+    ...input,
+    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.comment
-    },
-    userId: ctx.user.id,
-    ...input
+    }
   });
 
   return comment;

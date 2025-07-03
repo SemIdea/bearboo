@@ -43,10 +43,12 @@ type IReadSessionByRefreshTokenDTO = {
 
 type IRefreshSessionDTO = {
   id: string;
-  accessToken: string;
-  refreshToken: string;
-  newRefreshToken: string;
-  newAccessToken: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    newRefreshToken: string;
+    newAccessToken: string;
+  };
   repositories: {
     database: ISessionModel;
     cache: ICacheRepositoryAdapter;
