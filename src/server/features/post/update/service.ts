@@ -3,17 +3,10 @@ import { IUpdatePostDTO } from "./DTO";
 import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";
 
-const UpdatePostService = async ({
-  repositories,
-  id,
-  userId,
-  ...data
-}: IUpdatePostDTO) => {
+const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
   const post = await PostEntity.read({
-    id,
-    repositories: {
-      ...repositories
-    }
+    ...data,
+    repositories
   });
 
   if (!post) {
@@ -23,7 +16,7 @@ const UpdatePostService = async ({
     });
   }
 
-  if (post.userId !== userId) {
+  if (post.userId !== data.userId) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: PostErrorCode.POST_UPDATE_FORBIDDEN
@@ -31,7 +24,7 @@ const UpdatePostService = async ({
   }
 
   return await PostEntity.update({
-    id,
+    ...data,
     data,
     repositories
   });

@@ -7,10 +7,8 @@ const ReadUserProfileService = async ({
   repositories,
   ...data
 }: IGetUserProfileDTO) => {
-  const { id } = data;
-
   const userProfile = await UserEntity.read({
-    id,
+    ...data,
     repositories
   });
 
@@ -30,11 +28,9 @@ const UpdateUserProfileService = async ({
   repositories,
   ...data
 }: IUpdateUserProfileDTO) => {
-  const { id, ...updateData } = data;
-
   const updatedProfile = await UserEntity.update({
-    id,
-    data: updateData,
+    ...data,
+    data,
     repositories
   });
 

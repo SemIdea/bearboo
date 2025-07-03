@@ -10,11 +10,11 @@ const readUserPostsController = async ({
   ctx: IAPIContextDTO;
 }) => {
   const posts = GetUserPostsService({
+    ...input,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post
-    },
-    ...input
+    }
   });
 
   return posts;
