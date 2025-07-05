@@ -59,4 +59,19 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   });
 });
 
-export { t, publicProcedure, protectedProcedure };
+const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  if (!ctx.user.verified) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: AuthErrorCode.USER_NOT_VERIFIED
+    });
+  }
+
+  return next({
+    ctx: {
+      user: ctx.user
+    }
+  });
+});
+
+export { t, publicProcedure, protectedProcedure, verifiedProcedure };
