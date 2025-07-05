@@ -9,6 +9,8 @@ import { PrismaPostModel } from "@/server/entities/post/repositories/prisma";
 import { PrismaSessionModel } from "@/server/entities/session/repositories/prisma";
 import { PrismaUserModel } from "@/server/entities/user/repositories/prisma";
 import { RedisCacheRepository } from "@/server/integrations/repositories/cache/implementations/redis";
+import { ITokenModel } from "../entities/token/DTO";
+import { PrismaTokenModel } from "../entities/token/repositories/prisma";
 
 type IRepositories = {
   cache: ICacheRepositoryAdapter;
@@ -16,6 +18,7 @@ type IRepositories = {
   session: ISessionModel;
   post: IPostModel;
   comment: ICommentModel;
+  token: ITokenModel;
 };
 
 const repositories: IRepositories = {
@@ -23,7 +26,8 @@ const repositories: IRepositories = {
   user: new PrismaUserModel(),
   session: new PrismaSessionModel(),
   post: new PrismaPostModel(),
-  comment: new PrismaCommentModel()
+  comment: new PrismaCommentModel(),
+  token: new PrismaTokenModel()
 };
 
 export { repositories };
