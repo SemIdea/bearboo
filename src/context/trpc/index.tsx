@@ -6,48 +6,106 @@ import { useState } from "react";
 import superjson from "superjson";
 import { trpc } from "@/app/_trpc/client";
 import { clearAuthData } from "@/utils/authStorage";
-import { TRPCError } from "@trpc/server";
 
 let trpcClientInstance: ReturnType<typeof trpc.createClient>;
 
+// Track ongoing refresh attempts to prevent race conditions
+let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
+
 export const fetcher = async (
   info: RequestInfo | URL,
-  options: RequestInit | RequestInit | undefined
-) => {
-  const response = await fetch(info, options);
+  options: RequestInit | undefined
+): Promise<Response> => {
+  let hasRetried = false;
 
-  if (response.status === 401) {
-    const refreshToken = localStorage.getItem("refreshToken");
+  try {
+    let response = await fetch(info, options);
 
-    if (!refreshToken) {
-      clearAuthData();
-      window.location.href = "/auth/login";
+    // If we get a 401 (unauthorized), try to refresh the token and retry once
+    if (response.status === 401 && !hasRetried) {
+      hasRetried = true;
 
-      return response;
+      // Check if we're already refreshing to prevent race conditions
+      if (isRefreshing && refreshPromise) {
+        try {
+          await refreshPromise;
+        } catch {
+          clearAuthData();
+          window.location.href = "/auth/login";
+          return response;
+        }
+      } else {
+        // Start refresh process
+        isRefreshing = true;
+        refreshPromise = refreshTokens();
+
+        try {
+          await refreshPromise;
+        } catch (error) {
+          clearAuthData();
+          window.location.href = "/auth/login";
+          return response;
+        } finally {
+          isRefreshing = false;
+          refreshPromise = null;
+        }
+      }
+
+      // Retry the original request with new tokens
+      response = await fetch(info, options);
     }
 
-    const data = await trpcClientInstance.auth.refreshSession
-      .mutate({
-        refreshToken
-      })
-      .catch((error) => {
-        clearAuthData();
-        window.location.href = "/auth/login";
-        throw error;
-      });
+    // After handling 401 and potential retry, check for other status codes
+    if (response.status === 401) {
+      // Still 401 after retry, redirect to login
+      clearAuthData();
+      window.location.href = "/auth/login";
+    } else if (response.status === 403) {
+      // User not verified, redirect to verification
+      window.location.href = "/auth/verify";
+    }
 
-    document.cookie = `accessToken=${data.accessToken}; path=/;`;
-    localStorage.setItem("refreshToken", data.refreshToken);
+    return response;
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Request timeout");
+    }
+    throw error;
+  }
+};
 
-    return await fetch(info, {
-      ...options,
-      headers: {
-        ...options?.headers
-      }
-    });
+// Separate function for token refresh logic
+const refreshTokens = async (): Promise<void> => {
+  // Check if we're in browser environment
+  if (typeof window === "undefined") {
+    throw new Error("Cannot refresh tokens in server environment");
   }
 
-  return response;
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
+
+  if (!trpcClientInstance) {
+    throw new Error("TRPC client not initialized");
+  }
+
+  try {
+    const data = await trpcClientInstance.auth.refreshSession.mutate({
+      refreshToken
+    });
+
+    // Update tokens
+    document.cookie = `accessToken=${data.accessToken}; path=/; secure; samesite=strict`;
+    localStorage.setItem("refreshToken", data.refreshToken);
+  } catch (error) {
+    // Clear tokens on refresh failure
+    clearAuthData();
+    throw error;
+  }
 };
 
 const queryClient = new QueryClient({
@@ -79,9 +137,8 @@ const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
       ]
     });
 
-    // Save a reference for our direct calls.
+    // Save reference for direct calls
     trpcClientInstance = client;
-
     return client;
   });
 
