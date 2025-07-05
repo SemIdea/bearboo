@@ -1,16 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/context/auth";
+import { useRouter } from "next/navigation";
+import { trpc } from "@/app/_trpc/client";
 
 const useRegisterForm = () => {
-  const { register } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const { mutate: register } = trpc.auth.registerUser.useMutation({
+    onSuccess: (data) => {
+      router.push(
+        `/auth/check-email?email=${encodeURIComponent(data.user.email)}`
+      );
+      setIsLoading(false);
+    },
+    onError: (error) => {
+      console.error("Registration error:", error);
+      setIsLoading(false);
+    }
+  });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     register({ email, name, password });
   };
@@ -22,7 +38,8 @@ const useRegisterForm = () => {
     setName,
     password,
     setPassword,
-    handleSubmit
+    handleSubmit,
+    isLoading
   };
 };
 
