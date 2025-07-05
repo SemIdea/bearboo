@@ -16,9 +16,8 @@ const Authprovider = ({ children }: ChatProviderProps) => {
     isLoadingSession,
     setIsLoadingSession,
     setSession,
-    login,
-    register,
-    logout
+    updateAuthData,
+    clearSession
   } = useAuthLogic();
 
   useEffect(() => {
@@ -46,9 +45,8 @@ const Authprovider = ({ children }: ChatProviderProps) => {
         isLoadingSession,
         setIsLoadingSession,
         setSession,
-        login,
-        register,
-        logout
+        updateAuthData,
+        clearSession
       }}
     >
       {children}
