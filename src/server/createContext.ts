@@ -3,6 +3,7 @@ import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { ReadUserAndSessionByAccessTokenService } from "./features/auth/session/service";
 import { IRepositories, repositories } from "./container/repositories";
 import { IHelpers, helpers } from "./container/helpers";
+import { IGateways, gateways } from "./container/gateways";
 
 type IInputAPIContextDTO = {
   headers: Headers;
@@ -12,6 +13,7 @@ type IBaseContextDTO = IInputAPIContextDTO & {
   headers: Headers;
   repositories: IRepositories;
   helpers: IHelpers;
+  gateways: IGateways;
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
@@ -28,7 +30,8 @@ const createTRPCContext = async ({
   const ctx: IAPIContextDTO = {
     headers,
     repositories,
-    helpers
+    helpers,
+    gateways
   };
 
   const cookies = headers.get("cookie");

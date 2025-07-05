@@ -2,14 +2,14 @@ import { IMailerGatewayAdapter } from "../integrations/gateway/mailer/adapter";
 
 import { NodeMailerGateway } from "../integrations/gateway/mailer/implementations/nodemailer";
 
-type IGateway = {
+type IGateways = {
   mail: IMailerGatewayAdapter;
 };
 
-const gateway: IGateway = {
+const gateways: IGateways = {
   mail: new NodeMailerGateway()
 };
 
-export { gateway };
+export { gateways };
 
-export type { IGateway };
+export type { IGateways };
