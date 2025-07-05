@@ -23,11 +23,20 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
     });
   }
 
-  await PostEntity.delete({
+  const deletedPost = await PostEntity.delete({
     id: post.id,
     data: post,
     repositories
   });
+
+  if (!deletedPost) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: PostErrorCode.POST_DELETE_FAILED
+    });
+  }
+
+  return deletedPost;
 };
 
 export { DeletePostService };

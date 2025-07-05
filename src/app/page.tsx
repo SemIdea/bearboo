@@ -2,11 +2,21 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/auth";
+import { trpc } from "@/app/_trpc/client";
 import { PostFeed } from "@/components/postFeed";
 import { SearchPost } from "@/components/ui/searchPost";
 
 const Home = () => {
-  const { session, logout } = useAuth();
+  const { session, clearSession } = useAuth();
+
+  const { mutate: logout } = trpc.auth.session.logout.useMutation({
+    onSuccess: () => {
+      clearSession();
+    },
+    onError: (error) => {
+      console.error("Logout error:", error);
+    }
+  });
 
   // const { data: testQuery } = trpc.auth.test.useQuery();
 

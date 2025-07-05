@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure, t } from "../createRouter";
+import { publicProcedure, t, verifiedProcedure } from "../createRouter";
 import { readUserCommentsController } from "../features/user/comments/controller";
 import { readUserPostsController } from "../features/user/posts/controller";
 import {
@@ -24,7 +24,7 @@ const UserRouter = t.router({
     .query(async ({ input, ctx }) =>
       readUserCommentsController({ input, ctx })
     ),
-  update: protectedProcedure
+  update: verifiedProcedure
     .input(updateUserProfileSchema)
     .mutation(async ({ input, ctx }) =>
       updateUserProfileController({ input, ctx })
