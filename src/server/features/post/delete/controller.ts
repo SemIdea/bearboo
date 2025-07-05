@@ -18,6 +18,8 @@ const deletePostController = async ({
     }
   });
 
+  console.log("Post deleted successfully:", post);
+
   return post;
 };
 

@@ -65,10 +65,18 @@ class PrismaPostModel implements IPostModel {
 
   async delete(id: string): Promise<boolean> {
     try {
-      await prisma.post.delete({
-        where: {
-          id
-        }
+      await prisma.$transaction(async (tx) => {
+        await tx.comment.deleteMany({
+          where: {
+            postId: id
+          }
+        });
+
+        await tx.post.delete({
+          where: {
+            id
+          }
+        });
       });
 
       return true;

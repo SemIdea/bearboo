@@ -1,7 +1,5 @@
 type ISendMailReq = {
   to: string | string[];
-  from: string;
-  fromPass: string;
   subject: string;
   body: string;
 };
