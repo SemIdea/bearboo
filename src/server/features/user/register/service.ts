@@ -27,7 +27,8 @@ const RegisterUserService = async ({
     id: userId,
     data: {
       ...data,
-      password: hashedPassword
+      password: hashedPassword,
+      verified: false
     },
     repositories
   });
