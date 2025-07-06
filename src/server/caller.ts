@@ -1,5 +1,5 @@
 import { appRouter } from "./routers/app.routes";
-import { createTRPCContext } from "./createContext";
+import { createTRPCContext, IProtectedAPIContextDTO } from "./createContext";
 import { cookies } from "next/headers";
 import { TRPCError } from "@trpc/server";
 import { AuthErrorCode } from "@/shared/error/auth";
@@ -30,16 +30,28 @@ const createDynamicCaller = async ({ pathName }: ICreateDynamicCallerDTO) => {
   const caller = appRouter.createCaller(callerCtx, {
     onError: ({ error }) => {
       if (error instanceof TRPCError) {
-        if (error.message === AuthErrorCode.SESSION_EXPIRED) {
-          redirect(`/auth/refresh?redirect=${pathName}`);
+        switch (error.message) {
+          case AuthErrorCode.USER_NOT_LOGGED_IN:
+            redirect(`/auth/login?redirect=${pathName}`);
+            break;
+          case AuthErrorCode.SESSION_EXPIRED:
+            redirect(`/auth/refresh?redirect=${pathName}`);
+            break;
+          default:
+            console.error("Unexpected error:", error);
+            throw error;
         }
       }
     }
   });
 
+  if (!callerCtx.user) {
+    redirect(`/auth/login?redirect=${pathName}`);
+  }
+
   return {
     caller,
-    ctx: callerCtx
+    ctx: callerCtx as IProtectedAPIContextDTO
   };
 };
 
