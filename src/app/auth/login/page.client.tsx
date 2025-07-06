@@ -41,4 +41,33 @@ const useLoginForm = () => {
   };
 };
 
-export { useLoginForm };
+const LoginForm = () => {
+  const { email, setEmail, password, setPassword, handleSubmit, isLoading } =
+    useLoginForm();
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        placeholder="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        disabled={isLoading}
+      />
+      <input
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        disabled={isLoading}
+      />
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? "Logging in..." : "Login"}
+      </button>
+    </form>
+  );
+};
+
+export { LoginForm };
