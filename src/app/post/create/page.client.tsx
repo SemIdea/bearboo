@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
+import MDEditor from "@uiw/react-md-editor";
 
 type PostData = {
   title: string;
@@ -71,4 +72,47 @@ const useCreatePost = () => {
   };
 };
 
-export { useCreatePost };
+const CreatePostForm = () => {
+  const {
+    title,
+    setTitle,
+    content,
+    setContent,
+    isUploading,
+    errorMessage,
+    successMessage,
+    handleCreatePost
+  } = useCreatePost();
+
+  return (
+    <>
+      <form onSubmit={handleCreatePost}>
+        <input
+          required
+          name="title"
+          placeholder="Title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <br />
+        <br />
+        <MDEditor
+          hideToolbar
+          className="markdown w-[800px]"
+          preview="live"
+          value={content}
+          onChange={(v) => {
+            setContent(v || "");
+          }}
+        />
+        <button type="submit">Create Post</button>
+      </form>
+      {isUploading && <p>Uploading...</p>}
+      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+    </>
+  );
+};
+
+export { CreatePostForm };
