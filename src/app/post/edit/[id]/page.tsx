@@ -1,4 +1,4 @@
-import { createCaller, createDynamicCaller } from "@/server/caller";
+import { createDynamicCaller } from "@/server/caller";
 import { UpdatePostForm } from "./page.client";
 
 type PageProps = {
@@ -15,7 +15,6 @@ const Page = async (props: PageProps) => {
     pathName: `/post/edit/${id}`
   });
 
-  const user = ctx.user;
   const post = await caller.post.read({ id });
 
   return (
