@@ -48,7 +48,7 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "Unauthorized"
+      message: AuthErrorCode.USER_NOT_LOGGED_IN
     });
   }
 
