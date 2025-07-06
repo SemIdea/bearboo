@@ -37,7 +37,8 @@ class TestContext {
       id: userId,
       data: {
         ...userData,
-        password: await this.helpers.hashing.hash(userData.password)
+        password: await this.helpers.hashing.hash(userData.password),
+        verified: false
       },
       repositories: {
         ...this.repositories,

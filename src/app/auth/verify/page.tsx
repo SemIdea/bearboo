@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { VerifyForm } from "./page.client";
 
 const Page = () => {
@@ -9,7 +10,9 @@ const Page = () => {
         If you clicked the link in the email, the verification should happen
         automatically.
       </p>
-      <VerifyForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <VerifyForm />
+      </Suspense>
     </div>
   );
 };
