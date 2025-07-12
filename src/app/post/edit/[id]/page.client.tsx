@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
 import { IPostEntity } from "@/server/entities/post/DTO";
+import MDEditor from "@uiw/react-md-editor";
 
 const useUpdatePost = (post: IPostEntity) => {
   const router = useRouter();
@@ -125,12 +126,14 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
         />
         <br />
         <br />
-        <textarea
-          required
-          name="content"
-          placeholder="Content"
+        <MDEditor
+          hideToolbar
+          className="markdown w-[800px]"
+          preview="live"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(v) => {
+            setContent(v || "");
+          }}
         />
         <button type="submit" disabled={isUploading}>
           {isUploading ? "Updating..." : "Edit Post"}
