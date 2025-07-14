@@ -1,11 +1,11 @@
-import { RegisterForm } from "./page.client";
+import { RegisterForm } from "@/components/register-form";
 
 const Page = () => {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <h1>Create Account</h1>
-
-      <RegisterForm />
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <RegisterForm />
+      </div>
     </div>
   );
 };
