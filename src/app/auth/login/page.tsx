@@ -1,11 +1,11 @@
-import { LoginForm } from "./page.client";
+import { LoginForm } from "@/components/login-form";
 
 const Page = () => {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <h1>Login</h1>
-
-      <LoginForm />
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <LoginForm />
+      </div>
     </div>
   );
 };
