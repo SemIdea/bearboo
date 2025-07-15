@@ -67,7 +67,7 @@ describe("User Posts Controller Unitary Testing", async () => {
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUD
+        message: UserErrorCode.USER_NOT_FOUND
       })
     );
   });

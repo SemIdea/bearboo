@@ -3,6 +3,7 @@ import { SendMailService } from "../../mail/service";
 import { UserEntity } from "@/server/entities/user/entity";
 import { IAPIContextDTO } from "@/server/createContext";
 import { TRPCError } from "@trpc/server";
+import { UserErrorCode } from "@/shared/error/user";
 
 const resendVerificationEmailController = async ({
   input,
@@ -22,14 +23,14 @@ const resendVerificationEmailController = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: "User not found"
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 
   if (user.verified) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: "User is already verified"
+      message: UserErrorCode.USER_ALREADY_VERIFIED
     });
   }
 
