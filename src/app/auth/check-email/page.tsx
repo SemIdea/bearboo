@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { CheckEmail } from "@/components/check-email";
+import { CheckEmail } from "./page.client";
 
 const Page = () => {
   return (

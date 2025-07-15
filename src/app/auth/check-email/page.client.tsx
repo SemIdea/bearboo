@@ -1,19 +1,19 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { trpc } from "@/app/_trpc/client";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from "./ui/card";
-import Link from "next/link";
-import { Button } from "./ui/button";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { trpc } from "@/app/_trpc/client";
-import { getErrorMessage } from "@/lib/getErrorMessage";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const useCheckEmailLogic = () => {
   const searchParams = useSearchParams();
