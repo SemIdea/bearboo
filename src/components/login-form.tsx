@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
 import Link from "next/link";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
 const useLoginForm = () => {
   const router = useRouter();
@@ -25,15 +26,18 @@ const useLoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { mutate: login } = trpc.auth.loginUser.useMutation({
     onSuccess: (data) => {
       updateAuthData(data);
       router.push("/");
       setIsLoading(false);
+      setErrorMessage("");
     },
     onError: (error) => {
       console.error("Login error:", error);
+      setErrorMessage(error.message || "Login failed. Please try again.");
       setIsLoading(false);
     }
   });
@@ -41,6 +45,7 @@ const useLoginForm = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage("");
 
     login({ email, password });
   };
@@ -51,13 +56,21 @@ const useLoginForm = () => {
     password,
     setPassword,
     handleSubmit,
-    isLoading
+    isLoading,
+    errorMessage
   };
 };
 
 const LoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
-  const { email, setEmail, password, setPassword, handleSubmit, isLoading } =
-    useLoginForm();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    handleSubmit,
+    isLoading,
+    errorMessage
+  } = useLoginForm();
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -103,9 +116,14 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
-                  Login
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Signing in..." : "Login"}
                 </Button>
+                {errorMessage && (
+                  <p className="text-red-600 text-sm text-center">
+                    {getErrorMessage(errorMessage)}
+                  </p>
+                )}
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
