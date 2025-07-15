@@ -29,7 +29,7 @@ const CreateAuthSessionService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 
@@ -159,7 +159,7 @@ const DeleteSessionService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 

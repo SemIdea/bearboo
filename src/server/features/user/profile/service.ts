@@ -15,7 +15,7 @@ const ReadUserProfileService = async ({
   if (!userProfile) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 
@@ -37,7 +37,7 @@ const UpdateUserProfileService = async ({
   if (!updatedProfile) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 
