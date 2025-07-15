@@ -3,9 +3,20 @@
 import { trpc } from "@/app/_trpc/client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
-const VerifyForm = () => {
+const useVerifyForm = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [token, setToken] = useState("");
@@ -27,13 +38,13 @@ const VerifyForm = () => {
       setSuccessMessage("Verification successful! You can now log in.");
       setIsVerifying(false);
 
-      // Redirect to login page after 3 seconds
+      // Redirect to login page after 2 seconds
       setTimeout(() => {
         router.push("/auth/login");
-      }, 3000);
+      }, 2000);
     },
     onError: (error) => {
-      setErrorMessage(`Verification failed: ${error.message}`);
+      setErrorMessage(getErrorMessage(error.message));
       setIsVerifying(false);
     }
   });
@@ -48,45 +59,63 @@ const VerifyForm = () => {
     }
   };
 
+  return {
+    token,
+    setToken,
+    successMessage,
+    errorMessage,
+    isVerifying,
+    handleVerifyToken
+  };
+};
+
+const VerifyForm = ({ className, ...props }: React.ComponentProps<"div">) => {
+  const {
+    token,
+    setToken,
+    successMessage,
+    errorMessage,
+    isVerifying,
+    handleVerifyToken
+  } = useVerifyForm();
+
   return (
-    <>
-      {!successMessage && !errorMessage && (
-        <form onSubmit={handleVerifyToken}>
-          <input
-            type="text"
-            placeholder="Enter verification code"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            disabled={isVerifying}
-          />
-          <button type="submit" disabled={isVerifying || !token}>
-            {isVerifying ? "Verifying..." : "Verify Email"}
-          </button>
-        </form>
-      )}
-
-      {successMessage && (
-        <div>
-          <p className="text-green-600">{successMessage}</p>
-          <p>Redirecting to login page...</p>
-          <Link href="/auth/login" className="text-blue-600 underline">
-            Go to Login
-          </Link>
-        </div>
-      )}
-
-      {errorMessage && (
-        <div>
-          <p className="text-red-600">{errorMessage}</p>
-          <div>
-            <p>The verification link may have expired or been used already.</p>
-            <Link href="/auth/register" className="text-blue-600 underline">
-              Register again
-            </Link>
-          </div>
-        </div>
-      )}
-    </>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Verify Your Email</CardTitle>
+          <CardDescription>
+            Please enter the verification code sent to your email.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleVerifyToken}>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-3">
+                <Label htmlFor="token">Verification Code</Label>
+                <Input
+                  id="token"
+                  type="text"
+                  placeholder="Enter verification code"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  required
+                />
+                <Button type="submit" disabled={isVerifying} className="w-full">
+                  {isVerifying ? "Verifying..." : "Verify"}
+                </Button>
+                {successMessage && (
+                  <div className="text-green-600">{successMessage}</div>
+                )}
+                {errorMessage && (
+                  <div className="text-red-600">{errorMessage}</div>
+                )}
+              </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
