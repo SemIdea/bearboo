@@ -66,7 +66,7 @@ const CheckEmail = ({ className, ...props }: React.ComponentProps<"div">) => {
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="border-0 shadow-none">
         <CardHeader>
           <CardTitle>Check your email</CardTitle>
           <CardDescription>

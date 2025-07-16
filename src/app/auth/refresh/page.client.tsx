@@ -48,7 +48,7 @@ const SessionRefresher = ({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="border-0 shadow-none">
         <CardHeader>
           <CardTitle>Session Refresh</CardTitle>
           <CardDescription>
