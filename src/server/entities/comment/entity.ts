@@ -1,6 +1,7 @@
 import { BaseEntity } from "../base/entity";
 import {
   ICommentEntity,
+  ICommentEntityWithUser,
   IReadAllByPostIdDTO,
   IReadAllByUserIdDTO
 } from "./DTO";
@@ -18,7 +19,7 @@ class CommentEntityClass extends BaseEntity<
     const comments = await repositories.database.readAllByPostId(postId);
 
     if (!comments) {
-      return [] as ICommentEntity[];
+      return [] as ICommentEntityWithUser[];
     }
 
     return comments;
