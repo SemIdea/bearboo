@@ -1,24 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { trpc } from "@/app/_trpc/client";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { trpc } from "@/app/_trpc/client";
+import { getErrorMessage } from "@/lib/getErrorMessage";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const useCheckEmailLogic = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const [isResending, setIsResending] = useState(false);
-  const [resendMessage, setResendMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { mutate: resendEmail } = trpc.auth.resendVerificationEmail.useMutation(
     {
       onSuccess: () => {
-        setResendMessage("Verification email sent successfully!");
+        setSuccessMessage("Verification email sent successfully!");
+        setErrorMessage("");
         setIsResending(false);
       },
       onError: (error) => {
-        setResendMessage(`Error: ${error.message}`);
+        setErrorMessage(getErrorMessage(error.message));
+        setSuccessMessage("");
         setIsResending(false);
       }
     }
@@ -28,62 +41,82 @@ const useCheckEmailLogic = () => {
     if (!email) return;
 
     setIsResending(true);
-    setResendMessage("");
+    setSuccessMessage("");
+    setErrorMessage("");
     resendEmail({ email });
   };
 
   return {
     email,
     isResending,
-    resendMessage,
+    successMessage,
+    errorMessage,
     handleResendEmail
   };
 };
 
-const CheckEmailContent = () => {
-  const { email, isResending, resendMessage, handleResendEmail } =
-    useCheckEmailLogic();
+const CheckEmail = ({ className, ...props }: React.ComponentProps<"div">) => {
+  const {
+    email,
+    isResending,
+    successMessage,
+    errorMessage,
+    handleResendEmail
+  } = useCheckEmailLogic();
 
   return (
-    <>
-      <div>
-        <p>We've sent a verification link to:</p>
-        {email && <p className="text-blue-600">{email}</p>}
-      </div>
-      <div>
-        <p>
-          Click the link in the email to verify your account and complete your
-          registration.
-        </p>
-        <p>
-          Don't forget to check your spam folder if you don't see the email.
-        </p>
-      </div>
-      <div>
-        <p>Didn't receive the email?</p>
-        <button onClick={handleResendEmail} disabled={isResending || !email}>
-          {isResending ? "Sending..." : "Resend verification email"}
-        </button>
-
-        {resendMessage && (
-          <p
-            className={
-              resendMessage.includes("Error")
-                ? "text-red-600"
-                : "text-green-600"
-            }
-          >
-            {resendMessage}
-          </p>
-        )}
-      </div>
-      <div>
-        <Link href="/auth/login" className="text-blue-600 underline">
-          ← Back to Login
-        </Link>
-      </div>
-    </>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card className="border-0 shadow-none">
+        <CardHeader>
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>
+            We've sent a verification link to verify your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-3">
+              <p>We've sent a verification link to:</p>
+              {email && <p className="text-blue-600 font-medium">{email}</p>}
+            </div>
+            <div className="grid gap-3">
+              <p>
+                Click the link in the email to verify your account and complete
+                your registration.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Don't forget to check your spam folder if you don't see the
+                email.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <p>Didn't receive the email?</p>
+              <Button
+                variant="outline"
+                onClick={handleResendEmail}
+                disabled={isResending || !email}
+                className="w-full"
+                type="button"
+              >
+                {isResending ? "Sending..." : "Resend verification email"}
+              </Button>
+              {successMessage && (
+                <p className="text-green-600 text-sm">{successMessage}</p>
+              )}
+              {errorMessage && (
+                <p className="text-red-600 text-sm">{errorMessage}</p>
+              )}
+            </div>
+          </div>
+          <div className="mt-4 text-center text-sm">
+            <Link href="/auth/login" className="underline underline-offset-4">
+              ← Back to Login
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
-export { CheckEmailContent };
+export { CheckEmail };

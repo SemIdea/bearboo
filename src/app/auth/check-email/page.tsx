@@ -1,14 +1,14 @@
 import { Suspense } from "react";
-import { CheckEmailContent } from "./page.client";
+import { CheckEmail } from "./page.client";
 
 const Page = () => {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <h1>Check Your Email</h1>
-
-      <Suspense fallback={<div>Loading...</div>}>
-        <CheckEmailContent />
-      </Suspense>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <Suspense fallback={<div>Loading...</div>}>
+          <CheckEmail />
+        </Suspense>
+      </div>
     </div>
   );
 };
