@@ -5,6 +5,7 @@ import { IUserEntity } from "@/server/entities/user/DTO";
 import { ISessionEntity } from "@/server/entities/session/DTO";
 import { repositories } from "@/server/container/repositories";
 import { helpers } from "@/server/container/helpers";
+import { gateways } from "@/server/container/gateways";
 
 type IAuthenticatedUserDTO = IUserEntity & {
   truePassword: string;
@@ -24,6 +25,7 @@ class TestContext {
   headers = new Headers();
   repositories = repositories;
   helpers = helpers;
+  gateways = gateways;
   user?: IAuthenticatedUserDTO;
   async createAuthenticatedUser() {
     const userId = this.helpers.uid.generate();
