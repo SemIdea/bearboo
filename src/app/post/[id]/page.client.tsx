@@ -1,46 +1,139 @@
 "use client";
 
-import MDEditor from "@uiw/react-md-editor";
-import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { formatDistance } from "date-fns";
+import MDEditor from "@uiw/react-md-editor";
+
 import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
-import { ICommentEntity } from "@/server/entities/comment/DTO";
+import { IPostEntity } from "@/server/entities/post/DTO";
+import { IUserEntity } from "@/server/entities/user/DTO";
+import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
 
-type Params = {
-  id: string;
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { MDView } from "@/components/ui/mdview";
+
+const useComment = (postId: string) => {
+  const [comments, setComments] = useState<ICommentEntityWithUser[]>([]);
+
+  const { data: commentsData, isLoading } = trpc.comment.readAllByPost.useQuery(
+    {
+      postId
+    }
+  );
+
+  useEffect(() => {
+    if (commentsData) {
+      setComments(commentsData);
+    }
+  }, [commentsData]);
+
+  const addComment = (comment: ICommentEntityWithUser) => {
+    console.log("Adding comment:", comment);
+    setComments((prevComments) => [...prevComments, comment]);
+  };
+
+  const updateComment = (updatedComment: ICommentEntityWithUser) => {
+    setComments((prevComments) =>
+      prevComments.map((comment) =>
+        comment.id === updatedComment.id ? updatedComment : comment
+      )
+    );
+  };
+
+  const deleteComment = (commentId: string) => {
+    setComments((prevComments) =>
+      prevComments.filter((comment) => comment.id !== commentId)
+    );
+  };
+
+  return {
+    comments,
+    setComments,
+    isLoading,
+    addComment,
+    updateComment,
+    deleteComment
+  };
 };
 
-type IBaseCommentDTO = {
-  setComments: React.Dispatch<React.SetStateAction<ICommentEntity[]>>;
+const Post = ({
+  post,
+  user
+}: {
+  post: IPostEntity;
+  user: Omit<IUserEntity, "password">;
+}) => {
+  const isUpdated =
+    new Date(post.createdAt).getTime() !== new Date(post.updatedAt).getTime();
+
+  const createdAt = formatDistance(new Date(post.createdAt), new Date(), {
+    addSuffix: true
+  });
+  const updatedAt = formatDistance(new Date(post.updatedAt), new Date(), {
+    addSuffix: true
+  });
+
+  const commentHook = useComment(post.id);
+
+  return (
+    <Card className="border-0">
+      <CardHeader>
+        <CardDescription>
+          By{" "}
+          <Link
+            href={`/user/${post.userId}`}
+            className="text-blue-600 hover:underline"
+          >
+            {user.name}
+          </Link>
+          {" • "}
+          {createdAt}
+          {isUpdated && (
+            <span className="text-muted-foreground"> (edited {updatedAt})</span>
+          )}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <h2 className="text-4xl font-bold">{post.title}</h2>
+        <MDView source={post.content} />
+        <CreateCommentSection postId={post.id} commentHook={commentHook} />
+        <CommentsSection userId={user.id} commentHook={commentHook} />
+      </CardContent>
+    </Card>
+  );
 };
 
-type ICreateCommentDTO = IBaseCommentDTO;
-
-type ICommentItemDTO = IBaseCommentDTO & {
-  comment: ICommentEntity;
-  isOwner: boolean;
-  onEdit: () => void;
-};
-
-type IUpdateCommentItemDTO = IBaseCommentDTO & {
-  comment: ICommentEntity;
-  onCancel: () => void;
-};
-
-const CreateCommentItem = ({ setComments }: ICreateCommentDTO) => {
-  const { id: postId } = useParams<Params>();
+const useCreateComment = (
+  postId: string,
+  addComment: (comment: ICommentEntityWithUser) => void
+) => {
+  const { session } = useAuth();
   const [comment, setComment] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isCommenting, setIsCommenting] = useState(false);
 
   const { mutate: createComment } = trpc.comment.create.useMutation({
     onSuccess: (data) => {
       setSuccessMessage("Comment created successfully!");
       setComment("");
       setIsUploading(false);
-      setComments((prevComments) => [...prevComments, data]);
+      setIsCommenting(false);
+      addComment({
+        ...data,
+        user: session?.user
+      } as ICommentEntityWithUser);
     },
     onError: () => {
       setErrorMessage("Failed to create comment.");
@@ -49,170 +142,327 @@ const CreateCommentItem = ({ setComments }: ICreateCommentDTO) => {
   });
 
   const handleCreateComment = useCallback(() => {
+    if (!session?.user) {
+      setErrorMessage("You must be logged in to comment.");
+      return;
+    }
+
     if (!comment.trim()) {
-      return alert("Comment cannot be empty.");
+      setErrorMessage("Comment cannot be empty.");
+      return;
     }
 
     setIsUploading(true);
     createComment({ postId, content: comment });
-  }, [comment, postId, createComment]);
+  }, [session, postId, comment, createComment]);
+
+  return {
+    comment,
+    setComment,
+    isUploading,
+    errorMessage,
+    successMessage,
+    handleCreateComment,
+    isCommenting,
+    setIsCommenting
+  };
+};
+
+const CreateCommentSection = ({
+  postId,
+  commentHook
+}: {
+  postId: string;
+  commentHook: ReturnType<typeof useComment>;
+}) => {
+  const {
+    comment,
+    setComment,
+    isUploading,
+    errorMessage,
+    successMessage,
+    handleCreateComment,
+    isCommenting,
+    setIsCommenting
+  } = useCreateComment(postId, commentHook.addComment);
 
   return (
-    <div>
-      <h2>Create Comment</h2>
-      <input
-        placeholder="Your comment"
-        type="text"
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-      />
-      <button
-        disabled={isUploading || !comment.trim()}
-        type="submit"
-        onClick={handleCreateComment}
-      >
-        Comment
-      </button>
-      {isUploading && <p>Uploading...</p>}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Add a Comment</CardTitle>
+        <CardDescription>Share your thoughts about this post.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {!isCommenting && (
+          <Button onClick={() => setIsCommenting(true)}>Add a comment</Button>
+        )}
+        {isCommenting && (
+          <>
+            <MDEditor
+              hideToolbar
+              className="markdown w-[100%]"
+              preview="live"
+              value={comment}
+              onChange={(v) => {
+                setComment(v || "");
+              }}
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant={"ghost"} onClick={() => setIsCommenting(false)}>
+                Cancel
+              </Button>
+              <Button
+                disabled={isUploading || !comment.trim()}
+                onClick={handleCreateComment}
+              >
+                {isUploading ? "Submitting..." : "Submit"}
+              </Button>
+            </div>
+          </>
+        )}
+        {successMessage && (
+          <p className="text-green-600 mt-4">{successMessage}</p>
+        )}
+        {errorMessage && <p className="text-red-600 mt-4">{errorMessage}</p>}
+      </CardContent>
+    </Card>
   );
 };
 
-const CommentItem = ({
+const useUpdateComment = (
+  commentId: string,
+  updateComment: (comment: ICommentEntityWithUser) => void
+) => {
+  const { session } = useAuth();
+  const [comment, setComment] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const { mutate: updateCommentMutation } = trpc.comment.update.useMutation({
+    onSuccess: (data) => {
+      setSuccessMessage("Comment updated successfully!");
+      setComment("");
+      setIsUpdating(false);
+      updateComment({
+        ...data,
+        user: session?.user
+      } as ICommentEntityWithUser);
+    },
+    onError: () => {
+      setErrorMessage("Failed to update comment.");
+      setIsUpdating(false);
+    }
+  });
+
+  const handleUpdateComment = useCallback(() => {
+    if (!comment.trim()) {
+      setErrorMessage("Comment cannot be empty.");
+      return;
+    }
+
+    setIsUpdating(true);
+    updateCommentMutation({ id: commentId, content: comment });
+  }, [commentId, comment, updateCommentMutation]);
+
+  return {
+    comment,
+    setComment,
+    isUpdating,
+    errorMessage,
+    successMessage,
+    handleUpdateComment
+  };
+};
+
+const useDeleteComment = (
+  commentId: string,
+  onDelete: (commentId: string) => void
+) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const { mutate: deleteCommentMutation } = trpc.comment.delete.useMutation({
+    onSuccess: () => {
+      setSuccessMessage("Comment deleted successfully!");
+      setIsDeleting(false);
+      onDelete(commentId);
+    },
+    onError: () => {
+      setErrorMessage("Failed to delete comment.");
+      setIsDeleting(false);
+    }
+  });
+
+  const handleDeleteComment = useCallback(() => {
+    setIsDeleting(true);
+    deleteCommentMutation({ id: commentId });
+  }, [commentId, deleteCommentMutation]);
+
+  return {
+    isDeleting,
+    errorMessage,
+    successMessage,
+    handleDeleteComment
+  };
+};
+
+const Comment = ({
   comment,
   isOwner,
-  onEdit,
-  setComments
-}: ICommentItemDTO) => {
-  const { mutate: deleteComment } = trpc.comment.delete.useMutation({
-    onSuccess: () => {
-      setComments((prevComments) =>
-        prevComments.filter((c) => c.id !== comment.id)
-      );
-    }
+  onUpdate,
+  onDelete
+}: {
+  comment: ICommentEntityWithUser;
+  isOwner: boolean;
+  onUpdate: (updatedComment: ICommentEntityWithUser) => void;
+  onDelete: (commentId: string) => void;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const {
+    comment: editComment,
+    setComment: setEditComment,
+    isUpdating,
+    errorMessage,
+    successMessage,
+    handleUpdateComment
+  } = useUpdateComment(comment.id, onUpdate);
+
+  const { isDeleting, handleDeleteComment } = useDeleteComment(
+    comment.id,
+    onDelete
+  );
+
+  const createdAt = formatDistance(new Date(comment.createdAt), new Date(), {
+    addSuffix: true
   });
 
-  const handleDeleteComment = () => {
-    deleteComment({ id: comment.id });
+  const updatedAt = formatDistance(new Date(comment.updatedAt), new Date(), {
+    addSuffix: true
+  });
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditComment(comment.content);
+  };
+
+  const handleSave = () => {
+    handleUpdateComment();
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditComment("");
+  };
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this comment?")) {
+      handleDeleteComment();
+    }
   };
 
   return (
-    <div>
-      <p>
-        <strong>{comment.userId}</strong>: {comment.content}
-      </p>
-      {isOwner && (
-        <>
-          <button onClick={handleDeleteComment}>Delete</button>
-          <br />
-          <button onClick={onEdit}>Edit</button>
-        </>
-      )}
-    </div>
-  );
-};
-
-const EditCommentItem = ({
-  comment,
-  onCancel,
-  setComments
-}: IUpdateCommentItemDTO) => {
-  const [editedContent, setEditedContent] = useState(comment.content);
-
-  const { mutate: updateComment } = trpc.comment.update.useMutation({
-    onSuccess: (data) => {
-      setComments((prevComments) =>
-        prevComments.map((c) =>
-          c.id === data.id ? { ...c, content: data.content } : c
-        )
-      );
-      onCancel();
-    }
-  });
-
-  const handleUpdateComment = () => {
-    updateComment({
-      id: comment.id,
-      content: editedContent
-    });
-  };
-
-  return (
-    <div>
-      <input
-        type="text"
-        value={editedContent}
-        onChange={(e) => setEditedContent(e.target.value)}
-      />
-      <br />
-      <button onClick={handleUpdateComment}>Save</button>
-      <br />
-      <button onClick={onCancel}>Cancel</button>
-    </div>
-  );
-};
-
-const Comments = () => {
-  const { id: postId } = useParams<Params>();
-  const { session } = useAuth();
-
-  const [comments, setComments] = useState<ICommentEntity[]>([]);
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-
-  const { data: commentsData, isLoading: isCommentsLoading } =
-    trpc.comment.readAllByPost.useQuery({ postId }, { enabled: !!postId });
-
-  useEffect(() => {
-    if (commentsData) setComments(commentsData);
-  }, [commentsData]);
-
-  return (
-    <div>
-      <div>
-        <h2>Comments</h2>
-        {isCommentsLoading && <p>Loading comments...</p>}
-        {!isCommentsLoading && comments.length === 0 && <p>No comments yet.</p>}
-        {!isCommentsLoading &&
-          comments.length > 0 &&
-          comments.map((comment) => {
-            const isOwner = session?.user?.id === comment.userId;
-
-            const isEditing = comment.id === editingCommentId;
-
-            if (isEditing)
-              return (
-                <EditCommentItem
-                  key={comment.id}
-                  comment={comment}
-                  setComments={setComments}
-                  onCancel={() => {
-                    setEditingCommentId(null);
-                  }}
-                />
-              );
-
-            return (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                isOwner={isOwner}
-                setComments={setComments}
-                onEdit={() => {
-                  setEditingCommentId(comment.id);
-                }}
+    <Card className="border-0 shadow-none">
+      <CardHeader>
+        <CardDescription className="flex items-center justify-between">
+          <div>
+            By{" "}
+            <Link
+              href={`/user/${comment.userId}`}
+              className="text-blue-600 hover:underline"
+            >
+              {comment.user.name}
+            </Link>
+            {" • "}
+            {createdAt}
+            {new Date(comment.createdAt).getTime() !==
+              new Date(comment.updatedAt).getTime() && (
+              <span className="text-muted-foreground">
+                {" "}
+                (edited {updatedAt})
+              </span>
+            )}
+          </div>
+          <div>
+            {isOwner && !isEditing && (
+              <>
+                <Button variant="ghost" onClick={handleEdit}>
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Button>
+              </>
+            )}
+          </div>
+        </CardDescription>
+        <CardContent className="p-0">
+          {!isEditing ? (
+            <MDView source={comment.content} />
+          ) : (
+            <div className="space-y-4">
+              <MDEditor
+                hideToolbar
+                className="markdown w-[100%]"
+                preview="live"
+                value={editComment}
+                onChange={(v) => setEditComment(v || "")}
               />
-            );
-          })}
-      </div>
-      <CreateCommentItem setComments={setComments} />
-    </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button
+                  disabled={isUpdating || !editComment.trim()}
+                  onClick={handleSave}
+                >
+                  {isUpdating ? "Saving..." : "Save"}
+                </Button>
+              </div>
+              {successMessage && (
+                <p className="text-green-600 text-sm">{successMessage}</p>
+              )}
+              {errorMessage && (
+                <p className="text-red-600 text-sm">{errorMessage}</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </CardHeader>
+    </Card>
   );
 };
 
-const PostMDView = ({ source }: { source: string }) => {
-  return <MDEditor.Markdown className="markdown w-[800px]" source={source} />;
+const CommentsSection = ({
+  userId,
+  commentHook
+}: {
+  userId: string;
+  commentHook: ReturnType<typeof useComment>;
+}) => {
+  const { comments, isLoading, updateComment, deleteComment } = commentHook;
+
+  if (isLoading) return <p>Loading comments...</p>;
+  if (!comments || comments.length === 0) return <p>No comments yet.</p>;
+
+  return comments.map((comment, index) => (
+    <div key={comment.id}>
+      <Comment
+        comment={comment}
+        isOwner={comment.userId === userId}
+        onUpdate={updateComment}
+        onDelete={deleteComment}
+      />
+      {index < comments.length - 1 && <Separator className="my-4" />}
+    </div>
+  ));
 };
 
-export { Comments, PostMDView };
+export { Post };
