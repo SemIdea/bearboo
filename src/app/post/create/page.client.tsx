@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
 import MDEditor from "@uiw/react-md-editor";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -92,6 +98,9 @@ const CreatePostForm = () => {
     <Card className="border-0 shadow-none">
       <CardHeader>
         <CardTitle>Create Post</CardTitle>
+        <CardDescription>
+          Fill in the details below to create a new post
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleCreatePost}>
@@ -110,8 +119,7 @@ const CreatePostForm = () => {
             <div className="grid gap-3">
               <Label htmlFor="content">Content</Label>
               <MDEditor
-                hideToolbar
-                className="markdown w-[800px]"
+                className="markdown"
                 preview="live"
                 value={content}
                 onChange={(v) => {
