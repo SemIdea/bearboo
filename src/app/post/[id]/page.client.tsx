@@ -403,39 +403,39 @@ const Comment = ({
             )}
           </div>
         </CardDescription>
-        <CardContent className="p-0">
-          {!isEditing ? (
-            <MDView source={comment.content} />
-          ) : (
-            <div className="space-y-4">
-              <MDEditor
-                hideToolbar
-                className="markdown w-[100%]"
-                preview="live"
-                value={editComment}
-                onChange={(v) => setEditComment(v || "")}
-              />
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button
-                  disabled={isUpdating || !editComment.trim()}
-                  onClick={handleSave}
-                >
-                  {isUpdating ? "Saving..." : "Save"}
-                </Button>
-              </div>
-              {successMessage && (
-                <p className="text-green-600 text-sm">{successMessage}</p>
-              )}
-              {errorMessage && (
-                <p className="text-red-600 text-sm">{errorMessage}</p>
-              )}
-            </div>
-          )}
-        </CardContent>
       </CardHeader>
+      <CardContent>
+        {!isEditing ? (
+          <MDView source={comment.content} />
+        ) : (
+          <div className="space-y-4">
+            <MDEditor
+              hideToolbar
+              className="markdown w-[100%]"
+              preview="live"
+              value={editComment}
+              onChange={(v) => setEditComment(v || "")}
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                disabled={isUpdating || !editComment.trim()}
+                onClick={handleSave}
+              >
+                {isUpdating ? "Saving..." : "Save"}
+              </Button>
+            </div>
+            {successMessage && (
+              <p className="text-green-600 text-sm">{successMessage}</p>
+            )}
+            {errorMessage && (
+              <p className="text-red-600 text-sm">{errorMessage}</p>
+            )}
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 };
