@@ -2,8 +2,7 @@ import { CreatePostForm } from "./page.client";
 
 const Page = () => {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <h2>Create Post</h2>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <CreatePostForm />
     </div>
   );
