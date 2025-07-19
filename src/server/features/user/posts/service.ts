@@ -9,7 +9,7 @@ const GetUserPostsService = async ({
   ...data
 }: IGetUserPostsDTO) => {
   const user = await UserEntity.read({
-    id: data.id,
+    ...data,
     repositories: {
       ...repositories,
       database: repositories.user
@@ -19,7 +19,7 @@ const GetUserPostsService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 

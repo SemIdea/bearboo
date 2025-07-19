@@ -1,3 +1,4 @@
+import { isFeatureEnabled } from "@/lib/featureFlags";
 import { BaseEntity } from "../base/entity";
 import {
   IReadSessionByAccessTokenDTO,
@@ -6,13 +7,14 @@ import {
   ISessionEntity,
   ISessionModel
 } from "./DTO";
-import {
-  sessionAccessTokenCacheKey,
-  sessionCacheKey,
-  SessionCacheTTL
-} from "@/constants/cache/session";
+import { SessionCacheTTL } from "@/constants/cache/session";
 
-class SessionEntityClass extends BaseEntity<ISessionEntity, ISessionModel> {
+class SessionEntityClass extends BaseEntity<
+  ISessionEntity,
+  ISessionModel,
+  "session",
+  "accessToken" | "refreshToken"
+> {
   async readByAccessToken({
     accessToken,
     repositories
@@ -66,21 +68,20 @@ class SessionEntityClass extends BaseEntity<ISessionEntity, ISessionModel> {
     return session;
   }
 
-  async refreshSession({
-    id,
-    accessToken,
-    newRefreshToken,
-    newAccessToken,
-    repositories
-  }: IRefreshSessionDTO) {
-    await this.bulkDeleteCachedEntities({
-      indexes: [id, accessToken],
-      repositories
+  async refreshSession({ id, data, repositories }: IRefreshSessionDTO) {
+    const session = await repositories.database.update(id, {
+      refreshToken: data.newRefreshToken,
+      accessToken: data.newAccessToken
     });
 
-    const session = await repositories.database.update(id, {
-      refreshToken: newRefreshToken,
-      accessToken: newAccessToken
+    await this.deleteCachedEntity({
+      data: {
+        ...session,
+        ...data
+      },
+      repositories: {
+        cache: repositories.cache!
+      }
     });
 
     await this.cacheEntity({
@@ -95,13 +96,18 @@ class SessionEntityClass extends BaseEntity<ISessionEntity, ISessionModel> {
 
   constructor() {
     super({
+      shouldCache: isFeatureEnabled("enableSessionCaching"),
       cache: {
-        key: sessionCacheKey("%id%"),
+        key: "session:%id%",
         ttl: SessionCacheTTL
       },
       index: {
         accessToken: {
-          key: sessionAccessTokenCacheKey("%accessToken%"),
+          key: "session:accessToken:%accessToken%",
+          ttl: SessionCacheTTL
+        },
+        refreshToken: {
+          key: "session:refreshToken:%refreshToken%",
           ttl: SessionCacheTTL
         }
       }

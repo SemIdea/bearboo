@@ -1,28 +1,13 @@
-"use client";
+import { LoginForm } from "./page.client";
 
-import { useLoginForm } from "./page.client";
-
-const Login = () => {
-  const { email, setEmail, password, setPassword, handleSubmit } =
-    useLoginForm();
-
+const Page = () => {
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        placeholder="Username"
-        type="text"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Login</button>
-    </form>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <LoginForm />
+      </div>
+    </div>
   );
 };
 
-export default Login;
+export default Page;

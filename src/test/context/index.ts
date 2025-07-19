@@ -1,17 +1,11 @@
-import {
-  cacheRepository,
-  commentRepository,
-  passwordHashingHelper,
-  postRepository,
-  sessionRepository,
-  userRepository
-} from "@/server/drivers/repositories";
 import { UserEntity } from "@/server/entities/user/entity";
 import { SessionEntity } from "@/server/entities/session/entity";
-import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { IBaseContextDTO } from "@/server/createContext";
 import { IUserEntity } from "@/server/entities/user/DTO";
 import { ISessionEntity } from "@/server/entities/session/DTO";
+import { repositories } from "@/server/container/repositories";
+import { helpers } from "@/server/container/helpers";
+import { gateways } from "@/server/container/gateways";
 
 type IAuthenticatedUserDTO = IUserEntity & {
   truePassword: string;
@@ -20,7 +14,6 @@ type IAuthenticatedUserDTO = IUserEntity & {
 
 type ITestContextDTO = IBaseContextDTO & {
   user?: IAuthenticatedUserDTO;
-  generateSnowflakeUuid: () => string;
   createAuthenticatedUser: () => Promise<void>;
 };
 
@@ -30,29 +23,15 @@ type IControllerContextDTO = ITestContextDTO & {
 
 class TestContext {
   headers = new Headers();
-  repositories = {
-    user: userRepository,
-    session: sessionRepository,
-    post: postRepository,
-    cache: cacheRepository,
-    hashing: passwordHashingHelper,
-    comment: commentRepository
-  };
-
+  repositories = repositories;
+  helpers = helpers;
+  gateways = gateways;
   user?: IAuthenticatedUserDTO;
-
-  generateSnowflakeUuid() {
-    const id = GenerateSnowflakeUID();
-    // const random = Math.floor(Math.random() * 1000);
-
-    // return id + random.toString();
-    return id;
-  }
-
   async createAuthenticatedUser() {
-    const userId = await this.generateSnowflakeUuid();
+    const userId = this.helpers.uid.generate();
     const userData = {
       email: `${userId}@example.com`,
+      name: "Test User",
       password: "password123"
     };
 
@@ -60,7 +39,8 @@ class TestContext {
       id: userId,
       data: {
         ...userData,
-        password: await this.repositories.hashing.hash(userData.password)
+        password: await this.helpers.hashing.hash(userData.password),
+        verified: false
       },
       repositories: {
         ...this.repositories,
@@ -68,9 +48,9 @@ class TestContext {
       }
     });
 
-    const sessionId = await this.generateSnowflakeUuid();
-    const accessToken = await this.generateSnowflakeUuid();
-    const refreshToken = await this.generateSnowflakeUuid();
+    const sessionId = this.helpers.uid.generate();
+    const accessToken = this.helpers.uid.generate();
+    const refreshToken = this.helpers.uid.generate();
 
     const session = await SessionEntity.create({
       id: sessionId,

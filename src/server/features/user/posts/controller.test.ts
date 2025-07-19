@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { getUserPostsController } from "./controller";
+import { readUserPostsController } from "./controller";
 import { isControllerContext, TestContext } from "@/test/context";
 import { PostEntity } from "@/server/entities/post/entity";
 import { UserErrorCode } from "@/shared/error/user";
@@ -17,7 +17,7 @@ describe("User Posts Controller Unitary Testing", async () => {
   const user = ctx.user;
 
   test("Should return an empty list when user has no posts", async () => {
-    const result = await getUserPostsController({
+    const result = await readUserPostsController({
       ctx,
       input: { id: user.id }
     });
@@ -29,7 +29,7 @@ describe("User Posts Controller Unitary Testing", async () => {
   test("Should return all posts from a user", async () => {
     const postIds: string[] = [];
     for (let i = 0; i < 10; i++) {
-      const postId = ctx.generateSnowflakeUuid();
+      const postId = ctx.helpers.uid.generate();
       postIds.push(postId);
 
       await PostEntity.create({
@@ -46,7 +46,7 @@ describe("User Posts Controller Unitary Testing", async () => {
       });
     }
 
-    const result = await getUserPostsController({
+    const result = await readUserPostsController({
       ctx,
       input: { id: user.id }
     });
@@ -57,17 +57,17 @@ describe("User Posts Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = ctx.generateSnowflakeUuid();
+    const uuid = ctx.helpers.uid.generate();
 
     await expect(
-      getUserPostsController({
+      readUserPostsController({
         ctx,
         input: { id: uuid }
       })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUD
+        message: UserErrorCode.USER_NOT_FOUND
       })
     );
   });
