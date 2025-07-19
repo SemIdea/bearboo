@@ -1,4 +1,4 @@
-import { UpdateUserSection, UserComments, UserPosts } from "./page.client";
+import { User } from "./page.client";
 import { createCaller } from "@/server/caller";
 
 type PageProps = {
@@ -17,18 +17,9 @@ const Page = async (props: PageProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <h2 className="text-2xl font-semibold">User Profile</h2>
-
-      <div className="text-center">
-        <p>Email: {user.email}</p>
-        <p>Name: {user.name}</p>
-        <p>Bio: {user.bio}</p>
-        <p>Id: {user.id}</p>
+      <div className="w-[55%]">
+        <User user={user} />
       </div>
-
-      <UserPosts id={id} />
-      <UserComments id={id} />
-      <UpdateUserSection id={id} />
     </div>
   );
 };

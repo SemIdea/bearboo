@@ -4,7 +4,7 @@ import { trpc } from "@/app/_trpc/client";
 import { IUserWithSession } from "@/server/entities/user/DTO";
 import { useState } from "react";
 
-const UseUpdateUser = (user: IUserWithSession) => {
+const useUpdateUser = (user: IUserWithSession) => {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [bio, setBio] = useState(user.bio || "");
@@ -63,7 +63,7 @@ const UpdateUserForm = ({ user }: { user: IUserWithSession }) => {
     isUploading,
     successMessage,
     errorMessage
-  } = UseUpdateUser(user);
+  } = useUpdateUser(user);
 
   return (
     <form onSubmit={handleUpdateUser}>
