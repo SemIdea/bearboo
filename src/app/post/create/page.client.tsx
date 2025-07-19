@@ -119,7 +119,7 @@ const CreatePostForm = () => {
             <div className="grid gap-3">
               <Label htmlFor="content">Content</Label>
               <MDEditor
-                className="markdown"
+                className="markdown markdown-editor"
                 preview="live"
                 value={content}
                 onChange={(v) => {

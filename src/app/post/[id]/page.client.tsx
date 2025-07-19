@@ -200,7 +200,7 @@ const CreateCommentSection = ({
           <>
             <MDEditor
               hideToolbar
-              className="markdown w-[100%]"
+              className="markdown markdown-editor w-full"
               preview="live"
               value={comment}
               onChange={(v) => {
@@ -411,7 +411,7 @@ const Comment = ({
           <div className="space-y-4">
             <MDEditor
               hideToolbar
-              className="markdown w-[100%]"
+              className="markdown w-full"
               preview="live"
               value={editComment}
               onChange={(v) => setEditComment(v || "")}
