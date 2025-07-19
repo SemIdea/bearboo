@@ -129,12 +129,13 @@
   body {
     @apply bg-background text-foreground;
   }
+
   .markdown-viewer * {
     all: revert;
   }
-  .markdown-editor * {
-    all: revert;
 
+  .markdown-editor .w-md-editor-preview * {
+    all: revert;
   }
 }
 
