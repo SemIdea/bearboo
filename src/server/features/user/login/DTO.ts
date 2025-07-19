@@ -5,13 +5,13 @@ import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cach
 type ILoginUserDTO = {
   email: string;
   password: string;
-  repositories: {
-    database: IUserModel;
-    cache: ICacheRepositoryAdapter;
-  };
-  helpers: {
-    hashing: IPasswordHashingHelperAdapter;
-  };
+  repositories: ILoginUserRepositories;
 };
 
-export type { ILoginUserDTO };
+type ILoginUserRepositories = {
+  database: IUserModel;
+  cache: ICacheRepositoryAdapter;
+  hashing: IPasswordHashingHelperAdapter;
+};
+
+export type { ILoginUserDTO, ILoginUserRepositories };

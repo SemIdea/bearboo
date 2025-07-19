@@ -30,7 +30,7 @@ describe("Login User Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const uuid = ctx.helpers.uid.generate();
+    const uuid = ctx.generateSnowflakeUuid();
     const userData = {
       email: `${uuid}@example.com`,
       password: "password123"
@@ -41,7 +41,7 @@ describe("Login User Controller Unitary Testing", async () => {
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUND
+        message: UserErrorCode.USER_NOT_FOUD
       })
     );
   });

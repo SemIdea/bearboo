@@ -10,11 +10,11 @@ const readPostController = async ({
   ctx: IAPIContextDTO;
 }) => {
   const post = await ReadPostService({
-    ...input,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post
-    }
+    },
+    ...input
   });
 
   return post;

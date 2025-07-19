@@ -10,12 +10,12 @@ const updateCommentController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const comment = await UpdateCommentService({
-    ...input,
-    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.comment
-    }
+    },
+    ...input,
+    userId: ctx.user.id
   });
 
   return comment;

@@ -12,11 +12,6 @@ const registerUserSchema = z.object({
       required_error: "Email is required"
     })
     .email("Invalid Email"),
-  name: z
-    .string({
-      required_error: "Name is required"
-    })
-    .min(3, "Name must be at least 3 characters long"),
   password: z
     .string({
       required_error: "Password is required"
@@ -49,33 +44,11 @@ const readUserCommentsSchema = z.object({
   id: z.string()
 });
 
-const updateUserProfileSchema = z
-  .object({
-    name: z
-      .string({
-        required_error: "Name is required"
-      })
-      .min(3, "Name must be at least 3 characters long"),
-    email: z
-      .string({
-        required_error: "Email is required"
-      })
-      .email("Invalid email format"),
-    bio: z
-      .string({
-        required_error: "Bio is required",
-        invalid_type_error: "Bio must be a string"
-      })
-      .max(500, "Bio must be at most 500 characters long")
-  })
-  .partial();
-
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
 type ReadUserProfileInput = z.TypeOf<typeof readUserProfileSchema>;
 type ReadUserPostsInput = z.TypeOf<typeof readUserPostsSchema>;
 type ReadUserCommentsInput = z.TypeOf<typeof readUserCommentsSchema>;
-type UpdateUserProfileInput = z.TypeOf<typeof updateUserProfileSchema>;
 
 export {
   verifyUserSchema,
@@ -83,14 +56,12 @@ export {
   loginUserSchema,
   readUserProfileSchema,
   readUserPostsSchema,
-  readUserCommentsSchema,
-  updateUserProfileSchema
+  readUserCommentsSchema
 };
 export type {
   CreateUserInput,
   LoginUserInput,
   ReadUserProfileInput,
   ReadUserPostsInput,
-  ReadUserCommentsInput,
-  UpdateUserProfileInput
+  ReadUserCommentsInput
 };

@@ -9,7 +9,7 @@ const ReadUserCommentsService = async ({
   ...data
 }: IGetUserCommentsDTO) => {
   const user = await UserEntity.read({
-    ...data,
+    id: data.id,
     repositories: {
       ...repositories,
       database: repositories.user
@@ -19,7 +19,7 @@ const ReadUserCommentsService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
+      message: UserErrorCode.USER_NOT_FOUD
     });
   }
 

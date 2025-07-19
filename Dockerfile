@@ -1,5 +1,5 @@
 # Base image
-ARG NODE_VERSION=20-alpine
+ARG NODE_VERSION=18-alpine
 FROM node:${NODE_VERSION} AS base
 
 # Environment setup

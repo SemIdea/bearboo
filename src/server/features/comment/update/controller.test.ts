@@ -16,7 +16,7 @@ describe("Update Comment Controller Unitary Testing", async () => {
   test("Should update a comment successfully", async () => {
     const user = ctx.user;
 
-    const postId = ctx.helpers.uid.generate();
+    const postId = ctx.generateSnowflakeUuid();
     const post = await PostEntity.create({
       id: postId,
       data: {
@@ -30,7 +30,7 @@ describe("Update Comment Controller Unitary Testing", async () => {
       }
     });
 
-    const commentId = ctx.helpers.uid.generate();
+    const commentId = ctx.generateSnowflakeUuid();
     const comment = await CommentEntity.create({
       id: commentId,
       data: {

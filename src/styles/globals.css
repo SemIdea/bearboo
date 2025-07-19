@@ -65,6 +65,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  .markdown * {
+    all: revert;
+  }
 }
 
 .markdown {
@@ -72,13 +75,5 @@
 }
 
 .markdown .wmde-markdown {
-  background-color: var(--background) !important;
-}
-
-.markdown .w-md-editor-toolbar {
-  background-color: var(--background) !important;
-}
-
-.markdown img {
   background-color: var(--background) !important;
 }

@@ -10,15 +10,13 @@ const deletePostController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const post = await DeletePostService({
-    ...input,
-    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post
-    }
+    },
+    userId: ctx.user.id,
+    ...input
   });
-
-  console.log("Post deleted successfully:", post);
 
   return post;
 };

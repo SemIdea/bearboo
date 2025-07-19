@@ -1,4 +1,4 @@
-import { publicProcedure, t, verifiedProcedure } from "../createRouter";
+import { protectedProcedure, publicProcedure, t } from "../createRouter";
 import { createPostController } from "../features/post/create/controller";
 import { deletePostController } from "../features/post/delete/controller";
 import {
@@ -14,7 +14,7 @@ import { revalidatePostController } from "../features/post/revalidate/controller
 import { readRecentPostsController } from "../features/post/readRecent/controller";
 
 const PostRouter = t.router({
-  create: verifiedProcedure
+  create: protectedProcedure
     .input(createPostSchema)
     .mutation(async ({ input, ctx }) => createPostController({ input, ctx })),
   read: publicProcedure
@@ -23,15 +23,15 @@ const PostRouter = t.router({
   readRecent: publicProcedure.query(async ({ ctx }) =>
     readRecentPostsController({ ctx })
   ),
-  update: verifiedProcedure
+  update: protectedProcedure
     .input(updatePostSchema)
     .mutation(async ({ input, ctx }) => updatePostController({ input, ctx })),
-  revalidate: verifiedProcedure
+  revalidate: protectedProcedure
     .input(revalidatePostSchema)
     .mutation(async ({ input, ctx }) =>
       revalidatePostController({ input, ctx })
     ),
-  delete: verifiedProcedure
+  delete: protectedProcedure
     .input(deletePostSchema)
     .mutation(async ({ input, ctx }) => deletePostController({ input, ctx }))
 });

@@ -1,13 +1,28 @@
-import { RegisterForm } from "./page.client";
+"use client";
 
-const Page = () => {
+import { useRegisterForm } from "./page.client";
+
+const Register = () => {
+  const { email, setEmail, password, setPassword, handleSubmit } =
+    useRegisterForm();
+
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <RegisterForm />
-      </div>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input
+        placeholder="Username"
+        type="text"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button type="submit">Register</button>
+    </form>
   );
 };
 
-export default Page;
+export default Register;

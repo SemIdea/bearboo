@@ -1,4 +1,5 @@
-import { Post } from "./page.client";
+import Link from "next/link";
+import { Comments, PostMDView } from "./page.client";
 import { createCaller } from "@/server/caller";
 
 type PageProps = {
@@ -17,13 +18,20 @@ const Page = async (props: PageProps) => {
   const { id } = params;
 
   const post = await caller.post.read({ id: id });
-  const user = await caller.user.read({ id: post.userId });
 
   return (
-    <div className="flex min-h-svh w-full justify-center p-6 md:p-10">
-      <div className="w-[55%]">
-        <Post post={post} user={user} />
-      </div>
+    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+      <h2>Post Details</h2>
+      <>
+        <div>
+          <h3>{post.title}</h3>
+          <PostMDView source={post.content} />
+        </div>
+        <div>
+          <Link href={`/user/${post.userId}`}>Author: {post.userId}</Link>
+        </div>
+        <Comments />
+      </>
     </div>
   );
 };

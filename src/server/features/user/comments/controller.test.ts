@@ -31,7 +31,7 @@ describe("User Comments Controller Unitary Testing", async () => {
   test("Should read user comments successfully", async () => {
     const user = ctx.user;
 
-    const postId = ctx.helpers.uid.generate();
+    const postId = ctx.generateSnowflakeUuid();
     await PostEntity.create({
       id: postId,
       data: {
@@ -45,7 +45,7 @@ describe("User Comments Controller Unitary Testing", async () => {
       }
     });
 
-    const commentId = ctx.helpers.uid.generate();
+    const commentId = ctx.generateSnowflakeUuid();
     const comment = await CommentEntity.create({
       id: commentId,
       data: {
@@ -75,7 +75,7 @@ describe("User Comments Controller Unitary Testing", async () => {
   });
 
   test("Should return an error if user does not exist", async () => {
-    const userId = ctx.helpers.uid.generate();
+    const userId = ctx.generateSnowflakeUuid();
 
     await expect(
       readUserCommentsController({
@@ -87,7 +87,7 @@ describe("User Comments Controller Unitary Testing", async () => {
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUND
+        message: UserErrorCode.USER_NOT_FOUD
       })
     );
   });

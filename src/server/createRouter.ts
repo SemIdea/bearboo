@@ -23,14 +23,14 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!user) return next();
   if (!user.session) return next();
 
-  const sessionUpdatedTimestamp = user.session.updatedAt;
+  const sessionCreatedTimestamp = user.session.createdAt;
 
-  if (!sessionUpdatedTimestamp) return next();
+  if (!sessionCreatedTimestamp) return next();
 
-  const sessionUpdatedDate = new Date(sessionUpdatedTimestamp);
+  const sessionCreatedDate = new Date(sessionCreatedTimestamp);
   const EXPIRES = 1000 * 20;
 
-  if (Date.now() - sessionUpdatedDate.getTime() > EXPIRES) {
+  if (Date.now() - sessionCreatedDate.getTime() > EXPIRES) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: AuthErrorCode.SESSION_EXPIRED
@@ -48,7 +48,7 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.USER_NOT_LOGGED_IN
+      message: "Unauthorized"
     });
   }
 
@@ -59,19 +59,4 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   });
 });
 
-const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  if (!ctx.user.verified) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: AuthErrorCode.USER_NOT_VERIFIED
-    });
-  }
-
-  return next({
-    ctx: {
-      user: ctx.user
-    }
-  });
-});
-
-export { t, publicProcedure, protectedProcedure, verifiedProcedure };
+export { t, publicProcedure, protectedProcedure };

@@ -10,13 +10,12 @@ const createCommentController = async ({
   ctx: IProtectedAPIContextDTO;
 }) => {
   const comment = await CreateCommentService({
-    ...input,
-    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.comment
     },
-    helpers: ctx.helpers
+    userId: ctx.user.id,
+    ...input
   });
 
   return comment;

@@ -5,18 +5,10 @@ type ICommentEntity = {
   postId: string;
   userId: string;
   content: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type ICommentEntityWithUser = ICommentEntity & {
-  user: {
-    name: string;
-  };
 };
 
 type ICommentExtraRepositories = {
-  readAllByPostId: (postId: string) => Promise<ICommentEntityWithUser[] | null>;
+  readAllByPostId: (postId: string) => Promise<ICommentEntity[] | null>;
   readAllByUserId: (userId: string) => Promise<ICommentEntity[] | null>;
 };
 
@@ -41,7 +33,6 @@ type IReadAllByUserIdDTO = {
 
 export type {
   ICommentEntity,
-  ICommentEntityWithUser,
   ICommentModel,
   IReadAllByPostIdDTO,
   IReadAllByUserIdDTO

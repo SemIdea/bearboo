@@ -1,6 +1,5 @@
 import { ICommentModel } from "@/server/entities/comment/DTO";
 import { IUserModel } from "@/server/entities/user/DTO";
-import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
 import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type ICreateCommentDTO = {
@@ -11,9 +10,6 @@ type ICreateCommentDTO = {
     user: IUserModel;
     database: ICommentModel;
     cache: ICacheRepositoryAdapter;
-  };
-  helpers: {
-    uid: IUidGeneratorHelperAdapter;
   };
 };
 

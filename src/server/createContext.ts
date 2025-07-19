@@ -1,9 +1,19 @@
-import { IUserWithSession } from "./entities/user/DTO";
+import { IUserModel, IUserWithSession } from "./entities/user/DTO";
+import { ICacheRepositoryAdapter } from "./integrations/repositories/cache/adapter";
+import { ISessionModel } from "./entities/session/DTO";
+import { IPasswordHashingHelperAdapter } from "./integrations/helpers/passwordHashing/adapter";
+import {
+  cacheRepository,
+  commentRepository,
+  passwordHashingHelper,
+  postRepository,
+  sessionRepository,
+  userRepository
+} from "./drivers/repositories";
+import { IPostModel } from "./entities/post/DTO";
+import { ICommentModel } from "./entities/comment/DTO";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { ReadUserAndSessionByAccessTokenService } from "./features/auth/session/service";
-import { IRepositories, repositories } from "./container/repositories";
-import { IHelpers, helpers } from "./container/helpers";
-import { IGateways, gateways } from "./container/gateways";
 
 type IInputAPIContextDTO = {
   headers: Headers;
@@ -11,9 +21,14 @@ type IInputAPIContextDTO = {
 
 type IBaseContextDTO = IInputAPIContextDTO & {
   headers: Headers;
-  repositories: IRepositories;
-  helpers: IHelpers;
-  gateways: IGateways;
+  repositories: {
+    user: IUserModel;
+    session: ISessionModel;
+    post: IPostModel;
+    cache: ICacheRepositoryAdapter;
+    hashing: IPasswordHashingHelperAdapter;
+    comment: ICommentModel;
+  };
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
@@ -29,9 +44,14 @@ const createTRPCContext = async ({
 }: IInputAPIContextDTO): Promise<IAPIContextDTO> => {
   const ctx: IAPIContextDTO = {
     headers,
-    repositories,
-    helpers,
-    gateways
+    repositories: {
+      user: userRepository,
+      session: sessionRepository,
+      post: postRepository,
+      cache: cacheRepository,
+      hashing: passwordHashingHelper,
+      comment: commentRepository
+    }
   };
 
   const cookies = headers.get("cookie");
@@ -45,7 +65,8 @@ const createTRPCContext = async ({
   const user = await ReadUserAndSessionByAccessTokenService({
     accessToken,
     repositories: {
-      ...ctx.repositories,
+      cache: ctx.repositories.cache,
+      user: ctx.repositories.user,
       database: ctx.repositories.session
     }
   });

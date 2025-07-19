@@ -27,9 +27,9 @@ const UpdateCommentService = async ({
   }
 
   const updatedComment = await CommentEntity.update({
-    ...data,
+    repositories,
     data,
-    repositories
+    id: data.id
   });
 
   return updatedComment;

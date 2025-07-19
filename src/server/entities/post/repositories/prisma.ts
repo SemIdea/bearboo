@@ -27,19 +27,6 @@ class PrismaPostModel implements IPostModel {
       take: count,
       orderBy: {
         createdAt: "desc"
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true
-          }
-        },
-        comments: {
-          select: {
-            id: true
-          }
-        }
       }
     });
   }
@@ -65,18 +52,10 @@ class PrismaPostModel implements IPostModel {
 
   async delete(id: string): Promise<boolean> {
     try {
-      await prisma.$transaction(async (tx) => {
-        await tx.comment.deleteMany({
-          where: {
-            postId: id
-          }
-        });
-
-        await tx.post.delete({
-          where: {
-            id
-          }
-        });
+      await prisma.post.delete({
+        where: {
+          id
+        }
       });
 
       return true;

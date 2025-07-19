@@ -1,17 +1,19 @@
 import { ICreateCommentDTO } from "./DTO";
 import { CommentEntity } from "@/server/entities/comment/entity";
+import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 
 const CreateCommentService = async ({
   repositories,
-  helpers,
   ...data
 }: ICreateCommentDTO) => {
-  const commentId = helpers.uid.generate();
+  const commentId = await GenerateSnowflakeUID();
 
   const comment = await CommentEntity.create({
     id: commentId,
     data,
-    repositories
+    repositories: {
+      ...repositories
+    }
   });
 
   return comment;

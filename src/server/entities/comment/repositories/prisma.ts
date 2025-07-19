@@ -26,13 +26,6 @@ class PrismaCommentModel implements ICommentModel {
     return await prisma.comment.findMany({
       where: {
         postId
-      },
-      include: {
-        user: {
-          select: {
-            name: true
-          }
-        }
       }
     });
   }

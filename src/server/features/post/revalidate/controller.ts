@@ -11,12 +11,12 @@ const revalidatePostController = async ({
 }) => {
   const revalidated = await RevalidatePostService({
     ...input,
-    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post,
       cache: ctx.repositories.cache
-    }
+    },
+    userId: ctx.user.id
   });
 
   return revalidated;

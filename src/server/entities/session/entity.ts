@@ -1,4 +1,3 @@
-import { isFeatureEnabled } from "@/lib/featureFlags";
 import { BaseEntity } from "../base/entity";
 import {
   IReadSessionByAccessTokenDTO,
@@ -7,14 +6,13 @@ import {
   ISessionEntity,
   ISessionModel
 } from "./DTO";
-import { SessionCacheTTL } from "@/constants/cache/session";
+import {
+  sessionAccessTokenCacheKey,
+  sessionCacheKey,
+  SessionCacheTTL
+} from "@/constants/cache/session";
 
-class SessionEntityClass extends BaseEntity<
-  ISessionEntity,
-  ISessionModel,
-  "session",
-  "accessToken" | "refreshToken"
-> {
+class SessionEntityClass extends BaseEntity<ISessionEntity, ISessionModel> {
   async readByAccessToken({
     accessToken,
     repositories
@@ -68,20 +66,21 @@ class SessionEntityClass extends BaseEntity<
     return session;
   }
 
-  async refreshSession({ id, data, repositories }: IRefreshSessionDTO) {
-    const session = await repositories.database.update(id, {
-      refreshToken: data.newRefreshToken,
-      accessToken: data.newAccessToken
+  async refreshSession({
+    id,
+    accessToken,
+    newRefreshToken,
+    newAccessToken,
+    repositories
+  }: IRefreshSessionDTO) {
+    await this.bulkDeleteCachedEntities({
+      indexes: [id, accessToken],
+      repositories
     });
 
-    await this.deleteCachedEntity({
-      data: {
-        ...session,
-        ...data
-      },
-      repositories: {
-        cache: repositories.cache!
-      }
+    const session = await repositories.database.update(id, {
+      refreshToken: newRefreshToken,
+      accessToken: newAccessToken
     });
 
     await this.cacheEntity({
@@ -96,18 +95,13 @@ class SessionEntityClass extends BaseEntity<
 
   constructor() {
     super({
-      shouldCache: isFeatureEnabled("enableSessionCaching"),
       cache: {
-        key: "session:%id%",
+        key: sessionCacheKey("%id%"),
         ttl: SessionCacheTTL
       },
       index: {
         accessToken: {
-          key: "session:accessToken:%accessToken%",
-          ttl: SessionCacheTTL
-        },
-        refreshToken: {
-          key: "session:refreshToken:%refreshToken%",
+          key: sessionAccessTokenCacheKey("%accessToken%"),
           ttl: SessionCacheTTL
         }
       }

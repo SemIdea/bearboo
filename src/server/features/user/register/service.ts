@@ -1,15 +1,17 @@
 import { TRPCError } from "@trpc/server";
 import { IRegisterUserDTO } from "./DTO";
+import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { UserEntity } from "@/server/entities/user/entity";
 import { UserErrorCode } from "@/shared/error/user";
 
 const RegisterUserService = async ({
   repositories,
-  helpers,
   ...data
 }: IRegisterUserDTO) => {
+  const { email, password } = data;
+
   const existingUser = await UserEntity.readByEmail({
-    ...data,
+    email,
     repositories
   });
 
@@ -20,16 +22,15 @@ const RegisterUserService = async ({
     });
   }
 
-  const userId = helpers.uid.generate();
-  const hashedPassword = await helpers.hashing.hash(data.password);
+  const userId = await GenerateSnowflakeUID();
+  const hashedPassword = await repositories.hashing.hash(password);
 
   const user = await UserEntity.create({
-    id: userId,
     data: {
-      ...data,
-      password: hashedPassword,
-      verified: false
+      email,
+      password: hashedPassword
     },
+    id: userId,
     repositories
   });
 

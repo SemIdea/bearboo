@@ -11,14 +11,11 @@ model User {
   id        String    @id
   email     String    @unique
   password  String
-  name      String
-  bio       String?
   sessions  Session[]
   Post      Post[]
   comments  Comment[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  verified  Boolean   @default(false)
 }
 
 model Session {
@@ -51,12 +48,4 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model VerificationToken {
-  id        String   @id
-  token     String   @unique
-  expiresAt DateTime
-  userId    String
-  used      Boolean  @default(false)
 }

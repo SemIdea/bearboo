@@ -1,4 +1,4 @@
-import { createDynamicCaller } from "@/server/caller";
+import { createCaller, createDynamicCaller } from "@/server/caller";
 import { UpdatePostForm } from "./page.client";
 
 type PageProps = {
@@ -11,17 +11,18 @@ const Page = async (props: PageProps) => {
   const params = await props.params;
   const { id } = params;
 
-  const { caller } = await createDynamicCaller({
+  const { caller, ctx } = await createDynamicCaller({
     pathName: `/post/edit/${id}`
   });
 
+  const user = ctx.user;
   const post = await caller.post.read({ id });
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-[55%]">
-        <UpdatePostForm post={post} />
-      </div>
+    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+      <h2>Edit Post</h2>
+      {JSON.stringify(ctx.user, null, 2)}
+      <UpdatePostForm post={post} />
     </div>
   );
 };

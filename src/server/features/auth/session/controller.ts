@@ -8,6 +8,7 @@ import {
   IProtectedAPIContextDTO
 } from "@/server/createContext";
 import { RefreshSessionInput } from "@/server/schema/session.schema";
+import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 
 const refreshSessionController = async ({
   input,
@@ -17,23 +18,32 @@ const refreshSessionController = async ({
   ctx: IAPIContextDTO;
 }) => {
   const session = await ReadSessionByRefreshTokenService({
-    ...input,
+    repositories: {
+      ...ctx.repositories,
+      database: ctx.repositories.session
+    },
+    ...input
+  });
+
+  const newAccessToken = await GenerateSnowflakeUID();
+  const newRefreshToken = await GenerateSnowflakeUID();
+
+  await RefreshSessionService({
+    id: session.id,
+    accessToken: session.accessToken,
+    refreshToken: session.refreshToken,
+    newAccessToken,
+    newRefreshToken,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.session
     }
   });
 
-  const newSession = await RefreshSessionService({
-    ...session,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.session
-    },
-    helpers: ctx.helpers
-  });
-
-  return newSession;
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken
+  };
 };
 
 const readUserFromSessionController = async ({
@@ -52,12 +62,12 @@ const logoutUserFromSessionController = async ({
   const session = ctx.user.session;
 
   await DeleteSessionService({
-    ...session,
-    userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.session
-    }
+    },
+    userId: ctx.user.id,
+    sessionId: session.id
   });
 };
 

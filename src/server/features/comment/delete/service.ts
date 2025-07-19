@@ -9,7 +9,9 @@ const DeleteCommentService = async ({
 }: IDeleteCommentDTO) => {
   const comment = await CommentEntity.read({
     ...data,
-    repositories
+    repositories: {
+      ...repositories
+    }
   });
 
   if (!comment) {
@@ -28,8 +30,9 @@ const DeleteCommentService = async ({
 
   return await CommentEntity.delete({
     ...data,
-    data: comment,
-    repositories
+    repositories: {
+      ...repositories
+    }
   });
 };
 
