@@ -3,66 +3,131 @@
 import Link from "next/link";
 import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
+import { IUserEntity } from "@/server/entities/user/DTO";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { MDView } from "@/components/ui/mdview";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDistance } from "date-fns";
 
 type Params = {
   id: string;
 };
 
-const UserPosts = ({ id }: { id: string }) => {
-  const { data: posts, isLoading: isPostsLoading } =
-    trpc.user.readPosts.useQuery({
-      id
-    });
-
+const User = ({ user }: { user: Omit<IUserEntity, "password"> }) => {
   return (
-    <div>
-      <h3 className="text-xl font-medium mt-6">Posts</h3>
-      {isPostsLoading ? (
-        <p>Loading posts...</p>
-      ) : posts?.length ? (
-        <ul className="w-full max-w-md space-y-4">
-          {posts.map((post) => (
-            <li key={post.id} className="border p-4 rounded-lg shadow">
-              <Link href={`/post/${post.id}`}>
-                <h4 className="font-semibold text-lg">{post.title}</h4>
-                <p className="text-gray-600">{post.content}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No posts found.</p>
-      )}
+    <Card className="border-0 shadow-none">
+      <CardHeader>
+        <h2 className="text-4xl font-bold">{user.name}'s Profile</h2>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="profile">
+          <TabsList>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="posts">Posts</TabsTrigger>
+            <TabsTrigger value="comments">Comments</TabsTrigger>
+          </TabsList>
+          <TabsContent value="profile">
+            <UserBio bio={user.bio || ""} />
+          </TabsContent>
+          <TabsContent value="posts">
+            <UserPosts id={user.id} />
+          </TabsContent>
+          <TabsContent value="comments">
+            <UserComments id={user.id} />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};
+
+const UserBio = ({ bio }: { bio: string }) => {
+  return (
+    <div className="space-y-1">
+      <h2 className="font-semibold">Bio</h2>
+      <Card>
+        <CardHeader>
+          <MDView source={bio || "No bio available"} />
+        </CardHeader>
+      </Card>
     </div>
   );
 };
 
-const UserComments = ({ id }: { id: string }) => {
-  const { data: comments, isLoading: isCommentsLoading } =
-    trpc.user.readComments.useQuery({
-      id
-    });
+const UserPosts = ({ id }: { id: string }) => {
+  const { data: posts, isLoading } = trpc.user.readPosts.useQuery({
+    id
+  });
 
   return (
-    <div>
-      <h3 className="text-xl font-medium mt-6">Comments</h3>
-      {isCommentsLoading ? (
-        <p>Loading comments...</p>
-      ) : comments?.length ? (
-        <ul className="w-full max-w-md space-y-4">
-          {comments.map((comment) => (
-            <li key={comment.id} className="border p-4 rounded-lg shadow">
-              <Link href={`/post/${comment.postId}`}>
-                <p>Post Id: {comment.postId}</p>
-                <p className="text-gray-600">{comment.content}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No comments found.</p>
-      )}
-    </div>
+    <Card className="border-0 shadow-none">
+      <CardHeader>
+        {isLoading && <p>Loading posts...</p>}
+        {!isLoading && !posts?.length && <p>No posts found.</p>}
+        {posts?.length && (
+          <ul>
+            {posts.map((post, index) => (
+              <li key={post.id} className="flex">
+                <span className="mr-2">{index + 1}.</span>
+                <div>
+                  <Link href={`/post/${post.id}`} className="hover:underline">
+                    <h2 className="font-semibold">{post.title}</h2>
+                  </Link>
+                  <p className="text-gray-600 text-sm">
+                    {formatDistance(new Date(post.createdAt), new Date(), {
+                      addSuffix: true
+                    })}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardHeader>
+    </Card>
+  );
+};
+
+const UserComments = ({ id }: { id: string }) => {
+  const { data: comments, isLoading } = trpc.user.readComments.useQuery({
+    id
+  });
+
+  return (
+    <Card className="border-0 shadow-none">
+      <CardHeader>
+        {isLoading && <p>Loading comments...</p>}
+        {!isLoading && !comments?.length && <p>No comments found.</p>}
+        {comments?.length && (
+          <ul>
+            {comments.map((comment, index) => (
+              <li key={comment.id} className="flex">
+                <span className="mr-2">{index + 1}.</span>
+                <div>
+                  <Link
+                    href={`/post/${comment.postId}`}
+                    className="hover:underline"
+                  >
+                    <h2 className="italic">
+                      "
+                      {comment.content.length > 300
+                        ? comment.content.slice(0, 300) + "..."
+                        : comment.content}
+                      "
+                    </h2>
+                  </Link>
+                  <p className="text-gray-600 text-sm">
+                    {formatDistance(new Date(comment.createdAt), new Date(), {
+                      addSuffix: true
+                    })}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardHeader>
+    </Card>
   );
 };
 
@@ -82,4 +147,4 @@ const UpdateUserSection = ({ id }: Params) => {
   );
 };
 
-export { UserPosts, UserComments, UpdateUserSection };
+export { User, UserPosts, UserComments, UpdateUserSection };
