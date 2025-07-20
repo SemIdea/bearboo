@@ -11,8 +11,9 @@ const Page = async () => {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <h2>Edit Profile</h2>
-      <UpdateUserForm user={user} />
+      <div className="w-[55%]">
+        <UpdateUserForm user={user} />
+      </div>
     </div>
   );
 };
