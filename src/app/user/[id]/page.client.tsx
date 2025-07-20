@@ -4,10 +4,18 @@ import Link from "next/link";
 import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
 import { IUserEntity } from "@/server/entities/user/DTO";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MDView } from "@/components/ui/mdview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistance } from "date-fns";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown";
+import { BsThreeDots } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
 
 type Params = {
   id: string;
@@ -17,7 +25,10 @@ const User = ({ user }: { user: Omit<IUserEntity, "password"> }) => {
   return (
     <Card className="border-0 shadow-none">
       <CardHeader>
-        <h2 className="text-4xl font-bold">{user.name}'s Profile</h2>
+        <CardTitle className="flex items-center justify-between">
+          <h2 className="text-4xl font-bold">{user.name}'s Profile</h2>
+          <UpdateUserSection id={user.id} />
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="profile">
@@ -139,12 +150,21 @@ const UpdateUserSection = ({ id }: Params) => {
   }
 
   return (
-    <div className="mt-6">
-      <Link href={`/user/profile`} className="text-blue-500">
-        Update Profile
-      </Link>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon" className="ml-auto">
+          <BsThreeDots />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>
+          <Link href={`/user/profile`} className="w-full">
+            Update Profile
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
-export { User, UserPosts, UserComments, UpdateUserSection };
+export { User };
