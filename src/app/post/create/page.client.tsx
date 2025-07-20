@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
-import MDEditor from "@uiw/react-md-editor";
+import dynamic from "next/dynamic";
 import {
   Card,
   CardContent,
@@ -15,6 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
+  ssr: false
+});
 
 type PostData = {
   title: string;
