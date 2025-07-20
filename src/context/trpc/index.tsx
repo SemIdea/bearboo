@@ -6,6 +6,7 @@ import { useState } from "react";
 import superjson from "superjson";
 import { trpc } from "@/app/_trpc/client";
 import { clearAuthData } from "@/utils/authStorage";
+import { AuthErrorCode } from "@/shared/error/auth";
 
 let trpcClientInstance: ReturnType<typeof trpc.createClient>;
 
@@ -22,38 +23,70 @@ export const fetcher = async (
   try {
     let response = await fetch(info, options);
 
-    // If we get a 401 (unauthorized), try to refresh the token and retry once
+    // If we get a 401 (unauthorized), read the message to determine action
     if (response.status === 401 && !hasRetried) {
       hasRetried = true;
 
-      // Check if we're already refreshing to prevent race conditions
-      if (isRefreshing && refreshPromise) {
-        try {
-          await refreshPromise;
-        } catch {
-          clearAuthData();
-          window.location.href = "/auth/login";
-          return response;
-        }
-      } else {
-        // Start refresh process
-        isRefreshing = true;
-        refreshPromise = refreshTokens();
+      // Create a copy of the response to read the message
+      const responseClone = response.clone();
+      let errorCode: string | null = null;
 
-        try {
-          await refreshPromise;
-        } catch (error) {
-          clearAuthData();
-          window.location.href = "/auth/login";
-          return response;
-        } finally {
-          isRefreshing = false;
-          refreshPromise = null;
-        }
+      try {
+        const responseBody = (await responseClone.json()) as {
+          error?: { code?: string };
+          code?: string;
+        };
+        errorCode = responseBody.error?.code || responseBody.code || null;
+      } catch {
+        // If we can't parse the response, treat it as invalid token
+        errorCode = AuthErrorCode.INVALID_TOKEN;
       }
 
-      // Retry the original request with new tokens
-      response = await fetch(info, options);
+      // Handle based on the error code
+      switch (errorCode) {
+        case AuthErrorCode.SESSION_EXPIRED:
+          // Check if we're already refreshing to prevent race conditions
+          if (isRefreshing && refreshPromise) {
+            try {
+              await refreshPromise;
+            } catch {
+              clearAuthData();
+              window.location.href = "/auth/login";
+              return response;
+            }
+          } else {
+            // Start refresh process
+            isRefreshing = true;
+            refreshPromise = refreshTokens();
+
+            try {
+              await refreshPromise;
+            } catch {
+              clearAuthData();
+              window.location.href = "/auth/login";
+              return response;
+            } finally {
+              isRefreshing = false;
+              refreshPromise = null;
+            }
+          }
+
+          // Retry the original request with new tokens
+          response = await fetch(info, options);
+          break;
+
+        case AuthErrorCode.INVALID_TOKEN:
+          // Clear auth data and redirect to login
+          clearAuthData();
+          window.location.href = "/auth/login";
+          return response;
+
+        default:
+          // For any other error codes, treat as invalid token
+          clearAuthData();
+          window.location.href = "/auth/login";
+          return response;
+      }
     }
 
     // After handling 401 and potential retry, check for other status codes
@@ -117,12 +150,6 @@ const queryClient = new QueryClient({
 });
 
 const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
-  const url =
-    process.env.NEXT_PUBLIC_APP_DOMAIN &&
-    !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
-      ? `https://www.${process.env.NEXT_PUBLIC_APP_DOMAIN}/api/trpc/`
-      : "http://localhost:3000/api/trpc/";
-
   const [client] = useState(() => {
     const client = trpc.createClient({
       links: [
