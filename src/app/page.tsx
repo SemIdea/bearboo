@@ -9,7 +9,7 @@ const Home = async () => {
   const posts = await caller.post.readRecent();
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+    <div className="flex justify-center w-full">
       <div className="w-[55%]">
         <PostFeed posts={posts} />
       </div>

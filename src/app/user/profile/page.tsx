@@ -1,6 +1,5 @@
 import { createDynamicCaller } from "@/server/caller";
 import { UpdateUserForm } from "./page.client";
-import { redirect } from "next/navigation";
 
 const Page = async () => {
   const { ctx } = await createDynamicCaller({
@@ -10,7 +9,7 @@ const Page = async () => {
   const { user } = ctx;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+    <div className="flex justify-center w-full">
       <div className="w-[55%]">
         <UpdateUserForm user={user} />
       </div>

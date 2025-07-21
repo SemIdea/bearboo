@@ -18,7 +18,7 @@ const Page = async (props: PageProps) => {
   const post = await caller.post.read({ id });
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex justify-center w-full">
       <div className="w-[55%]">
         <UpdatePostForm post={post} />
       </div>

@@ -16,7 +16,7 @@ const Page = async (props: PageProps) => {
   const user = await caller.user.read({ id });
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+    <div className="flex justify-center w-full">
       <div className="w-[55%]">
         <User user={user} />
       </div>
