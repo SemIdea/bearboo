@@ -37,7 +37,7 @@ describe("Profile User Controller Unitary Testing", async () => {
       ctx,
       input: {
         name: "New Name",
-        email: "newemail@example.com",
+        email: `new${user.id}email@example.com`,
         bio: "New bio"
       }
     });
@@ -45,7 +45,7 @@ describe("Profile User Controller Unitary Testing", async () => {
     expect(result).toBeTruthy();
     expect(result.id).toEqual(user.id);
     expect(result.name).toEqual("New Name");
-    expect(result.email).toEqual("newemail@example.com");
+    expect(result.email).toEqual(`new${user.id}email@example.com`);
     expect(result.bio).toEqual("New bio");
   });
 
