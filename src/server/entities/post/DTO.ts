@@ -13,7 +13,7 @@ type IPostEntity = {
 type IPostEntityWithRelations = IPostEntity & {
   user: {
     id: string;
-    email: string;
+    name: string;
   };
   comments: {
     id: string;
@@ -45,4 +45,11 @@ type IReadUserPostsDTO = {
   };
 };
 
-export type { IPostEntity, IPostModel, IReadAllPostsDTO, IReadUserPostsDTO };
+export type {
+  IPostEntity,
+  IPostEntityWithRelations,
+  IPostExtraRepositories,
+  IPostModel,
+  IReadAllPostsDTO,
+  IReadUserPostsDTO
+};

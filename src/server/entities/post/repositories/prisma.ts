@@ -32,7 +32,7 @@ class PrismaPostModel implements IPostModel {
         user: {
           select: {
             id: true,
-            email: true
+            name: true
           }
         },
         comments: {
