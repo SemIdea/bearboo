@@ -157,7 +157,7 @@ class BaseEntity<
     ];
 
     if (this.index) {
-      for (const [_, index] of Object.entries(this.index) as [
+      for (const [_key, index] of Object.entries(this.index) as [
         string,
         { key: string; ttl: number }
       ][]) {

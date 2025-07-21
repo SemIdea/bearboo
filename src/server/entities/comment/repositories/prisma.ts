@@ -65,7 +65,7 @@ class PrismaCommentModel implements ICommentModel {
       });
 
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

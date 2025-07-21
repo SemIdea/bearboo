@@ -20,7 +20,7 @@ const Page = async (props: PageProps) => {
   const user = await caller.user.read({ id: post.userId });
 
   return (
-    <div className="flex min-h-svh w-full justify-center p-6 md:p-10">
+    <div className="flex justify-center w-full">
       <div className="w-[55%]">
         <Post post={post} user={user} />
       </div>

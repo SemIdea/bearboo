@@ -1,7 +1,6 @@
 import { TokenEntity } from "@/server/entities/token/entity";
 import { ICreateTokenServiceDTO, ITokenServiceDTO } from "./DTO";
 import { TRPCError } from "@trpc/server";
-import { dataTagSymbol } from "@tanstack/react-query";
 import { TokenErrorCodes } from "@/shared/error/token";
 import { UserEntity } from "@/server/entities/user/entity";
 

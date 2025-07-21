@@ -56,7 +56,7 @@ class PrismaSessionModel implements ISessionModel {
       });
 
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
