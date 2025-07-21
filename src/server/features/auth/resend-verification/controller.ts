@@ -42,7 +42,7 @@ const resendVerificationEmailController = async ({
     helpers: ctx.helpers
   });
 
-  const mail = await SendMailService({
+  await SendMailService({
     to: user.email,
     subject: "Please verify your email address",
     body: `
