@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { PostFeed } from "@/components/postFeed";
-import { SearchPost } from "@/components/ui/searchPost";
 import { createCaller } from "@/server/caller";
 
 const Home = async () => {
