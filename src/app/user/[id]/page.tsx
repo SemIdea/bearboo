@@ -7,6 +7,8 @@ type PageProps = {
   }>;
 };
 
+export const revalidate = 3600; // 1 hour
+
 const Page = async (props: PageProps) => {
   const params = await props.params;
   const caller = await createCaller();

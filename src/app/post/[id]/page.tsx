@@ -8,7 +8,6 @@ type PageProps = {
 };
 
 export const revalidate = 3600; // 1 hour
-export const dynamic = "error";
 
 const Page = async (props: PageProps) => {
   const params = await props.params;
