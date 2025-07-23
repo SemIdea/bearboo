@@ -8,18 +8,24 @@ import {
 } from "./ui/card";
 import { formatDistance } from "date-fns";
 import Link from "next/link";
+import { createDynamicCaller } from "@/server/caller";
 
-const PostFeed = ({ posts }: { posts: IPostEntityWithRelations[] }) => (
-  <Card className="border-0 shadow-none">
-    <CardHeader>
-      {posts.length == 0 && <p>No posts found.</p>}
-      {posts.length > 0 &&
-        posts.map((post, index) => (
-          <Post key={post.id} post={post} index={index} />
-        ))}
-    </CardHeader>
-  </Card>
-);
+const PostFeed = async () => {
+  const { caller } = await createDynamicCaller({ pathName: "/" });
+
+  const posts = await caller.post.readRecent();
+  return (
+    <Card className="border-0 shadow-none">
+      <CardHeader>
+        {posts.length == 0 && <p>No posts found.</p>}
+        {posts.length > 0 &&
+          posts.map((post, index) => (
+            <Post key={post.id} post={post} index={index} />
+          ))}
+      </CardHeader>
+    </Card>
+  );
+};
 
 const Post = ({
   post,
