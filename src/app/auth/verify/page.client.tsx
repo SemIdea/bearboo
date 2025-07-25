@@ -14,7 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getErrorMessage } from "@/lib/getErrorMessage";
+import { extractErrorMessage } from "@/lib/error";
 
 const useVerifyForm = () => {
   const searchParams = useSearchParams();
@@ -44,7 +44,7 @@ const useVerifyForm = () => {
       }, 2000);
     },
     onError: (error) => {
-      setErrorMessage(getErrorMessage(error.message));
+      setErrorMessage(extractErrorMessage(error));
       setIsVerifying(false);
     }
   });

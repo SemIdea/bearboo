@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { getErrorMessage } from "@/lib/getErrorMessage";
 import {
   Card,
   CardContent,
@@ -16,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { extractErrorMessage } from "@/lib/error";
 
 const useRegisterForm = () => {
   const router = useRouter();
@@ -34,10 +34,7 @@ const useRegisterForm = () => {
       setErrorMessage("");
     },
     onError: (error) => {
-      console.error("Registration error:", error);
-      setErrorMessage(
-        error.message || "Registration failed. Please try again."
-      );
+      setErrorMessage(extractErrorMessage(error));
       setIsLoading(false);
     }
   });
@@ -137,7 +134,7 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                 </Button>
                 {errorMessage && (
                   <p className="text-red-600 text-sm text-center">
-                    {getErrorMessage(errorMessage)}
+                    {errorMessage}
                   </p>
                 )}
               </div>
