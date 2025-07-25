@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getErrorMessage } from "@/lib/getErrorMessage";
 import { IUserWithSession } from "@/server/entities/user/DTO";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { extractErrorMessage } from "@/lib/error";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
   ssr: false
@@ -30,7 +30,7 @@ const useUpdateUser = (user: IUserWithSession) => {
       setIsUploading(false);
     },
     onError: (error) => {
-      setErrorMessage(getErrorMessage(error.message));
+      setErrorMessage(extractErrorMessage(error));
       setSuccessMessage(null);
       setIsUploading(false);
     }

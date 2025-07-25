@@ -11,13 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
 import Link from "next/link";
-import { getErrorMessage } from "@/lib/getErrorMessage";
+import { extractErrorMessage } from "@/lib/error";
 
 const useLoginForm = () => {
   const router = useRouter();
@@ -31,13 +30,12 @@ const useLoginForm = () => {
   const { mutate: login } = trpc.auth.loginUser.useMutation({
     onSuccess: (data) => {
       updateAuthData(data);
-      router.push("/");
       setIsLoading(false);
       setErrorMessage("");
+      router.push("/");
     },
     onError: (error) => {
-      console.error("Login error:", error);
-      setErrorMessage(error.message || "Login failed. Please try again.");
+      setErrorMessage(extractErrorMessage(error));
       setIsLoading(false);
     }
   });
@@ -121,7 +119,7 @@ const LoginForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                 </Button>
                 {errorMessage && (
                   <p className="text-red-600 text-sm text-center">
-                    {getErrorMessage(errorMessage)}
+                    {errorMessage}
                   </p>
                 )}
               </div>

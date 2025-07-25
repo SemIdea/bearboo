@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
-import { getErrorMessage } from "@/lib/getErrorMessage";
 import {
   Card,
   CardContent,
@@ -14,6 +13,7 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { extractErrorMessage } from "@/lib/error";
 
 const useCheckEmailLogic = () => {
   const searchParams = useSearchParams();
@@ -30,7 +30,7 @@ const useCheckEmailLogic = () => {
         setIsResending(false);
       },
       onError: (error) => {
-        setErrorMessage(getErrorMessage(error.message));
+        setErrorMessage(extractErrorMessage(error));
         setSuccessMessage("");
         setIsResending(false);
       }
