@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AuthErrorCode } from "@/shared/error/auth";
+import { UserErrorCode } from "@/shared/error/user";
 
 const verifyUserSchema = z.object({
   id: z.string(),
@@ -10,32 +11,32 @@ const verifyUserSchema = z.object({
 const registerUserSchema = z.object({
   email: z
     .string({
-      required_error: "Email is required"
+      required_error: AuthErrorCode.EMAIL_REQUIRED
     })
-    .email("Invalid Email"),
+    .email(AuthErrorCode.INVALID_EMAIL),
   name: z
     .string({
-      required_error: "Name is required"
+      required_error: AuthErrorCode.NAME_REQUIRED
     })
-    .min(3, "Name must be at least 3 characters long"),
+    .min(3, AuthErrorCode.NAME_TOO_SHORT),
   password: z
     .string({
-      required_error: "Password is required"
+      required_error: AuthErrorCode.PASSWORD_REQUIRED
     })
-    .min(8, "Password must be at least 8 characters long")
+    .min(8, AuthErrorCode.PASSWORD_TOO_SHORT)
 });
 
 const loginUserSchema = z.object({
   email: z
     .string({
-      required_error: "Email is required"
+      required_error: AuthErrorCode.EMAIL_REQUIRED
     })
-    .email(AuthErrorCode.INVALID_CREDENTIALS),
+    .email(AuthErrorCode.INVALID_EMAIL),
   password: z
     .string({
-      required_error: "Password is required"
+      required_error: AuthErrorCode.PASSWORD_REQUIRED
     })
-    .min(8, AuthErrorCode.INVALID_CREDENTIALS)
+    .min(8, AuthErrorCode.PASSWORD_TOO_SHORT)
 });
 
 const readUserProfileSchema = z.object({
@@ -54,20 +55,20 @@ const updateUserProfileSchema = z
   .object({
     name: z
       .string({
-        required_error: "Name is required"
+        required_error: UserErrorCode.PROFILE_NAME_REQUIRED
       })
-      .min(3, "Name must be at least 3 characters long"),
+      .min(3, UserErrorCode.PROFILE_NAME_TOO_SHORT),
     email: z
       .string({
-        required_error: "Email is required"
+        required_error: UserErrorCode.PROFILE_EMAIL_REQUIRED
       })
-      .email("Invalid email format"),
+      .email(UserErrorCode.PROFILE_INVALID_EMAIL),
     bio: z
       .string({
-        required_error: "Bio is required",
-        invalid_type_error: "Bio must be a string"
+        required_error: UserErrorCode.BIO_REQUIRED,
+        invalid_type_error: UserErrorCode.BIO_MUST_BE_STRING
       })
-      .max(500, "Bio must be at most 500 characters long")
+      .max(500, UserErrorCode.BIO_TOO_LONG)
   })
   .partial();
 

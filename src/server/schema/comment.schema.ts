@@ -1,8 +1,13 @@
 import { z } from "zod";
+import { CommentErrorCode } from "@/shared/error/comment";
 
 const createCommentschema = z.object({
   postId: z.string(),
-  content: z.string().min(1, "Content cannot be empty")
+  content: z
+    .string({
+      required_error: CommentErrorCode.COMMENT_CONTENT_REQUIRED
+    })
+    .min(1, CommentErrorCode.COMMENT_CONTENT_TOO_SHORT)
 });
 
 const readAllCommentsByPostSchema = z.object({
@@ -11,7 +16,11 @@ const readAllCommentsByPostSchema = z.object({
 
 const updateCommentSchema = z.object({
   id: z.string(),
-  content: z.string().min(1, "Content cannot be empty")
+  content: z
+    .string({
+      required_error: CommentErrorCode.COMMENT_CONTENT_REQUIRED
+    })
+    .min(1, CommentErrorCode.COMMENT_CONTENT_TOO_SHORT)
 });
 
 const deleteCommentSchema = z.object({
