@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { TRPCError } from "@trpc/server";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { redirect } from "next/navigation";
+import { SessionErrorCode } from "@/shared/error/session";
 
 type ICreateDynamicCallerDTO = {
   pathName: string;
@@ -34,7 +35,7 @@ const createDynamicCaller = async ({ pathName }: ICreateDynamicCallerDTO) => {
           case AuthErrorCode.USER_NOT_LOGGED_IN:
             redirect(`/auth/login?redirect=${pathName}`);
             break;
-          case AuthErrorCode.SESSION_EXPIRED:
+          case SessionErrorCode.SESSION_EXPIRED:
             redirect(`/auth/refresh?redirect=${pathName}`);
             break;
           default:
