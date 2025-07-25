@@ -22,7 +22,7 @@ const DeleteCommentService = async ({
   if (comment.userId !== data.userId) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: CommentErrorCode.COMMENT_NOT_BELONG_TO_USER
+      message: CommentErrorCode.COMMENT_DELETE_FORBIDDEN
     });
   }
 

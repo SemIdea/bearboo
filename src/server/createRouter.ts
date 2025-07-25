@@ -3,15 +3,20 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
 import { Context } from "./createContext";
 import { AuthErrorCode } from "@/shared/error/auth";
+import { SessionErrorCode } from "@/shared/error/session";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
-  errorFormatter({ shape, error }) {
+  errorFormatter(opts) {
+    const { shape, error } = opts;
     return {
       ...shape,
       data: {
         ...shape.data,
-        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null
+        zodError:
+          error.code === "BAD_REQUEST" && error.cause instanceof ZodError
+            ? error.cause.flatten()
+            : null
       }
     };
   }
@@ -33,7 +38,7 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (Date.now() - sessionUpdatedDate.getTime() > EXPIRES) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.SESSION_EXPIRED
+      message: SessionErrorCode.SESSION_EXPIRED
     });
   }
 

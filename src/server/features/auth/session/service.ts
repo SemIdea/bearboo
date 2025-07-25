@@ -11,6 +11,7 @@ import { UserEntity } from "@/server/entities/user/entity";
 import { IUserWithSession } from "@/server/entities/user/DTO";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { UserErrorCode } from "@/shared/error/user";
+import { SessionErrorCode } from "@/shared/error/session";
 
 const CreateAuthSessionService = async ({
   repositories,
@@ -50,7 +51,7 @@ const CreateAuthSessionService = async ({
   if (!session) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_CREATE_ERROR
+      message: SessionErrorCode.SESSION_CREATE_ERROR
     });
   }
 
@@ -69,7 +70,7 @@ const ReadUserAndSessionByAccessTokenService = async ({
   if (!session || !session.userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: SessionErrorCode.INVALID_TOKEN
     });
   }
 
@@ -84,7 +85,7 @@ const ReadUserAndSessionByAccessTokenService = async ({
   if (!user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: SessionErrorCode.INVALID_TOKEN
     });
   }
 
@@ -109,7 +110,7 @@ const ReadSessionByRefreshTokenService = async ({
   if (!session) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: SessionErrorCode.INVALID_TOKEN
     });
   }
 
@@ -137,7 +138,7 @@ const RefreshSessionService = async ({
   if (!newSession) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_UPDATE_ERROR
+      message: SessionErrorCode.SESSION_UPDATE_ERROR
     });
   }
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AuthErrorCode } from "@/shared/error/auth";
 
 const verifyUserSchema = z.object({
   id: z.string(),
@@ -29,12 +30,12 @@ const loginUserSchema = z.object({
     .string({
       required_error: "Email is required"
     })
-    .email("Invalid Email or password"),
+    .email(AuthErrorCode.INVALID_CREDENTIALS),
   password: z
     .string({
       required_error: "Password is required"
     })
-    .min(8, "Invalid Email or password")
+    .min(8, AuthErrorCode.INVALID_CREDENTIALS)
 });
 
 const readUserProfileSchema = z.object({
