@@ -1,8 +1,17 @@
 import { z } from "zod";
+import { PostErrorCode } from "@/shared/error/post";
 
 const createPostSchema = z.object({
-  title: z.string(),
-  content: z.string()
+  title: z
+    .string({
+      required_error: PostErrorCode.POST_TITLE_REQUIRED
+    })
+    .min(3, PostErrorCode.POST_TITLE_TOO_SHORT),
+  content: z
+    .string({
+      required_error: PostErrorCode.POST_CONTENT_REQUIRED
+    })
+    .min(10, PostErrorCode.POST_CONTENT_TOO_SHORT)
 });
 
 const readPostSchema = z.object({
@@ -11,8 +20,8 @@ const readPostSchema = z.object({
 
 const updatePostSchema = z.object({
   id: z.string(),
-  title: z.string().optional(),
-  content: z.string().optional()
+  title: z.string().min(3, PostErrorCode.POST_TITLE_TOO_SHORT).optional(),
+  content: z.string().min(10, PostErrorCode.POST_CONTENT_TOO_SHORT).optional()
 });
 
 const deletePostSchema = z.object({

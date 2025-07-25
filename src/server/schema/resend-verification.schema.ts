@@ -1,7 +1,12 @@
 import { z } from "zod";
+import { AuthErrorCode } from "@/shared/error/auth";
 
 const resendVerificationEmailSchema = z.object({
-  email: z.string().email("Please enter a valid email address")
+  email: z
+    .string({
+      required_error: AuthErrorCode.EMAIL_REQUIRED
+    })
+    .email(AuthErrorCode.INVALID_EMAIL)
 });
 
 type ResendVerificationEmailInput = z.infer<
