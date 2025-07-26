@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
+import { extractErrorMessage, getErrorMessage } from "@/lib/error";
+import { ValidationErrorCode } from "@/shared/error/validation";
+import { useClientValidation } from "@/lib/validation";
 import dynamic from "next/dynamic";
 import {
   Card,
@@ -28,13 +31,36 @@ type PostData = {
 const useCreatePost = () => {
   const router = useRouter();
   const { session, isLoadingSession } = useAuth();
+  const { validatePost, validationError, clearValidationError } =
+    useClientValidation();
 
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
 
+  // Focus state tracking
+  const [titleFocused, setTitleFocused] = useState(false);
+  const [contentFocused, setContentFocused] = useState(false);
+
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [successMessage, setSuccessMessage] = useState<null | string>(null);
+
+  // Clear error message when user starts typing
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    if (errorMessage || validationError) {
+      setErrorMessage(null);
+      clearValidationError();
+    }
+  };
+
+  const handleContentChange = (value: string | undefined) => {
+    setContent(value || "");
+    if (errorMessage || validationError) {
+      setErrorMessage(null);
+      clearValidationError();
+    }
+  };
 
   const { mutate: createPost } = trpc.post.create.useMutation({
     onSuccess: (data) => {
@@ -43,7 +69,7 @@ const useCreatePost = () => {
       router.push(`/post/${data.id}`);
     },
     onError: (error) => {
-      setErrorMessage("Failed to create post. Please try again.");
+      setErrorMessage(extractErrorMessage(error));
       setSuccessMessage(null);
       console.error("Error creating post:", error);
     },
@@ -60,8 +86,11 @@ const useCreatePost = () => {
 
   const handleCreatePost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!title || !content) {
-      return alert("Title and content are required.");
+
+    // Client-side validation using the validation hook
+    const isValid = validatePost(title, content);
+    if (!isValid) {
+      return; // Error message is already set by the validation hook
     }
 
     setIsUploading(true);
@@ -76,26 +105,34 @@ const useCreatePost = () => {
 
   return {
     title,
-    setTitle,
     content,
-    setContent,
     isUploading,
-    errorMessage,
+    errorMessage: errorMessage || validationError, // Combine both error types
     successMessage,
-    handleCreatePost
+    handleCreatePost,
+    handleTitleChange,
+    handleContentChange,
+    titleFocused,
+    contentFocused,
+    setTitleFocused,
+    setContentFocused
   };
 };
 
 const CreatePostForm = () => {
   const {
     title,
-    setTitle,
     content,
-    setContent,
     isUploading,
     errorMessage,
     successMessage,
-    handleCreatePost
+    handleCreatePost,
+    handleTitleChange,
+    handleContentChange,
+    titleFocused,
+    contentFocused,
+    setTitleFocused,
+    setContentFocused
   } = useCreatePost();
 
   return (
@@ -117,8 +154,23 @@ const CreatePostForm = () => {
                 placeholder="Title"
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                onFocus={() => setTitleFocused(true)}
+                onBlur={() => setTitleFocused(false)}
+                autoComplete="off"
+                className={
+                  title.length > 0 && title.length < 3 && !titleFocused
+                    ? "border-red-300"
+                    : ""
+                }
               />
+              {title.length > 0 && title.length < 3 && !titleFocused && (
+                <p className="text-red-600 text-xs">
+                  {getErrorMessage(
+                    ValidationErrorCode.POST_TITLE_TOO_SHORT_CLIENT
+                  )}
+                </p>
+              )}
             </div>
             <div className="grid gap-3">
               <Label htmlFor="content">Content</Label>
@@ -126,25 +178,32 @@ const CreatePostForm = () => {
                 className="markdown markdown-editor"
                 preview="live"
                 value={content}
-                onChange={(v) => {
-                  setContent(v || "");
-                }}
+                onChange={handleContentChange}
+                onFocus={() => setContentFocused(true)}
+                onBlur={() => setContentFocused(false)}
               />
+              {content.length > 0 && content.length < 10 && !contentFocused && (
+                <p className="text-red-600 text-xs">
+                  {getErrorMessage(
+                    ValidationErrorCode.POST_CONTENT_TOO_SHORT_CLIENT
+                  )}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-3">
+              {errorMessage && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-red-800 text-sm">{errorMessage}</p>
+                </div>
+              )}
+              {successMessage && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-green-800 text-sm">{successMessage}</p>
+                </div>
+              )}
               <Button type="submit" className="w-full" disabled={isUploading}>
                 {isUploading ? "Creating Post..." : "Create Post"}
               </Button>
-              {successMessage && (
-                <p className="text-green-600 text-sm text-center">
-                  {successMessage}
-                </p>
-              )}
-              {errorMessage && (
-                <p className="text-red-600 text-sm text-center">
-                  {errorMessage}
-                </p>
-              )}
             </div>
           </div>
         </form>

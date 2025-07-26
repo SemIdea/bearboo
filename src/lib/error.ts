@@ -3,6 +3,10 @@ import { AuthErrorMessages } from "@/shared/error/auth";
 import { CommentErrorMessages } from "@/shared/error/comment";
 import { PostErrorMessages } from "@/shared/error/post";
 import { TokenErrorMessages } from "@/shared/error/token";
+import {
+  ValidationErrorMessages,
+  ValidationErrorCode
+} from "@/shared/error/validation";
 import { TRPCClientErrorLike } from "@trpc/client";
 import { AppRouter } from "@/server/routers/app.routes";
 
@@ -21,7 +25,8 @@ type AppErrorCode =
   | keyof typeof CommentErrorMessages
   | keyof typeof PostErrorMessages
   | keyof typeof TokenErrorMessages
-  | keyof typeof UserErrorMessages;
+  | keyof typeof UserErrorMessages
+  | keyof typeof ValidationErrorMessages;
 
 const getErrorMessage = (code: string | AppErrorCode): string => {
   const allErrorMessages = {
@@ -29,7 +34,8 @@ const getErrorMessage = (code: string | AppErrorCode): string => {
     ...CommentErrorMessages,
     ...PostErrorMessages,
     ...TokenErrorMessages,
-    ...UserErrorMessages
+    ...UserErrorMessages,
+    ...ValidationErrorMessages
   };
 
   return (
