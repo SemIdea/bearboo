@@ -1,13 +1,11 @@
 import { z } from "zod";
-import { CommentErrorCode } from "@/shared/error/comment";
 
 const createCommentschema = z.object({
   postId: z.string(),
   content: z
-    .string({
-      required_error: CommentErrorCode.COMMENT_CONTENT_REQUIRED
-    })
-    .min(1, CommentErrorCode.COMMENT_CONTENT_TOO_SHORT)
+    .string()
+    .min(10, "Comment must be at least 10 characters long.")
+    .max(500, "Comment must not exceed 500 characters.")
 });
 
 const readAllCommentsByPostSchema = z.object({
@@ -17,10 +15,9 @@ const readAllCommentsByPostSchema = z.object({
 const updateCommentSchema = z.object({
   id: z.string(),
   content: z
-    .string({
-      required_error: CommentErrorCode.COMMENT_CONTENT_REQUIRED
-    })
-    .min(1, CommentErrorCode.COMMENT_CONTENT_TOO_SHORT)
+    .string()
+    .min(10, "Comment must be at least 10 characters long.")
+    .max(500, "Comment must not exceed 500 characters.")
 });
 
 const deleteCommentSchema = z.object({

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { PostErrorCode } from "@/shared/error/post";
 
 const createPostSchema = z.object({
   title: z
