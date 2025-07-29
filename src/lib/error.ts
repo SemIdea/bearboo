@@ -3,22 +3,7 @@ import { AuthErrorMessages } from "@/shared/error/auth";
 import { CommentErrorMessages } from "@/shared/error/comment";
 import { PostErrorMessages } from "@/shared/error/post";
 import { TokenErrorMessages } from "@/shared/error/token";
-import {
-  ValidationErrorMessages,
-  ValidationErrorCode
-} from "@/shared/error/validation";
-import { TRPCClientErrorLike } from "@trpc/client";
-import { AppRouter } from "@/server/routers/app.routes";
-
-const extractErrorMessage = (error: TRPCClientErrorLike<AppRouter>): string => {
-  const zod = error?.data?.zodError;
-  if (zod?.fieldErrors) {
-    const firstErrorCode = Object.values(zod.fieldErrors).flat().find(Boolean);
-    if (firstErrorCode) return getErrorMessage(firstErrorCode);
-  }
-
-  return getErrorMessage(error.message);
-};
+import { ValidationErrorMessages } from "@/shared/error/validation";
 
 type AppErrorCode =
   | keyof typeof AuthErrorMessages
@@ -44,4 +29,4 @@ const getErrorMessage = (code: string | AppErrorCode): string => {
   );
 };
 
-export { getErrorMessage, extractErrorMessage };
+export { getErrorMessage };
