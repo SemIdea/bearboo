@@ -46,7 +46,7 @@ const Page = async (props: PageProps) => {
         <div className="flex flex-col gap-4">
           <h2 className="text-4xl font-bold">{post.title}</h2>
           <MdView source={post.content} />
-          <CommentArea postId={post.id} userId={user.id} />
+          <CommentArea postId={post.id} />
         </div>
       }
     />

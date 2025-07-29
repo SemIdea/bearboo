@@ -50,17 +50,15 @@ const useComment = (postId: string) => {
 
 const CommentArea = ({
   postId,
-  userId
 }: {
   postId: string;
-  userId: string;
 }) => {
   const commentHook = useComment(postId);
 
   return (
     <>
       <CreateComment postId={postId} commentHook={commentHook} />
-      <Comments userId={userId} commentHook={commentHook} />
+      <Comments commentHook={commentHook} />
     </>
   );
 };
