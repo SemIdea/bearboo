@@ -76,12 +76,12 @@ const useDeleteComment = (deleteLocalcomment: (commentId: string) => void) => {
 };
 
 const Comments = ({
-  userId,
   commentHook
 }: {
-  userId: string;
   commentHook: ICommentHook;
 }) => {
+  const { session } = useAuth();
+
   const [commentBeingEdited, setCommentBeingEdited] = useState("");
 
   const { comments, isLoading, deleteLocalComment, updateLocalComment } =
@@ -105,7 +105,7 @@ const Comments = ({
       <Comment
         comment={comment}
         editing={comment.id === commentBeingEdited}
-        isOwner={comment.userId === userId}
+        isOwner={comment.userId === session?.user.id}
         isUpdating={comment.id === commentBeingUpdated}
         isDeleting={comment.id === commentBeingDeleted}
         errorMessage={deleteErrorMessage || updateErrorMessage}
@@ -117,6 +117,5 @@ const Comments = ({
     </div>
   ));
 };
-
 
 export { Comments };
