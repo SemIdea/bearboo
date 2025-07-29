@@ -7,12 +7,13 @@ import {
   CardTitle
 } from "./ui/card";
 import { formatDistance } from "date-fns";
-import { createDynamicCaller } from "@/server/caller";
-import Link from "next/link";
+import { createCaller } from "@/server/caller";
 import { By } from "./ui/by";
+import Link from "next/link";
+
 
 const PostFeed = async () => {
-  const { caller } = await createDynamicCaller();
+  const caller = await createCaller();
 
   const posts = await caller.post.readRecent();
   return (

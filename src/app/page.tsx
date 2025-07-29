@@ -1,7 +1,7 @@
 import { PostFeed } from "@/components/postFeed";
 import { Suspense } from "react";
 
-export const experimental_ppr = true;
+export const dynamic = "force-dynamic";
 
 const Home = async () => {
   return (
