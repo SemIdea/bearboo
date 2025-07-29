@@ -21,7 +21,7 @@ const Authprovider = ({ children }: ChatProviderProps) => {
   } = useAuthLogic();
 
   useEffect(() => {
-    const [_accessTokenCookie, sessionCookie] = ["accessToken=", "session="].map(
+    const [_, sessionCookie] = ["accessToken=", "session="].map(
       (key) =>
         document.cookie
           .split("; ")

@@ -9,7 +9,6 @@ import {
 import { SessionEntity } from "@/server/entities/session/entity";
 import { UserEntity } from "@/server/entities/user/entity";
 import { IUserWithSession } from "@/server/entities/user/DTO";
-import { AuthErrorCode } from "@/shared/error/auth";
 import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
 
