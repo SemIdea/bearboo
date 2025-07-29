@@ -86,7 +86,7 @@ const InputField = ({
                 type={type}
                 placeholder={placeholder}
                 {...field}
-                value={field.value as string | number | undefined}
+                value={(field.value as string | number | undefined) || ""}
               />
             )}
           </FormControl>
