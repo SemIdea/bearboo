@@ -7,11 +7,12 @@ import {
   CardTitle
 } from "./ui/card";
 import { formatDistance } from "date-fns";
-import Link from "next/link";
 import { createDynamicCaller } from "@/server/caller";
+import Link from "next/link";
+import { By } from "./ui/by";
 
 const PostFeed = async () => {
-  const { caller } = await createDynamicCaller({ pathName: "/" });
+  const { caller } = await createDynamicCaller();
 
   const posts = await caller.post.readRecent();
   return (
@@ -48,14 +49,7 @@ const Post = ({
           </Link>
         </CardTitle>
         <CardDescription className="ml-5">
-          By{" "}
-          <Link
-            href={`/user/${post.user.id}`}
-            className="text-blue-600 hover:underline"
-          >
-            {post.user.name}
-          </Link>{" "}
-          {createdDistance}
+          <By name={post.user.name} id={post.user.id} /> {createdDistance}
         </CardDescription>
       </CardContent>
     </Card>
