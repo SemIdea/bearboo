@@ -3,15 +3,13 @@ import { PostErrorCode } from "@/shared/error/post";
 
 const createPostSchema = z.object({
   title: z
-    .string({
-      required_error: PostErrorCode.POST_TITLE_REQUIRED
-    })
-    .min(3, PostErrorCode.POST_TITLE_TOO_SHORT),
+    .string()
+    .min(3, "Post title must be at least 3 characters long.")
+    .max(100, "Post title must not exceed 100 characters."),
   content: z
-    .string({
-      required_error: PostErrorCode.POST_CONTENT_REQUIRED
-    })
-    .min(10, PostErrorCode.POST_CONTENT_TOO_SHORT)
+    .string()
+    .min(10, "Post content must be at least 10 characters long.")
+    .max(5000, "Post content must not exceed 5000 characters.")
 });
 
 const readPostSchema = z.object({
@@ -20,8 +18,14 @@ const readPostSchema = z.object({
 
 const updatePostSchema = z.object({
   id: z.string(),
-  title: z.string().min(3, PostErrorCode.POST_TITLE_TOO_SHORT).optional(),
-  content: z.string().min(10, PostErrorCode.POST_CONTENT_TOO_SHORT).optional()
+  title: z
+    .string()
+    .min(3, "Post title must be at least 3 characters long.")
+    .optional(),
+  content: z
+    .string()
+    .min(10, "Post content must be at least 10 characters long.")
+    .optional()
 });
 
 const deletePostSchema = z.object({
