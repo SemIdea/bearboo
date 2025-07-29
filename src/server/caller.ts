@@ -5,10 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { redirect } from "next/navigation";
 import { SessionErrorCode } from "@/shared/error/session";
-
-type ICreateDynamicCallerDTO = {
-  pathName: string;
-};
+import { headers as nextHeaders } from "next/headers";
 
 const createCaller = async () => {
   return appRouter.createCaller(
@@ -18,7 +15,8 @@ const createCaller = async () => {
   );
 };
 
-const createDynamicCaller = async ({ pathName }: ICreateDynamicCallerDTO) => {
+const createDynamicCaller = async () => {
+  const headers = await nextHeaders();
   const cookieHeader = (await cookies())
     .getAll()
     .map(({ name, value }) => `${name}=${value}`)
@@ -28,6 +26,9 @@ const createDynamicCaller = async ({ pathName }: ICreateDynamicCallerDTO) => {
     headers: new Headers({ cookie: cookieHeader })
   });
 
+  const url = new URL(headers.get("x-url")!);
+  const pathName = url.pathname;
+  
   const caller = appRouter.createCaller(callerCtx, {
     onError: ({ error }) => {
       if (error instanceof TRPCError) {
