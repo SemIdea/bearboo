@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure, t } from "../createRouter";
+import { publicProcedure, t } from "../createRouter";
 import { refreshSessionController } from "../features/auth/session/controller";
 import { resendVerificationEmailController } from "../features/auth/resend-verification/controller";
 import { verifyTokenController } from "../features/auth/verify/controller";
