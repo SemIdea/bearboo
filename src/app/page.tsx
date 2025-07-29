@@ -5,12 +5,10 @@ export const experimental_ppr = true;
 
 const Home = async () => {
   return (
-    <div className="flex justify-center w-full">
-      <div className="w-[55%]">
-        <Suspense fallback={<p>Loading posts...</p>}>
-          <PostFeed />
-        </Suspense>
-      </div>
+    <div className="w-[55%]">
+      <Suspense fallback={<p>Loading posts...</p>}>
+        <PostFeed />
+      </Suspense>
     </div>
   );
 };
