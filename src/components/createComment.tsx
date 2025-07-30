@@ -1,7 +1,7 @@
 "use client";
 
 import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
-import { CardComponent } from "./card";
+import { CardBase } from "./cardBase";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { MdEditor } from "./ui/mdEditor";
@@ -113,7 +113,7 @@ const CreateComment = ({
   );
 
   return (
-    <CardComponent
+    <CardBase
       border
       title="Add a Comment"
       description="Share your thoughts about this post."

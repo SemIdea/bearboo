@@ -3,8 +3,8 @@
 import { trpc } from "@/app/_trpc/client";
 import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
 import { useEffect, useState } from "react";
+import { CommentList } from "@/components/commentList";
 import { CreateComment } from "@/components/createComment";
-import { Comments } from "@/components/comments";
 
 const useComment = (postId: string) => {
   const [comments, setComments] = useState<ICommentEntityWithUser[]>([]);
@@ -48,17 +48,13 @@ const useComment = (postId: string) => {
   };
 };
 
-const CommentArea = ({
-  postId,
-}: {
-  postId: string;
-}) => {
+const CommentArea = ({ postId }: { postId: string }) => {
   const commentHook = useComment(postId);
 
   return (
     <>
       <CreateComment postId={postId} commentHook={commentHook} />
-      <Comments commentHook={commentHook} />
+      <CommentList commentHook={commentHook} />
     </>
   );
 };
