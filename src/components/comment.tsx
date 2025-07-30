@@ -1,5 +1,4 @@
 import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
-import { CardComponent } from "./card";
 import { formatDistance } from "date-fns";
 import { By } from "./ui/by";
 import { MdView } from "./ui/mdView";
@@ -7,6 +6,7 @@ import { MdEditor } from "./ui/mdEditor";
 import { Button } from "./ui/button";
 import { ErrorMessage } from "./ui/errorMessage";
 import { useState } from "react";
+import { CardBase } from "./cardBase";
 
 const CommentDescription = ({
   comment,
@@ -129,7 +129,7 @@ const Comment = ({
   handleDelete: (id: string) => void;
 }) => {
   return (
-    <CardComponent
+    <CardBase
       description={
         <CommentDescription
           comment={comment}

@@ -1,5 +1,5 @@
 import { createCaller } from "@/server/caller";
-import { CardComponent } from "@/components/card";
+import { CardBase } from "@/components/cardBase";
 import { MdView } from "@/components/ui/mdView";
 import { formatDistance } from "date-fns";
 import { CommentArea } from "./page.client";
@@ -33,7 +33,7 @@ const Page = async (props: PageProps) => {
   });
 
   return (
-    <CardComponent
+    <CardBase
       title="Post Details"
       description={
         <p>

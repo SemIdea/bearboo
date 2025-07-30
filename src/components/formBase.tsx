@@ -19,7 +19,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 
-const FormProvider = ({
+const FormBase = ({
   schema,
   children,
   onSubmit,
@@ -97,4 +97,4 @@ const InputField = ({
   );
 };
 
-export { FormProvider, InputField };
+export { FormBase, InputField };

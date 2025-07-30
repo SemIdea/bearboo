@@ -5,9 +5,12 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/error";
-import { FormProvider, InputField } from "@/components/form";
+import { FormBase, InputField } from "@/components/formBase";
 import { ErrorMessage } from "@/components/ui/errorMessage";
-import { VerifyTokenInput, verifyTokenSchema } from "@/server/schema/token.schema";
+import {
+  VerifyTokenInput,
+  verifyTokenSchema
+} from "@/server/schema/token.schema";
 
 const useVerifyForm = () => {
   const searchParams = useSearchParams();
@@ -68,7 +71,7 @@ const VerifyForm = () => {
   } = useVerifyForm();
 
   return (
-    <FormProvider
+    <FormBase
       schema={verifyTokenSchema}
       onSubmit={handleVerifyToken}
       defaultValues={{ token }}
@@ -83,7 +86,7 @@ const VerifyForm = () => {
       </Button>
       <ErrorMessage error={errorMessage} />
       {successMessage && <div className="text-green-600">{successMessage}</div>}
-    </FormProvider>
+    </FormBase>
   );
 };
 

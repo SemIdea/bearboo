@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/error";
-import { FormProvider, InputField } from "@/components/form";
+import { FormBase, InputField } from "@/components/formBase";
 import {
   CreateUserInput,
   registerUserSchema
@@ -49,7 +49,7 @@ const RegisterForm = () => {
   const { isLoading, errorMessage, handleSubmit } = useRegisterForm();
 
   return (
-    <FormProvider schema={registerUserSchema} onSubmit={handleSubmit}>
+    <FormBase schema={registerUserSchema} onSubmit={handleSubmit}>
       <InputField
         name="email"
         label="Email"
@@ -67,7 +67,7 @@ const RegisterForm = () => {
         {isLoading ? "Creating account..." : "Create account"}
       </Button>
       <ErrorMessage error={errorMessage} />
-    </FormProvider>
+    </FormBase>
   );
 };
 
