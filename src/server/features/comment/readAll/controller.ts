@@ -10,11 +10,11 @@ const readAllCommentsByPostController = async ({
   ctx: IAPIContextDTO;
 }) => {
   const comments = await ReadAllCommentsByPostService({
+    ...input,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.comment
     },
-    ...input
   });
 
   return comments;

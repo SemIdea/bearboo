@@ -6,10 +6,8 @@ const ReadAllCommentsByPostService = async ({
   ...data
 }: IReadAllCommentsByPostIdDTO) => {
   const comments = await CommentEntity.readAllByPostId({
-    repositories: {
-      ...repositories
-    },
-    ...data
+    ...data,
+    repositories
   });
 
   return comments;

@@ -6,21 +6,19 @@ import {
   IReadUserAndSessionByAccessTokenDTO,
   IRefreshSessionDTO
 } from "./DTO";
-import { GenerateSnowflakeUID } from "@/server/drivers/snowflake";
 import { SessionEntity } from "@/server/entities/session/entity";
 import { UserEntity } from "@/server/entities/user/entity";
 import { IUserWithSession } from "@/server/entities/user/DTO";
-import { AuthErrorCode } from "@/shared/error/auth";
 import { UserErrorCode } from "@/shared/error/user";
+import { SessionErrorCode } from "@/shared/error/session";
 
 const CreateAuthSessionService = async ({
   repositories,
+  helpers,
   ...data
 }: ICreateAuthSessionDTO) => {
-  const { userId } = data;
-
   const user = await UserEntity.read({
-    id: userId,
+    id: data.userId,
     repositories: {
       ...repositories,
       database: repositories.user,
@@ -31,30 +29,28 @@ const CreateAuthSessionService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 
-  const [sessionId, accessToken, refreshToken] = await Promise.all([
-    GenerateSnowflakeUID(),
-    GenerateSnowflakeUID(),
-    GenerateSnowflakeUID()
-  ]);
+  const sessionId = helpers.uid.generate();
+  const accessToken = helpers.uid.generate();
+  const refreshToken = helpers.uid.generate();
 
   const session = await SessionEntity.create({
+    id: sessionId,
     data: {
-      userId,
+      userId: user.id,
       accessToken,
       refreshToken
     },
-    id: sessionId,
     repositories
   });
 
   if (!session) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_CREATE_ERROR
+      message: SessionErrorCode.SESSION_CREATE_ERROR
     });
   }
 
@@ -65,19 +61,15 @@ const ReadUserAndSessionByAccessTokenService = async ({
   repositories,
   ...data
 }: IReadUserAndSessionByAccessTokenDTO) => {
-  const { accessToken } = data;
-
   const session = await SessionEntity.readByAccessToken({
-    accessToken,
-    repositories: {
-      ...repositories
-    }
+    ...data,
+    repositories
   });
 
   if (!session || !session.userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: SessionErrorCode.INVALID_TOKEN
     });
   }
 
@@ -92,7 +84,7 @@ const ReadUserAndSessionByAccessTokenService = async ({
   if (!user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: SessionErrorCode.INVALID_TOKEN
     });
   }
 
@@ -110,14 +102,14 @@ const ReadSessionByRefreshTokenService = async ({
   ...data
 }: IReadSessionByRefreshTokenDTO) => {
   const session = await SessionEntity.readByRefreshToken({
-    repositories,
-    ...data
+    ...data,
+    repositories
   });
 
   if (!session) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: AuthErrorCode.INVALID_TOKEN
+      message: SessionErrorCode.INVALID_TOKEN
     });
   }
 
@@ -126,20 +118,26 @@ const ReadSessionByRefreshTokenService = async ({
 
 const RefreshSessionService = async ({
   repositories,
+  helpers,
   ...data
 }: IRefreshSessionDTO) => {
+  const newAccessToken = helpers.uid.generate();
+  const newRefreshToken = helpers.uid.generate();
+
   const newSession = await SessionEntity.refreshSession({
-    id: data.id,
-    accessToken: data.accessToken,
-    newAccessToken: data.newAccessToken,
-    newRefreshToken: data.newRefreshToken,
+    ...data,
+    data: {
+      ...data,
+      newAccessToken: newAccessToken,
+      newRefreshToken: newRefreshToken
+    },
     repositories
   });
 
   if (!newSession) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: AuthErrorCode.SESSION_UPDATE_ERROR
+      message: SessionErrorCode.SESSION_UPDATE_ERROR
     });
   }
 
@@ -161,15 +159,13 @@ const DeleteSessionService = async ({
   if (!user) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUD
+      message: UserErrorCode.USER_NOT_FOUND
     });
   }
 
   const session = await SessionEntity.read({
-    id: data.sessionId,
-    repositories: {
-      ...repositories
-    }
+    ...data,
+    repositories
   });
 
   if (!session) {
@@ -187,10 +183,9 @@ const DeleteSessionService = async ({
   }
 
   await SessionEntity.delete({
-    id: data.sessionId,
-    repositories: {
-      ...repositories
-    }
+    ...session,
+    data: session,
+    repositories
   });
 };
 

@@ -22,14 +22,14 @@ const UpdateCommentService = async ({
   if (comment.userId !== data.userId) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: CommentErrorCode.COMMENT_NOT_BELONG_TO_USER
+      message: CommentErrorCode.COMMENT_UPDATE_FORBIDDEN
     });
   }
 
   const updatedComment = await CommentEntity.update({
-    repositories,
+    ...data,
     data,
-    id: data.id
+    repositories
   });
 
   return updatedComment;

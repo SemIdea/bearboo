@@ -1,8 +1,11 @@
-export const featureFlags = {
+const featureFlags = {
   enableSessionCaching: true,
   enablePostCaching: false,
   enableUserCaching: true,
   enableComments: true
 } as const;
 
-export type FeatureFlagKey = keyof typeof featureFlags;
+type FeatureFlagKey = keyof typeof featureFlags;
+
+export { featureFlags };
+export type { FeatureFlagKey };

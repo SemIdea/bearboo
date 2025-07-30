@@ -16,13 +16,12 @@ const Authprovider = ({ children }: ChatProviderProps) => {
     isLoadingSession,
     setIsLoadingSession,
     setSession,
-    login,
-    register,
-    logout
+    updateAuthData,
+    clearSession
   } = useAuthLogic();
 
   useEffect(() => {
-    const [accessTokenCookie, sessionCookie] = ["accessToken=", "session="].map(
+    const [_, sessionCookie] = ["accessToken=", "session="].map(
       (key) =>
         document.cookie
           .split("; ")
@@ -46,9 +45,8 @@ const Authprovider = ({ children }: ChatProviderProps) => {
         isLoadingSession,
         setIsLoadingSession,
         setSession,
-        login,
-        register,
-        logout
+        updateAuthData,
+        clearSession
       }}
     >
       {children}

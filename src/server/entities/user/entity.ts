@@ -1,12 +1,14 @@
+import { isFeatureEnabled } from "@/lib/featureFlags";
 import { BaseEntity } from "../base/entity";
 import { IUserEntity, IReadUserByEmailDTO, IUserModel } from "./DTO";
-import {
-  userCacheKey,
-  UserCacheTTL,
-  userEmailCacheKey
-} from "@/constants/cache/user";
+import { UserCacheTTL } from "@/constants/cache/user";
 
-class UserEntityClass extends BaseEntity<IUserEntity, IUserModel> {
+class UserEntityClass extends BaseEntity<
+  IUserEntity,
+  IUserModel,
+  "user",
+  "email"
+> {
   async readByEmail({
     email,
     repositories
@@ -33,13 +35,14 @@ class UserEntityClass extends BaseEntity<IUserEntity, IUserModel> {
 
   constructor() {
     super({
+      shouldCache: isFeatureEnabled("enableUserCaching"),
       cache: {
-        key: userCacheKey("%id%"),
+        key: "user:%id%",
         ttl: UserCacheTTL
       },
       index: {
         email: {
-          key: userEmailCacheKey("%email%"),
+          key: "user:email:%email%",
           ttl: UserCacheTTL
         }
       }

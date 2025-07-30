@@ -2,7 +2,10 @@ import { z } from "zod";
 
 const createCommentschema = z.object({
   postId: z.string(),
-  content: z.string().min(1, "Content cannot be empty")
+  content: z
+    .string()
+    .min(10, "Comment must be at least 10 characters long.")
+    .max(500, "Comment must not exceed 500 characters.")
 });
 
 const readAllCommentsByPostSchema = z.object({
@@ -11,7 +14,10 @@ const readAllCommentsByPostSchema = z.object({
 
 const updateCommentSchema = z.object({
   id: z.string(),
-  content: z.string().min(1, "Content cannot be empty")
+  content: z
+    .string()
+    .min(10, "Comment must be at least 10 characters long.")
+    .max(500, "Comment must not exceed 500 characters.")
 });
 
 const deleteCommentSchema = z.object({

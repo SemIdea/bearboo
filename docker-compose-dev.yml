@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 30s
@@ -19,7 +19,7 @@ services:
   cache:
     image: redis
     volumes:
-      - ./data/redis:/data
+      - redisdata:/data
     ports:
       - "6379:6379"
     healthcheck:
@@ -28,3 +28,7 @@ services:
       timeout: 5s
       retries: 20
       start_period: 10s
+      
+volumes:
+  pgdata:
+  redisdata:

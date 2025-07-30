@@ -5,10 +5,8 @@ import { PostErrorCode } from "@/shared/error/post";
 
 const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   const post = await PostEntity.read({
-    id: data.id,
-    repositories: {
-      ...repositories
-    }
+    ...data,
+    repositories
   });
 
   if (!post) {
@@ -25,12 +23,20 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
     });
   }
 
-  await PostEntity.delete({
-    id: data.id,
-    repositories: {
-      ...repositories
-    }
+  const deletedPost = await PostEntity.delete({
+    id: post.id,
+    data: post,
+    repositories
   });
+
+  if (!deletedPost) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: PostErrorCode.POST_DELETE_FAILED
+    });
+  }
+
+  return deletedPost;
 };
 
 export { DeletePostService };

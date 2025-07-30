@@ -3,15 +3,20 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
 import { Context } from "./createContext";
 import { AuthErrorCode } from "@/shared/error/auth";
+import { SessionErrorCode } from "@/shared/error/session";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
-  errorFormatter({ shape, error }) {
+  errorFormatter(opts) {
+    const { shape, error } = opts;
     return {
       ...shape,
       data: {
         ...shape.data,
-        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null
+        zodError:
+          error.code === "BAD_REQUEST" && error.cause instanceof ZodError
+            ? error.cause.flatten()
+            : null
       }
     };
   }
@@ -23,17 +28,17 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
   if (!user) return next();
   if (!user.session) return next();
 
-  const sessionCreatedTimestamp = user.session.createdAt;
+  const sessionUpdatedTimestamp = user.session.updatedAt;
 
-  if (!sessionCreatedTimestamp) return next();
+  if (!sessionUpdatedTimestamp) return next();
 
-  const sessionCreatedDate = new Date(sessionCreatedTimestamp);
+  const sessionUpdatedDate = new Date(sessionUpdatedTimestamp);
   const EXPIRES = 1000 * 20;
 
-  if (Date.now() - sessionCreatedDate.getTime() > EXPIRES) {
+  if (Date.now() - sessionUpdatedDate.getTime() > EXPIRES) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: AuthErrorCode.SESSION_EXPIRED
+      message: SessionErrorCode.SESSION_EXPIRED
     });
   }
 
@@ -48,7 +53,7 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "Unauthorized"
+      message: AuthErrorCode.USER_NOT_LOGGED_IN
     });
   }
 
@@ -59,4 +64,19 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   });
 });
 
-export { t, publicProcedure, protectedProcedure };
+const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  if (!ctx.user.verified) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: AuthErrorCode.USER_NOT_VERIFIED
+    });
+  }
+
+  return next({
+    ctx: {
+      user: ctx.user
+    }
+  });
+});
+
+export { t, publicProcedure, protectedProcedure, verifiedProcedure };

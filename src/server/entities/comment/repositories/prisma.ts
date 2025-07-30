@@ -26,6 +26,13 @@ class PrismaCommentModel implements ICommentModel {
     return await prisma.comment.findMany({
       where: {
         postId
+      },
+      include: {
+        user: {
+          select: {
+            name: true
+          }
+        }
       }
     });
   }
@@ -58,7 +65,7 @@ class PrismaCommentModel implements ICommentModel {
       });
 
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

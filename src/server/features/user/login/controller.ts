@@ -11,20 +11,21 @@ const loginUserController = async ({
   ctx: IAPIContextDTO;
 }) => {
   const user = await LoginUserService({
+    ...input,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.user
     },
-    ...input
+    helpers: ctx.helpers
   });
 
   const session = await CreateAuthSessionService({
+    userId: user.id,
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.session,
-      user: ctx.repositories.user
+      database: ctx.repositories.session
     },
-    userId: user.id
+    helpers: ctx.helpers
   });
 
   const { password, ...userWithoutPassword } = user;

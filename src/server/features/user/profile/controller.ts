@@ -1,6 +1,12 @@
-import { ReadUserProfileService } from "./service";
-import { IAPIContextDTO } from "@/server/createContext";
-import { ReadUserProfileInput } from "@/server/schema/user.schema";
+import { ReadUserProfileService, UpdateUserProfileService } from "./service";
+import {
+  IAPIContextDTO,
+  IProtectedAPIContextDTO
+} from "@/server/createContext";
+import {
+  ReadUserProfileInput,
+  UpdateUserProfileInput
+} from "@/server/schema/user.schema";
 
 const readUserProfileController = async ({
   input,
@@ -16,14 +22,33 @@ const readUserProfileController = async ({
   }
 
   const profile = await ReadUserProfileService({
+    ...input,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.user
-    },
-    ...input
+    }
   });
 
   return profile;
 };
 
-export { readUserProfileController };
+const updateUserProfileController = async ({
+  input,
+  ctx
+}: {
+  input: UpdateUserProfileInput;
+  ctx: IProtectedAPIContextDTO;
+}) => {
+  const updatedProfile = await UpdateUserProfileService({
+    ...input,
+    id: ctx.user.id,
+    repositories: {
+      ...ctx.repositories,
+      database: ctx.repositories.user
+    }
+  });
+
+  return updatedProfile;
+};
+
+export { readUserProfileController, updateUserProfileController };

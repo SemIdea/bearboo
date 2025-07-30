@@ -9,7 +9,7 @@ export default defineConfig({
   },
 
   test: {
-    include: ["**.setup.test.ts", "**.test.ts"],
+    include: ["src/**/*.setup.test.ts", "src/**/*.test.ts"],
     poolOptions: {
       threads: {
         singleThread: true

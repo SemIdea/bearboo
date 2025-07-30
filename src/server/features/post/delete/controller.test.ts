@@ -15,7 +15,7 @@ describe("Delete Post Controller Unitary Testing", async () => {
   }
 
   test("Should delete a post successfully", async () => {
-    const id = ctx.generateSnowflakeUuid();
+    const id = ctx.helpers.uid.generate();
     await PostEntity.create({
       id,
       data: {
@@ -42,7 +42,7 @@ describe("Delete Post Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if post does not exist", async () => {
-    const id = ctx.generateSnowflakeUuid();
+    const id = ctx.helpers.uid.generate();
 
     await expect(
       deletePostController({
