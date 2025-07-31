@@ -35,6 +35,7 @@ const resetPasswordController = async ({
   const user = await ResetPasswordService({
     token: input.token,
     newPassword: input.password,
+    confirmNewPassword: input.confirmPassword,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.user
