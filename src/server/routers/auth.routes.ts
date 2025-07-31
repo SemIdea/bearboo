@@ -9,6 +9,14 @@ import { resendVerificationEmailSchema } from "../schema/resend-verification.sch
 import { verifyTokenSchema } from "../schema/token.schema";
 import { registerUserSchema, loginUserSchema } from "../schema/user.schema";
 import { SessionRouter } from "./session.routes";
+import {
+  resetPasswordController,
+  sendResetPasswordEmailController
+} from "../features/auth/reset-password/controller";
+import {
+  resetPasswordSchema,
+  sendResetPasswordEmailSchema
+} from "../schema/resetPassword.schema";
 
 const AuthRouter = t.router({
   registerUser: publicProcedure
@@ -30,6 +38,16 @@ const AuthRouter = t.router({
     .input(resendVerificationEmailSchema)
     .mutation(async ({ input, ctx }) =>
       resendVerificationEmailController({ input, ctx })
+    ),
+  resetPassword: publicProcedure
+    .input(resetPasswordSchema)
+    .mutation(async ({ input, ctx }) =>
+      resetPasswordController({ input, ctx })
+    ),
+  sendResetPasswordEmail: publicProcedure
+    .input(sendResetPasswordEmailSchema)
+    .mutation(async ({ input, ctx }) =>
+      sendResetPasswordEmailController({ input, ctx })
     )
 });
 
