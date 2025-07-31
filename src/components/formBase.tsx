@@ -19,7 +19,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 
-const FormProvider = ({
+const FormBase = ({
   schema,
   children,
   onSubmit,
@@ -38,16 +38,14 @@ const FormProvider = ({
   });
 
   return (
-    <RHFProvider {...form}>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className={cn("space-y-8", className)}
-        >
-          {children}
-        </form>
-      </Form>
-    </RHFProvider>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn("space-y-8", className)}
+      >
+        {children}
+      </form>
+    </Form>
   );
 };
 
@@ -97,4 +95,4 @@ const InputField = ({
   );
 };
 
-export { FormProvider, InputField };
+export { FormBase, InputField };

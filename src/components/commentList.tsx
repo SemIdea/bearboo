@@ -75,11 +75,7 @@ const useDeleteComment = (deleteLocalcomment: (commentId: string) => void) => {
   };
 };
 
-const Comments = ({
-  commentHook
-}: {
-  commentHook: ICommentHook;
-}) => {
+const CommentList = ({ commentHook }: { commentHook: ICommentHook }) => {
   const { session } = useAuth();
 
   const [commentBeingEdited, setCommentBeingEdited] = useState("");
@@ -118,4 +114,4 @@ const Comments = ({
   ));
 };
 
-export { Comments };
+export { CommentList };

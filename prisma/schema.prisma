@@ -60,3 +60,11 @@ model VerificationToken {
   userId    String
   used      Boolean  @default(false)
 }
+
+model ResetToken {
+  id        String   @id
+  token     String   @unique
+  expiresAt DateTime
+  userId    String
+  used      Boolean  @default(false)
+}

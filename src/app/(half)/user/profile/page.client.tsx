@@ -4,7 +4,7 @@ import { trpc } from "@/app/_trpc/client";
 import { Button } from "@/components/ui/button";
 import { IUserWithSession } from "@/server/entities/user/DTO";
 import { useState } from "react";
-import { FormProvider, InputField } from "@/components/form";
+import { FormBase, InputField } from "@/components/formBase";
 import {
   UpdateUserProfileInput,
   updateUserProfileSchema
@@ -36,7 +36,7 @@ const useUpdateUser = () => {
 
     updateUser(data);
   };
-  
+
   return {
     handleUpdateUser,
     isUploading,
@@ -50,7 +50,7 @@ const UpdateUserForm = ({ user }: { user: IUserWithSession }) => {
     useUpdateUser();
 
   return (
-    <FormProvider
+    <FormBase
       schema={updateUserProfileSchema}
       onSubmit={handleUpdateUser}
       defaultValues={{ ...user }}
@@ -67,7 +67,7 @@ const UpdateUserForm = ({ user }: { user: IUserWithSession }) => {
       {successMessage && (
         <div className="text-green-600 mt-2">{successMessage}</div>
       )}
-    </FormProvider>
+    </FormBase>
   );
 };
 

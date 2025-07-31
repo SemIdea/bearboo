@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
 import { getErrorMessage } from "@/lib/error";
-import { FormProvider, InputField } from "@/components/form";
+import { FormBase, InputField } from "@/components/formBase";
 import { LoginUserInput, loginUserSchema } from "@/server/schema/user.schema";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 
@@ -48,7 +48,7 @@ const LoginForm = () => {
   const { isLoading, errorMessage, handleSubmit } = useLoginForm();
 
   return (
-    <FormProvider schema={loginUserSchema} onSubmit={handleSubmit}>
+    <FormBase schema={loginUserSchema} onSubmit={handleSubmit}>
       <InputField name="email" label="Email" placeholder="m@example.com" />
       <InputField
         name="password"
@@ -60,7 +60,7 @@ const LoginForm = () => {
         {isLoading ? "Signing in..." : "Login"}
       </Button>
       <ErrorMessage error={errorMessage} />
-    </FormProvider>
+    </FormBase>
   );
 };
 

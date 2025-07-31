@@ -7,7 +7,7 @@ import {
   CardTitle
 } from "./ui/card";
 
-const CardComponent = ({
+const CardBase = ({
   title,
   titleBold = true,
   description,
@@ -45,4 +45,4 @@ const CardComponent = ({
   );
 };
 
-export { CardComponent };
+export { CardBase };

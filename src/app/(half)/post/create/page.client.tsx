@@ -7,7 +7,7 @@ import { trpc } from "@/app/_trpc/client";
 import { getErrorMessage } from "@/lib/error";
 import { CreatePostInput, createPostSchema } from "@/server/schema/post.schema";
 import { Button } from "@/components/ui/button";
-import { FormProvider, InputField } from "@/components/form";
+import { FormBase, InputField } from "@/components/formBase";
 import { MdEditor } from "@/components/ui/mdEditor";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 
@@ -52,7 +52,7 @@ const CreatePostForm = () => {
   const { onSubmit, isSubmitting, errorMessage } = useCreatePost();
 
   return (
-    <FormProvider schema={createPostSchema} onSubmit={onSubmit}>
+    <FormBase schema={createPostSchema} onSubmit={onSubmit}>
       <InputField name="title" label="Title" placeholder="Enter post title" />
       <InputField name="content" label="Content">
         <MdEditor preview="live" />
@@ -61,7 +61,7 @@ const CreatePostForm = () => {
         {isSubmitting ? "Creating Post..." : "Create Post"}
       </Button>
       <ErrorMessage error={errorMessage} />
-    </FormProvider>
+    </FormBase>
   );
 };
 

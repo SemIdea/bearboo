@@ -1,10 +1,10 @@
 import { prisma } from "@/server/drivers/prisma";
-import { ITokenEntity, ITokenModel } from "../DTO";
+import { IVerifyTokenEntity, IVerifyTokenModel } from "../DTO";
 
-class PrismaTokenModel implements ITokenModel {
+class PrismaVerifyTokenModel implements IVerifyTokenModel {
   async create(
     id: string,
-    data: Omit<ITokenEntity, "id" | "createdAt" | "updatedAt">
+    data: Omit<IVerifyTokenEntity, "id" | "createdAt" | "updatedAt">
   ) {
     return await prisma.verificationToken.create({
       data: {
@@ -22,7 +22,7 @@ class PrismaTokenModel implements ITokenModel {
     });
   }
 
-  async readByToken(token: string): Promise<ITokenEntity | null> {
+  async readByToken(token: string): Promise<IVerifyTokenEntity | null> {
     return await prisma.verificationToken.findUnique({
       where: {
         token
@@ -30,7 +30,7 @@ class PrismaTokenModel implements ITokenModel {
     });
   }
 
-  async update(id: string, data: Partial<ITokenEntity>) {
+  async update(id: string, data: Partial<IVerifyTokenEntity>) {
     return await prisma.verificationToken.update({
       where: {
         id
@@ -54,4 +54,4 @@ class PrismaTokenModel implements ITokenModel {
   }
 }
 
-export { PrismaTokenModel };
+export { PrismaVerifyTokenModel };

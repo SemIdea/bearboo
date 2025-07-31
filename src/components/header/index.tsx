@@ -1,10 +1,10 @@
-import { CardComponent } from "../card";
+import { CardBase } from "../cardBase";
 import { AuthSection } from "./index.client";
 import Link from "next/link";
 
 const Header = () => {
   return (
-    <CardComponent
+    <CardBase
       title={
         <div className="flex items-center justify-between">
           <Link href="/">

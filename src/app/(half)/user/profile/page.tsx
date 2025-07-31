@@ -1,6 +1,6 @@
 import { createDynamicCaller } from "@/server/caller";
 import { UpdateUserForm } from "./page.client";
-import { CardComponent } from "@/components/card";
+import { CardBase } from "@/components/cardBase";
 
 const Page = async () => {
   const { ctx } = await createDynamicCaller();
@@ -8,7 +8,7 @@ const Page = async () => {
   const { user } = ctx;
 
   return (
-    <CardComponent
+    <CardBase
       title={"Update Profile"}
       content={<UpdateUserForm user={user} />}
     />

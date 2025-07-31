@@ -1,5 +1,5 @@
 import { UpdateUserSection, UserComments, UserPosts } from "./page.client";
-import { CardComponent } from "@/components/card";
+import { CardBase } from "@/components/cardBase";
 import { createCaller } from "@/server/caller";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MdView } from "@/components/ui/mdView";
@@ -21,7 +21,7 @@ const Page = async (props: PageProps) => {
   const user = await caller.user.read({ id });
 
   return (
-    <CardComponent
+    <CardBase
       title={
         <div className="flex items-center justify-between">
           <h2 className="text-4xl font-bold">{user.name}'s Profile</h2>
@@ -38,7 +38,7 @@ const Page = async (props: PageProps) => {
           <TabsContent value="profile">
             <div className="space-y-1 font-normal">
               <h2 className="font-semibold">Bio</h2>
-              <CardComponent
+              <CardBase
                 title={<MdView source={user.bio || "No bio available"} />}
                 titleBold={false}
                 border
@@ -46,10 +46,10 @@ const Page = async (props: PageProps) => {
             </div>
           </TabsContent>
           <TabsContent value="posts">
-            <CardComponent content={<UserPosts id={user.id} />} />
+            <CardBase content={<UserPosts id={user.id} />} />
           </TabsContent>
           <TabsContent value="comments">
-            <CardComponent content={<UserComments id={user.id} />} />
+            <CardBase content={<UserComments id={user.id} />} />
           </TabsContent>
         </Tabs>
       }

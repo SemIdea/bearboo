@@ -37,7 +37,7 @@ const resendVerificationEmailController = async ({
   const verifyToken = await CreateTokenService({
     userId: user.id,
     repositories: {
-      database: ctx.repositories.token
+      database: ctx.repositories.verifyToken
     },
     helpers: ctx.helpers
   });

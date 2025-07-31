@@ -7,7 +7,7 @@ import { trpc } from "@/app/_trpc/client";
 import { IPostEntity } from "@/server/entities/post/DTO";
 import { Button } from "@/components/ui/button";
 import { MdEditor } from "@/components/ui/mdEditor";
-import { FormProvider, InputField } from "@/components/form";
+import { FormBase, InputField } from "@/components/formBase";
 import { UpdatePostInput, updatePostSchema } from "@/server/schema/post.schema";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { getErrorMessage } from "@/lib/error";
@@ -107,7 +107,7 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
     useUpdatePost(post);
 
   return (
-    <FormProvider
+    <FormBase
       schema={updatePostSchema}
       onSubmit={handleCreate}
       defaultValues={{ ...post }}
@@ -123,7 +123,7 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
       {successMessage && (
         <p className="text-green-600 text-sm text-center">{successMessage}</p>
       )}
-    </FormProvider>
+    </FormBase>
   );
 };
 

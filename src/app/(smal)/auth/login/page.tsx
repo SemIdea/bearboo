@@ -1,11 +1,11 @@
 import { LoginForm } from "./page.client";
-import { CardComponent } from "@/components/card";
+import { CardBase } from "@/components/cardBase";
 import Link from "next/link";
 
 const Page = () => {
   return (
     <div className="flex flex-col gap-6">
-      <CardComponent
+      <CardBase
         title="Login to your account"
         description="Enter your email below to login to your account"
         content={

@@ -1,11 +1,11 @@
-import { ITokenModel } from "@/server/entities/token/DTO";
+import { IVerifyTokenModel } from "@/server/entities/verifyToken/DTO";
 import { IUserModel } from "@/server/entities/user/DTO";
 import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
 
 type ICreateTokenServiceDTO = {
   userId: string;
   repositories: {
-    database: ITokenModel;
+    database: IVerifyTokenModel;
   };
   helpers: {
     uid: IUidGeneratorHelperAdapter;
@@ -15,7 +15,7 @@ type ICreateTokenServiceDTO = {
 type ITokenServiceDTO = {
   token: string;
   repositories: {
-    database: ITokenModel;
+    database: IVerifyTokenModel;
     user: IUserModel;
   };
 };

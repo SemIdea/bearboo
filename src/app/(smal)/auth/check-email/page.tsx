@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { CardComponent } from "@/components/card";
+import { CardBase } from "@/components/cardBase";
 import { EmailParam } from "./page.server";
 import { ResendEmailButton } from "./page.client";
 
@@ -8,7 +8,7 @@ export const experimental_ppr = true;
 const Page = () => {
   return (
     <div>
-      <CardComponent
+      <CardBase
         title="Check your email"
         description="We've sent a verification link to your email address."
         content={
