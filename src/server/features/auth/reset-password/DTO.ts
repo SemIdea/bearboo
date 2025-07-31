@@ -23,6 +23,7 @@ type ISendResetPasswordEmailDTO = {
 type IResetPasswordDTO = {
   token: string;
   newPassword: string;
+  confirmNewPassword: string;
   repositories: {
     database: IUserModel;
     resetToken: IResetTokenModel;

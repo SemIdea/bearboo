@@ -96,6 +96,13 @@ const ResetPasswordService = async ({
     });
   }
 
+  if (data.newPassword !== data.confirmNewPassword) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: UserErrorCode.PASSWORDS_DO_NOT_MATCH
+    });
+  }
+
   const user = await UserEntity.read({
     id: resetToken.userId,
     repositories: {
