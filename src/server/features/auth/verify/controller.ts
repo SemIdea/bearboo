@@ -13,7 +13,7 @@ const verifyTokenController = async ({
     ...input,
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.token
+      database: ctx.repositories.verifyToken
     }
   });
 
