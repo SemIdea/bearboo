@@ -38,16 +38,14 @@ const FormBase = ({
   });
 
   return (
-    <RHFProvider {...form}>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className={cn("space-y-8", className)}
-        >
-          {children}
-        </form>
-      </Form>
-    </RHFProvider>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn("space-y-8", className)}
+      >
+        {children}
+      </form>
+    </Form>
   );
 };
 
