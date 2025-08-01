@@ -2,13 +2,13 @@ import { CardBase } from "@/components/cardBase";
 import { ResetPasswordForm } from "./page.client";
 
 type Params = {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 };
 
-const Page = ({ params }: Params) => {
-  const { token } = params;
+const Page = async ({ params }: Params) => {
+  const { token } = await params;
 
   return (
     <CardBase
