@@ -1,7 +1,9 @@
 import { publicProcedure, t } from "../createRouter";
 import { refreshSessionController } from "../features/auth/session/controller";
-import { resendVerificationEmailController } from "../features/auth/resend-verification/controller";
-import { verifyTokenController } from "../features/auth/verify/controller";
+import {
+  resendVerificationEmailController,
+  verifyTokenController
+} from "../features/auth/verifyToken/controller";
 import { loginUserController } from "../features/user/login/controller";
 import { registerUserController } from "../features/user/register/controller";
 import { refreshSessionSchema } from "../schema/session.schema";
@@ -12,7 +14,7 @@ import { SessionRouter } from "./session.routes";
 import {
   resetPasswordController,
   sendResetPasswordEmailController
-} from "../features/auth/reset-password/controller";
+} from "../features/auth/resetToken/controller";
 import {
   resetPasswordSchema,
   sendResetPasswordEmailSchema
