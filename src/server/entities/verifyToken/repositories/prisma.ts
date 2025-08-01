@@ -30,6 +30,14 @@ class PrismaVerifyTokenModel implements IVerifyTokenModel {
     });
   }
 
+  async readByUserId(userId: string): Promise<IVerifyTokenEntity | null> {
+    return await prisma.verificationToken.findFirst({
+      where: {
+        userId
+      }
+    });
+  }
+
   async update(id: string, data: Partial<IVerifyTokenEntity>) {
     return await prisma.verificationToken.update({
       where: {

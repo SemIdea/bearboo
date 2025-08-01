@@ -2,7 +2,7 @@ import { RegisterUserService } from "./service";
 import { CreateUserInput } from "@/server/schema/user.schema";
 import { IAPIContextDTO } from "@/server/createContext";
 import { SendMailService } from "../../mail/service";
-import { CreateTokenService } from "../../auth/verify/service";
+import { CreateTokenService } from "../../auth/verifyToken/service";
 
 const registerUserController = async ({
   input,

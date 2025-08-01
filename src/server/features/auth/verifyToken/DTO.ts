@@ -20,4 +20,18 @@ type ITokenServiceDTO = {
   };
 };
 
-export type { ICreateTokenServiceDTO, ITokenServiceDTO };
+type IReCreateTokenServiceDTO = {
+  userId: string;
+  repositories: {
+    database: IVerifyTokenModel;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
+
+export type {
+  ICreateTokenServiceDTO,
+  ITokenServiceDTO,
+  IReCreateTokenServiceDTO
+};
