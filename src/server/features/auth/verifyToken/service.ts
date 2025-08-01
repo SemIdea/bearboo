@@ -1,5 +1,9 @@
 import { VerifyTokenEntity } from "@/server/entities/verifyToken/entity";
-import { ICreateTokenServiceDTO, ITokenServiceDTO } from "./DTO";
+import {
+  ICreateTokenServiceDTO,
+  IReCreateTokenServiceDTO,
+  ITokenServiceDTO
+} from "./DTO";
 import { TRPCError } from "@trpc/server";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
 import { UserEntity } from "@/server/entities/user/entity";
@@ -78,4 +82,29 @@ const VerifyTokenService = async ({
   return verifiedToken;
 };
 
-export { CreateTokenService, VerifyTokenService };
+const ReCreateTokenService = async ({
+  userId,
+  repositories,
+  helpers
+}: IReCreateTokenServiceDTO) => {
+  const existingToken = await VerifyTokenEntity.readByUserId({
+    userId,
+    repositories
+  });
+
+  if (existingToken) {
+    await VerifyTokenEntity.delete({
+      id: existingToken.id,
+      data: existingToken,
+      repositories
+    });
+  }
+
+  return CreateTokenService({
+    userId,
+    repositories,
+    helpers
+  });
+};
+
+export { CreateTokenService, VerifyTokenService, ReCreateTokenService };

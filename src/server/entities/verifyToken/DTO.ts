@@ -12,6 +12,7 @@ type IVerifyTokenModel = IEntityDatabaseRepository<
   IVerifyTokenEntity,
   {
     readByToken: (token: string) => Promise<IVerifyTokenEntity | null>;
+    readByUserId: (userId: string) => Promise<IVerifyTokenEntity | null>;
   }
 >;
 
@@ -22,8 +23,16 @@ type IReadVerifyTokenByTokenDTO = {
   };
 };
 
+type IReadByUserIdDTO = {
+  userId: string;
+  repositories: {
+    database: IVerifyTokenModel;
+  };
+};
+
 export type {
   IVerifyTokenEntity,
   IVerifyTokenModel,
-  IReadVerifyTokenByTokenDTO
+  IReadVerifyTokenByTokenDTO,
+  IReadByUserIdDTO
 };
