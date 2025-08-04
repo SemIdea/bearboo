@@ -33,7 +33,9 @@ const Page = () => {
             </div>
             <div className="grid gap-3">
               <p>Didn't receive the email?</p>
-              <ResendEmailButton />
+              <Suspense>
+                <ResendEmailButton />
+              </Suspense>
             </div>
           </div>
         }
