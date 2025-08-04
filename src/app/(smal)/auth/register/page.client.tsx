@@ -20,7 +20,7 @@ const useRegisterForm = () => {
   const { mutate: register } = trpc.auth.registerUser.useMutation({
     onSuccess: (data) => {
       router.push(
-        `/auth/check-email?email=${encodeURIComponent(data.user.email)}`
+        `/auth/verify?email=${encodeURIComponent(data.user.email)}`
       );
       setIsLoading(false);
       setErrorMessage("");

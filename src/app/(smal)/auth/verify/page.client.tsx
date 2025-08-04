@@ -1,93 +1,79 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/error";
-import { FormBase, InputField } from "@/components/formBase";
 import { ErrorMessage } from "@/components/ui/errorMessage";
-import {
-  VerifyTokenInput,
-  verifyTokenSchema
-} from "@/server/schema/token.schema";
 
-const useVerifyForm = () => {
+const useCheckEmailLogic = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const [token, setToken] = useState("");
+  const email = searchParams.get("email");
+  
+  const [isResending, setIsResending] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
 
-  useEffect(() => {
-    const urlToken = searchParams.get("token");
-    if (urlToken) {
-      setToken(urlToken);
-      setIsVerifying(true);
-      verifyToken({ token: urlToken });
+  const { mutate: resendEmail } = trpc.auth.resendVerificationEmail.useMutation(
+    {
+      onSuccess: () => {
+        setSuccessMessage("Verification email sent successfully!");
+        setErrorMessage("");
+        setIsResending(false);
+      },
+      onError: (error) => {
+        setErrorMessage(getErrorMessage(error.message));
+        setSuccessMessage("");
+        setIsResending(false);
+      }
     }
-  }, [searchParams]);
+  );
 
-  const { mutate: verifyToken } = trpc.auth.verify.useMutation({
-    onSuccess: () => {
-      setSuccessMessage("Verification successful! You can now log in.");
-      setIsVerifying(false);
+  const handleResendEmail = () => {
+    if (!email) return;
 
-      // Redirect to login page after 2 seconds
-      setTimeout(() => {
-        router.push("/auth/login");
-      }, 2000);
-    },
-    onError: (error) => {
-      setErrorMessage(getErrorMessage(error.message));
-      setIsVerifying(false);
-    }
-  });
-
-  const handleVerifyToken = (data: VerifyTokenInput) => {
-    console.log("Verifying token:", data);
-    setIsVerifying(true);
-    verifyToken(data);
+    setIsResending(true);
+    setSuccessMessage("");
+    setErrorMessage("");
+    resendEmail({ email });
   };
 
   return {
-    token,
-    isVerifying,
+    email,
+    isResending,
     successMessage,
     errorMessage,
-    handleVerifyToken
+    handleResendEmail
   };
 };
 
-const VerifyForm = () => {
+const ResendEmailButton = () => {
   const {
-    token,
-    isVerifying,
+    email,
+    isResending,
+    handleResendEmail,
     successMessage,
-    errorMessage,
-    handleVerifyToken
-  } = useVerifyForm();
+    errorMessage
+  } = useCheckEmailLogic();
 
   return (
-    <FormBase
-      schema={verifyTokenSchema}
-      onSubmit={handleVerifyToken}
-      defaultValues={{ token }}
-    >
-      <InputField
-        name="token"
-        label="Verification Code"
-        placeholder="Enter verification code"
-      />
-      <Button type="submit" disabled={isVerifying} className="w-full">
-        {isVerifying ? "Verifying..." : "Verify"}
+    <>
+      <Button
+        variant="outline"
+        onClick={handleResendEmail}
+        disabled={isResending || !email}
+        className="w-full"
+        type="button"
+      >
+        {isResending ? "Sending..." : "Resend verification email"}
       </Button>
       <ErrorMessage error={errorMessage} />
-      {successMessage && <div className="text-green-600">{successMessage}</div>}
-    </FormBase>
+      {successMessage && (
+        <p className="text-green-600 text-sm">{successMessage}</p>
+      )}
+    </>
   );
 };
 
-export { VerifyForm };
+export { ResendEmailButton };
