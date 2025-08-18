@@ -12,6 +12,7 @@ type IResetTokenModel = IEntityDatabaseRepository<
   IResetTokenEntity,
   {
     readByToken: (token: string) => Promise<IResetTokenEntity | null>;
+    readByUserId: (userId: string) => Promise<IResetTokenEntity | null>;
   }
 >;
 
@@ -22,4 +23,16 @@ type IReadResetTokenByTokenDTO = {
   };
 };
 
-export type { IResetTokenEntity, IResetTokenModel, IReadResetTokenByTokenDTO };
+type IReadResetTokenByUserIdDTO = {
+  userId: string;
+  repositories: {
+    database: IResetTokenModel;
+  };
+};
+
+export type {
+  IResetTokenEntity,
+  IResetTokenModel,
+  IReadResetTokenByTokenDTO,
+  IReadResetTokenByUserIdDTO
+};
