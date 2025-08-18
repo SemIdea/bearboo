@@ -30,7 +30,18 @@ class PrismaResetTokenModel implements IResetTokenModel {
     });
   }
 
-  async update(id: string, data: Partial<IResetTokenEntity>): Promise<IResetTokenEntity> {
+  async readByUserId(userId: string): Promise<IResetTokenEntity | null> {
+    return await prisma.resetToken.findFirst({
+      where: {
+        userId
+      }
+    });
+  }
+
+  async update(
+    id: string,
+    data: Partial<IResetTokenEntity>
+  ): Promise<IResetTokenEntity> {
     return await prisma.resetToken.update({
       where: {
         id
@@ -54,4 +65,4 @@ class PrismaResetTokenModel implements IResetTokenModel {
   }
 }
 
- export { PrismaResetTokenModel };
+export { PrismaResetTokenModel };
