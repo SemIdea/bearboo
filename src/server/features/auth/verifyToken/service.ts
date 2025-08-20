@@ -7,6 +7,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
 import { UserEntity } from "@/server/entities/user/entity";
+import { UserErrorCode } from "@/shared/error/user";
 
 const CreateTokenService = async ({
   repositories,
@@ -83,14 +84,31 @@ const VerifyTokenService = async ({
 };
 
 const ReCreateTokenService = async ({
-  userId,
+  userEmail,
   repositories,
   helpers
 }: IReCreateTokenServiceDTO) => {
+  const user = await UserEntity.readByEmail({
+    email: userEmail,
+    repositories: {
+      ...repositories,
+      database: repositories.user
+    }
+  });
+
+  if (!user) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: UserErrorCode.USER_NOT_FOUND
+    });
+  }
+
   const existingToken = await VerifyTokenEntity.readByUserId({
-    userId,
+    userId: user.id,
     repositories
   });
+
+  console.log("Existing token:", existingToken, user);
 
   if (existingToken) {
     await VerifyTokenEntity.delete({
@@ -101,7 +119,7 @@ const ReCreateTokenService = async ({
   }
 
   return CreateTokenService({
-    userId,
+    userId: user.id,
     repositories,
     helpers
   });

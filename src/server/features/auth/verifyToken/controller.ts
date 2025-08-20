@@ -1,7 +1,7 @@
 import { IAPIContextDTO } from "@/server/createContext";
 import { VerifyTokenInput } from "@/server/schema/token.schema";
 import { ReCreateTokenService, VerifyTokenService } from "./service";
-import { SendMailByUserIdService, SendMailService } from "../../mail/service";
+import { SendMailService } from "../../mail/service";
 
 const verifyTokenController = async ({
   input,
@@ -29,15 +29,16 @@ const resendVerificationEmailController = async ({
   ctx: IAPIContextDTO;
 }) => {
   const token = await ReCreateTokenService({
-    userId: input.email,
+    userEmail: input.email,
     repositories: {
+      ...ctx.repositories,
       database: ctx.repositories.verifyToken
     },
     helpers: ctx.helpers
   });
 
-  await SendMailByUserIdService({
-    userId: input.email,
+  await SendMailService({
+    to: input.email,
     subject: "Please verify your email address",
     body: `
       <h2>Email Verification</h2>
@@ -51,9 +52,6 @@ const resendVerificationEmailController = async ({
       <br>
       <p>Best regards,<br>The Team</p>
     `,
-    repositories: {
-      database: ctx.repositories.user
-    },
     gateways: ctx.gateways
   });
 
