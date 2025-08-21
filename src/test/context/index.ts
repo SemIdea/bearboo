@@ -67,6 +67,30 @@ class TestContext {
 
     this.user = { ...user, truePassword: userData.password, session };
   }
+
+  async createNewUser() {
+    const userId = this.helpers.uid.generate();
+    const userData = {
+      email: `${userId}@example.com`,
+      name: "Test User",
+      password: "password123"
+    };
+
+    const user = await UserEntity.create({
+      id: userId,
+      data: {
+        ...userData,
+        password: await this.helpers.hashing.hash(userData.password),
+        verified: false
+      },
+      repositories: {
+        ...this.repositories,
+        database: this.repositories.user
+      }
+    });
+
+    return user;
+  }
 }
 
 function isControllerContext(
