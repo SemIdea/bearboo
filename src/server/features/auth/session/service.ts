@@ -174,14 +174,7 @@ const DeleteSessionService = async ({
       message: SessionErrorCode.SESSION_NOT_FOUND
     });
   }
-
-  if (session.userId !== user.id) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: SessionErrorCode.SESSION_NOT_AUTHORIZED
-    });
-  }
-
+  
   await SessionEntity.delete({
     ...session,
     data: session,

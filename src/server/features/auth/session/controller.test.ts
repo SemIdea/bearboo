@@ -112,13 +112,6 @@ describe("Logout Session Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if user is not found", async () => {
-    const ctx = new TestContext();
-    await ctx.createAuthenticatedUser();
-
-    if (!isControllerContext(ctx)) {
-      throw new Error("User is not authenticated");
-    }
-
     ctx.user.id = "non-existent-user-id";
 
     await expect(
@@ -151,29 +144,6 @@ describe("Logout Session Controller Unitary Testing", async () => {
       new TRPCError({
         code: "NOT_FOUND",
         message: SessionErrorCode.SESSION_NOT_FOUND
-      })
-    );
-  });
-
-  test("Should throw an error if session is not authorized", async () => {
-    const ctx = new TestContext();
-    await ctx.createAuthenticatedUser();
-
-    if (!isControllerContext(ctx)) {
-      throw new Error("User is not authenticated");
-    }
-
-    const session = ctx.user.session;
-    session.userId = "unauthorized-user-id";
-
-    await expect(
-      logoutUserFromSessionController({
-        ctx
-      })
-    ).rejects.toThrowError(
-      new TRPCError({
-        code: "FORBIDDEN",
-        message: SessionErrorCode.SESSION_NOT_AUTHORIZED
       })
     );
   });
