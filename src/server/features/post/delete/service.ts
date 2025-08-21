@@ -29,13 +29,6 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
     repositories
   });
 
-  if (!deletedPost) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: PostErrorCode.POST_DELETE_FAILED
-    });
-  }
-
   return deletedPost;
 };
 
