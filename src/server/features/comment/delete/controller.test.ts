@@ -87,7 +87,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error when trying to delete a comment that belongs to another user", async () => {
-    const otherUserId = ctx.helpers.uid.generate();
+    const otherUser = await ctx.createNewUser();
 
     const postId = ctx.helpers.uid.generate();
 
@@ -96,7 +96,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
       data: {
         title: "Test Post",
         content: "This is a test post.",
-        userId: otherUserId
+        userId: otherUser.id
       },
       repositories: {
         ...ctx.repositories,
@@ -111,7 +111,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
       data: {
         postId,
         content: "This is a test comment.",
-        userId: otherUserId
+        userId: otherUser.id
       },
       repositories: {
         ...ctx.repositories,
