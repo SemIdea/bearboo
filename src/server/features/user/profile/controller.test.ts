@@ -7,7 +7,7 @@ import {
 import { isControllerContext, TestContext } from "@/test/context";
 import { UserErrorCode } from "@/shared/error/user";
 
-describe("Profile User Controller Unitary Testing", async () => {
+describe("Read Profile User Controller Unitary Testing", async () => {
   const ctx = new TestContext();
 
   await ctx.createAuthenticatedUser();
@@ -30,6 +30,34 @@ describe("Profile User Controller Unitary Testing", async () => {
     expect(result.id).toEqual(user.id);
   });
 
+  test("Should throw error if user does not exist", async () => {
+    const uuid = ctx.helpers.uid.generate();
+
+    await expect(
+      readUserProfileController({
+        ctx,
+        input: {
+          id: uuid
+        }
+      })
+    ).rejects.toThrowError(
+      new TRPCError({
+        code: "NOT_FOUND",
+        message: UserErrorCode.USER_NOT_FOUND
+      })
+    );
+  });
+});
+
+describe("Update Profile User Controller Unitary Testing", async () => {
+  const ctx = new TestContext();
+
+  await ctx.createAuthenticatedUser();
+
+  if (!isControllerContext(ctx)) {
+    throw new Error("User not authenticated");
+  }
+
   test("Should update user profile", async () => {
     const user = ctx.user;
 
@@ -47,23 +75,5 @@ describe("Profile User Controller Unitary Testing", async () => {
     expect(result.name).toEqual("New Name");
     expect(result.email).toEqual(`new${user.id}email@example.com`);
     expect(result.bio).toEqual("New bio");
-  });
-
-  test("Should throw error if user does not exist", async () => {
-    const uuid = ctx.helpers.uid.generate();
-
-    await expect(
-      readUserProfileController({
-        ctx,
-        input: {
-          id: uuid
-        }
-      })
-    ).rejects.toThrowError(
-      new TRPCError({
-        code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUND
-      })
-    );
   });
 });
