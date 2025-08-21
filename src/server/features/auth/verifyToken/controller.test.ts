@@ -7,6 +7,8 @@ import {
 } from "./controller";
 import { UserEntity } from "@/server/entities/user/entity";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
+import { TRPCError } from "@trpc/server";
+import { UserErrorCode } from "@/shared/error/user";
 
 describe("Verify Token Controller Unitary Testing", async () => {
   const ctx = new TestContext();
@@ -166,5 +168,23 @@ describe("Resend Verification Email Controller Unitary Testing", async () => {
 
     expect(oldToken).toBeNull();
     expect(result).toBeDefined();
+  });
+
+  test("Should throw error if user email is not found", async () => {
+    const input = {
+      email: "nonexistent@example.com"
+    };
+
+    await expect(
+      resendVerificationEmailController({
+        input,
+        ctx
+      })
+    ).rejects.toThrow(
+      new TRPCError({
+        code: "NOT_FOUND",
+        message: UserErrorCode.USER_NOT_FOUND
+      })
+    );
   });
 });
