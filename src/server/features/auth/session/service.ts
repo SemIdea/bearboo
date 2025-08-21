@@ -171,14 +171,14 @@ const DeleteSessionService = async ({
   if (!session) {
     throw new TRPCError({
       code: "NOT_FOUND",
-      message: "Session not found"
+      message: SessionErrorCode.SESSION_NOT_FOUND
     });
   }
 
   if (session.userId !== user.id) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: "You can't delete this session"
+      message: SessionErrorCode.SESSION_NOT_AUTHORIZED
     });
   }
 
