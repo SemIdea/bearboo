@@ -36,7 +36,6 @@ const customFetcher: typeof fetch = async (info, options) => {
         break;
 
       case SessionErrorCode.INVALID_TOKEN:
-      default:
         clearAuthData();
         window.location.href = "/auth/login";
         return response;
