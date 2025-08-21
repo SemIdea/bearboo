@@ -108,8 +108,6 @@ const ReCreateTokenService = async ({
     repositories
   });
 
-  console.log("Existing token:", existingToken, user);
-
   if (existingToken) {
     await VerifyTokenEntity.delete({
       id: existingToken.id,
