@@ -2,7 +2,6 @@ import { describe, expect, test, vi } from "vitest";
 
 import { registerUserController } from "./controller";
 import { TestContext } from "@/test/context";
-import { gateways } from "@/server/container/gateways";
 import { TRPCError } from "@trpc/server";
 import { UserErrorCode } from "@/shared/error/user";
 
