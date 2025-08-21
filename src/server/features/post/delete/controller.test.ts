@@ -58,4 +58,36 @@ describe("Delete Post Controller Unitary Testing", async () => {
       })
     );
   });
+
+  test("Should throw an error if post does not belong to user", async () => {
+    const otherUser = await ctx.createNewUser();
+
+    const otherUserPostId = ctx.helpers.uid.generate();
+    await PostEntity.create({
+      id: otherUserPostId,
+      data: {
+        title: "Other User's Post",
+        content: "This post belongs to another user.",
+        userId: otherUser.id
+      },
+      repositories: {
+        ...ctx.repositories,
+        database: ctx.repositories.post
+      }
+    });
+
+    await expect(
+      deletePostController({
+        ctx,
+        input: {
+          id: otherUserPostId
+        }
+      })
+    ).rejects.toThrowError(
+      new TRPCError({
+        code: "FORBIDDEN",
+        message: PostErrorCode.POST_DELETE_FORBIDDEN
+      })
+    );
+  });
 });
