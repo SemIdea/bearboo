@@ -11,17 +11,41 @@ import {
   registerUserSchema
 } from "@/server/schema/user.schema";
 import { ErrorMessage } from "@/components/ui/errorMessage";
+import { useAuth } from "@/context/auth";
 
 const useRegisterForm = () => {
   const router = useRouter();
+  const { updateAuthData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [registerData, setRegisterData] = useState<{
+    email: string;
+    name: string;
+    password: string;
+  } | null>(null);
+
+  const { mutate: login } = trpc.auth.loginUser.useMutation({
+    onSuccess: (data) => {
+      updateAuthData(data);
+      setIsLoading(false);
+      setErrorMessage("");
+      router.push("/");
+    },
+    onError: (error) => {
+      setErrorMessage(getErrorMessage(error.message));
+      setIsLoading(false);
+    }
+  });
 
   const { mutate: register } = trpc.auth.registerUser.useMutation({
     onSuccess: (data) => {
-      router.push(
-        `/auth/verify?email=${encodeURIComponent(data.user.email)}`
-      );
+      // router.push(
+      //   `/auth/verify?email=${encodeURIComponent(data.user.email)}`
+      // );
+      login({
+        email: registerData?.email || "",
+        password: registerData?.password || ""
+      });
       setIsLoading(false);
       setErrorMessage("");
     },
@@ -36,6 +60,7 @@ const useRegisterForm = () => {
     setErrorMessage("");
 
     register(data);
+    setRegisterData(data);
   };
 
   return {
