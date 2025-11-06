@@ -4,6 +4,7 @@ import { MdView } from "@/components/ui/mdView";
 import { formatDistance } from "date-fns";
 import { CommentArea } from "./page.client";
 import { By } from "@/components/ui/by";
+import { Metadata } from "next";
 
 type PageProps = {
   params: Promise<{
