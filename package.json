@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --no-engine --no-hints && next build",
     "start": "next start",
     "test": "vitest run --reporter verbose",
     "lint": "eslint src --ext .ts,.tsx --fix",
