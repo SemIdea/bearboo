@@ -12,7 +12,7 @@ type PageProps = {
   }>;
 };
 
-export const revalidate = 3600; // 1 hour
+export const revalidate = 3600;
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
