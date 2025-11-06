@@ -4,6 +4,7 @@ import { MdView } from "@/components/ui/mdView";
 import { formatDistance } from "date-fns";
 import { CommentArea } from "./page.client";
 import { By } from "@/components/ui/by";
+import { Metadata } from "next";
 
 type PageProps = {
   params: Promise<{
@@ -12,6 +13,39 @@ type PageProps = {
 };
 
 export const revalidate = 3600; // 1 hour
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const caller = await createCaller();
+    const post = await caller.post.read({ id: id });
+
+    if (!post) {
+      return {
+        title: "Post Not Found"
+      };
+    }
+
+    return {
+      title: post.title,
+      description: post.content.substring(0, 160),
+      openGraph: {
+        title: post.title,
+        description: post.content.substring(0, 160),
+        type: "article"
+      }
+    };
+  } catch {
+    return {
+      title: "Error | Bearboo"
+    };
+  }
+}
 
 const Page = async (props: PageProps) => {
   const params = await props.params;
