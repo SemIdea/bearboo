@@ -1,7 +1,7 @@
 import { IAPIContextDTO } from "@/server/createContext";
 import { VerifyTokenInput } from "@/server/schema/token.schema";
 import { ReCreateTokenService, VerifyTokenService } from "./service";
-import { SendMailService } from "../../mail/service";
+import { SendMailService } from "../../mail/domain/sendMail";
 
 const verifyTokenController = async ({
   input,

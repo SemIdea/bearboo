@@ -4,7 +4,7 @@ import {
   SendResetPasswordEmailInput
 } from "@/server/schema/resetPassword.schema";
 import { ResetPasswordService, CreateResetTokenService } from "./service";
-import { SendMailByUserIdService } from "../../mail/service";
+import { SendMailByUserIdService } from "../../mail/domain/sendMailByUserId";
 
 const sendResetPasswordEmailController = async ({
   input,

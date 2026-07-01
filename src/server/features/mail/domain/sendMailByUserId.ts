@@ -1,13 +1,6 @@
 import { UserEntity } from "@/server/entities/user/entity";
-import { ISendMailByUserIdDTO, ISendMailDTO } from "./DTO";
-
-const SendMailService = async ({ gateways, ...data }: ISendMailDTO) => {
-  return await gateways.mail.sendMail({
-    body: data.body,
-    subject: data.subject,
-    to: data.to
-  });
-};
+import { ISendMailByUserIdDTO } from "./sendMailByUserId.dto";
+import { SendMailService } from "./sendMail";
 
 const SendMailByUserIdService = async ({
   userId,
@@ -41,4 +34,4 @@ const SendMailByUserIdService = async ({
   });
 };
 
-export { SendMailService, SendMailByUserIdService };
+export { SendMailByUserIdService };

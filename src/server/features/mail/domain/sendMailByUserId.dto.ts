@@ -1,15 +1,6 @@
 import { IUserModel } from "@/server/entities/user/DTO";
 import { IMailerGatewayAdapter } from "@/server/integrations/gateway/mailer/adapter";
 
-type ISendMailDTO = {
-  to: string | string[];
-  subject: string;
-  body: string;
-  gateways: {
-    mail: IMailerGatewayAdapter;
-  };
-};
-
 type ISendMailByUserIdDTO = {
   userId: string;
   subject: string;
@@ -22,4 +13,4 @@ type ISendMailByUserIdDTO = {
   };
 };
 
-export type { ISendMailDTO, ISendMailByUserIdDTO };
+export type { ISendMailByUserIdDTO };
