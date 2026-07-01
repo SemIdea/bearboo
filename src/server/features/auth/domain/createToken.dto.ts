@@ -1,0 +1,14 @@
+import { IVerifyTokenModel } from "@/server/entities/verifyToken/DTO";
+import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
+
+type ICreateTokenServiceDTO = {
+  userId: string;
+  repositories: {
+    database: IVerifyTokenModel;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
+
+export type { ICreateTokenServiceDTO };

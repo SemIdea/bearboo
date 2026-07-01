@@ -1,6 +1,6 @@
 import { IUserWithSession } from "./entities/user/DTO";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { ReadUserAndSessionByAccessTokenService } from "./features/auth/session/service";
+import { ReadUserAndSessionByAccessTokenService } from "./features/auth/domain/readUserAndSessionByAccessToken";
 import { IRepositories, repositories } from "./container/repositories";
 import { IHelpers, helpers } from "./container/helpers";
 import { IGateways, gateways } from "./container/gateways";

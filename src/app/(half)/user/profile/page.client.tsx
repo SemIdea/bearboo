@@ -8,7 +8,7 @@ import { FormBase, InputField } from "@/components/formBase";
 import {
   UpdateUserProfileInput,
   updateUserProfileSchema
-} from "@/server/schema/user.schema";
+} from "@/server/features/user/schema";
 import { MdEditor } from "@/components/ui/mdEditor";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { getErrorMessage } from "@/lib/error";

@@ -7,7 +7,10 @@ import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
 import { getErrorMessage } from "@/lib/error";
 import { FormBase, InputField } from "@/components/formBase";
-import { LoginUserInput, loginUserSchema } from "@/server/schema/user.schema";
+import {
+  LoginUserInput,
+  loginUserSchema
+} from "@/server/features/user/schema";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 
 const useLoginForm = () => {
@@ -17,7 +20,7 @@ const useLoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { mutate: login } = trpc.auth.loginUser.useMutation({
+  const { mutate: login } = trpc.user.login.useMutation({
     onSuccess: (data) => {
       updateAuthData(data);
       setIsLoading(false);

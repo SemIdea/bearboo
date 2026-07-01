@@ -9,7 +9,7 @@ import { FormBase, InputField } from "@/components/formBase";
 import {
   CreateUserInput,
   registerUserSchema
-} from "@/server/schema/user.schema";
+} from "@/server/features/user/schema";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 
 const useRegisterForm = () => {
@@ -17,7 +17,7 @@ const useRegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { mutate: register } = trpc.auth.registerUser.useMutation({
+  const { mutate: register } = trpc.user.register.useMutation({
     onSuccess: (data) => {
       router.push(
         `/auth/verify?email=${encodeURIComponent(data.user.email)}`

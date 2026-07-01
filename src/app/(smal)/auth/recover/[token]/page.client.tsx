@@ -8,7 +8,7 @@ import { getErrorMessage } from "@/lib/error";
 import {
   ResetPasswordInput,
   resetPasswordSchema
-} from "@/server/schema/resetPassword.schema";
+} from "@/server/features/auth/schema";
 import { useState } from "react";
 
 const useResetPassword = () => {
