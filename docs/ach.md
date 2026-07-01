@@ -7,6 +7,8 @@
 >
 > **Docs relacionados:** [`/docs/afm.md`](./afm.md) (processo + regras duras), [`/docs/gotchas.md`](./gotchas.md) (surpresas contraintuitivas), [`/docs/adr/`](./adr/) (decisões versionadas).
 
+> **⚠️ Refactor planejado, ainda não implementado (2026-07-01).** Este documento descreve a arquitetura **atual** (o que o código faz hoje). As decisões em `docs/adr/0006` a `0010` já fecharam um desenho novo pra `src/server/` — reorganização por feature (`domain/`+`procedures/`), entidades relocadas pra `src/server/models/`, separação `src/lib/` (lib pura) vs `src/server/infra/`, Redis reconstruído do zero, DTOs substituídos por Zod. Este `ach.md` só é reescrito pra refletir isso **quando o refactor for de fato implementado** — documentar o planejado como se já existisse inventaria estado que não está no código (princípio invariante #4). Até lá, ADRs 0006-0010 são a fonte do desenho pretendido; este doc é a fonte do que roda em produção hoje.
+
 ---
 
 ## 1. Arquitetura Macro
