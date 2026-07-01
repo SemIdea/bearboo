@@ -7,7 +7,7 @@
 >
 > **Docs relacionados:** [`/docs/afm.md`](./afm.md) (processo + regras duras), [`/docs/gotchas.md`](./gotchas.md) (surpresas contraintuitivas), [`/docs/adr/`](./adr/) (decisões versionadas).
 
-> **⚠️ Refactor planejado, ainda não implementado (2026-07-01).** Este documento descreve a arquitetura **atual** (o que o código faz hoje). As decisões em `docs/adr/0006` a `0010` já fecharam um desenho novo pra `src/server/` — reorganização por feature (`domain/`+`procedures/`), entidades relocadas pra `src/server/models/`, separação `src/lib/` (lib pura) vs `src/server/infra/`, Redis reconstruído do zero, DTOs substituídos por Zod. Este `ach.md` só é reescrito pra refletir isso **quando o refactor for de fato implementado** — documentar o planejado como se já existisse inventaria estado que não está no código (princípio invariante #4). Até lá, ADRs 0006-0010 são a fonte do desenho pretendido; este doc é a fonte do que roda em produção hoje.
+> **⚠️ Refactor parcialmente implementado (2026-07-01).** ADR-0006 (reorganização do server por feature — `domain/`+`procedures/`) já foi aplicada em todo `src/server/features/` e é o que este documento descreve abaixo. **ADR-0007 a 0010 ainda não foram implementadas**: entidades continuam em `src/server/entities/` (não em `src/server/models/`), sem separação `src/lib/` vs `src/server/infra/`, Redis sem reconstrução, DTOs ainda TS puro (não Zod no boundary de output). Este doc é reescrito incrementalmente conforme cada ADR aterrissa — documentar o planejado como se já existisse inventaria estado que não está no código (princípio invariante #4).
 
 ---
 
@@ -23,13 +23,13 @@ Next.js App Router (src/app/**)  ──── SSR/ISR/PPR ────►  React
 tRPC route handler (src/app/api/trpc/[trpc]/route.ts)   tRPC client (src/context/trpc/*)
   │
   ▼
-tRPC Router (src/server/routers/<feature>.routes.ts)  — Procedure-like
+tRPC Router (src/server/features/<feature>/index.ts)  — Procedure-like, agregador da feature
   │
   ▼
-Controller (src/server/features/<feature>/<action>/controller.ts)  — orquestra
+Procedure (src/server/features/<feature>/procedures/<action>.ts)  — orquestra
   │
   ▼
-Service (src/server/features/<feature>/<action>/service.ts)  — Domain-like
+Domain (src/server/features/<feature>/domain/<action>.ts)  — Domain-like
   │
   ▼
 Entity (src/server/entities/<entity>/entity.ts)  — encapsula acesso a repositório
@@ -82,8 +82,14 @@ src/
 ├── context/                    # Providers React (auth, trpc client)
 ├── lib/                        # libs isoladas (error, featureFlags, utils, validation) — arquivos flat, não pastas
 ├── server/                     # Camada backend
-│   ├── routers/                # tRPC routers — Procedure-like (1 arquivo por feature)
-│   ├── features/<feature>/<action>/  # controller.ts + service.ts + DTO.ts (+ .test.ts)
+│   ├── routers/app.routes.ts   # Agregador raiz — importa o router de cada feature (não é feature)
+│   ├── features/<feature>/     # index.ts (router) + schema.ts + domain/ + procedures/
+│   │   ├── index.ts            # tRPC router da feature — agrega procedures/<action>.ts
+│   │   ├── schema.ts           # Zod schemas de input/output da feature (1 arquivo por feature)
+│   │   ├── procedures/<action>.ts        # orquestra: valida via schema, chama domain/, retorna
+│   │   ├── procedures/<action>.test.ts   # teste vizinho, sem __tests__/
+│   │   ├── domain/<action>.ts             # regra de negócio — UMA função por arquivo (regra dura 7)
+│   │   └── domain/<action>.dto.ts         # tipo de input/output + deps injetadas (repositories/helpers)
 │   ├── entities/<entity>/      # entity.ts + DTO.ts + repositories/prisma.ts
 │   ├── integrations/
 │   │   ├── helpers/<name>/     # adapter.ts + implementations/  (uidGenerator, passwordHashing)
@@ -101,14 +107,17 @@ src/
 ### Regras de import
 
 ```
-routers/          → pode importar: features/*/controller
-                     NUNCA importa: entities/*, integrations/* direto (delega pro controller)
+routers/app.routes.ts     → pode importar: features/<feature> (o index.ts de cada feature)
+                             NUNCA importa: entities/*, integrations/* direto
 
-features/*/controller.ts → pode importar: features/*/service, schema/, createContext types
-                            NUNCA importa: repositories/prisma direto (recebe via ctx.repositories)
+features/<feature>/index.ts        → pode importar: procedures/*, schema.ts
+                                      NUNCA importa: entities/*, integrations/* direto (delega pra procedure)
 
-features/*/service.ts    → pode importar: entities/*/entity, DTO.ts local
-                            NUNCA importa: zod/schema (validação já ocorreu no boundary)
+features/<feature>/procedures/*.ts → pode importar: domain/* (mesma feature ou outra), schema.ts, createContext types
+                                      NUNCA importa: repositories/prisma direto (recebe via ctx.repositories)
+
+features/<feature>/domain/*.ts     → pode importar: entities/*/entity, domain/*.dto.ts local, outro domain/* (mesma feature)
+                                      NUNCA importa: zod/schema (validação já ocorreu no boundary)
 
 entities/*/entity.ts      → pode importar: entities/base/entity, DTO.ts local
                              NUNCA importa: server/schema (zod), tipos de erro de transport
@@ -116,6 +125,8 @@ entities/*/entity.ts      → pode importar: entities/base/entity, DTO.ts local
 integrations/**/adapter.ts → interface pura (porta tipada), zero import de implementação concreta
 integrations/**/implementations/* → implementa a porta; pode importar drivers/*
 ```
+
+**Import cross-feature confirmado no código:** `features/user/procedures/login.ts` importa `features/auth/domain/createAuthSession`; `features/user/procedures/register.ts` importa `features/auth/domain/createToken` e `features/mail/domain/sendMail`; `features/auth/procedures/*.ts` importa `features/mail/domain/*`. Domain-a-domain cross-feature é aceito hoje (não há módulo isolado forçando boundary) — revisitar se a regra dura 11 (mudança arquitetural) apontar necessidade de portas explícitas entre features.
 
 **Promoção pra `domain/shared/`:** ainda não há necessidade observada (Rule of Three) — nenhuma lógica duplicada em 3+ módulos identificada no scan. Cresce sob demanda.
 
@@ -127,24 +138,25 @@ integrations/**/implementations/* → implementa a porta; pode importar drivers/
 
 #### Procedure-like — handler sync request/response
 
-- **Implementação no stack:** tRPC procedure em `src/server/routers/<feature>.routes.ts`, delegando pro controller.
-- **Convenção de nome:** router `<Feature>Router`; procedure = verbo (`create`, `read`, `update`, `delete`, `readRecent`, `revalidate`).
-- **Exemplo canônico:** `src/server/routers/post.routes.ts`.
+- **Implementação no stack:** router tRPC em `src/server/features/<feature>/index.ts`, agregando as procedures da própria feature.
+- **Convenção de nome:** router `<Feature>Router`; procedure = verbo (`create`, `read`, `update`, `delete`, `readRecent`, `revalidate`, `login`, `register`).
+- **Exemplo canônico:** `src/server/features/post/index.ts`.
+- **Nota:** `login`/`register` são expostos por `features/user/index.ts` (`trpc.user.login`/`trpc.user.register`) — fisicamente vivem em `user/` mesmo sendo conceitualmente "auth", decisão tomada durante a ADR-0006 pra eliminar o roteamento cruzado que existia antes (`auth.routes.ts` chamando controllers de `user/`).
 
-#### Controller — orquestrador thin (variante local de Procedure-like)
+#### Procedure — orquestrador thin
 
-- **Conceito:** camada extra entre o router tRPC e o Service — recebe `input` + `ctx`, monta o DTO do Service (injeta `repositories`/`helpers` do `ctx`), chama o Service, retorna o resultado.
-- **Implementação:** `src/server/features/<feature>/<action>/controller.ts`, export `<action><Feature>Controller`.
-- **Quando NÃO usar:** lógica de negócio real → delega pro Service.
-- **Exemplo canônico:** `src/server/features/post/create/controller.ts`.
+- **Conceito:** camada entre o router tRPC e o Domain — recebe `input` + `ctx`, monta o DTO da função de domain (injeta `repositories`/`helpers` do `ctx`), chama a função, retorna o resultado.
+- **Implementação:** `src/server/features/<feature>/procedures/<action>.ts`, export `<action><Feature>Controller`.
+- **Quando NÃO usar:** lógica de negócio real → delega pro `domain/`.
+- **Exemplo canônico:** `src/server/features/post/procedures/create.ts`.
 
-#### Domain-like — função pura de regra de negócio (variante local: "Service")
+#### Domain-like — função pura de regra de negócio
 
 - **Conceito universal:** função que aplica regra de negócio, recebendo repositórios/helpers já resolvidos (injeção explícita, não IO direto).
-- **Implementação no stack:** `src/server/features/<feature>/<action>/service.ts`, export único `<Verbo><Entidade>Service`.
-- **UMA função exportada por arquivo** — confirmado no scan (100% dos `service.ts` auditados exportam exatamente 1 símbolo).
-- **Quando NÃO usar:** validação de schema (fica no `schema/`, boundary), transport glue (fica no controller).
-- **Exemplo canônico:** `src/server/features/post/create/service.ts`.
+- **Implementação no stack:** `src/server/features/<feature>/domain/<action>.ts`, export único `<Verbo><Entidade>Service`; DTO co-locado em `domain/<action>.dto.ts`.
+- **UMA função exportada por arquivo — compliant em todo `src/server/features/` desde a ADR-0006 (2026-07-01).** Auditoria original (retroativa, `/afm:refactor`) tinha reportado "compliant" por engano num grep que contava linhas de `export {...}` em vez de símbolos — a violação real (`auth/resetToken`, `auth/session`, `auth/verifyToken`, `user/profile`, `mail` bundlando 2-3 funções por arquivo) foi corrigida durante a implementação desta ADR, quebrando cada arquivo multi-export em um arquivo por função.
+- **Quando NÃO usar:** validação de schema (fica no `schema.ts` da feature, boundary), transport glue (fica na procedure).
+- **Exemplo canônico:** `src/server/features/post/domain/create.ts`.
 
 #### Entity — encapsula acesso a repositório (camada local, não do vocabulário universal)
 
@@ -172,13 +184,13 @@ integrations/**/implementations/* → implementa a porta; pode importar drivers/
 
 #### Schema — validação no boundary
 
-`src/server/schema/<feature>.schema.ts` — Zod schemas de input de procedure. Confirmado no scan: zero `import zod` dentro de `entities/*/entity.ts` ou `features/*/service.ts` (regra dura 16 já respeitada).
+`src/server/features/<feature>/schema.ts` — Zod schemas de input de procedure, um arquivo por feature (consolidado na ADR-0006; antes viviam espalhados em `src/server/schema/<nome>.schema.ts`, às vezes um arquivo por feature, às vezes um por sub-concern). Confirmado no scan: zero `import zod` dentro de `entities/*/entity.ts` ou `features/*/domain/*.ts` (regra dura 16 já respeitada).
 
 #### Shared error — classificação por domínio (intenção) vs. estado atual
 
 `src/shared/error/<domínio>.ts` — `<Domínio>ErrorCode` enum + `<Domínio>ErrorMessages`, um arquivo por domínio (auth, post, comment, user, session, resetToken, verifyToken, validation). **Intenção arquitetural:** Domain nunca importa tipo de erro de transport (regra dura 15); Controller mapeia `DomainErrorCode` → `TRPCError` no boundary.
 
-**Estado atual (violação difundida — ver `afm.md` § 3.1 forward-only):** `grep -rl "TRPCError" src/server/features/` retorna **18 de 19** arquivos `service.ts` — o Service (Domain-like) importa `@trpc/server` e lança `TRPCError` diretamente, em vez de lançar um erro de domínio e deixar o Controller mapear. Além disso, o `message` passado ao `TRPCError` é o **código** do enum (`UserErrorCode.USER_NOT_FOUND`), não a mensagem amigável de `<Domínio>ErrorMessages` — os mapas de mensagem existem mas não são consumidos onde o erro é lançado. Ver `src/server/features/user/login/service.ts` como exemplo representativo.
+**Estado atual (violação difundida — ver `afm.md` § 3.1 forward-only):** `grep -rl "TRPCError" src/server/features/*/domain/*.ts` retorna **20 de 28** arquivos de domain (número mudou de 18/19 pra 20/28 após a ADR-0006 quebrar os arquivos multi-export em um-por-função — mesma violação, granularidade nova) — a função de domain importa `@trpc/server` e lança `TRPCError` diretamente, em vez de lançar um erro de domínio e deixar a procedure mapear. Além disso, o `message` passado ao `TRPCError` é o **código** do enum (`UserErrorCode.USER_NOT_FOUND`), não a mensagem amigável de `<Domínio>ErrorMessages` — os mapas de mensagem existem mas não são consumidos onde o erro é lançado. Ver `src/server/features/user/domain/login.ts` como exemplo representativo. **Esta é exatamente a violação que a ADR-0010 (DTOs → Zod, ainda não implementada) planeja resolver** — o `.output()` do Zod no boundary da procedure é o ponto natural pra esse mapeamento.
 
 #### UI primitives
 
@@ -192,11 +204,11 @@ integrations/**/implementations/* → implementa a porta; pode importar drivers/
 
 | Nível | O que testa | Onde vive | Estado atual |
 | ----- | ----------- | --------- | ------------- |
-| **Unit/Controller** | Controller + Service + Entity via `TestContext` | `src/server/features/**/*.test.ts` | 18 arquivos de teste (`vitest`) |
+| **Unit/Procedure** | Procedure + Domain + Entity via `TestContext` | `src/server/features/**/procedures/*.test.ts` | 23 arquivos de teste (`vitest`) |
 | **Integration** | [A DEFINIR — não identificado no scan] | — | — |
 | **E2E** | [A DEFINIR — não identificado no scan] | — | — |
 
-Cobertura atual (proxy `tests/src`): 18 arquivos de teste / 210 arquivos `.ts`/`.tsx` em `src/` (~8.6%). Ver `afm.md` § 3.1 forward-only.
+Cobertura atual (proxy `tests/src`): 23 arquivos de teste / 234 arquivos `.ts`/`.tsx` em `src/` (~9.8% — número de arquivos mudou pós-ADR-0006, mesmos 55 testes, só mais granulares). Ver `afm.md` § 3.1 forward-only.
 
 ### 4.2 TDD duro + types-as-test
 
@@ -236,9 +248,10 @@ Consulte as rubricas em [`docs/rubrics/`](./rubrics/) **antes** de escolher onde
 
 | Camada | Padrão do export | Padrão do arquivo |
 | ----- | ---- | ---- |
-| Router (Procedure-like) | `<Feature>Router` | `<feature>.routes.ts` |
-| Controller | `<action><Feature>Controller` | `controller.ts` (1 por pasta `<feature>/<action>/`) |
-| Service (Domain-like) | `<Verbo><Entidade>Service` | `service.ts` |
+| Router (Procedure-like) | `<Feature>Router` | `features/<feature>/index.ts` |
+| Procedure | `<action><Feature>Controller` | `features/<feature>/procedures/<action>.ts` |
+| Domain-like | `<Verbo><Entidade>Service` | `features/<feature>/domain/<action>.ts` |
+| Domain DTO | `I<Verbo><Entidade>DTO` | `features/<feature>/domain/<action>.dto.ts` |
 | Entity | `<Entidade>Entity` (instância) | `entity.ts` |
 | Repository adapter | `Prisma<Entidade>Model` | `repositories/prisma.ts` |
 | Adapter (porta) | `I<Nome>Adapter` (tipo) | `adapter.ts` |

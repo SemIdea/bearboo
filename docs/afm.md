@@ -150,7 +150,7 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
 6. **Arquivo ≤ 300 linhas.** Exceções com header explicando.
    *Verificação:* `find src -type f \( -name "*.ts" -o -name "*.tsx" \) -not -name "*.test.*" | xargs wc -l | awk '$1 > 300'`. Hoje: `src/server/entities/base/entity.ts` (320 linhas) — ver § 3.1 forward-only.
 7. **Service (Domain-like) exporta exatamente UMA função `<Verbo><Entidade>Service`.** Service é regra de negócio; query builder, DTO map, transport glue não vão aqui.
-   *Verificação:* `for f in $(find src/server/features -name service.ts); do test $(grep -c "^export" "$f") -eq 1 || echo "$f"; done` retorna vazio. **Compliant hoje** (100% dos 19 `service.ts` auditados exportam exatamente 1 símbolo).
+   *Verificação:* `for f in $(find src/server/features -name service.ts); do n=$(grep -oE '^export \{[^}]*\}' "$f" | tr ',' '\n' | wc -l); test "$n" -le 1 || echo "$f: $n exports"; done` retorna vazio. **Violação corrigida em 2026-07-01** — a verificação original (`grep -c "^export"`) contava linhas de `export {...}`, não símbolos exportados, e reportou falso-positivo de compliance. Estado real: `auth/resetToken/service.ts` (2 funções), `auth/verifyToken/service.ts` (3), `auth/session/controller.ts` (3), `auth/verifyToken/controller.ts` (2) violam a regra — pastas por-ação (`comment/*`, `post/*`, `user/*`) são compliant. Corrigido durante a implementação da ADR-0006 (ver `docs/adr/0006`).
 10. **Sem backwards-compat shim.** Caller não existe → deleta. `// removed for X` polui.
     *Verificação:* `grep -rn "removed\|deprecated\|legacy" src/`. **Compliant hoje** (0 ocorrências).
 11. **Mudança arquitetural pára e pergunta.** Nova camada / componente de 1ª classe / contrato entre módulos / refactor de pastas exige validação do dono da arquitetura.
@@ -172,8 +172,8 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
 
 ### Regras específicas do projeto (a partir de 30)
 
-30. **Entity/Service NÃO importa `PrismaClient`/`@prisma/client` direto.** Recebe repositório via `repositories` injetado no DTO — mantém a camada testável sem infra real (`TestContext`).
-    *Verificação:* `grep -rnE "from.*@prisma/client|new PrismaClient" src/server/entities/*/entity.ts src/server/features/*/*/service.ts` retorna 0. **Compliant hoje.**
+30. **Entity/Domain NÃO importa `PrismaClient`/`@prisma/client` direto.** Recebe repositório via `repositories` injetado no DTO — mantém a camada testável sem infra real (`TestContext`).
+    *Verificação:* `grep -rnE "from.*@prisma/client|new PrismaClient" src/server/entities/*/entity.ts src/server/features/*/domain/*.ts` retorna 0. **Compliant hoje.**
 31. **Route handler (`src/app/api/**/route.ts`) é fino.** Delega pro tRPC handler; nenhuma regra de negócio inline.
     *Verificação:* `find src/app/api -name route.ts | xargs wc -l` — todos < 80 linhas. **Compliant hoje** (único route: `src/app/api/trpc/[trpc]/route.ts`).
 
@@ -187,13 +187,13 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 
 | Regra | Razão pro forward-only | Violação encontrada | Tech-debt rastreado em |
 | --- | --- | --- | --- |
-| 1 — TDD/cobertura | Cobertura atual baixa: 18 arquivos de teste / 210 arquivos `src/` (~8.6%). Sweep retroativo seria semanas de trabalho. | 18/210 (~8.6%) | `[A DEFINIR — abrir issue]` |
+| 1 — TDD/cobertura | Cobertura atual baixa: 23 arquivos de teste / 234 arquivos `src/` (~9.8%, pós-ADR-0006 — mesmos 55 testes, mais arquivos). Sweep retroativo seria semanas de trabalho. | 23/234 (~9.8%) | `[A DEFINIR — abrir issue]` |
 | 2 — zero `any`/`unknown` | Baixo volume (2 ocorrências) — corrigir é rápido, mas não bloqueia PRs em andamento até o boy-scout alcançar. | 2 ocorrências | `[A DEFINIR]` |
 | 5 — naming vago | 2 arquivos sem prefixo de domínio (`src/lib/utils.ts`, `src/server/container/helpers.ts`). Renomear/particionar exige revisão de todos os imports. | `src/lib/utils.ts`, `src/server/container/helpers.ts` | `[A DEFINIR]` |
 | 6 — arquivo ≤300 linhas | 1 arquivo 20 linhas acima do limite (`src/server/entities/base/entity.ts`, 320 linhas). | 1 arquivo (320 linhas) | `[A DEFINIR]` |
-| 15 — Domain ≠ Transport | Violação difundida (18/19 `service.ts`) — corrigir exige tocar toda a camada de features + mover mapeamento de erro pro Controller. Maior item de tech-debt arquitetural desta adoção. | 18/19 arquivos `service.ts` | `[A DEFINIR — considerar feature folder dedicada, não boy-scout incremental]` |
+| 15 — Domain ≠ Transport | Violação difundida (20/28 arquivos de `domain/`, pós-ADR-0006 — mesma violação, granularidade nova) — corrigir exige mover mapeamento de erro pra procedure em cada função. Candidato natural da ADR-0010 (DTOs → Zod), ainda não implementada. | 20/28 arquivos `domain/*.ts` | ADR-0010 (`docs/adr/0010-dto-substituido-por-zod-no-boundary.md`) |
 
-**Critério de boy-scout:** ao editar arquivo legado que viola regra forward-only, traz pra conformidade no mesmo PR se o escopo justifica. Senão, abre issue separada e linka. Regra 15 é exceção — dado o volume (18 arquivos), considerar uma feature dedicada em vez de boy-scout arquivo-a-arquivo, pra evitar migração pela metade.
+**Critério de boy-scout:** ao editar arquivo legado que viola regra forward-only, traz pra conformidade no mesmo PR se o escopo justifica. Senão, abre issue separada e linka. Regra 15 é exceção — dado o volume (20 arquivos), a remediação é a ADR-0010, não boy-scout arquivo-a-arquivo, pra evitar migração pela metade.
 
 ---
 
@@ -210,7 +210,7 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 
 1. Identificar US correspondente. Se não existe, escrever primeiro (`/docs/ust.md`).
 2. Critério de aceitação em Gherkin vira o primeiro teste.
-3. Tracer bullet: ligar UI → router → controller → service → entity → DB com o mínimo, ver fluxo fim-a-fim.
+3. Tracer bullet: ligar UI → router → procedure → domain → entity → DB com o mínimo, ver fluxo fim-a-fim.
 4. Engrossar camadas via TDD.
 5. Commit por slice.
 
