@@ -1,4 +1,4 @@
-import { IReadRecentPostsDTO } from "./DTO";
+import { IReadRecentPostsDTO } from "./readRecent.dto";
 import { PostEntity } from "@/server/entities/post/entity";
 
 const ReadRecentPostsService = async ({

@@ -1,17 +1,17 @@
-import { publicProcedure, t, verifiedProcedure } from "../createRouter";
-import { createPostController } from "../features/post/create/controller";
-import { deletePostController } from "../features/post/delete/controller";
+import { publicProcedure, t, verifiedProcedure } from "../../createRouter";
+import { createPostController } from "./procedures/create";
+import { deletePostController } from "./procedures/delete";
 import {
   createPostSchema,
   deletePostSchema,
   readPostSchema,
   revalidatePostSchema,
   updatePostSchema
-} from "../schema/post.schema";
-import { readPostController } from "../features/post/read/controller";
-import { updatePostController } from "../features/post/update/controller";
-import { revalidatePostController } from "../features/post/revalidate/controller";
-import { readRecentPostsController } from "../features/post/readRecent/controller";
+} from "./schema";
+import { readPostController } from "./procedures/read";
+import { updatePostController } from "./procedures/update";
+import { revalidatePostController } from "./procedures/revalidate";
+import { readRecentPostsController } from "./procedures/readRecent";
 
 const PostRouter = t.router({
   create: verifiedProcedure

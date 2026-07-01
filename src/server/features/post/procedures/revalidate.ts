@@ -1,6 +1,6 @@
-import { RevalidatePostService } from "./service";
+import { RevalidatePostService } from "../domain/revalidate";
 import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { RevalidatePostInput } from "@/server/schema/post.schema";
+import { RevalidatePostInput } from "../schema";
 
 const revalidatePostController = async ({
   input,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createPostController } from "./controller";
+import { createPostController } from "./create";
 import { isControllerContext, TestContext } from "@/test/context";
 
 describe("Create Post Controller Unitary Testing", async () => {

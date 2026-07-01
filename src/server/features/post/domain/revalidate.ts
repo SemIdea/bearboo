@@ -1,9 +1,13 @@
 import { TRPCError } from "@trpc/server";
-import { IDeletePostDTO } from "./DTO";
+import { revalidatePath } from "next/cache";
+import { IRevalidatePostDTO } from "./revalidate.dto";
 import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";
 
-const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
+const RevalidatePostService = async ({
+  repositories,
+  ...data
+}: IRevalidatePostDTO) => {
   const post = await PostEntity.read({
     ...data,
     repositories
@@ -19,17 +23,13 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
   if (post.userId !== data.userId) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: PostErrorCode.POST_DELETE_FORBIDDEN
+      message: PostErrorCode.POST_UPDATE_FORBIDDEN
     });
   }
 
-  const deletedPost = await PostEntity.delete({
-    id: post.id,
-    data: post,
-    repositories
-  });
+  revalidatePath(`/post/${data.id}`);
 
-  return deletedPost;
+  return post;
 };
 
-export { DeletePostService };
+export { RevalidatePostService };

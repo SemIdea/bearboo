@@ -1,6 +1,6 @@
-import { ReadAllCommentsByPostService } from "./service";
+import { ReadAllCommentsByPostService } from "../domain/readAll";
 import { IAPIContextDTO } from "@/server/createContext";
-import { ReadAllCommentsByPostInput } from "@/server/schema/comment.schema";
+import { ReadAllCommentsByPostInput } from "../schema";
 
 const readAllCommentsByPostController = async ({
   input,

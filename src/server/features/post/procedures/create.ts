@@ -1,24 +1,25 @@
-import { DeletePostService } from "./service";
+import { CreatePostService } from "../domain/create";
 import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { DeletePostInput } from "@/server/schema/post.schema";
+import { CreatePostInput } from "../schema";
 
-const deletePostController = async ({
+const createPostController = async ({
   input,
   ctx
 }: {
-  input: DeletePostInput;
+  input: CreatePostInput;
   ctx: IProtectedAPIContextDTO;
 }) => {
-  const post = await DeletePostService({
+  const post = await CreatePostService({
     ...input,
     userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
       database: ctx.repositories.post
-    }
+    },
+    helpers: ctx.helpers
   });
 
   return post;
 };
 
-export { deletePostController };
+export { createPostController };

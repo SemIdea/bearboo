@@ -1,7 +1,7 @@
 import { t } from "../createRouter";
 import { AuthRouter } from "./auth.routes";
-import { CommentRouter } from "./comment.routes";
-import { PostRouter } from "./post.routes";
+import { CommentRouter } from "../features/comment";
+import { PostRouter } from "../features/post";
 import { SessionRouter } from "./session.routes";
 import { UserRouter } from "./user.routes";
 

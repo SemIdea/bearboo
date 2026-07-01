@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { IUpdateCommentDTO } from "./DTO";
+import { IUpdateCommentDTO } from "./update.dto";
 import { CommentEntity } from "@/server/entities/comment/entity";
 import { CommentErrorCode } from "@/shared/error/comment";
 

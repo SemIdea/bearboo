@@ -1,4 +1,4 @@
-import { ReadRecentPostsService } from "./service";
+import { ReadRecentPostsService } from "../domain/readRecent";
 import { IAPIContextDTO } from "@/server/createContext";
 
 const readRecentPostsController = async ({ ctx }: { ctx: IAPIContextDTO }) => {

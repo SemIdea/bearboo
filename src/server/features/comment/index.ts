@@ -1,14 +1,14 @@
-import { publicProcedure, t, verifiedProcedure } from "../createRouter";
-import { createCommentController } from "../features/comment/create/controller";
-import { deleteCommentController } from "../features/comment/delete/controller";
-import { readAllCommentsByPostController } from "../features/comment/readAll/controller";
-import { updateCommentController } from "../features/comment/update/controller";
+import { publicProcedure, t, verifiedProcedure } from "../../createRouter";
+import { createCommentController } from "./procedures/create";
+import { deleteCommentController } from "./procedures/delete";
+import { readAllCommentsByPostController } from "./procedures/readAll";
+import { updateCommentController } from "./procedures/update";
 import {
   createCommentschema,
   readAllCommentsByPostSchema,
   updateCommentSchema,
   deleteCommentSchema
-} from "../schema/comment.schema";
+} from "./schema";
 
 const CommentRouter = t.router({
   create: verifiedProcedure

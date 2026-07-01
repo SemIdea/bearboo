@@ -1,6 +1,6 @@
-import { ReadPostService } from "./service";
+import { ReadPostService } from "../domain/read";
 import { IAPIContextDTO } from "@/server/createContext";
-import { ReadPostInput } from "@/server/schema/post.schema";
+import { ReadPostInput } from "../schema";
 
 const readPostController = async ({
   input,

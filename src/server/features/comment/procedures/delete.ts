@@ -1,6 +1,6 @@
-import { DeleteCommentService } from "./service";
+import { DeleteCommentService } from "../domain/delete";
 import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { DeleteCommentInput } from "@/server/schema/comment.schema";
+import { DeleteCommentInput } from "../schema";
 
 const deleteCommentController = async ({
   input,

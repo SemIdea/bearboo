@@ -1,4 +1,4 @@
-import { ICreatePostDTO } from "./DTO";
+import { ICreatePostDTO } from "./create.dto";
 import { PostEntity } from "@/server/entities/post/entity";
 
 const CreatePostService = async ({

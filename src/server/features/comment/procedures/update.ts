@@ -1,6 +1,6 @@
-import { UpdateCommentService } from "./service";
+import { UpdateCommentService } from "../domain/update";
 import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { UpdateCommentInput } from "@/server/schema/comment.schema";
+import { UpdateCommentInput } from "../schema";
 
 const updateCommentController = async ({
   input,

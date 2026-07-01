@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
 import { getErrorMessage } from "@/lib/error";
-import { CreatePostInput, createPostSchema } from "@/server/schema/post.schema";
+import { CreatePostInput, createPostSchema } from "@/server/features/post/schema";
 import { Button } from "@/components/ui/button";
 import { FormBase, InputField } from "@/components/formBase";
 import { MdEditor } from "@/components/ui/mdEditor";

@@ -1,4 +1,4 @@
-import { ICreateCommentDTO } from "./DTO";
+import { ICreateCommentDTO } from "./create.dto";
 import { CommentEntity } from "@/server/entities/comment/entity";
 
 const CreateCommentService = async ({

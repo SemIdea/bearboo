@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { readRecentPostsController } from "./controller";
+import { readRecentPostsController } from "./readRecent";
 import { TestContext } from "@/test/context";
 
 describe("Read Recent Posts Controller Unitary Testing", () => {

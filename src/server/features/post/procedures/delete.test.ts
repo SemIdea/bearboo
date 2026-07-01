@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { deletePostController } from "./controller";
+import { deletePostController } from "./delete";
 import { isControllerContext, TestContext } from "@/test/context";
 import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";

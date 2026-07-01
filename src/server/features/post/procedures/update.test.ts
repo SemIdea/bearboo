@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { updatePostController } from "./controller";
+import { updatePostController } from "./update";
 import { PostEntity } from "@/server/entities/post/entity";
 import { isControllerContext, TestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";

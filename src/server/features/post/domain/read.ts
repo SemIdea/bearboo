@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { IReadPostDTO } from "./DTO";
+import { IReadPostDTO } from "./read.dto";
 import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";
 

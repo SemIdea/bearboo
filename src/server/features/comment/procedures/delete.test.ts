@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { deleteCommentController } from "./controller";
+import { deleteCommentController } from "./delete";
 import { CommentEntity } from "@/server/entities/comment/entity";
 import { PostEntity } from "@/server/entities/post/entity";
 import { isControllerContext, TestContext } from "@/test/context";

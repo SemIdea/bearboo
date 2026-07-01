@@ -8,7 +8,7 @@ import { IPostEntity } from "@/server/entities/post/DTO";
 import { Button } from "@/components/ui/button";
 import { MdEditor } from "@/components/ui/mdEditor";
 import { FormBase, InputField } from "@/components/formBase";
-import { UpdatePostInput, updatePostSchema } from "@/server/schema/post.schema";
+import { UpdatePostInput, updatePostSchema } from "@/server/features/post/schema";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { getErrorMessage } from "@/lib/error";
 

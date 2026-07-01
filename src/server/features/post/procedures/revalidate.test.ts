@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest";
-import { revalidatePostController } from "./controller";
+import { revalidatePostController } from "./revalidate";
 import { isControllerContext, TestContext } from "@/test/context";
 import { revalidatePath } from "next/cache";
 import { PostEntity } from "@/server/entities/post/entity";
