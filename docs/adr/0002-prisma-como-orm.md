@@ -10,7 +10,7 @@ O Bearboo persiste em Postgres via Prisma (`prisma/schema.prisma`, `@prisma/clie
 
 ## Decisão
 
-Schema declarativo único em `prisma/schema.prisma`; migrations geradas via Prisma CLI. Cada entidade tem um repository adapter dedicado (`src/server/entities/<entity>/repositories/prisma.ts`) que implementa a porta tipada (`adapter.ts`), isolando o client Prisma do restante do domínio (regra dura 30 do `afm.md`: Entity/Service não importa `PrismaClient` direto).
+Schema declarativo único em `prisma/schema.prisma`; migrations geradas via Prisma CLI. Cada entidade tem um model dedicado (`src/server/models/<entity>.ts`) registrado no composition root (`src/server/infra/container/repositories.ts`), isolando o client Prisma do restante do domínio (regra dura 30 do `afm.md`: Domain/Procedure não importa `PrismaClient` nem o driver Prisma direto).
 
 ## Alternativas consideradas
 
@@ -21,7 +21,7 @@ Decisão direta — sem alternativa avaliada no código.
 ## Consequência
 
 - **Fica fácil:** migrations versionadas e reproduzíveis; tipos gerados automaticamente do schema.
-- **Fica difícil:** trocar de ORM exige reescrever todos os `repositories/prisma.ts` (6 entidades) e o `driver` (`src/server/drivers/prisma.ts`), mas o impacto fica contido nessa camada — o resto do domínio já depende só da porta tipada, não do Prisma direto.
+- **Fica difícil:** trocar de ORM exige reescrever os models de dados (`src/server/models/*.ts`) e o driver (`src/server/infra/drivers/prisma.ts`), mas o impacto fica contido nessa camada — o resto do domínio já depende só de `ctx.repositories`, não do Prisma direto.
 - **Load-bearing:** schema declarativo + migrations geradas são a fonte de verdade do modelo de dados; trocar de ORM hoje é reescrita de infraestrutura, não de regra de negócio.
 
 ## Referências

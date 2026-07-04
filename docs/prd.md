@@ -36,7 +36,7 @@ Proposta de valor em uma frase: *"[A DEFINIR — validar com o dono do produto]"
 
 | ID | Requisito | Prioridade |
 | --- | --- | --- |
-| RF-01 | Autenticação de usuário — registro, login, logout e sessão com refresh automático (Redis + Postgres) | P0 |
+| RF-01 | Autenticação de usuário — registro, login, logout e sessão com refresh automático (Postgres como source of truth; Redis cache removido e pendente de reconstrução futura) | P0 |
 | RF-02 | Verificação de email — token de verificação enviado por email, reenvio de token | P0 |
 | RF-03 | Recuperação de senha — token de reset enviado por email, troca de senha | P0 |
 | RF-04 | CRUD de posts — criar, ler, atualizar, deletar, revalidar (ISR) | P0 |
@@ -69,7 +69,7 @@ Proposta de valor em uma frase: *"[A DEFINIR — validar com o dono do produto]"
 
 **Do roadmap Fase 1 ainda faltando:** slug único por post (posts usam `id`, não slug), paginação, tags, categorias, imagem de capa, tempo estimado de leitura, posts relacionados. `enum PostStatus` (DRAFT/PUBLISHED/ARCHIVED) também não existe no `prisma/schema.prisma` hoje — todo post criado é implicitamente publicado.
 
-**Nota de discrepância com o roadmap:** a "stack sugerida" da Fase 0 do roadmap lista Auth.js/Better Auth, Playwright e GitHub Actions. Playwright/GitHub Actions não foram adotados (testes são `vitest`, sem CI — `.github/workflows/` ausente, ver `ach.md` § CI/hooks). **Auth.js/Better Auth foi decisão explícita de não adotar — ver ADR-0005**: a auth própria (sessão opaca em `Session`, Postgres+Redis) é mantida, com hardening incremental em vez de substituição por lib.
+**Nota de discrepância com o roadmap:** a "stack sugerida" da Fase 0 do roadmap lista Auth.js/Better Auth, Playwright e GitHub Actions. Playwright/GitHub Actions não foram adotados (testes são `vitest`, sem CI — `.github/workflows/` ausente, ver `ach.md` § CI/hooks). **Auth.js/Better Auth foi decisão explícita de não adotar — ver ADR-0005**: a auth própria (sessão opaca em `Session`, Postgres como source of truth) é mantida, com hardening incremental em vez de substituição por lib.
 
 **Critério de aceite:** [A DEFINIR].
 

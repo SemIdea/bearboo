@@ -6,7 +6,7 @@
 
 ## Contexto
 
-`docs/roadmap.md` (Fase 0 — "stack sugerida") listava Auth.js ou Better Auth como opção de auth pro projeto. O código, porém, já implementa autenticação própria: sessão opaca (UUID v4) em `Session` (Postgres, cache Redis), refresh/access token com rotação em cada refresh, hashing de senha com bcrypt (`src/server/features/auth/`, `src/server/entities/session/`, `src/server/integrations/helpers/passwordHashing/`). Não havia registro de por que a lib de auth sugerida no roadmap não foi adotada.
+`docs/roadmap.md` (Fase 0 — "stack sugerida") listava Auth.js ou Better Auth como opção de auth pro projeto. O código, porém, já implementa autenticação própria: sessão opaca (UUID v4) em `Session` no Postgres, refresh/access token com rotação em cada refresh, hashing de senha com bcrypt (`src/server/features/auth/`, `src/server/models/session.ts`, `src/lib/passwordHashing/`). A camada Redis antiga foi removida pela ADR-0009 e não é requisito para manter a decisão de auth própria. Não havia registro de por que a lib de auth sugerida no roadmap não foi adotada.
 
 ## Decisão
 

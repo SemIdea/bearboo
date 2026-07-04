@@ -10,7 +10,7 @@ A proposta inicial do refactor do server era colocar Prisma, Redis, helpers e ut
 
 ## Decisão
 
-`src/lib/` fica reservado pra código sem dependência de ORM/framework — candidatos confirmados: `uidGenerator`, `passwordHashing`, utils genéricos (hoje em `src/server/integrations/helpers/` e `src/lib/`). `src/server/infra/` recebe os clients externos com config e o container de DI — hoje em `src/server/drivers/` (Prisma/Redis client) e `src/server/container/` (wiring de implementações concretas).
+`src/lib/` fica reservado pra código sem dependência de ORM/framework — `uidGenerator`, `passwordHashing`, `env`, utils genéricos. `src/server/infra/` recebe clients externos com config e o container de DI — hoje `src/server/infra/drivers/prisma.ts` e `src/server/infra/container/{gateways,helpers,repositories}.ts`.
 
 ## Alternativas consideradas
 
@@ -19,7 +19,7 @@ A proposta inicial do refactor do server era colocar Prisma, Redis, helpers e ut
 ## Consequência
 
 - **Fica fácil:** saber, só pelo path, se um módulo é publicável isoladamente (`lib/`) ou depende do runtime do app (`infra/`).
-- **Fica difícil:** migração toca `drivers/` e `container/` e todos os imports que apontam pra esses paths hoje.
+- **Fica difícil:** migração tocou `drivers/`, `container/`, helpers e todos os imports que apontavam para esses paths; código novo deve seguir os paths atuais para não reabrir a mistura.
 - **Load-bearing:** define onde código futuro (novo helper, novo client externo) deve nascer — critério herda da rubrica, não é ad-hoc por PR.
 
 ## Referências

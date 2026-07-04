@@ -1,12 +1,12 @@
 # ADR-0007 — Entidades Prisma centralizadas em `src/server/models/`
 
-> **Status:** Aceita
+> **Status:** Aceita e implementada
 > **Data:** 2026-07-01
 > **Decidido por:** dono do produto
 
 ## Contexto
 
-Hoje `BaseEntity` vive em `src/server/entities/base/entity.ts` (320 linhas — já flagado forward-only por exceder o limite de 300 linhas, `docs/afm.md` § 3.1), com cada entidade concreta em `src/server/entities/<entity>/entity.ts` chamando um `repositories/prisma.ts` próprio. A seleção de qual model do Prisma corresponde a cada entidade está espalhada nesses repositórios. O dono do produto quer uma classe base CRUD explícita e genérica, cuidando dessa seleção centralizadamente.
+Na data da decisão, `BaseEntity` vivia em `src/server/entities/base/entity.ts` (320 linhas — flagado forward-only por exceder o limite de 300 linhas, `docs/afm.md` § 3.1), com cada entidade concreta em `src/server/entities/<entity>/entity.ts` chamando um `repositories/prisma.ts` próprio. A seleção de qual model do Prisma corresponde a cada entidade estava espalhada nesses repositórios. O dono do produto queria uma classe base CRUD explícita e genérica, cuidando dessa seleção centralizadamente.
 
 ## Decisão
 
@@ -22,7 +22,7 @@ Relocar `src/server/entities/` → `src/server/models/`. `models/base.ts` conté
 - **Fica fácil:** adicionar entidade nova (menos arquivos por entidade); resolver a seleção de model num único lugar.
 - **Fica difícil:** resolver corretamente a tipagem genérica de "qual model Prisma corresponde a essa entidade" dentro da base é a parte tecnicamente mais delicada da migração — o próprio dono do produto já sinalizou essa atenção.
 - **Débito temporário aceito:** a base nova nasce sem cache. `Session`/`Post`/`User` perdem a camada de cache Redis até uma decisão futura trazê-la de volta — aceitável porque o cache atual já seria descartado por ADR-0009.
-- **Load-bearing:** muda onde a regra dura 30 (`afm.md` — Entity/Service não importa `PrismaClient` direto) se verifica.
+- **Load-bearing:** muda onde a regra dura 30 (`afm.md` — Domain/Procedure não importa `PrismaClient`/driver Prisma direto) se verifica.
 
 ## Referências
 

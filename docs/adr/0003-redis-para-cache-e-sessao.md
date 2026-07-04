@@ -1,16 +1,16 @@
 # ADR-0003 — Redis para cache e sessão
 
-> **Status:** Aceita (retroativo, originado em `/afm:refactor`)
+> **Status:** Aceita como tecnologia; implementação antiga removida pela ADR-0009
 > **Data:** 2026-06-30
 > **Decidido por:** dono do produto (adoção retroativa)
 
 ## Contexto
 
-O Bearboo usa Redis (`ioredis`, `src/server/drivers/redis.ts`) como cache sobre o Postgres, com granularidade por entidade controlada via feature flags (`src/config/featureFlags.ts`: `enableSessionCaching`, `enablePostCaching`, `enableUserCaching`). O README também cita Redis explicitamente ("Sessões seguras com Redis, utilizado como cache para sessões e perfis de usuário").
+O Bearboo usava Redis (`ioredis`, antigo `src/server/drivers/redis.ts`) como cache sobre o Postgres, com granularidade por entidade controlada via feature flags (`src/config/featureFlags.ts`: `enableSessionCaching`, `enablePostCaching`, `enableUserCaching`). Em 2026-07-01, a ADR-0009 decidiu remover essa implementação e reconstruir a camada do zero quando houver desenho concreto.
 
 ## Decisão
 
-Postgres permanece **source of truth** de todas as entidades (incluindo `Session`, que tem tabela própria via Prisma). Redis é uma camada de **cache de leitura opcional**, acessada através da porta tipada `ICacheRepositoryAdapter` (`src/server/integrations/repositories/cache/adapter.ts`), nunca como única fonte de um dado. Cada tipo de cache é independentemente desligável via feature flag, sem exigir deploy de código.
+Postgres permanece **source of truth** de todas as entidades (incluindo `Session`, que tem tabela própria via Prisma). Redis permanece tecnologia aceita para cache de leitura futuro, nunca como única fonte de um dado. **Estado atual do código (2026-07-04):** não há porta/adapters Redis ativos em `src/server/`; a reconstrução é trabalho futuro da ADR-0009.
 
 ## Alternativas consideradas
 
@@ -19,9 +19,9 @@ Postgres permanece **source of truth** de todas as entidades (incluindo `Session
 
 ## Consequência
 
-- **Fica fácil:** desligar cache de uma entidade específica em produção sem deploy (feature flag), útil pra debugar staleness.
-- **Fica difícil:** qualquer bug de invalidação de cache é uma segunda fonte de verdade a considerar — divergência resolve-se sempre lendo do Postgres (ver `ach.md` § 5).
-- **Load-bearing:** remover Redis hoje muda a estratégia de performance de sessão/post/user; reintroduzir exigiria reavaliar os feature flags e os pontos de invalidação em cada `service.ts` que escreve.
+- **Fica fácil:** manter Postgres como fonte única enquanto a camada nova não existe.
+- **Fica difícil:** reintroduzir cache exige redesenhar feature flags, invalidação e pontos de leitura/escrita; não há adapter atual para reaproveitar.
+- **Load-bearing:** qualquer Redis futuro deve respeitar a invariável: divergência resolve-se sempre lendo do Postgres (ver `ach.md` § 5).
 
 ## Referências
 

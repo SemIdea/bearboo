@@ -62,16 +62,16 @@ Scenario: Brute-force de login
 
 - [NEEDS CLARIFICATION: o timeout de 20 segundos em `src/server/routers/../createRouter.ts` (`EXPIRES = 1000 * 20`) é intencional (idle-timeout agressivo de propósito) ou é valor de debug esquecido? Muda o desenho de quanto tempo um access token deveria durar.]
 - [NEEDS CLARIFICATION: mensagem genérica em login/reset é aceitável do ponto de vista de UX (perde a clareza de "esse email não existe" pro usuário legítimo que errou o email), ou o produto prefere aceitar o risco de enumeração em troca de UX mais clara?]
-- Premissa: manter tokens opacos (UUID) em vez de JWT — já é o padrão hoje e favorece revogação; hardening não deve reverter essa escolha (ver `docs/ach.md` § 3.1, Entity/Adapter).
+- Premissa: manter tokens opacos (UUID) em vez de JWT — já é o padrão hoje e favorece revogação; hardening não deve reverter essa escolha (ver `docs/ach.md` § 3.1, Model/Adapter).
 - Premissa: o hardening de infraestrutura (TLS, credenciais do compose) entra nesta feature porque sem ele o hardening de aplicação é insuficiente — se o dono do produto preferir tratar infra como feature separada, este spec se estreita só pra camada de aplicação.
 - **Premissa (2026-07-01, revisada após ADR-0009):** os critérios de sucesso da § 2 (expiração de sessão, rotação, CSRF, rate limiting, enumeração) são independentes de cache Redis — dependem do `Session` no Postgres (source of truth, `docs/ach.md` § 1) e da camada de cookie/procedure, não da leitura cacheada. Remover o Redis atual (ADR-0009) **não invalida** nenhum critério aqui; só significa que a implementação, quando chegar no `plan.md`, não deve reintroduzir cache como parte do hardening — isso é decisão separada, futura.
-- **Premissa:** se ADR-0006/0007 (reorganização por feature + entidades em `src/server/models/`) já tiver sido implementado quando este spec for planejado/executado, a implementação do hardening usa a estrutura nova (`models/`, `domain/`, `procedures/`), não a estrutura atual (`entities/`, `controller.ts`/`service.ts`) descrita nesta versão do `ach.md`.
+- **Premissa:** ADR-0006/0007 já foram implementadas; a implementação do hardening usa a estrutura atual (`models/`, `domain/`, `procedures/`), não a estrutura antiga (`entities/`, `controller.ts`/`service.ts`).
 
 ## 6. Dependências
 
 - US-001, US-002, US-003 — todas `done` (base funcional já existe; esta feature é hardening, não construção do zero).
 - `docs/adr/0005-manter-auth-propria.md` — decisão que motiva manter a auth própria em vez de trocar de lib.
-- `docs/adr/0006-reorganizacao-server-por-feature.md`, `docs/adr/0007-entidades-prisma-em-server-models.md` — se implementadas antes desta feature, a implementação do hardening vai na estrutura nova.
+- `docs/adr/0006-reorganizacao-server-por-feature.md`, `docs/adr/0007-entidades-prisma-em-server-models.md` — definem a estrutura atual usada pelo hardening.
 - `docs/adr/0009-reconstruir-redis-do-zero.md` — confirma que os critérios desta feature não dependem de cache (ver Assumptions acima).
 
 ## 7. Clarifications

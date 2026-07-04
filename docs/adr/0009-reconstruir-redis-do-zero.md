@@ -1,12 +1,12 @@
 # ADR-0009 — Reconstruir a camada de cache Redis do zero
 
-> **Status:** Aceita
+> **Status:** Aceita e implementada quanto à remoção; reconstrução futura pendente
 > **Data:** 2026-07-01
 > **Decidido por:** dono do produto
 
 ## Contexto
 
-A implementação atual de cache/sessão via Redis (`src/server/integrations/repositories/cache/`, feature flags `enableSessionCaching`/`enablePostCaching`/`enableUserCaching` em `src/config/featureFlags.ts`, index por `accessToken`/`refreshToken` na `SessionEntity`) foi avaliada pelo dono do produto como inadequada e sem nada reaproveitável, no contexto do refactor maior do server.
+Na data da decisão, a implementação de cache/sessão via Redis (`src/server/integrations/repositories/cache/`, feature flags `enableSessionCaching`/`enablePostCaching`/`enableUserCaching` em `src/config/featureFlags.ts`, index por `accessToken`/`refreshToken` na `SessionEntity`) foi avaliada pelo dono do produto como inadequada e sem nada reaproveitável, no contexto do refactor maior do server.
 
 ## Decisão
 
@@ -21,7 +21,7 @@ Remover a implementação atual de cache Redis completamente. A reconstrução f
 
 - **Fica fácil:** remove a superfície de bugs/dívida técnica atual do cache — inclusive parte do que `docs/features/001-auth-hardening/spec.md` apontava (sessão cacheada sem expiração real).
 - **Fica difícil:** `Session`/`Post`/`User` perdem a camada de cache até a reconstrução — sem impacto funcional imediato (Postgres continua sendo source of truth, `docs/ach.md` § 1), só perde o ganho de performance do cache enquanto não for refeito.
-- **Dependência com `docs/features/001-auth-hardening/spec.md`:** os critérios de sucesso dessa feature que mencionavam sessão/cache precisam ser revisitados à luz da remoção do Redis atual — não foi resolvido nesta conversa, fica como pendência de reconciliação.
+- **Dependência com `docs/features/001-auth-hardening/spec.md`:** reconciliada em 2026-07-04; os critérios de hardening dependem de `Session` no Postgres e não exigem cache Redis.
 - **Não revoga ADR-0003** (decisão de usar Redis como tecnologia de cache) — a troca é de implementação, não da escolha de usar Redis.
 
 ## Referências

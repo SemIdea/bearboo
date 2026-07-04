@@ -7,7 +7,7 @@
 >
 > **Docs relacionados:** [`/docs/afm.md`](./afm.md) (processo + regras duras), [`/docs/gotchas.md`](./gotchas.md) (surpresas contraintuitivas), [`/docs/adr/`](./adr/) (decisões versionadas).
 
-> **⚠️ Refactor parcialmente implementado (2026-07-01).** ADR-0006 (reorganização do server por feature — `domain/`+`procedures/`) já foi aplicada em todo `src/server/features/` e é o que este documento descreve abaixo. **ADR-0007 a 0010 ainda não foram implementadas**: entidades continuam em `src/server/entities/` (não em `src/server/models/`), sem separação `src/lib/` vs `src/server/infra/`, Redis sem reconstrução, DTOs ainda TS puro (não Zod no boundary de output). Este doc é reescrito incrementalmente conforme cada ADR aterrissa — documentar o planejado como se já existisse inventaria estado que não está no código (princípio invariante #4).
+> **Estado do refactor em 2026-07-04.** ADR-0006 a ADR-0010 já aterrissaram no código: server por feature (`domain/` + `procedures/`), entidades Prisma centralizadas em `src/server/models/`, separação `src/lib/` vs `src/server/infra/`, remoção da implementação Redis antiga e schemas Zod de input/output no boundary. O Redis permanece decisão tecnológica para reconstrução futura (ADR-0003/0009), mas hoje não há adapter/cache Redis em `src/server/`.
 
 ---
 
@@ -32,16 +32,17 @@ Procedure (src/server/features/<feature>/procedures/<action>.ts)  — orquestra
 Domain (src/server/features/<feature>/domain/<action>.ts)  — Domain-like
   │
   ▼
-Entity (src/server/entities/<entity>/entity.ts)  — encapsula acesso a repositório
+Model (src/server/models/<entity>.ts)  — encapsula acesso Prisma por entidade
   │
-  ├──► Repository adapter (src/server/entities/<entity>/repositories/prisma.ts) ──► Postgres (Prisma)
-  └──► Cache adapter (src/server/integrations/repositories/cache/implementations/*) ──► Redis
+  ▼
+Prisma driver (src/server/infra/drivers/prisma.ts) ──► Postgres
 
 Integrations transversais (adapters tipados, injetados via DI container):
-  - Helpers: uidGenerator, passwordHashing (src/server/integrations/helpers/*)
+  - Helpers puros: uidGenerator, passwordHashing (src/lib/*)
   - Gateway: mailer (src/server/integrations/gateway/mailer/*)
-  - Composition root: src/server/container/{gateways,helpers,repositories}.ts
-  - Drivers (clients singleton): src/server/drivers/{prisma,redis}.ts
+  - Env: src/lib/env
+  - Composition root: src/server/infra/container/{gateways,helpers,repositories}.ts
+  - Drivers (clients singleton): src/server/infra/drivers/prisma.ts
 ```
 
 **Entidades canônicas** (de `prisma/schema.prisma`):
@@ -64,7 +65,7 @@ User 1───N ResetToken          (userId sem @relation declarada no schema)
 
 **Dataflow:**
 - **Postgres (Prisma)** — source of truth de todas as entidades (User, Session, Post, Comment, VerificationToken, ResetToken).
-- **Redis** — cache de leitura sobre sessão/post/user, feature-flagged (`src/config/featureFlags.ts`: `enableSessionCaching`, `enablePostCaching`, `enableUserCaching`). Postgres permanece autoritativo; Redis nunca é a única fonte de um dado.
+- **Redis** — a implementação antiga de cache foi removida pela ADR-0009. Redis segue como tecnologia aceita para uma reconstrução futura, mas o código atual não consulta Redis nem mantém porta de cache ativa.
 
 ---
 
@@ -78,9 +79,11 @@ src/
 │   └── api/trpc/[trpc]/        # Handler HTTP único do tRPC
 ├── components/                 # Componentes React reutilizáveis + components/ui (shadcn-style)
 ├── config/                     # site.ts, fonts.ts, featureFlags.ts
-├── constants/                  # constantes cross-cutting (cache keys, mail)
 ├── context/                    # Providers React (auth, trpc client)
-├── lib/                        # libs isoladas (error, featureFlags, utils, validation) — arquivos flat, não pastas
+├── lib/                        # libs puras sem ORM/framework: env, error, featureFlags, utils, validation, helpers
+│   ├── env/                    # leitura tipada de env vars via dotenv
+│   ├── passwordHashing/        # adapter + implementação bcrypt
+│   └── uidGenerator/           # adapter + implementação uuid
 ├── server/                     # Camada backend
 │   ├── routers/app.routes.ts   # Agregador raiz — importa o router de cada feature (não é feature)
 │   ├── features/<feature>/     # index.ts (router) + schema.ts + domain/ + procedures/
@@ -88,42 +91,42 @@ src/
 │   │   ├── schema.ts           # Zod schemas de input/output da feature (1 arquivo por feature)
 │   │   ├── procedures/<action>.ts        # orquestra: valida via schema, chama domain/, retorna
 │   │   ├── procedures/<action>.test.ts   # teste vizinho, sem __tests__/
-│   │   ├── domain/<action>.ts             # regra de negócio — UMA função por arquivo (regra dura 7)
-│   │   └── domain/<action>.dto.ts         # tipo de input/output + deps injetadas (repositories/helpers)
-│   ├── entities/<entity>/      # entity.ts + DTO.ts + repositories/prisma.ts
+│   │   └── domain/<action>.ts             # regra de negócio — UMA função por arquivo (regra dura 7)
+│   ├── models/                 # base.ts + model por entidade Prisma
+│   ├── infra/
+│   │   ├── container/           # Composition root — liga implementações concretas
+│   │   └── drivers/             # Clients singleton (prisma.ts)
 │   ├── integrations/
-│   │   ├── helpers/<name>/     # adapter.ts + implementations/  (uidGenerator, passwordHashing)
-│   │   ├── gateway/<name>/     # adapter.ts + implementations/  (mailer)
-│   │   └── repositories/cache/ # adapter.ts + implementations/  (Redis)
-│   ├── container/               # Composition root — liga implementação concreta ao adapter
-│   ├── drivers/                 # Clients singleton (prisma.ts, redis.ts)
-│   ├── schema/                  # Zod schemas de input — boundary de validação
+│   │   └── gateway/<name>/      # adapter.ts + implementations/  (mailer)
 │   └── createContext.ts, createRouter.ts, caller.ts
 ├── shared/error/<domínio>.ts   # ErrorCode enum + mensagens, por domínio (auth/post/comment/user/session/resetToken/verifyToken/validation)
-├── test/context/                # TestContext — helper de setup pra testes de controller
-└── utils/                       # authStorage, env, error, validation (client-side helpers)
+├── test/
+│   ├── context/                 # TestContext — helper de setup pra testes de procedure
+│   ├── gateways/                # gateways fake in-memory
+│   └── repositories/            # models fake in-memory usados nos testes
+└── utils/                       # authStorage, error, validation (client-side helpers)
 ```
 
 ### Regras de import
 
 ```
 routers/app.routes.ts     → pode importar: features/<feature> (o index.ts de cada feature)
-                             NUNCA importa: entities/*, integrations/* direto
+                             NUNCA importa: models/*, infra/*, integrations/* direto
 
 features/<feature>/index.ts        → pode importar: procedures/*, schema.ts
-                                      NUNCA importa: entities/*, integrations/* direto (delega pra procedure)
+                                      NUNCA importa: models/*, infra/*, integrations/* direto (delega pra procedure)
 
-features/<feature>/procedures/*.ts → pode importar: domain/* (mesma feature ou outra), schema.ts, createContext types
-                                      NUNCA importa: repositories/prisma direto (recebe via ctx.repositories)
+features/<feature>/procedures/*.ts → pode importar: domain/* (mesma feature ou outra), schema.ts, createContext/createRouter types
+                                      NUNCA importa: Prisma/driver direto (recebe via ctx.repositories)
 
-features/<feature>/domain/*.ts     → pode importar: entities/*/entity, domain/*.dto.ts local, outro domain/* (mesma feature)
-                                      NUNCA importa: zod/schema (validação já ocorreu no boundary)
+features/<feature>/domain/*.ts     → pode importar: createDomain, tipos inferidos do schema, outro domain/* (mesma feature)
+                                      NUNCA importa: zod runtime, Prisma/driver ou implementation concreta
 
-entities/*/entity.ts      → pode importar: entities/base/entity, DTO.ts local
-                             NUNCA importa: server/schema (zod), tipos de erro de transport
+models/*.ts               → pode importar: models/base, infra/drivers/prisma
+                             NUNCA importa: features/*, server/schema, tipos de erro de transport
 
 integrations/**/adapter.ts → interface pura (porta tipada), zero import de implementação concreta
-integrations/**/implementations/* → implementa a porta; pode importar drivers/*
+integrations/**/implementations/* → implementa a porta; pode receber config/env via constructor; não lê container
 ```
 
 **Import cross-feature confirmado no código:** `features/user/procedures/login.ts` importa `features/auth/domain/createAuthSession`; `features/user/procedures/register.ts` importa `features/auth/domain/createToken` e `features/mail/domain/sendMail`; `features/auth/procedures/*.ts` importa `features/mail/domain/*`. Domain-a-domain cross-feature é aceito hoje (não há módulo isolado forçando boundary) — revisitar se a regra dura 11 (mudança arquitetural) apontar necessidade de portas explícitas entre features.
@@ -145,52 +148,51 @@ integrations/**/implementations/* → implementa a porta; pode importar drivers/
 
 #### Procedure — orquestrador thin
 
-- **Conceito:** camada entre o router tRPC e o Domain — recebe `input` + `ctx`, monta o DTO da função de domain (injeta `repositories`/`helpers` do `ctx`), chama a função, retorna o resultado.
-- **Implementação:** `src/server/features/<feature>/procedures/<action>.ts`, export `<action><Feature>Controller`.
+- **Conceito:** camada entre o router tRPC e o Domain — aplica `.input()`/`.output()`, recebe `input` + `ctx`, chama a função de domain com `DomainInput<T>` e retorna o resultado.
+- **Implementação:** `src/server/features/<feature>/procedures/<action>.ts`, export `procedure_<action>`.
 - **Quando NÃO usar:** lógica de negócio real → delega pro `domain/`.
 - **Exemplo canônico:** `src/server/features/post/procedures/create.ts`.
 
 #### Domain-like — função pura de regra de negócio
 
 - **Conceito universal:** função que aplica regra de negócio, recebendo repositórios/helpers já resolvidos (injeção explícita, não IO direto).
-- **Implementação no stack:** `src/server/features/<feature>/domain/<action>.ts`, export único `<Verbo><Entidade>Service`; DTO co-locado em `domain/<action>.dto.ts`.
+- **Implementação no stack:** `src/server/features/<feature>/domain/<action>.ts`, export único `domain_<action>`.
 - **UMA função exportada por arquivo — compliant em todo `src/server/features/` desde a ADR-0006 (2026-07-01).** Auditoria original (retroativa, `/afm:refactor`) tinha reportado "compliant" por engano num grep que contava linhas de `export {...}` em vez de símbolos — a violação real (`auth/resetToken`, `auth/session`, `auth/verifyToken`, `user/profile`, `mail` bundlando 2-3 funções por arquivo) foi corrigida durante a implementação desta ADR, quebrando cada arquivo multi-export em um arquivo por função.
 - **Quando NÃO usar:** validação de schema (fica no `schema.ts` da feature, boundary), transport glue (fica na procedure).
 - **Exemplo canônico:** `src/server/features/post/domain/create.ts`.
 
-#### Entity — encapsula acesso a repositório (camada local, não do vocabulário universal)
+#### Model — encapsula acesso Prisma por entidade (camada local, não do vocabulário universal)
 
-- **Conceito:** classe que estende `BaseEntity<Entity, Model>` (`src/server/entities/base/entity.ts`), fornecendo CRUD genérico (`create/read/update/delete`) + métodos extras específicos da entidade (ex: `PostEntity.readRecent`, `PostEntity.readUserPosts`).
-- **Implementação:** `src/server/entities/<entity>/entity.ts`, instância singleton exportada (`const <Entity>Entity = new <Entity>EntityClass({})`).
+- **Conceito:** classe que estende `BaseModel<Entity>` (`src/server/models/base.ts`), fornecendo CRUD genérico (`create/read/update/delete`) + métodos extras específicos da entidade (ex: `PostModel.readRecents`, `PostModel.readUserPosts`).
+- **Implementação:** `src/server/models/<entity>.ts`, instância singleton exportada (`const <Entity>Model = new <Entity>ModelClass()`).
 - **Quando usar:** toda entidade do `prisma/schema.prisma` que precisa de acesso a dado + lógica de leitura/escrita específica.
-- **Nota:** Service chama Entity, que chama o repository adapter — Entity é quem sabe orquestrar `repositories.database`/`repositories.cache`.
+- **Nota:** Domain acessa dados via `ctx.repositories.<entity>`; o container injeta os models reais em runtime e os testes injetam models fake in-memory.
 
 #### Adapter-like — implementação de porta tipada
 
 - **Conceito universal:** implementação concreta de uma porta (`adapter.ts`) — mesmo shape de retorno entre implementações (LSP).
 - **Implementação no stack:**
-  - Repository de entidade: `src/server/entities/<entity>/repositories/prisma.ts`.
-  - Helper cross-cutting: `src/server/integrations/helpers/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`).
+  - Models de dados: `src/server/models/<entity>.ts`.
+  - Helper puro: `src/lib/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`).
   - Gateway externo: `src/server/integrations/gateway/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `mailer`).
-  - Cache: `src/server/integrations/repositories/cache/adapter.ts` + `implementations/<concreto>.ts` (Redis).
 - **OCP em ação:** provider novo (ex: outro mailer) = arquivo novo em `implementations/`, sem `switch (provider)` espalhado.
 
 #### Composition root — wiring de implementações concretas (camada local)
 
-- **Implementação:** `src/server/container/{gateways,helpers,repositories}.ts` — resolve qual `implementations/*` concreta cada adapter usa, injeta nos `drivers/*`.
-- **Drivers:** `src/server/drivers/{prisma,redis}.ts` — clients singleton crus, consumidos só pelo container/pelos adapters.
+- **Implementação:** `src/server/infra/container/{gateways,helpers,repositories}.ts` — resolve qual `implementations/*` concreta cada adapter usa e injeta config/env quando necessário.
+- **Drivers:** `src/server/infra/drivers/prisma.ts` — client singleton cru, consumido só por infra/model.
 
 ### 3.2 Componentes de suporte (2ª classe)
 
 #### Schema — validação no boundary
 
-`src/server/features/<feature>/schema.ts` — Zod schemas de input de procedure, um arquivo por feature (consolidado na ADR-0006; antes viviam espalhados em `src/server/schema/<nome>.schema.ts`, às vezes um arquivo por feature, às vezes um por sub-concern). Confirmado no scan: zero `import zod` dentro de `entities/*/entity.ts` ou `features/*/domain/*.ts` (regra dura 16 já respeitada).
+`src/server/features/<feature>/schema.ts` — Zod schemas de input e output de procedure, um arquivo por feature. Procedures aplicam `.input()` e `.output()` no boundary; domain recebe `DomainInput<T>` com tipos inferidos via `z.TypeOf`, sem validar runtime de novo. Confirmado no scan: zero `import zod` dentro de `models/*` ou `features/*/domain/*.ts` (regra dura 16 já respeitada).
 
 #### Shared error — classificação por domínio (intenção) vs. estado atual
 
-`src/shared/error/<domínio>.ts` — `<Domínio>ErrorCode` enum + `<Domínio>ErrorMessages`, um arquivo por domínio (auth, post, comment, user, session, resetToken, verifyToken, validation). **Intenção arquitetural:** Domain nunca importa tipo de erro de transport (regra dura 15); Controller mapeia `DomainErrorCode` → `TRPCError` no boundary.
+`src/shared/error/<domínio>.ts` — `<Domínio>ErrorCode` enum + `<Domínio>ErrorMessages`, um arquivo por domínio (auth, post, comment, user, session, resetToken, verifyToken, validation). **Intenção arquitetural:** Domain nunca importa tipo de erro de transport (regra dura 15); Procedure mapeia `DomainErrorCode` → `TRPCError` no boundary.
 
-**Estado atual (violação difundida — ver `afm.md` § 3.1 forward-only):** `grep -rl "TRPCError" src/server/features/*/domain/*.ts` retorna **20 de 28** arquivos de domain (número mudou de 18/19 pra 20/28 após a ADR-0006 quebrar os arquivos multi-export em um-por-função — mesma violação, granularidade nova) — a função de domain importa `@trpc/server` e lança `TRPCError` diretamente, em vez de lançar um erro de domínio e deixar a procedure mapear. Além disso, o `message` passado ao `TRPCError` é o **código** do enum (`UserErrorCode.USER_NOT_FOUND`), não a mensagem amigável de `<Domínio>ErrorMessages` — os mapas de mensagem existem mas não são consumidos onde o erro é lançado. Ver `src/server/features/user/domain/login.ts` como exemplo representativo. **Esta é exatamente a violação que a ADR-0010 (DTOs → Zod, ainda não implementada) planeja resolver** — o `.output()` do Zod no boundary da procedure é o ponto natural pra esse mapeamento.
+**Estado atual (violação difundida — ver `afm.md` § 3.1 forward-only):** `rg -l "TRPCError" src/server/features/*/domain/*.ts` retorna **17 de 30** arquivos de domain — a função de domain importa `@trpc/server` e lança `TRPCError` diretamente, em vez de lançar um erro de domínio e deixar a procedure mapear. Além disso, em vários casos o `message` passado ao `TRPCError` é o **código** do enum (`UserErrorCode.USER_NOT_FOUND`), não a mensagem amigável de `<Domínio>ErrorMessages`. Ver `src/server/features/user/domain/login.ts` como exemplo representativo. Schemas Zod de output já existem; o que ainda falta é a remediação de erro Domain ≠ Transport.
 
 #### UI primitives
 
@@ -204,11 +206,13 @@ integrations/**/implementations/* → implementa a porta; pode importar drivers/
 
 | Nível | O que testa | Onde vive | Estado atual |
 | ----- | ----------- | --------- | ------------- |
-| **Unit/Procedure** | Procedure + Domain + Entity via `TestContext` | `src/server/features/**/procedures/*.test.ts` | 23 arquivos de teste (`vitest`) |
+| **Unit/Procedure** | Procedure + Domain + Model via `TestContext` | `src/server/features/**/procedures/*.test.ts` | 23 arquivos de teste (`vitest`) |
 | **Integration** | [A DEFINIR — não identificado no scan] | — | — |
 | **E2E** | [A DEFINIR — não identificado no scan] | — | — |
 
-Cobertura atual (proxy `tests/src`): 23 arquivos de teste / 234 arquivos `.ts`/`.tsx` em `src/` (~9.8% — número de arquivos mudou pós-ADR-0006, mesmos 55 testes, só mais granulares). Ver `afm.md` § 3.1 forward-only.
+Cobertura atual (proxy `tests/src`): 23 arquivos de teste / 205 arquivos `.ts`/`.tsx` em `src/` (~11.2%). Ver `afm.md` § 3.1 forward-only.
+
+Os testes de procedure rodam sem Postgres/Redis: `createTestContext()` injeta repositories fake in-memory (`src/test/repositories/`) e gateways fake (`src/test/gateways/`). O hook de pre-push roda `yarn test` direto.
 
 ### 4.2 TDD duro + types-as-test
 
@@ -231,9 +235,9 @@ Padrão observado no `git log`: vários commits `test:` acompanham `fix:`/`refac
 ## 5. Princípios transversais
 
 - **XP + Pragmatic** — DRY, YAGNI, KISS, Broken Windows, Design by Contract, Rubber Duck. Práticas diárias em [`/docs/afm.md`](./afm.md).
-- **Postgres = source of truth de todas as entidades; Redis = cache opcional feature-flagged.** Divergência resolve-se sempre lendo do Postgres.
+- **Postgres = source of truth de todas as entidades.** Redis cache antigo foi removido; reconstrução futura passa por ADR nova/continuação da ADR-0009.
 - **Tipos no lugar de comentários.** Nome + tipo carregam o *o quê*. Comentário só pra justificar *porquê* surpreendente.
-- **Injeção explícita de repositórios/helpers via DTO**, nunca acesso direto a driver dentro de Service/Entity — mantém a camada testável sem infra real (`TestContext` monta repositórios em memória).
+- **Injeção explícita via `ctx`/`DomainInput`**, nunca acesso direto a driver dentro de Domain/Procedure — mantém a camada testável sem infra real (`TestContext` monta repositórios em memória).
 - **Erro classificado por domínio, nunca genérico** — todo domínio tem seu próprio `<Domínio>ErrorCode` em `src/shared/error/`.
 
 ---
@@ -249,23 +253,22 @@ Consulte as rubricas em [`docs/rubrics/`](./rubrics/) **antes** de escolher onde
 | Camada | Padrão do export | Padrão do arquivo |
 | ----- | ---- | ---- |
 | Router (Procedure-like) | `<Feature>Router` | `features/<feature>/index.ts` |
-| Procedure | `<action><Feature>Controller` | `features/<feature>/procedures/<action>.ts` |
-| Domain-like | `<Verbo><Entidade>Service` | `features/<feature>/domain/<action>.ts` |
-| Domain DTO | `I<Verbo><Entidade>DTO` | `features/<feature>/domain/<action>.dto.ts` |
-| Entity | `<Entidade>Entity` (instância) | `entity.ts` |
-| Repository adapter | `Prisma<Entidade>Model` | `repositories/prisma.ts` |
+| Procedure | `procedure_<action>` | `features/<feature>/procedures/<action>.ts` |
+| Domain-like | `domain_<action>` | `features/<feature>/domain/<action>.ts` |
+| Domain input | `DomainInput<T>` | `server/createDomain.ts` |
+| Model | `<Entidade>Model` (instância) | `server/models/<entity>.ts` |
 | Adapter (porta) | `I<Nome>Adapter` (tipo) | `adapter.ts` |
 | Test file | mesmo nome + `.test.ts` | mesmo diretório, sem `__tests__/` |
 
 ### Tamanho e responsabilidade
 
-- ≤ 300 linhas por arquivo (1 exceção conhecida hoje: `src/server/entities/base/entity.ts`, 320 linhas — ver `afm.md` § 3.1).
+- ≤ 300 linhas por arquivo (sem exceção produtiva conhecida no scan de 2026-07-04).
 - Uma responsabilidade por arquivo.
 
 ### Tipos: explícitos nas fronteiras, inferência no resto
 
-- **Explícito:** retorno de Services/Controllers exportados, DTOs, props de componentes exportados.
-- **Nunca `any` / `unknown` em helper próprio** (2 exceções conhecidas hoje — ver `afm.md` § 3.1).
+- **Explícito:** retorno de funções exportadas de domain/procedure, schemas/tipos de boundary, props de componentes exportados.
+- **Nunca `any` / `unknown` em helper próprio** (5 ocorrências conhecidas hoje — ver `afm.md` § 3.1).
 
 ---
 

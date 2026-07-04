@@ -146,11 +146,11 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
 4. **Não commita com type-check quebrado.**
    *Verificação:* `npx tsc --noEmit`.
 5. **Uma responsabilidade por arquivo.** Nome vago ("manager", "utils", "helpers" sem prefixo de domínio) = parte.
-   *Verificação:* `find src -type f \( -iname "*manager*" -o -iname "*utils*" -o -iname "*helpers*" \)` retorna 0 sem prefixo de domínio. Hoje retorna `src/lib/utils.ts` e `src/server/container/helpers.ts` — ver § 3.1 forward-only.
+   *Verificação:* `find src -type f \( -iname "*manager*" -o -iname "*utils*" -o -iname "*helpers*" \)` retorna 0 sem prefixo de domínio. Hoje retorna `src/lib/utils.ts` e `src/server/infra/container/helpers.ts` — ver § 3.1 forward-only.
 6. **Arquivo ≤ 300 linhas.** Exceções com header explicando.
-   *Verificação:* `find src -type f \( -name "*.ts" -o -name "*.tsx" \) -not -name "*.test.*" | xargs wc -l | awk '$1 > 300'`. Hoje: `src/server/entities/base/entity.ts` (320 linhas) — ver § 3.1 forward-only.
-7. **Service (Domain-like) exporta exatamente UMA função `<Verbo><Entidade>Service`.** Service é regra de negócio; query builder, DTO map, transport glue não vão aqui.
-   *Verificação:* `for f in $(find src/server/features -name service.ts); do n=$(grep -oE '^export \{[^}]*\}' "$f" | tr ',' '\n' | wc -l); test "$n" -le 1 || echo "$f: $n exports"; done` retorna vazio. **Violação corrigida em 2026-07-01** — a verificação original (`grep -c "^export"`) contava linhas de `export {...}`, não símbolos exportados, e reportou falso-positivo de compliance. Estado real: `auth/resetToken/service.ts` (2 funções), `auth/verifyToken/service.ts` (3), `auth/session/controller.ts` (3), `auth/verifyToken/controller.ts` (2) violam a regra — pastas por-ação (`comment/*`, `post/*`, `user/*`) são compliant. Corrigido durante a implementação da ADR-0006 (ver `docs/adr/0006`).
+   *Verificação:* `find src -type f \( -name "*.ts" -o -name "*.tsx" \) -not -name "*.test.*" -print0 | xargs -0 wc -l | awk '$2 != "total" && $1 > 300'`. **Compliant hoje** (0 arquivos produtivos >300 linhas no scan de 2026-07-04).
+7. **Domain-like exporta exatamente UMA função `domain_<action>`.** Domain é regra de negócio; query builder, schema/Zod e transport glue não vão aqui.
+   *Verificação:* `for f in $(find src/server/features -path '*/domain/*.ts'); do n=$(rg -o '^export \{[^}]*\}' "$f" | tr ',' '\n' | wc -l); test "$n" -eq 1 || echo "$f: $n exports"; done` retorna vazio. **Compliant hoje** em 30 arquivos de domain.
 10. **Sem backwards-compat shim.** Caller não existe → deleta. `// removed for X` polui.
     *Verificação:* `grep -rn "removed\|deprecated\|legacy" src/`. **Compliant hoje** (0 ocorrências).
 11. **Mudança arquitetural pára e pergunta.** Nova camada / componente de 1ª classe / contrato entre módulos / refactor de pastas exige validação do dono da arquitetura.
@@ -158,10 +158,10 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
 12. *(princípio — vive em § 1.3. Sem componente Task-like no projeto hoje — nenhum job/queue/scheduler detectado no scan A.1. Se um for introduzido, promove pra regra dura com gatilho de idempotência.)*
 13. **Tokens e segredos não vazam.** Nunca logar token em claro. Redact em erros. Nunca commitar `.env`.
     *Verificação:* `git diff --staged | grep -nE "(token|secret|api[_-]?key|password|bearer)\s*[:=]\s*['\"][^'\"]+"` retorna 0; `git diff --staged --name-only | grep -E "(^|/)\.env"` vazio.
-15. **Classificação de erros — Domain ≠ Transport.** Entity/Service não importa `TRPCError` (`@trpc/server`). Controller mapeia erro de domínio → `TRPCError` no boundary.
-    *Verificação:* `grep -rln "TRPCError" src/server/entities/*/entity.ts src/server/features/*/*/service.ts`. **Violação hoje: 18 de 19 arquivos `service.ts`** importam e lançam `TRPCError` diretamente — ver `ach.md` § 3.2 e § 3.1 forward-only abaixo.
-16. **Validação no boundary — schema só na entrada.** Zod valida em (a) input de procedure (`src/server/schema/*.schema.ts`), (b) payload externo. Entity/Service recebe shape já validado.
-    *Verificação:* `grep -rnE "z\.|zod" src/server/entities/ src/server/features/*/*/service.ts` retorna 0. **Compliant hoje.**
+15. **Classificação de erros — Domain ≠ Transport.** Domain/Model não importa `TRPCError` (`@trpc/server`). Procedure mapeia erro de domínio → `TRPCError` no boundary.
+    *Verificação:* `rg -l "TRPCError" src/server/features/*/domain/*.ts`. **Violação hoje: 17 de 30 arquivos `domain/*.ts`** importam e lançam `TRPCError` diretamente — ver `ach.md` § 3.2 e § 3.1 forward-only abaixo.
+16. **Validação no boundary — schema só em input/output de procedure.** Zod valida em (a) `.input()`/`.output()` de procedure (`src/server/features/<feature>/schema.ts`), (b) payload externo. Domain/Model recebe shape já validado.
+    *Verificação:* `rg -n "z\.|zod" src/server/models src/server/features/*/domain/*.ts` retorna 0. **Compliant hoje.**
 17. **Edit em `/docs/` não colapsa o doc.** Rewrite que apaga mais da metade das linhas num só edit pára e exige revisão explícita.
     *Verificação:* `git diff --numstat -- docs/ | grep -vE '(^|/)\.afm-log|(^|/)_focus\.md$|(^|/)sessions/' | awk '$2 > 20 && $2/($1+$2+1) > 0.5 {print}'` retorna vazio.
 18. **Substrato de captura é append-only.** `docs/.afm-log/` só recebe append.
@@ -172,8 +172,8 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
 
 ### Regras específicas do projeto (a partir de 30)
 
-30. **Entity/Domain NÃO importa `PrismaClient`/`@prisma/client` direto.** Recebe repositório via `repositories` injetado no DTO — mantém a camada testável sem infra real (`TestContext`).
-    *Verificação:* `grep -rnE "from.*@prisma/client|new PrismaClient" src/server/entities/*/entity.ts src/server/features/*/domain/*.ts` retorna 0. **Compliant hoje.**
+30. **Domain/Procedure NÃO importa `PrismaClient`/`@prisma/client`/driver Prisma direto.** Acesso a dados passa por `ctx.repositories` injetado; `src/server/models/*` e `src/server/infra/drivers/prisma.ts` são a exceção intencional da camada de dados.
+    *Verificação:* `rg -n "from.*@prisma/client|new PrismaClient|@/server/infra/drivers/prisma" src/server/features/*/domain/*.ts src/server/features/*/procedures/*.ts` retorna 0. **Compliant hoje.**
 31. **Route handler (`src/app/api/**/route.ts`) é fino.** Delega pro tRPC handler; nenhuma regra de negócio inline.
     *Verificação:* `find src/app/api -name route.ts | xargs wc -l` — todos < 80 linhas. **Compliant hoje** (único route: `src/app/api/trpc/[trpc]/route.ts`).
 
@@ -187,13 +187,13 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 
 | Regra | Razão pro forward-only | Violação encontrada | Tech-debt rastreado em |
 | --- | --- | --- | --- |
-| 1 — TDD/cobertura | Cobertura atual baixa: 23 arquivos de teste / 234 arquivos `src/` (~9.8%, pós-ADR-0006 — mesmos 55 testes, mais arquivos). Sweep retroativo seria semanas de trabalho. | 23/234 (~9.8%) | `[A DEFINIR — abrir issue]` |
-| 2 — zero `any`/`unknown` | Baixo volume (2 ocorrências) — corrigir é rápido, mas não bloqueia PRs em andamento até o boy-scout alcançar. | 2 ocorrências | `[A DEFINIR]` |
-| 5 — naming vago | 2 arquivos sem prefixo de domínio (`src/lib/utils.ts`, `src/server/container/helpers.ts`). Renomear/particionar exige revisão de todos os imports. | `src/lib/utils.ts`, `src/server/container/helpers.ts` | `[A DEFINIR]` |
-| 6 — arquivo ≤300 linhas | 1 arquivo 20 linhas acima do limite (`src/server/entities/base/entity.ts`, 320 linhas). | 1 arquivo (320 linhas) | `[A DEFINIR]` |
-| 15 — Domain ≠ Transport | Violação difundida (20/28 arquivos de `domain/`, pós-ADR-0006 — mesma violação, granularidade nova) — corrigir exige mover mapeamento de erro pra procedure em cada função. Candidato natural da ADR-0010 (DTOs → Zod), ainda não implementada. | 20/28 arquivos `domain/*.ts` | ADR-0010 (`docs/adr/0010-dto-substituido-por-zod-no-boundary.md`) |
+| 1 — TDD/cobertura | Cobertura atual baixa: 23 arquivos de teste / 205 arquivos `src/` (~11.2%). Sweep retroativo seria semanas de trabalho. | 23/205 (~11.2%) | `[A DEFINIR — abrir issue]` |
+| 2 — zero `any`/`unknown` | Volume pequeno, mas ainda existente em helpers/componentes legados; não bloqueia PRs em andamento até o boy-scout alcançar. | 5 ocorrências | `[A DEFINIR]` |
+| 5 — naming vago | 2 arquivos sem prefixo de domínio (`src/lib/utils.ts`, `src/server/infra/container/helpers.ts`). Renomear/particionar exige revisão de todos os imports. | `src/lib/utils.ts`, `src/server/infra/container/helpers.ts` | `[A DEFINIR]` |
+| 6 — arquivo ≤300 linhas | Resolvido pela migração `entities/` → `models/` (ADR-0007); manter como regra forward-only para código novo. | 0 arquivos produtivos >300 linhas | — |
+| 15 — Domain ≠ Transport | Violação difundida (17/30 arquivos de `domain/`) — corrigir exige mover mapeamento de erro pra procedure/boundary em cada função. Schemas Zod de output já existem, mas a remediação de erro ainda não aterrissou. | 17/30 arquivos `domain/*.ts` | ADR-0010 (`docs/adr/0010-dto-substituido-por-zod-no-boundary.md`) |
 
-**Critério de boy-scout:** ao editar arquivo legado que viola regra forward-only, traz pra conformidade no mesmo PR se o escopo justifica. Senão, abre issue separada e linka. Regra 15 é exceção — dado o volume (20 arquivos), a remediação é a ADR-0010, não boy-scout arquivo-a-arquivo, pra evitar migração pela metade.
+**Critério de boy-scout:** ao editar arquivo legado que viola regra forward-only, traz pra conformidade no mesmo PR se o escopo justifica. Senão, abre issue separada e linka. Regra 15 é exceção — dado o volume (17 arquivos), a remediação deve ser feita como migração coordenada, não boy-scout arquivo-a-arquivo, pra evitar migração pela metade.
 
 ---
 
@@ -236,7 +236,7 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 - **Mock que simula mais que o necessário.** Está testando o mock.
 - **Adicionando `eslint-disable`, `@ts-ignore`, `@ts-expect-error` sem ticket.** Broken window.
 - **Criando função `utils.ts` sem segundo caller.** Inline.
-- **Duplicando lógica de negócio entre transports.** Move pra Service/Entity puro.
+- **Duplicando lógica de negócio entre transports.** Move pra Domain/Model puro.
 - **Escrevendo mais de uma implementação em paralelo.** Escolhe uma.
 - **Cobrindo com try/catch todos os awaits.** Erros tipados > catch genérico.
 - **Refatorando "enquanto estou aqui" sem teste prévio.** Outra tarefa.
@@ -247,16 +247,18 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 - **`any` / `as any` aparecendo "por causa do TS".** Investiga inferência.
 - **Código copiado 3×.** Abstrai.
 - **Abstração com 1 caller.** Inline.
-- **Service (Domain-like) com 2+ exports.** Parte.
+- **Domain-like com 2+ exports.** Parte.
 - **Comentário narrando *o quê*.** Apaga; nome + tipo já dizem.
 - **Comentário compensando código difícil.** Refatora primeiro.
-- **Service lançando `TRPCError` direto.** Violação da regra 15 (forward-only hoje) — não espalha mais; lança erro de domínio e deixa o Controller mapear.
+- **Domain lançando `TRPCError` direto.** Violação da regra 15 (forward-only hoje) — não espalha mais; lança erro de domínio e deixa a Procedure mapear.
 
 ---
 
 ## 6. Definition of Done
 
-Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na entrevista de adoção retroativa (2026-06-30): `.husky/pre-commit` roda `eslint --fix` nos arquivos staged + `yarn lint` completo; `.husky/pre-push` roda a suíte de testes via `docker compose -f docker-compose-test.yml`; `.husky/commit-msg` roda `commitlint`. DoD de merge inclui **test runner + type check**, mesmo sem CI formal hoje — o agente roda os dois manualmente antes de considerar a tarefa pronta.
+Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na entrevista de adoção retroativa (2026-06-30): `.husky/pre-commit` roda `eslint --fix` nos arquivos staged + `yarn lint` completo; `.husky/pre-push` roda `yarn test` (vitest) diretamente; `.husky/commit-msg` roda `commitlint`. DoD de merge inclui **test runner + type check**, mesmo sem CI formal hoje — o agente roda os dois manualmente antes de considerar a tarefa pronta.
+
+**Atualizado em 2026-07-04**: a suíte de testes deixou de depender de Postgres/Redis via Docker (`docker-compose-test.yml`, removido) — os testes de procedure agora rodam contra repositórios e gateways fake in-memory injetados via `TestContext` (`src/test/repositories/`, `src/test/gateways/`), o que também tornou o pre-push mais rápido (segundos, não um container build).
 
 - [ ] Testes novos cobrem o comportamento adicionado/modificado, e rodam verde.
 - [ ] Suíte inteira roda verde (`yarn test`).
@@ -270,7 +272,7 @@ Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na en
 
 ### 6.1 Pre-push validation (já gateado por hook — `.husky/pre-push`)
 
-1. `docker compose -f docker-compose-test.yml up --build --abort-on-container-exit --exit-code-from app` (suíte de testes em container).
+1. `yarn test` (vitest, sem dependência de Docker/Postgres — ver nota de 2026-07-04 acima).
 
 Confirmado na entrevista: mantém só o test runner no pre-push (não adicionar type-check/build nesse hook — ficam no DoD de merge, § 6).
 
