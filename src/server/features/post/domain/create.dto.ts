@@ -1,6 +1,6 @@
 import { IPostModel } from "@/server/models/post";
 import { IUserModel } from "@/server/models/user";
-import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 
 type ICreatePostDTO = {
   userId: string;

@@ -1,6 +1,6 @@
 import { ISessionModel } from "@/server/models/session";
 import { IUserModel } from "@/server/models/user";
-import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 
 type IRefreshSessionDTO = {
   id: string;

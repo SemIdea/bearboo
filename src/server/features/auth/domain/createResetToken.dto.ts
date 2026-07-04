@@ -1,6 +1,6 @@
 import { IResetTokenModel } from "@/server/models/resetToken";
 import { IUserModel } from "@/server/models/user";
-import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 
 type ISendResetPasswordEmailDTO = {
   email: string;

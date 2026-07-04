@@ -1,6 +1,6 @@
 import { IVerifyTokenModel } from "@/server/models/verifyToken";
 import { IUserModel } from "@/server/models/user";
-import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 
 type IReCreateTokenServiceDTO = {
   userEmail: string;

@@ -1,5 +1,5 @@
 import { IVerifyTokenModel } from "@/server/models/verifyToken";
-import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 
 type ICreateTokenServiceDTO = {
   userId: string;

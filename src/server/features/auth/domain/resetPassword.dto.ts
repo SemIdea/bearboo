@@ -1,6 +1,6 @@
 import { IResetTokenModel } from "@/server/models/resetToken";
 import { IUserModel } from "@/server/models/user";
-import { IPasswordHashingHelperAdapter } from "@/server/integrations/helpers/passwordHashing/adapter";
+import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
 
 type IResetPasswordDTO = {
   token: string;

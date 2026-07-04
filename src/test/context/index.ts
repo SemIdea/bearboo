@@ -1,9 +1,9 @@
 import { IBaseContextDTO } from "@/server/createContext";
 import { IUserEntity } from "@/server/models/user";
 import { ISessionEntity } from "@/server/models/session";
-import { repositories } from "@/server/container/repositories";
-import { helpers } from "@/server/container/helpers";
-import { gateways } from "@/server/container/gateways";
+import { repositories } from "@/server/infra/container/repositories";
+import { helpers } from "@/server/infra/container/helpers";
+import { gateways } from "@/server/infra/container/gateways";
 
 type IAuthenticatedUserDTO = IUserEntity & {
   truePassword: string;

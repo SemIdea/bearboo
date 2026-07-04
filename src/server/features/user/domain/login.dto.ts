@@ -1,5 +1,5 @@
 import { IUserModel } from "@/server/models/user";
-import { IPasswordHashingHelperAdapter } from "@/server/integrations/helpers/passwordHashing/adapter";
+import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
 
 type ILoginUserDTO = {
   email: string;

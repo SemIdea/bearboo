@@ -1,9 +1,9 @@
 import { IUserWithSession } from "./models/user";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { ReadUserAndSessionByAccessTokenService } from "./features/auth/domain/readUserAndSessionByAccessToken";
-import { IRepositories, repositories } from "./container/repositories";
-import { IHelpers, helpers } from "./container/helpers";
-import { IGateways, gateways } from "./container/gateways";
+import { IRepositories, repositories } from "./infra/container/repositories";
+import { IHelpers, helpers } from "./infra/container/helpers";
+import { IGateways, gateways } from "./infra/container/gateways";
 
 type IInputAPIContextDTO = {
   headers: Headers;

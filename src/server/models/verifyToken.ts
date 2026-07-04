@@ -1,4 +1,4 @@
-import { prisma } from "@/server/drivers/prisma";
+import { prisma } from "@/server/infra/drivers/prisma";
 import { BaseModel } from "./base";
 
 type IVerifyTokenEntity = {

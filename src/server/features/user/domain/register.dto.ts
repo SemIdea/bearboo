@@ -1,6 +1,6 @@
 import { IUserModel } from "@/server/models/user";
-import { IPasswordHashingHelperAdapter } from "@/server/integrations/helpers/passwordHashing/adapter";
-import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
+import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 
 type IRegisterUserDTO = {
   email: string;
