@@ -1,15 +1,9 @@
+import { publicProcedure } from "@/server/createRouter";
 import { ReadRecentPostsService } from "../domain/readRecent";
-import { IAPIContextDTO } from "@/server/createContext";
+import { readRecentPostsOutputSchema } from "../schema";
 
-const readRecentPostsController = async ({ ctx }: { ctx: IAPIContextDTO }) => {
-  const posts = await ReadRecentPostsService({
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.post
-    }
-  });
+const readRecentPostsProcedure = publicProcedure
+  .output(readRecentPostsOutputSchema)
+  .query(async ({ ctx }) => ReadRecentPostsService({ ctx }));
 
-  return posts;
-};
-
-export { readRecentPostsController };
+export { readRecentPostsProcedure };

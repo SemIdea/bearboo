@@ -1,16 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { IPostModel } from "@/server/models/post";
+import { DomainInput } from "@/server/createDomain";
 import { PostErrorCode } from "@/shared/error/post";
 import { ReadPostInput } from "../schema";
 
-type Params = ReadPostInput & {
-  repositories: {
-    database: IPostModel;
-  };
-};
+type Input = DomainInput<ReadPostInput>;
 
-const ReadPostService = async ({ repositories, id }: Params) => {
-  const post = await repositories.database.read(id);
+const ReadPostService = async ({ ctx, id }: Input) => {
+  const post = await ctx.repositories.post.read(id);
 
   if (!post) {
     throw new TRPCError({

@@ -1,24 +1,12 @@
+import { verifiedProcedure } from "@/server/createRouter";
 import { UpdateCommentService } from "../domain/update";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { UpdateCommentInput } from "../schema";
+import { updateCommentSchema, updateCommentOutputSchema } from "../schema";
 
-const updateCommentController = async ({
-  input,
-  ctx
-}: {
-  input: UpdateCommentInput;
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const comment = await UpdateCommentService({
-    ...input,
-    userId: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.comment
-    }
-  });
+const updateCommentProcedure = verifiedProcedure
+  .input(updateCommentSchema)
+  .output(updateCommentOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    UpdateCommentService({ ...input, userId: ctx.user.id, ctx })
+  );
 
-  return comment;
-};
-
-export { updateCommentController };
+export { updateCommentProcedure };

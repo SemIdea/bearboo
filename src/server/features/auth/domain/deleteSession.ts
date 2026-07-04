@@ -1,20 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { ISessionModel } from "@/server/models/session";
-import { IUserModel } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
 
-type Params = {
-  id: string;
-  userId: string;
-  repositories: {
-    user: IUserModel;
-    database: ISessionModel;
-  };
-};
+type Input = DomainInput<{ id: string; userId: string }>;
 
-const DeleteSessionService = async ({ repositories, ...data }: Params) => {
-  const user = await repositories.user.read(data.userId);
+const DeleteSessionService = async ({ ctx, ...data }: Input) => {
+  const user = await ctx.repositories.user.read(data.userId);
 
   if (!user) {
     throw new TRPCError({
@@ -23,7 +15,7 @@ const DeleteSessionService = async ({ repositories, ...data }: Params) => {
     });
   }
 
-  const session = await repositories.database.read(data.id);
+  const session = await ctx.repositories.session.read(data.id);
 
   if (!session) {
     throw new TRPCError({
@@ -32,7 +24,7 @@ const DeleteSessionService = async ({ repositories, ...data }: Params) => {
     });
   }
 
-  await repositories.database.delete(session.id);
+  await ctx.repositories.session.delete(session.id);
 };
 
 export { DeleteSessionService };

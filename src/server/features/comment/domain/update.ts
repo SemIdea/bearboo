@@ -1,17 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { ICommentModel } from "@/server/models/comment";
+import { DomainInput } from "@/server/createDomain";
 import { CommentErrorCode } from "@/shared/error/comment";
 import { UpdateCommentInput } from "../schema";
 
-type Params = UpdateCommentInput & {
-  userId: string;
-  repositories: {
-    database: ICommentModel;
-  };
-};
+type Input = DomainInput<UpdateCommentInput & { userId: string }>;
 
-const UpdateCommentService = async ({ repositories, ...data }: Params) => {
-  const comment = await repositories.database.read(data.id);
+const UpdateCommentService = async ({ ctx, ...data }: Input) => {
+  const comment = await ctx.repositories.comment.read(data.id);
 
   if (!comment) {
     throw new TRPCError({
@@ -27,7 +22,7 @@ const UpdateCommentService = async ({ repositories, ...data }: Params) => {
     });
   }
 
-  const updatedComment = await repositories.database.update(data.id, {
+  const updatedComment = await ctx.repositories.comment.update(data.id, {
     content: data.content
   });
 

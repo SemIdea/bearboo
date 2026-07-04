@@ -1,19 +1,16 @@
 import { TRPCError } from "@trpc/server";
-import { ISessionModel } from "@/server/models/session";
+import { DomainInput } from "@/server/createDomain";
 import { SessionErrorCode } from "@/shared/error/session";
 import { RefreshSessionInput } from "../schema";
 
-type Params = RefreshSessionInput & {
-  repositories: {
-    database: ISessionModel;
-  };
-};
+type Input = DomainInput<RefreshSessionInput>;
 
 const ReadSessionByRefreshTokenService = async ({
-  repositories,
+  ctx,
   refreshToken
-}: Params) => {
-  const session = await repositories.database.readByRefreshToken(refreshToken);
+}: Input) => {
+  const session =
+    await ctx.repositories.session.readByRefreshToken(refreshToken);
 
   if (!session) {
     throw new TRPCError({

@@ -1,6 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { readUserCommentsController } from "./readComments";
+import { UserRouter } from "../index";
 import { TRPCError } from "@trpc/server";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -15,11 +15,8 @@ describe("User Comments Controller Unitary Testing", async () => {
   test("Should return an empty array if user has no comments", async () => {
     const user = ctx.user;
 
-    const result = await readUserCommentsController({
-      ctx,
-      input: {
-        id: user.id
-      }
+    const result = await UserRouter.createCaller(ctx).readComments({
+      id: user.id
     });
 
     expect(result).toBeDefined();
@@ -43,11 +40,8 @@ describe("User Comments Controller Unitary Testing", async () => {
       userId: user.id
     });
 
-    const result = await readUserCommentsController({
-      ctx,
-      input: {
-        id: user.id
-      }
+    const result = await UserRouter.createCaller(ctx).readComments({
+      id: user.id
     });
 
     expect(result).toBeDefined();
@@ -62,12 +56,7 @@ describe("User Comments Controller Unitary Testing", async () => {
     const userId = ctx.helpers.uid.generate();
 
     await expect(
-      readUserCommentsController({
-        ctx,
-        input: {
-          id: userId
-        }
-      })
+      UserRouter.createCaller(ctx).readComments({ id: userId })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",

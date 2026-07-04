@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { updatePostController } from "./update";
+import { PostRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { PostErrorCode } from "@/shared/error/post";
@@ -21,13 +21,10 @@ describe("Update Post Controller Unitary Testing", async () => {
       userId: ctx.user!.id
     });
 
-    const result = await updatePostController({
-      ctx,
-      input: {
-        id,
-        content: "Updated Content",
-        title: "Updated Title"
-      }
+    const result = await PostRouter.createCaller(ctx).update({
+      id,
+      content: "Updated Content",
+      title: "Updated Title"
     });
 
     expect(result).toEqual({
@@ -39,16 +36,11 @@ describe("Update Post Controller Unitary Testing", async () => {
   });
 
   test("Should throw error if post does not exist", async () => {
-    const input = {
-      id: "non-existent-id",
-      content: "Updated Content",
-      title: "Updated Title"
-    };
-
     await expect(
-      updatePostController({
-        ctx,
-        input
+      PostRouter.createCaller(ctx).update({
+        id: "non-existent-id",
+        content: "Updated Content",
+        title: "Updated Title"
       })
     ).rejects.toThrowError(
       new TRPCError({
@@ -68,16 +60,11 @@ describe("Update Post Controller Unitary Testing", async () => {
       userId: otherUser.id
     });
 
-    const input = {
-      id,
-      content: "Updated Content",
-      title: "Updated Title"
-    };
-
     await expect(
-      updatePostController({
-        ctx,
-        input
+      PostRouter.createCaller(ctx).update({
+        id,
+        content: "Updated Content",
+        title: "Updated Title"
       })
     ).rejects.toThrowError(
       new TRPCError({

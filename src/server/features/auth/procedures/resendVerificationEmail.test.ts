@@ -1,6 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { resendVerificationEmailController } from "./resendVerificationEmail";
+import { AuthRouter } from "../index";
 import { TRPCError } from "@trpc/server";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -22,14 +22,11 @@ describe("Resend Verification Email Controller Unitary Testing", async () => {
       used: false
     });
 
-    const input = {
-      email: ctx.user.email
-    };
-
-    const result = await resendVerificationEmailController({
-      input,
-      ctx
-    });
+    const result = await AuthRouter.createCaller(ctx).resendVerificationEmail(
+      {
+        email: ctx.user.email
+      }
+    );
 
     const oldToken = await ctx.repositories.verifyToken.read(oldTokenId);
 
@@ -38,14 +35,9 @@ describe("Resend Verification Email Controller Unitary Testing", async () => {
   });
 
   test("Should throw error if user email is not found", async () => {
-    const input = {
-      email: "nonexistent@example.com"
-    };
-
     await expect(
-      resendVerificationEmailController({
-        input,
-        ctx
+      AuthRouter.createCaller(ctx).resendVerificationEmail({
+        email: "nonexistent@example.com"
       })
     ).rejects.toThrow(
       new TRPCError({

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createCommentController } from "./create";
+import { CommentRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 
 describe("Create Comment Controller Unitary Testing", async () => {
@@ -27,10 +27,7 @@ describe("Create Comment Controller Unitary Testing", async () => {
       content: "This is a test comment."
     };
 
-    const result = await createCommentController({
-      ctx,
-      input
-    });
+    const result = await CommentRouter.createCaller(ctx).create(input);
 
     expect(result).toBeDefined();
     expect(result.content).toEqual(input.content);

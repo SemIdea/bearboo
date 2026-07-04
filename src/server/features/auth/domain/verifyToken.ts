@@ -1,18 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { IVerifyTokenModel } from "@/server/models/verifyToken";
-import { IUserModel } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
 import { VerifyTokenInput } from "../schema";
 
-type Params = VerifyTokenInput & {
-  repositories: {
-    database: IVerifyTokenModel;
-    user: IUserModel;
-  };
-};
+type Input = DomainInput<VerifyTokenInput>;
 
-const VerifyTokenService = async ({ repositories, token }: Params) => {
-  const verifyToken = await repositories.database.readByToken(token);
+const VerifyTokenService = async ({ ctx, token }: Input) => {
+  const verifyToken = await ctx.repositories.verifyToken.readByToken(token);
 
   if (!verifyToken) {
     throw new TRPCError({
@@ -35,13 +29,16 @@ const VerifyTokenService = async ({ repositories, token }: Params) => {
     });
   }
 
-  await repositories.user.update(verifyToken.userId, {
+  await ctx.repositories.user.update(verifyToken.userId, {
     verified: true
   });
 
-  const verifiedToken = await repositories.database.update(verifyToken.id, {
-    used: true
-  });
+  const verifiedToken = await ctx.repositories.verifyToken.update(
+    verifyToken.id,
+    {
+      used: true
+    }
+  );
 
   return verifiedToken;
 };

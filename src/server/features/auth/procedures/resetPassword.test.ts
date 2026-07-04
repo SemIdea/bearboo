@@ -1,8 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { resetPasswordController } from "./resetPassword";
-import { sendResetPasswordEmailController } from "./sendResetPasswordEmail";
-import { UserErrorCode } from "@/shared/error/user";
+import { AuthRouter } from "../index";
 import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
 import { TRPCError } from "@trpc/server";
 
@@ -17,43 +15,30 @@ describe("Reset Token Controller Unitary Testing", async () => {
   test("Should reset the user password", async () => {
     const email = ctx.user.email;
 
-    await sendResetPasswordEmailController({
-      input: {
-        email
-      },
-      ctx
-    });
+    await AuthRouter.createCaller(ctx).sendResetPasswordEmail({ email });
 
     const resetToken = await ctx.repositories.resetToken.readByUserId(
       ctx.user.id
     );
 
-    const input = {
+    const result = await AuthRouter.createCaller(ctx).resetPassword({
       token: resetToken!.token,
       password: "NewPassword1234",
       confirmPassword: "NewPassword1234"
-    };
-
-    const result = await resetPasswordController({
-      input,
-      ctx
     });
 
+    const updatedUser = await ctx.repositories.user.read(ctx.user.id);
+
     expect(result).toBeDefined();
-    expect(result.password).not.toBe(ctx.user.password);
+    expect(updatedUser?.password).not.toBe(ctx.user.password);
   });
 
   test("Should throw an error if reset token is invalid", async () => {
-    const input = {
-      token: "invalid-token",
-      password: "NewPassword1234",
-      confirmPassword: "NewPassword1234"
-    };
-
     await expect(
-      resetPasswordController({
-        input,
-        ctx
+      AuthRouter.createCaller(ctx).resetPassword({
+        token: "invalid-token",
+        password: "NewPassword1234",
+        confirmPassword: "NewPassword1234"
       })
     ).rejects.toThrowError(
       new TRPCError({
@@ -74,16 +59,11 @@ describe("Reset Token Controller Unitary Testing", async () => {
       }
     );
 
-    const input = {
-      token: resetToken.token,
-      password: "NewPassword1234",
-      confirmPassword: "NewPassword1234"
-    };
-
     await expect(
-      resetPasswordController({
-        input,
-        ctx
+      AuthRouter.createCaller(ctx).resetPassword({
+        token: resetToken.token,
+        password: "NewPassword1234",
+        confirmPassword: "NewPassword1234"
       })
     ).rejects.toThrowError(
       new TRPCError({
@@ -104,16 +84,11 @@ describe("Reset Token Controller Unitary Testing", async () => {
       }
     );
 
-    const input = {
-      token: resetToken.token,
-      password: "NewPassword1234",
-      confirmPassword: "NewPassword1234"
-    };
-
     await expect(
-      resetPasswordController({
-        input,
-        ctx
+      AuthRouter.createCaller(ctx).resetPassword({
+        token: resetToken.token,
+        password: "NewPassword1234",
+        confirmPassword: "NewPassword1234"
       })
     ).rejects.toThrowError(
       new TRPCError({
@@ -134,22 +109,14 @@ describe("Reset Token Controller Unitary Testing", async () => {
       }
     );
 
-    const input = {
-      token: resetToken.token,
-      password: "NewPassword1234",
-      confirmPassword: "DifferentPassword1234"
-    };
-
     await expect(
-      resetPasswordController({
-        input,
-        ctx
+      AuthRouter.createCaller(ctx).resetPassword({
+        token: resetToken.token,
+        password: "NewPassword1234",
+        confirmPassword: "DifferentPassword1234"
       })
-    ).rejects.toThrowError(
-      new TRPCError({
-        code: "BAD_REQUEST",
-        message: UserErrorCode.PASSWORDS_DO_NOT_MATCH
-      })
-    );
+    ).rejects.toMatchObject({
+      code: "BAD_REQUEST"
+    });
   });
 });

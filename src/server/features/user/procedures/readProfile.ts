@@ -1,29 +1,18 @@
+import { publicProcedure } from "@/server/createRouter";
 import { ReadUserProfileService } from "../domain/readProfile";
-import { IAPIContextDTO } from "@/server/createContext";
-import { ReadUserProfileInput } from "../schema";
+import { readUserProfileSchema, readUserProfileOutputSchema } from "../schema";
 
-const readUserProfileController = async ({
-  input,
-  ctx
-}: {
-  input: ReadUserProfileInput;
-  ctx: IAPIContextDTO;
-}) => {
-  if (ctx.user && input.id == ctx.user.id) {
-    const { session, ...userWithoutSession } = ctx.user;
+const readUserProfileProcedure = publicProcedure
+  .input(readUserProfileSchema)
+  .output(readUserProfileOutputSchema)
+  .query(async ({ input, ctx }) => {
+    if (ctx.user && input.id === ctx.user.id) {
+      const { session, ...userWithoutSession } = ctx.user;
 
-    return userWithoutSession;
-  }
-
-  const profile = await ReadUserProfileService({
-    ...input,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.user
+      return userWithoutSession;
     }
+
+    return ReadUserProfileService({ ...input, ctx });
   });
 
-  return profile;
-};
-
-export { readUserProfileController };
+export { readUserProfileProcedure };

@@ -1,25 +1,12 @@
+import { verifiedProcedure } from "@/server/createRouter";
 import { CreatePostService } from "../domain/create";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { CreatePostInput } from "../schema";
+import { createPostSchema, createPostOutputSchema } from "../schema";
 
-const createPostController = async ({
-  input,
-  ctx
-}: {
-  input: CreatePostInput;
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const post = await CreatePostService({
-    ...input,
-    userId: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.post
-    },
-    helpers: ctx.helpers
-  });
+const createPostProcedure = verifiedProcedure
+  .input(createPostSchema)
+  .output(createPostOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    CreatePostService({ ...input, userId: ctx.user.id, ctx })
+  );
 
-  return post;
-};
-
-export { createPostController };
+export { createPostProcedure };

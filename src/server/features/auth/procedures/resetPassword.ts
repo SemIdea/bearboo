@@ -1,26 +1,16 @@
-import { IAPIContextDTO } from "@/server/createContext";
-import { ResetPasswordInput } from "../schema";
+import { publicProcedure } from "@/server/createRouter";
 import { ResetPasswordService } from "../domain/resetPassword";
+import { resetPasswordSchema, resetPasswordOutputSchema } from "../schema";
 
-const resetPasswordController = async ({
-  input,
-  ctx
-}: {
-  input: ResetPasswordInput;
-  ctx: IAPIContextDTO;
-}) => {
-  const user = await ResetPasswordService({
-    token: input.token,
-    newPassword: input.password,
-    confirmNewPassword: input.confirmPassword,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.user
-    },
-    helpers: ctx.helpers
-  });
+const resetPasswordProcedure = publicProcedure
+  .input(resetPasswordSchema)
+  .output(resetPasswordOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    ResetPasswordService({
+      token: input.token,
+      newPassword: input.password,
+      ctx
+    })
+  );
 
-  return user;
-};
-
-export { resetPasswordController };
+export { resetPasswordProcedure };

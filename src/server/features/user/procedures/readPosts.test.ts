@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { readUserPostsController } from "./readPosts";
+import { UserRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -16,9 +16,8 @@ describe("User Posts Controller Unitary Testing", async () => {
   const user = ctx.user;
 
   test("Should return an empty list when user has no posts", async () => {
-    const result = await readUserPostsController({
-      ctx,
-      input: { id: user.id }
+    const result = await UserRouter.createCaller(ctx).readPosts({
+      id: user.id
     });
 
     expect(result).toBeDefined();
@@ -38,9 +37,8 @@ describe("User Posts Controller Unitary Testing", async () => {
       });
     }
 
-    const result = await readUserPostsController({
-      ctx,
-      input: { id: user.id }
+    const result = await UserRouter.createCaller(ctx).readPosts({
+      id: user.id
     });
 
     expect(result).toBeDefined();
@@ -52,10 +50,7 @@ describe("User Posts Controller Unitary Testing", async () => {
     const uuid = ctx.helpers.uid.generate();
 
     await expect(
-      readUserPostsController({
-        ctx,
-        input: { id: uuid }
-      })
+      UserRouter.createCaller(ctx).readPosts({ id: uuid })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",

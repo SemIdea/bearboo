@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { updateCommentController } from "./update";
+import { CommentRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { CommentErrorCode } from "@/shared/error/comment";
@@ -35,10 +35,7 @@ describe("Update Comment Controller Unitary Testing", async () => {
       content: "This is an updated test comment."
     };
 
-    const result = await updateCommentController({
-      ctx,
-      input
-    });
+    const result = await CommentRouter.createCaller(ctx).update(input);
 
     expect(result).toBeDefined();
     expect(result.id).toEqual(comment.id);
@@ -54,10 +51,7 @@ describe("Update Comment Controller Unitary Testing", async () => {
     };
 
     await expect(
-      updateCommentController({
-        ctx,
-        input
-      })
+      CommentRouter.createCaller(ctx).update(input)
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
@@ -89,10 +83,7 @@ describe("Update Comment Controller Unitary Testing", async () => {
     };
 
     await expect(
-      updateCommentController({
-        ctx,
-        input
-      })
+      CommentRouter.createCaller(ctx).update(input)
     ).rejects.toThrowError(
       new TRPCError({
         code: "FORBIDDEN",

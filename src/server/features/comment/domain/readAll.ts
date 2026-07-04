@@ -1,17 +1,10 @@
-import { ICommentModel } from "@/server/models/comment";
+import { DomainInput } from "@/server/createDomain";
 import { ReadAllCommentsByPostInput } from "../schema";
 
-type Params = ReadAllCommentsByPostInput & {
-  repositories: {
-    database: ICommentModel;
-  };
-};
+type Input = DomainInput<ReadAllCommentsByPostInput>;
 
-const ReadAllCommentsByPostService = async ({
-  repositories,
-  postId
-}: Params) => {
-  const comments = await repositories.database.readAllByPostId(postId);
+const ReadAllCommentsByPostService = async ({ ctx, postId }: Input) => {
+  const comments = await ctx.repositories.comment.readAllByPostId(postId);
 
   return comments ?? [];
 };

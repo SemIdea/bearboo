@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createPostController } from "./create";
+import { PostRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 
 describe("Create Post Controller Unitary Testing", async () => {
@@ -18,10 +18,7 @@ describe("Create Post Controller Unitary Testing", async () => {
       content: "This is a test post content."
     };
 
-    const result = await createPostController({
-      ctx,
-      input
-    });
+    const result = await PostRouter.createCaller(ctx).create(input);
 
     expect(result).toBeDefined();
     expect(result.title).toEqual(input.title);

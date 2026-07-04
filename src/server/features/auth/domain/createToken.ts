@@ -1,25 +1,12 @@
-import { IVerifyTokenModel } from "@/server/models/verifyToken";
-import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
+import { DomainInput } from "@/server/createDomain";
 
-type Params = {
-  userId: string;
-  repositories: {
-    database: IVerifyTokenModel;
-  };
-  helpers: {
-    uid: IUidGeneratorHelperAdapter;
-  };
-};
+type Input = DomainInput<{ userId: string }>;
 
-const CreateTokenService = async ({
-  repositories,
-  helpers,
-  ...data
-}: Params) => {
-  const tokenId = helpers.uid.generate();
-  const newToken = helpers.uid.generate();
+const CreateTokenService = async ({ ctx, ...data }: Input) => {
+  const tokenId = ctx.helpers.uid.generate();
+  const newToken = ctx.helpers.uid.generate();
 
-  const token = await repositories.database.create(tokenId, {
+  const token = await ctx.repositories.verifyToken.create(tokenId, {
     ...data,
     token: newToken,
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours

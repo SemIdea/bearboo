@@ -1,24 +1,12 @@
+import { verifiedProcedure } from "@/server/createRouter";
 import { RevalidatePostService } from "../domain/revalidate";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { RevalidatePostInput } from "../schema";
+import { revalidatePostSchema, revalidatePostOutputSchema } from "../schema";
 
-const revalidatePostController = async ({
-  input,
-  ctx
-}: {
-  input: RevalidatePostInput;
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const revalidated = await RevalidatePostService({
-    ...input,
-    userId: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.post
-    }
-  });
+const revalidatePostProcedure = verifiedProcedure
+  .input(revalidatePostSchema)
+  .output(revalidatePostOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    RevalidatePostService({ ...input, userId: ctx.user.id, ctx })
+  );
 
-  return revalidated;
-};
-
-export { revalidatePostController };
+export { revalidatePostProcedure };

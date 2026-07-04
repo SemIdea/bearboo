@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { readPostController } from "./read";
+import { PostRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { PostErrorCode } from "@/shared/error/post";
 
@@ -21,12 +21,7 @@ describe("Read Post Controller Unitary Testing", async () => {
       userId: ctx.user.id
     });
 
-    const result = await readPostController({
-      ctx,
-      input: {
-        id
-      }
-    });
+    const result = await PostRouter.createCaller(ctx).read({ id });
 
     expect(result).toEqual(post);
   });
@@ -35,12 +30,7 @@ describe("Read Post Controller Unitary Testing", async () => {
     const id = ctx.helpers.uid.generate();
 
     await expect(
-      readPostController({
-        ctx,
-        input: {
-          id
-        }
-      })
+      PostRouter.createCaller(ctx).read({ id })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",

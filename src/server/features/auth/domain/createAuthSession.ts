@@ -1,27 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { ISessionModel } from "@/server/models/session";
-import { IUserModel } from "@/server/models/user";
-import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
+import { DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
 
-type Params = {
-  userId: string;
-  repositories: {
-    user: IUserModel;
-    database: ISessionModel;
-  };
-  helpers: {
-    uid: IUidGeneratorHelperAdapter;
-  };
-};
+type Input = DomainInput<{ userId: string }>;
 
-const CreateAuthSessionService = async ({
-  repositories,
-  helpers,
-  ...data
-}: Params) => {
-  const user = await repositories.user.read(data.userId);
+const CreateAuthSessionService = async ({ ctx, userId }: Input) => {
+  const user = await ctx.repositories.user.read(userId);
 
   if (!user) {
     throw new TRPCError({
@@ -30,11 +15,11 @@ const CreateAuthSessionService = async ({
     });
   }
 
-  const sessionId = helpers.uid.generate();
-  const accessToken = helpers.uid.generate();
-  const refreshToken = helpers.uid.generate();
+  const sessionId = ctx.helpers.uid.generate();
+  const accessToken = ctx.helpers.uid.generate();
+  const refreshToken = ctx.helpers.uid.generate();
 
-  const session = await repositories.database.create(sessionId, {
+  const session = await ctx.repositories.session.create(sessionId, {
     userId: user.id,
     accessToken,
     refreshToken

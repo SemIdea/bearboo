@@ -1,6 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { refreshSessionController } from "./refreshSession";
+import { AuthRouter } from "../index";
 import { ISessionEntity } from "@/server/models/session";
 import { TRPCError } from "@trpc/server";
 import { SessionErrorCode } from "@/shared/error/session";
@@ -16,13 +16,8 @@ describe("Refresh Session Controller Unitary Testing", async () => {
   test("Should refresh session successfully", async () => {
     const user = ctx.user;
 
-    const input = {
+    await AuthRouter.createCaller(ctx).refreshSession({
       refreshToken: user.session.refreshToken
-    };
-
-    await refreshSessionController({
-      input,
-      ctx
     });
 
     const result = (await ctx.repositories.session.read(
@@ -36,14 +31,9 @@ describe("Refresh Session Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if token is invalid", async () => {
-    const input = {
-      refreshToken: "invalid-token"
-    };
-
     await expect(
-      refreshSessionController({
-        input,
-        ctx
+      AuthRouter.createCaller(ctx).refreshSession({
+        refreshToken: "invalid-token"
       })
     ).rejects.toThrowError(
       new TRPCError({

@@ -1,11 +1,8 @@
-import { IProtectedAPIContextDTO } from "@/server/createContext";
+import { protectedProcedure } from "@/server/createRouter";
+import { readUserFromSessionOutputSchema } from "../schema";
 
-const readUserFromSessionController = async ({
-  ctx
-}: {
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  return ctx.user;
-};
+const readUserFromSessionProcedure = protectedProcedure
+  .output(readUserFromSessionOutputSchema)
+  .query(async ({ ctx }) => ctx.user);
 
-export { readUserFromSessionController };
+export { readUserFromSessionProcedure };

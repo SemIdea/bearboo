@@ -1,24 +1,12 @@
+import { verifiedProcedure } from "@/server/createRouter";
 import { DeletePostService } from "../domain/delete";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { DeletePostInput } from "../schema";
+import { deletePostSchema, deletePostOutputSchema } from "../schema";
 
-const deletePostController = async ({
-  input,
-  ctx
-}: {
-  input: DeletePostInput;
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const post = await DeletePostService({
-    ...input,
-    userId: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.post
-    }
-  });
+const deletePostProcedure = verifiedProcedure
+  .input(deletePostSchema)
+  .output(deletePostOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    DeletePostService({ ...input, userId: ctx.user.id, ctx })
+  );
 
-  return post;
-};
-
-export { deletePostController };
+export { deletePostProcedure };

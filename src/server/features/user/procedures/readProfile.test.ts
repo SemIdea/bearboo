@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { readUserProfileController } from "./readProfile";
+import { UserRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -16,12 +16,7 @@ describe("Read Profile User Controller Unitary Testing", async () => {
   test("Should return user profile", async () => {
     const user = ctx.user;
 
-    const result = await readUserProfileController({
-      ctx,
-      input: {
-        id: user.id
-      }
-    });
+    const result = await UserRouter.createCaller(ctx).read({ id: user.id });
 
     expect(result).toBeTruthy();
     expect(result.id).toEqual(user.id);
@@ -31,12 +26,7 @@ describe("Read Profile User Controller Unitary Testing", async () => {
     const uuid = ctx.helpers.uid.generate();
 
     await expect(
-      readUserProfileController({
-        ctx,
-        input: {
-          id: uuid
-        }
-      })
+      UserRouter.createCaller(ctx).read({ id: uuid })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",

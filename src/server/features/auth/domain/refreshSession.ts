@@ -1,27 +1,14 @@
 import { TRPCError } from "@trpc/server";
-import { ISessionModel } from "@/server/models/session";
-import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
+import { DomainInput } from "@/server/createDomain";
 import { SessionErrorCode } from "@/shared/error/session";
 
-type Params = {
-  id: string;
-  repositories: {
-    database: ISessionModel;
-  };
-  helpers: {
-    uid: IUidGeneratorHelperAdapter;
-  };
-};
+type Input = DomainInput<{ id: string }>;
 
-const RefreshSessionService = async ({
-  repositories,
-  helpers,
-  ...data
-}: Params) => {
-  const newAccessToken = helpers.uid.generate();
-  const newRefreshToken = helpers.uid.generate();
+const RefreshSessionService = async ({ ctx, ...data }: Input) => {
+  const newAccessToken = ctx.helpers.uid.generate();
+  const newRefreshToken = ctx.helpers.uid.generate();
 
-  const newSession = await repositories.database.update(data.id, {
+  const newSession = await ctx.repositories.session.update(data.id, {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken
   });

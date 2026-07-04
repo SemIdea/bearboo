@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { readAllCommentsByPostController } from "./readAll";
+import { CommentRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 
 describe("Read All Comments Controller Unitary Testing", async () => {
@@ -33,10 +33,7 @@ describe("Read All Comments Controller Unitary Testing", async () => {
       postId
     };
 
-    const result = await readAllCommentsByPostController({
-      ctx,
-      input
-    });
+    const result = await CommentRouter.createCaller(ctx).readAllByPost(input);
 
     expect(result).toBeDefined();
     expect(result.length).toBeGreaterThan(0);
@@ -61,10 +58,7 @@ describe("Read All Comments Controller Unitary Testing", async () => {
       postId
     };
 
-    const result = await readAllCommentsByPostController({
-      ctx,
-      input
-    });
+    const result = await CommentRouter.createCaller(ctx).readAllByPost(input);
 
     expect(result).toBeDefined();
     expect(result.length).toEqual(0);

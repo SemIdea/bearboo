@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { updateUserProfileController } from "./updateProfile";
+import { UserRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 
 describe("Update Profile User Controller Unitary Testing", async () => {
@@ -14,13 +14,10 @@ describe("Update Profile User Controller Unitary Testing", async () => {
   test("Should update user profile", async () => {
     const user = ctx.user;
 
-    const result = await updateUserProfileController({
-      ctx,
-      input: {
-        name: "New Name",
-        email: `new${user.id}email@example.com`,
-        bio: "New bio"
-      }
+    const result = await UserRouter.createCaller(ctx).update({
+      name: "New Name",
+      email: `new${user.id}email@example.com`,
+      bio: "New bio"
     });
 
     expect(result).toBeTruthy();

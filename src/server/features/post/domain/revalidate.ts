@@ -1,18 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
-import { IPostModel } from "@/server/models/post";
+import { DomainInput } from "@/server/createDomain";
 import { PostErrorCode } from "@/shared/error/post";
 import { RevalidatePostInput } from "../schema";
 
-type Params = RevalidatePostInput & {
-  userId: string;
-  repositories: {
-    database: IPostModel;
-  };
-};
+type Input = DomainInput<RevalidatePostInput & { userId: string }>;
 
-const RevalidatePostService = async ({ repositories, ...data }: Params) => {
-  const post = await repositories.database.read(data.id);
+const RevalidatePostService = async ({ ctx, ...data }: Input) => {
+  const post = await ctx.repositories.post.read(data.id);
 
   if (!post) {
     throw new TRPCError({

@@ -44,10 +44,7 @@ const createTRPCContext = async ({
 
   const user = await ReadUserAndSessionByAccessTokenService({
     accessToken,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.session
-    }
+    ctx
   });
 
   if (!user) return ctx;

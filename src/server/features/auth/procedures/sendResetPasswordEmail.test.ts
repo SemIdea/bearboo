@@ -1,6 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { sendResetPasswordEmailController } from "./sendResetPasswordEmail";
+import { AuthRouter } from "../index";
 import { UserErrorCode } from "@/shared/error/user";
 
 describe("Send Reset Password Email Controller Unitary Testing", async () => {
@@ -12,13 +12,8 @@ describe("Send Reset Password Email Controller Unitary Testing", async () => {
   }
 
   test("Should create a reset token and send a reset token email", async () => {
-    const input = {
+    const result = await AuthRouter.createCaller(ctx).sendResetPasswordEmail({
       email: ctx.user.email
-    };
-
-    const result = await sendResetPasswordEmailController({
-      input,
-      ctx
     });
 
     const resetToken = await ctx.repositories.resetToken.readByUserId(
@@ -32,14 +27,9 @@ describe("Send Reset Password Email Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if user does not exist", async () => {
-    const input = {
-      email: "nonexistent@example.com"
-    };
-
     await expect(
-      sendResetPasswordEmailController({
-        input,
-        ctx
+      AuthRouter.createCaller(ctx).sendResetPasswordEmail({
+        email: "nonexistent@example.com"
       })
     ).rejects.toThrowError(UserErrorCode.USER_NOT_FOUND);
   });

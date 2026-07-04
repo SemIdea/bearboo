@@ -1,25 +1,12 @@
+import { verifiedProcedure } from "@/server/createRouter";
 import { CreateCommentService } from "../domain/create";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { CreateCommentInput } from "../schema";
+import { createCommentschema, createCommentOutputSchema } from "../schema";
 
-const createCommentController = async ({
-  input,
-  ctx
-}: {
-  input: CreateCommentInput;
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const comment = await CreateCommentService({
-    ...input,
-    userId: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.comment
-    },
-    helpers: ctx.helpers
-  });
+const createCommentProcedure = verifiedProcedure
+  .input(createCommentschema)
+  .output(createCommentOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    CreateCommentService({ ...input, userId: ctx.user.id, ctx })
+  );
 
-  return comment;
-};
-
-export { createCommentController };
+export { createCommentProcedure };

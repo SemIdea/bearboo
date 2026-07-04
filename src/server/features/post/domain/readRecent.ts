@@ -1,13 +1,9 @@
-import { IPostModel } from "@/server/models/post";
+import { DomainInput } from "@/server/createDomain";
 
-type Params = {
-  repositories: {
-    database: IPostModel;
-  };
-};
+type Input = DomainInput;
 
-const ReadRecentPostsService = async ({ repositories }: Params) => {
-  const posts = await repositories.database.readRecents(30);
+const ReadRecentPostsService = async ({ ctx }: Input) => {
+  const posts = await ctx.repositories.post.readRecents(30);
 
   return posts;
 };

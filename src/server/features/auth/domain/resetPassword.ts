@@ -1,29 +1,17 @@
 import { TRPCError } from "@trpc/server";
-import { IResetTokenModel } from "@/server/models/resetToken";
-import { IUserModel } from "@/server/models/user";
-import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
+import { DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
 
-type Params = {
+type Input = DomainInput<{
   token: string;
   newPassword: string;
-  confirmNewPassword: string;
-  repositories: {
-    database: IUserModel;
-    resetToken: IResetTokenModel;
-  };
-  helpers: {
-    hashing: IPasswordHashingHelperAdapter;
-  };
-};
+}>;
 
-const ResetPasswordService = async ({
-  repositories,
-  helpers,
-  ...data
-}: Params) => {
-  const resetToken = await repositories.resetToken.readByToken(data.token);
+const ResetPasswordService = async ({ ctx, ...data }: Input) => {
+  const resetToken = await ctx.repositories.resetToken.readByToken(
+    data.token
+  );
 
   if (!resetToken) {
     throw new TRPCError({
@@ -46,14 +34,7 @@ const ResetPasswordService = async ({
     });
   }
 
-  if (data.newPassword !== data.confirmNewPassword) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: UserErrorCode.PASSWORDS_DO_NOT_MATCH
-    });
-  }
-
-  const user = await repositories.database.read(resetToken.userId);
+  const user = await ctx.repositories.user.read(resetToken.userId);
 
   if (!user) {
     throw new TRPCError({
@@ -62,12 +43,12 @@ const ResetPasswordService = async ({
     });
   }
 
-  await repositories.resetToken.update(resetToken.id, {
+  await ctx.repositories.resetToken.update(resetToken.id, {
     used: true
   });
 
-  const updatedUser = await repositories.database.update(user.id, {
-    password: await helpers.hashing.hash(data.newPassword)
+  const updatedUser = await ctx.repositories.user.update(user.id, {
+    password: await ctx.helpers.hashing.hash(data.newPassword)
   });
 
   return updatedUser;

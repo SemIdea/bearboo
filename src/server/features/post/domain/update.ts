@@ -1,19 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { IPostModel } from "@/server/models/post";
-import { IUserModel } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
 import { PostErrorCode } from "@/shared/error/post";
 import { UpdatePostInput } from "../schema";
 
-type Params = UpdatePostInput & {
-  userId: string;
-  repositories: {
-    user: IUserModel;
-    database: IPostModel;
-  };
-};
+type Input = DomainInput<UpdatePostInput & { userId: string }>;
 
-const UpdatePostService = async ({ repositories, ...data }: Params) => {
-  const post = await repositories.database.read(data.id);
+const UpdatePostService = async ({ ctx, ...data }: Input) => {
+  const post = await ctx.repositories.post.read(data.id);
 
   if (!post) {
     throw new TRPCError({
@@ -29,7 +22,7 @@ const UpdatePostService = async ({ repositories, ...data }: Params) => {
     });
   }
 
-  return await repositories.database.update(data.id, {
+  return await ctx.repositories.post.update(data.id, {
     title: data.title,
     content: data.content
   });

@@ -1,27 +1,12 @@
-import { ICommentModel } from "@/server/models/comment";
-import { IUserModel } from "@/server/models/user";
-import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
+import { DomainInput } from "@/server/createDomain";
 import { CreateCommentInput } from "../schema";
 
-type Params = CreateCommentInput & {
-  userId: string;
-  repositories: {
-    user: IUserModel;
-    database: ICommentModel;
-  };
-  helpers: {
-    uid: IUidGeneratorHelperAdapter;
-  };
-};
+type Input = DomainInput<CreateCommentInput & { userId: string }>;
 
-const CreateCommentService = async ({
-  repositories,
-  helpers,
-  ...data
-}: Params) => {
-  const commentId = helpers.uid.generate();
+const CreateCommentService = async ({ ctx, ...data }: Input) => {
+  const commentId = ctx.helpers.uid.generate();
 
-  const comment = await repositories.database.create(commentId, data);
+  const comment = await ctx.repositories.comment.create(commentId, data);
 
   return comment;
 };

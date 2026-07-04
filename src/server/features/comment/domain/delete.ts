@@ -1,17 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { ICommentModel } from "@/server/models/comment";
+import { DomainInput } from "@/server/createDomain";
 import { CommentErrorCode } from "@/shared/error/comment";
 import { DeleteCommentInput } from "../schema";
 
-type Params = DeleteCommentInput & {
-  userId: string;
-  repositories: {
-    database: ICommentModel;
-  };
-};
+type Input = DomainInput<DeleteCommentInput & { userId: string }>;
 
-const DeleteCommentService = async ({ repositories, ...data }: Params) => {
-  const comment = await repositories.database.read(data.id);
+const DeleteCommentService = async ({ ctx, ...data }: Input) => {
+  const comment = await ctx.repositories.comment.read(data.id);
 
   if (!comment) {
     throw new TRPCError({
@@ -27,7 +22,7 @@ const DeleteCommentService = async ({ repositories, ...data }: Params) => {
     });
   }
 
-  return await repositories.database.delete(data.id);
+  return await ctx.repositories.comment.delete(data.id);
 };
 
 export { DeleteCommentService };

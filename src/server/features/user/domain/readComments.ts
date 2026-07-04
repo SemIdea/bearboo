@@ -1,18 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { ICommentModel } from "@/server/models/comment";
-import { IUserModel } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { ReadUserCommentsInput } from "../schema";
 
-type Params = ReadUserCommentsInput & {
-  repositories: {
-    database: ICommentModel;
-    user: IUserModel;
-  };
-};
+type Input = DomainInput<ReadUserCommentsInput>;
 
-const ReadUserCommentsService = async ({ repositories, id }: Params) => {
-  const user = await repositories.user.read(id);
+const ReadUserCommentsService = async ({ ctx, id }: Input) => {
+  const user = await ctx.repositories.user.read(id);
 
   if (!user) {
     throw new TRPCError({
@@ -21,7 +15,7 @@ const ReadUserCommentsService = async ({ repositories, id }: Params) => {
     });
   }
 
-  const comments = await repositories.database.readAllByUserId(id);
+  const comments = await ctx.repositories.comment.readAllByUserId(id);
 
   return comments ?? [];
 };

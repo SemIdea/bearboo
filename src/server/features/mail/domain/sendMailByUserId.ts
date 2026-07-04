@@ -1,27 +1,19 @@
-import { IUserModel } from "@/server/models/user";
-import { IMailerGatewayAdapter } from "@/server/integrations/gateway/mailer/adapter";
+import { DomainInput } from "@/server/createDomain";
 import { SendMailService } from "./sendMail";
 
-type Params = {
+type Input = DomainInput<{
   userId: string;
   subject: string;
   body: string;
-  repositories: {
-    database: IUserModel;
-  };
-  gateways: {
-    mail: IMailerGatewayAdapter;
-  };
-};
+}>;
 
 const SendMailByUserIdService = async ({
+  ctx,
   userId,
   subject,
-  body,
-  repositories,
-  gateways
-}: Params) => {
-  const user = await repositories.database.read(userId);
+  body
+}: Input) => {
+  const user = await ctx.repositories.user.read(userId);
 
   if (!user) {
     throw new Error("User not found");
@@ -39,7 +31,7 @@ const SendMailByUserIdService = async ({
     to: user.email,
     subject,
     body: newBody,
-    gateways
+    ctx
   });
 };
 

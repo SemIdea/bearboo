@@ -1,23 +1,13 @@
 import { TRPCError } from "@trpc/server";
-import { IUserModel } from "@/server/models/user";
-import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
+import { DomainInput } from "@/server/createDomain";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { UserErrorCode } from "@/shared/error/user";
 import { LoginUserInput } from "../schema";
 
-type Params = LoginUserInput & {
-  repositories: {
-    database: IUserModel;
-  };
-  helpers: {
-    hashing: IPasswordHashingHelperAdapter;
-  };
-};
+type Input = DomainInput<LoginUserInput>;
 
-const LoginUserService = async ({ repositories, helpers, ...data }: Params) => {
-  const { email, password } = data;
-
-  const user = await repositories.database.readByEmail(email);
+const LoginUserService = async ({ ctx, email, password }: Input) => {
+  const user = await ctx.repositories.user.readByEmail(email);
 
   if (!user) {
     throw new TRPCError({
@@ -26,7 +16,10 @@ const LoginUserService = async ({ repositories, helpers, ...data }: Params) => {
     });
   }
 
-  const isSamePassword = await helpers.hashing.compare(password, user.password);
+  const isSamePassword = await ctx.helpers.hashing.compare(
+    password,
+    user.password
+  );
 
   if (!isSamePassword) {
     throw new TRPCError({

@@ -1,21 +1,17 @@
+import { protectedProcedure } from "@/server/createRouter";
 import { DeleteSessionService } from "../domain/deleteSession";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
+import { logoutUserFromSessionOutputSchema } from "../schema";
 
-const logoutUserFromSessionController = async ({
-  ctx
-}: {
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const session = ctx.user.session;
+const logoutUserFromSessionProcedure = protectedProcedure
+  .output(logoutUserFromSessionOutputSchema)
+  .mutation(async ({ ctx }) => {
+    const session = ctx.user.session;
 
-  await DeleteSessionService({
-    ...session,
-    userId: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.session
-    }
+    await DeleteSessionService({
+      id: session.id,
+      userId: ctx.user.id,
+      ctx
+    });
   });
-};
 
-export { logoutUserFromSessionController };
+export { logoutUserFromSessionProcedure };

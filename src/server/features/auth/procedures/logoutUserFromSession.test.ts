@@ -1,6 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { logoutUserFromSessionController } from "./logoutUserFromSession";
+import { AuthRouter } from "../index";
 import { TRPCError } from "@trpc/server";
 import { SessionErrorCode } from "@/shared/error/session";
 import { UserErrorCode } from "@/shared/error/user";
@@ -17,9 +17,7 @@ describe("Logout Session Controller Unitary Testing", async () => {
     const user = ctx.user;
     const session = user.session;
 
-    await logoutUserFromSessionController({
-      ctx
-    });
+    await AuthRouter.createCaller(ctx).session.logout();
 
     const result = await ctx.repositories.session.read(session.id);
 
@@ -30,9 +28,7 @@ describe("Logout Session Controller Unitary Testing", async () => {
     ctx.user.id = "non-existent-user-id";
 
     await expect(
-      logoutUserFromSessionController({
-        ctx
-      })
+      AuthRouter.createCaller(ctx).session.logout()
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
@@ -52,9 +48,7 @@ describe("Logout Session Controller Unitary Testing", async () => {
     ctx.user.session.id = "non-existent-session-id";
 
     await expect(
-      logoutUserFromSessionController({
-        ctx
-      })
+      AuthRouter.createCaller(ctx).session.logout()
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",

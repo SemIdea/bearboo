@@ -1,16 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { IUserModel } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { ReadUserProfileInput } from "../schema";
 
-type Params = ReadUserProfileInput & {
-  repositories: {
-    database: IUserModel;
-  };
-};
+type Input = DomainInput<ReadUserProfileInput>;
 
-const ReadUserProfileService = async ({ repositories, id }: Params) => {
-  const userProfile = await repositories.database.read(id);
+const ReadUserProfileService = async ({ ctx, id }: Input) => {
+  const userProfile = await ctx.repositories.user.read(id);
 
   if (!userProfile) {
     throw new TRPCError({

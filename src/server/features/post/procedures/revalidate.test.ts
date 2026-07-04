@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from "vitest";
-import { revalidatePostController } from "./revalidate";
+import { PostRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { revalidatePath } from "next/cache";
 import { TRPCError } from "@trpc/server";
@@ -27,9 +27,8 @@ describe("Revalidate Post Controller Unitary Testing", async () => {
       content: "This is a test post content."
     });
 
-    const result = await revalidatePostController({
-      ctx,
-      input: { id: post.id }
+    const result = await PostRouter.createCaller(ctx).revalidate({
+      id: post.id
     });
 
     expect(result).toBeDefined();
@@ -40,15 +39,8 @@ describe("Revalidate Post Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if post does not exist", async () => {
-    const input = {
-      id: "non-existent-post-id"
-    };
-
     await expect(
-      revalidatePostController({
-        ctx,
-        input
-      })
+      PostRouter.createCaller(ctx).revalidate({ id: "non-existent-post-id" })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
@@ -67,15 +59,8 @@ describe("Revalidate Post Controller Unitary Testing", async () => {
       content: "This post belongs to another user."
     });
 
-    const input = {
-      id: postId
-    };
-
     await expect(
-      revalidatePostController({
-        ctx,
-        input
-      })
+      PostRouter.createCaller(ctx).revalidate({ id: postId })
     ).rejects.toThrowError(
       new TRPCError({
         code: "FORBIDDEN",

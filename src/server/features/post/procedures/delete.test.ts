@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { deletePostController } from "./delete";
+import { PostRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { PostErrorCode } from "@/shared/error/post";
 
@@ -21,12 +21,7 @@ describe("Delete Post Controller Unitary Testing", async () => {
       userId: ctx.user.id
     });
 
-    await deletePostController({
-      ctx,
-      input: {
-        id
-      }
-    });
+    await PostRouter.createCaller(ctx).delete({ id });
 
     const result = await ctx.repositories.post.read(id);
 
@@ -37,12 +32,7 @@ describe("Delete Post Controller Unitary Testing", async () => {
     const id = ctx.helpers.uid.generate();
 
     await expect(
-      deletePostController({
-        ctx,
-        input: {
-          id: id
-        }
-      })
+      PostRouter.createCaller(ctx).delete({ id })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
@@ -62,12 +52,7 @@ describe("Delete Post Controller Unitary Testing", async () => {
     });
 
     await expect(
-      deletePostController({
-        ctx,
-        input: {
-          id: otherUserPostId
-        }
-      })
+      PostRouter.createCaller(ctx).delete({ id: otherUserPostId })
     ).rejects.toThrowError(
       new TRPCError({
         code: "FORBIDDEN",

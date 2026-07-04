@@ -1,24 +1,15 @@
+import { verifiedProcedure } from "@/server/createRouter";
 import { UpdateUserProfileService } from "../domain/updateProfile";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { UpdateUserProfileInput } from "../schema";
+import {
+  updateUserProfileSchema,
+  updateUserProfileOutputSchema
+} from "../schema";
 
-const updateUserProfileController = async ({
-  input,
-  ctx
-}: {
-  input: UpdateUserProfileInput;
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const updatedProfile = await UpdateUserProfileService({
-    ...input,
-    id: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.user
-    }
-  });
+const updateUserProfileProcedure = verifiedProcedure
+  .input(updateUserProfileSchema)
+  .output(updateUserProfileOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    UpdateUserProfileService({ ...input, id: ctx.user.id, ctx })
+  );
 
-  return updatedProfile;
-};
-
-export { updateUserProfileController };
+export { updateUserProfileProcedure };

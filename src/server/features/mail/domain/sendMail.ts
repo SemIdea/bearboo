@@ -1,16 +1,13 @@
-import { IMailerGatewayAdapter } from "@/server/integrations/gateway/mailer/adapter";
+import { DomainInput } from "@/server/createDomain";
 
-type Params = {
+type Input = DomainInput<{
   to: string | string[];
   subject: string;
   body: string;
-  gateways: {
-    mail: IMailerGatewayAdapter;
-  };
-};
+}>;
 
-const SendMailService = async ({ gateways, ...data }: Params) => {
-  return await gateways.mail.sendMail({
+const SendMailService = async ({ ctx, ...data }: Input) => {
+  return await ctx.gateways.mail.sendMail({
     body: data.body,
     subject: data.subject,
     to: data.to

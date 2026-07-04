@@ -1,27 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { IVerifyTokenModel } from "@/server/models/verifyToken";
-import { IUserModel } from "@/server/models/user";
-import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
+import { DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { CreateTokenService } from "./createToken";
 
-type Params = {
-  userEmail: string;
-  repositories: {
-    database: IVerifyTokenModel;
-    user: IUserModel;
-  };
-  helpers: {
-    uid: IUidGeneratorHelperAdapter;
-  };
-};
+type Input = DomainInput<{ userEmail: string }>;
 
-const ReCreateTokenService = async ({
-  userEmail,
-  repositories,
-  helpers
-}: Params) => {
-  const user = await repositories.user.readByEmail(userEmail);
+const ReCreateTokenService = async ({ userEmail, ctx }: Input) => {
+  const user = await ctx.repositories.user.readByEmail(userEmail);
 
   if (!user) {
     throw new TRPCError({
@@ -30,16 +15,17 @@ const ReCreateTokenService = async ({
     });
   }
 
-  const existingToken = await repositories.database.readByUserId(user.id);
+  const existingToken = await ctx.repositories.verifyToken.readByUserId(
+    user.id
+  );
 
   if (existingToken) {
-    await repositories.database.delete(existingToken.id);
+    await ctx.repositories.verifyToken.delete(existingToken.id);
   }
 
   return CreateTokenService({
     userId: user.id,
-    repositories,
-    helpers
+    ctx
   });
 };
 

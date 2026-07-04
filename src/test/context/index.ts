@@ -36,7 +36,7 @@ class TestContext {
     const user = await this.repositories.user.create(userId, {
       ...userData,
       password: await this.helpers.hashing.hash(userData.password),
-      verified: false
+      verified: true
     });
 
     const sessionId = this.helpers.uid.generate();

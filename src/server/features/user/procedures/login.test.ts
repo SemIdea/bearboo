@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { loginUserController } from "./login";
+import { UserRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -16,12 +16,9 @@ describe("Login User Controller Unitary Testing", async () => {
   test("Should return a session if valid credentials", async () => {
     const user = ctx.user;
 
-    const result = await loginUserController({
-      ctx,
-      input: {
-        email: user.email,
-        password: user.truePassword
-      }
+    const result = await UserRouter.createCaller(ctx).login({
+      email: user.email,
+      password: user.truePassword
     });
 
     expect(result).toBeDefined();
@@ -31,13 +28,12 @@ describe("Login User Controller Unitary Testing", async () => {
 
   test("Should throw an error if user does not exist", async () => {
     const uuid = ctx.helpers.uid.generate();
-    const userData = {
-      email: `${uuid}@example.com`,
-      password: "password123"
-    };
 
     await expect(
-      loginUserController({ input: userData, ctx })
+      UserRouter.createCaller(ctx).login({
+        email: `${uuid}@example.com`,
+        password: "password123"
+      })
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",

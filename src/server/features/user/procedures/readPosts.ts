@@ -1,23 +1,10 @@
+import { publicProcedure } from "@/server/createRouter";
 import { GetUserPostsService } from "../domain/readPosts";
-import { ReadUserPostsInput } from "../schema";
-import { IAPIContextDTO } from "@/server/createContext";
+import { readUserPostsSchema, readUserPostsOutputSchema } from "../schema";
 
-const readUserPostsController = async ({
-  input,
-  ctx
-}: {
-  input: ReadUserPostsInput;
-  ctx: IAPIContextDTO;
-}) => {
-  const posts = GetUserPostsService({
-    ...input,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.post
-    }
-  });
+const readUserPostsProcedure = publicProcedure
+  .input(readUserPostsSchema)
+  .output(readUserPostsOutputSchema)
+  .query(async ({ input, ctx }) => GetUserPostsService({ ...input, ctx }));
 
-  return posts;
-};
-
-export { readUserPostsController };
+export { readUserPostsProcedure };

@@ -1,15 +1,10 @@
-import { IUserModel } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
 import { UpdateUserProfileInput } from "../schema";
 
-type Params = UpdateUserProfileInput & {
-  id: string;
-  repositories: {
-    database: IUserModel;
-  };
-};
+type Input = DomainInput<UpdateUserProfileInput & { id: string }>;
 
-const UpdateUserProfileService = async ({ repositories, ...data }: Params) => {
-  const updatedProfile = await repositories.database.update(data.id, {
+const UpdateUserProfileService = async ({ ctx, ...data }: Input) => {
+  const updatedProfile = await ctx.repositories.user.update(data.id, {
     name: data.name,
     email: data.email,
     bio: data.bio

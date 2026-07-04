@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 
-import { registerUserController } from "./register";
+import { UserRouter } from "../index";
 import { TestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { UserErrorCode } from "@/shared/error/user";
@@ -20,7 +20,7 @@ describe("Register User Controller Unitary Testing", () => {
       password: "password123"
     };
 
-    const result = await registerUserController({ input, ctx });
+    const result = await UserRouter.createCaller(ctx).register(input);
 
     expect(result).toBeTruthy();
     expect(result.user).toBeDefined();
@@ -43,9 +43,9 @@ describe("Register User Controller Unitary Testing", () => {
       password: "password123"
     };
 
-    await expect(registerUserController({ input, ctx })).rejects.toThrow(
-      "Failed to send verification email"
-    );
+    await expect(
+      UserRouter.createCaller(ctx).register(input)
+    ).rejects.toThrow("Failed to send verification email");
   });
 
   test("Should throw error if user already exists", async () => {
@@ -57,7 +57,9 @@ describe("Register User Controller Unitary Testing", () => {
       password: "password123"
     };
 
-    await expect(registerUserController({ input, ctx })).rejects.toThrowError(
+    await expect(
+      UserRouter.createCaller(ctx).register(input)
+    ).rejects.toThrowError(
       new TRPCError({
         code: "CONFLICT",
         message: UserErrorCode.USER_ALREADY_EXISTS

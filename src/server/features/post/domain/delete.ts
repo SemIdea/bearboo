@@ -1,19 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { IPostModel } from "@/server/models/post";
-import { IUserModel } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
 import { PostErrorCode } from "@/shared/error/post";
 import { DeletePostInput } from "../schema";
 
-type Params = DeletePostInput & {
-  userId: string;
-  repositories: {
-    user: IUserModel;
-    database: IPostModel;
-  };
-};
+type Input = DomainInput<DeletePostInput & { userId: string }>;
 
-const DeletePostService = async ({ repositories, ...data }: Params) => {
-  const post = await repositories.database.read(data.id);
+const DeletePostService = async ({ ctx, ...data }: Input) => {
+  const post = await ctx.repositories.post.read(data.id);
 
   if (!post) {
     throw new TRPCError({
@@ -29,7 +22,7 @@ const DeletePostService = async ({ repositories, ...data }: Params) => {
     });
   }
 
-  const deletedPost = await repositories.database.delete(post.id);
+  const deletedPost = await ctx.repositories.post.delete(post.id);
 
   return deletedPost;
 };

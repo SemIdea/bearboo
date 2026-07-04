@@ -1,42 +1,14 @@
-import { publicProcedure, t, verifiedProcedure } from "../../createRouter";
-import { createCommentController } from "./procedures/create";
-import { deleteCommentController } from "./procedures/delete";
-import { readAllCommentsByPostController } from "./procedures/readAll";
-import { updateCommentController } from "./procedures/update";
-import {
-  createCommentschema,
-  readAllCommentsByPostSchema,
-  updateCommentSchema,
-  deleteCommentSchema,
-  createCommentOutputSchema,
-  readAllCommentsByPostOutputSchema,
-  updateCommentOutputSchema,
-  deleteCommentOutputSchema
-} from "./schema";
+import { t } from "../../createRouter";
+import { createCommentProcedure } from "./procedures/create";
+import { deleteCommentProcedure } from "./procedures/delete";
+import { readAllCommentsByPostProcedure } from "./procedures/readAll";
+import { updateCommentProcedure } from "./procedures/update";
 
 const CommentRouter = t.router({
-  create: verifiedProcedure
-    .input(createCommentschema)
-    .output(createCommentOutputSchema)
-    .mutation(async ({ input, ctx }) =>
-      createCommentController({ input, ctx })
-    ),
-  readAllByPost: publicProcedure
-    .input(readAllCommentsByPostSchema)
-    .output(readAllCommentsByPostOutputSchema)
-    .query(async ({ input, ctx }) =>
-      readAllCommentsByPostController({ input, ctx })
-    ),
-  update: verifiedProcedure
-    .input(updateCommentSchema)
-    .output(updateCommentOutputSchema)
-    .mutation(async ({ input, ctx }) =>
-      updateCommentController({ input, ctx })
-    ),
-  delete: verifiedProcedure
-    .input(deleteCommentSchema)
-    .output(deleteCommentOutputSchema)
-    .mutation(async ({ input, ctx }) => deleteCommentController({ input, ctx }))
+  create: createCommentProcedure,
+  readAllByPost: readAllCommentsByPostProcedure,
+  update: updateCommentProcedure,
+  delete: deleteCommentProcedure
 });
 
 export { CommentRouter };

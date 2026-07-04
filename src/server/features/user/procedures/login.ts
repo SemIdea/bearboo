@@ -1,40 +1,19 @@
+import { publicProcedure } from "@/server/createRouter";
 import { CreateAuthSessionService } from "../../auth/domain/createAuthSession";
 import { LoginUserService } from "../domain/login";
-import { LoginUserInput } from "../schema";
-import { IAPIContextDTO } from "@/server/createContext";
+import { loginUserOutputSchema, loginUserSchema } from "../schema";
 
-const loginUserController = async ({
-  input,
-  ctx
-}: {
-  input: LoginUserInput;
-  ctx: IAPIContextDTO;
-}) => {
-  const user = await LoginUserService({
-    ...input,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.user
-    },
-    helpers: ctx.helpers
+const loginUserProcedure = publicProcedure
+  .input(loginUserSchema)
+  .output(loginUserOutputSchema)
+  .mutation(async ({ input, ctx }) => {
+    const user = await LoginUserService({ ...input, ctx });
+    const session = await CreateAuthSessionService({ userId: user.id, ctx });
+
+    return {
+      ...session,
+      user
+    };
   });
 
-  const session = await CreateAuthSessionService({
-    userId: user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.session
-    },
-    helpers: ctx.helpers
-  });
-
-  const { password, ...userWithoutPassword } = user;
-  const { userId, ...sessionWithoutUserId } = session;
-
-  return {
-    ...sessionWithoutUserId,
-    user: userWithoutPassword
-  };
-};
-
-export { loginUserController };
+export { loginUserProcedure };

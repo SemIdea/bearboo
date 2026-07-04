@@ -1,23 +1,13 @@
-import { ReadUserCommentsInput } from "../schema";
+import { publicProcedure } from "@/server/createRouter";
 import { ReadUserCommentsService } from "../domain/readComments";
-import { IAPIContextDTO } from "@/server/createContext";
+import {
+  readUserCommentsSchema,
+  readUserCommentsOutputSchema
+} from "../schema";
 
-const readUserCommentsController = async ({
-  input,
-  ctx
-}: {
-  input: ReadUserCommentsInput;
-  ctx: IAPIContextDTO;
-}) => {
-  const comments = ReadUserCommentsService({
-    ...input,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.comment
-    }
-  });
+const readUserCommentsProcedure = publicProcedure
+  .input(readUserCommentsSchema)
+  .output(readUserCommentsOutputSchema)
+  .query(async ({ input, ctx }) => ReadUserCommentsService({ ...input, ctx }));
 
-  return comments;
-};
-
-export { readUserCommentsController };
+export { readUserCommentsProcedure };

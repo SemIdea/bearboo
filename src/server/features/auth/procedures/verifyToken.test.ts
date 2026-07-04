@@ -1,6 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { verifyTokenController } from "./verifyToken";
+import { AuthRouter } from "../index";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
 
 describe("Verify Token Controller Unitary Testing", async () => {
@@ -22,11 +22,8 @@ describe("Verify Token Controller Unitary Testing", async () => {
       used: false
     });
 
-    const result = await verifyTokenController({
-      input: {
-        token: verifyToken
-      },
-      ctx
+    const result = await AuthRouter.createCaller(ctx).verify({
+      token: verifyToken
     });
 
     const updatedUser = await ctx.repositories.user.read(ctx.user.id);
@@ -37,15 +34,8 @@ describe("Verify Token Controller Unitary Testing", async () => {
   });
 
   test("Should throw error if token is not found", async () => {
-    const input = {
-      token: "nonexistent-token"
-    };
-
     await expect(
-      verifyTokenController({
-        input,
-        ctx
-      })
+      AuthRouter.createCaller(ctx).verify({ token: "nonexistent-token" })
     ).rejects.toThrow(VerifyTokenErrorCodes.TOKEN_NOT_FOUND);
   });
 
@@ -60,15 +50,8 @@ describe("Verify Token Controller Unitary Testing", async () => {
       }
     );
 
-    const input = {
-      token: verifyToken.token
-    };
-
     await expect(
-      verifyTokenController({
-        input,
-        ctx
-      })
+      AuthRouter.createCaller(ctx).verify({ token: verifyToken.token })
     ).rejects.toThrow(VerifyTokenErrorCodes.TOKEN_ALREADY_USED);
   });
 
@@ -83,15 +66,8 @@ describe("Verify Token Controller Unitary Testing", async () => {
       }
     );
 
-    const input = {
-      token: expiredToken.token
-    };
-
     await expect(
-      verifyTokenController({
-        input,
-        ctx
-      })
+      AuthRouter.createCaller(ctx).verify({ token: expiredToken.token })
     ).rejects.toThrow(VerifyTokenErrorCodes.TOKEN_EXPIRED);
   });
 });

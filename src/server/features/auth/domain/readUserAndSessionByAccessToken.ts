@@ -1,21 +1,17 @@
 import { TRPCError } from "@trpc/server";
-import { ISessionModel } from "@/server/models/session";
-import { IUserModel, IUserWithSession } from "@/server/models/user";
+import { DomainInput } from "@/server/createDomain";
+import { IUserWithSession } from "@/server/models/user";
 import { SessionErrorCode } from "@/shared/error/session";
 
-type Params = {
-  accessToken: string;
-  repositories: {
-    user: IUserModel;
-    database: ISessionModel;
-  };
-};
+type Input = DomainInput<{ accessToken: string }>;
 
 const ReadUserAndSessionByAccessTokenService = async ({
-  repositories,
+  ctx,
   accessToken
-}: Params) => {
-  const session = await repositories.database.readByAccessToken(accessToken);
+}: Input) => {
+  const session = await ctx.repositories.session.readByAccessToken(
+    accessToken
+  );
 
   if (!session || !session.userId) {
     throw new TRPCError({
@@ -24,7 +20,7 @@ const ReadUserAndSessionByAccessTokenService = async ({
     });
   }
 
-  const user = await repositories.user.read(session.userId);
+  const user = await ctx.repositories.user.read(session.userId);
 
   if (!user) {
     throw new TRPCError({

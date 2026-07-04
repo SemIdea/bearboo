@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { deleteCommentController } from "./delete";
+import { CommentRouter } from "../index";
 import { isControllerContext, TestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { CommentErrorCode } from "@/shared/error/comment";
@@ -36,10 +36,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
       id: commentId
     };
 
-    await deleteCommentController({
-      ctx,
-      input
-    });
+    await CommentRouter.createCaller(ctx).delete(input);
 
     const result = await ctx.repositories.comment.read(commentId);
 
@@ -52,10 +49,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
     };
 
     await expect(
-      deleteCommentController({
-        ctx,
-        input
-      })
+      CommentRouter.createCaller(ctx).delete(input)
     ).rejects.toThrowError(
       new TRPCError({
         code: "NOT_FOUND",
@@ -88,10 +82,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
     };
 
     await expect(
-      deleteCommentController({
-        ctx,
-        input
-      })
+      CommentRouter.createCaller(ctx).delete(input)
     ).rejects.toThrowError(
       new TRPCError({
         code: "FORBIDDEN",

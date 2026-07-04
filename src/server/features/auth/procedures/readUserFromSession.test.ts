@@ -1,6 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
-import { readUserFromSessionController } from "./readUserFromSession";
+import { AuthRouter } from "../index";
 
 describe("Read User From Session Controller Unitary Testing", async () => {
   const ctx = new TestContext();
@@ -13,11 +13,15 @@ describe("Read User From Session Controller Unitary Testing", async () => {
   test("Should read user from session successfully", async () => {
     const user = ctx.user;
 
-    const result = await readUserFromSessionController({
-      ctx
-    });
+    const result = await AuthRouter.createCaller(ctx).session.me();
+
+    const { truePassword, password, ...userWithoutPassword } = user;
+    const { userId, ...sessionWithoutUserId } = user.session;
 
     expect(result).toBeDefined();
-    expect(result).toEqual(user);
+    expect(result).toEqual({
+      ...userWithoutPassword,
+      session: sessionWithoutUserId
+    });
   });
 });

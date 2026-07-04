@@ -1,24 +1,12 @@
+import { verifiedProcedure } from "@/server/createRouter";
 import { UpdatePostService } from "../domain/update";
-import { IProtectedAPIContextDTO } from "@/server/createContext";
-import { UpdatePostInput } from "../schema";
+import { updatePostSchema, updatePostOutputSchema } from "../schema";
 
-const updatePostController = async ({
-  input,
-  ctx
-}: {
-  input: UpdatePostInput;
-  ctx: IProtectedAPIContextDTO;
-}) => {
-  const post = await UpdatePostService({
-    ...input,
-    userId: ctx.user.id,
-    repositories: {
-      ...ctx.repositories,
-      database: ctx.repositories.post
-    }
-  });
+const updatePostProcedure = verifiedProcedure
+  .input(updatePostSchema)
+  .output(updatePostOutputSchema)
+  .mutation(async ({ input, ctx }) =>
+    UpdatePostService({ ...input, userId: ctx.user.id, ctx })
+  );
 
-  return post;
-};
-
-export { updatePostController };
+export { updatePostProcedure };
