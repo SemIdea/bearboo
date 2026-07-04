@@ -7,9 +7,15 @@ const procedure_readUserProfile = publicProcedure
   .output(readUserProfileOutputSchema)
   .query(async ({ input, ctx }) => {
     if (ctx.user && input.id === ctx.user.id) {
-      const { session, ...userWithoutSession } = ctx.user;
-
-      return userWithoutSession;
+      return {
+        id: ctx.user.id,
+        name: ctx.user.name,
+        email: ctx.user.email,
+        verified: ctx.user.verified,
+        createdAt: ctx.user.createdAt,
+        updatedAt: ctx.user.updatedAt,
+        bio: ctx.user.bio
+      };
     }
 
     return domain_readUserProfile({ ctx, input });

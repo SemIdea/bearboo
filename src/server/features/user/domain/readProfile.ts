@@ -11,9 +11,15 @@ const domain_readUserProfile = async ({
     input: { id: input.id }
   });
 
-  const { password, ...userWithoutPassword } = userProfile;
-
-  return userWithoutPassword;
+  return {
+    id: userProfile.id,
+    name: userProfile.name,
+    email: userProfile.email,
+    verified: userProfile.verified,
+    createdAt: userProfile.createdAt,
+    updatedAt: userProfile.updatedAt,
+    bio: userProfile.bio
+  };
 };
 
 export { domain_readUserProfile };

@@ -21,13 +21,10 @@ const Authprovider = ({ children }: ChatProviderProps) => {
   } = useAuthLogic();
 
   useEffect(() => {
-    const [_, sessionCookie] = ["accessToken=", "session="].map(
-      (key) =>
-        document.cookie
-          .split("; ")
-          .find((row) => row.startsWith(key))
-          ?.split("=")[1]
-    );
+    const sessionCookie = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("session="))
+      ?.split("=")[1];
 
     if (sessionCookie) {
       const session = JSON.parse(sessionCookie) as ISessionWithUser;

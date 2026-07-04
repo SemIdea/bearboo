@@ -27,12 +27,21 @@ const domain_readUserAndSessionByAccessToken = async ({
     });
   }
 
-  const { password, ...userWithoutPassword } = user;
-  const { userId, ...sessionWithoutUserId } = session;
-
   return {
-    ...userWithoutPassword,
-    session: sessionWithoutUserId
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    verified: user.verified,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    bio: user.bio,
+    session: {
+      id: session.id,
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt
+    }
   } as IUserWithSession;
 };
 
