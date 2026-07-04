@@ -96,7 +96,7 @@ Se o GREEN não fica verde, antes de haltar/perguntar, roda um loop curto de aut
 ### 6. REFACTOR
 
 - Remove duplicação, melhora nomes, extrai constantes/tipos se ganhar clareza.
-- Roda `tsc --noEmit` + testes afetados + `eslint`.
+- Roda `tsc --noEmit` + testes afetados + `yarn lint`.
 
 ### 7. COMMIT
 
@@ -234,7 +234,7 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 
 - **Comentando código pra fazer teste passar.** Falsa confiança.
 - **Mock que simula mais que o necessário.** Está testando o mock.
-- **Adicionando `eslint-disable`, `@ts-ignore`, `@ts-expect-error` sem ticket.** Broken window.
+- **Adicionando `biome-ignore`, `@ts-ignore`, `@ts-expect-error` sem ticket.** Broken window.
 - **Criando função `utils.ts` sem segundo caller.** Inline.
 - **Duplicando lógica de negócio entre transports.** Move pra Domain/Model puro.
 - **Escrevendo mais de uma implementação em paralelo.** Escolhe uma.
@@ -256,7 +256,7 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 
 ## 6. Definition of Done
 
-Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na entrevista de adoção retroativa (2026-06-30): `.husky/pre-commit` roda `eslint --fix` nos arquivos staged + `yarn lint` completo; `.husky/pre-push` roda `yarn test` (vitest) diretamente; `.husky/commit-msg` roda `commitlint`. DoD de merge inclui **test runner + type check**, mesmo sem CI formal hoje — o agente roda os dois manualmente antes de considerar a tarefa pronta.
+Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na entrevista de adoção retroativa (2026-06-30): `.husky/pre-commit` roda `lint-staged`, configurado no `package.json` para executar `biome check --write` nos arquivos staged suportados; `.husky/pre-push` roda `yarn lint` + `yarn test` (vitest); `.husky/commit-msg` roda `commitlint`. DoD de merge inclui **test runner + type check**, mesmo sem CI formal hoje — o agente roda os dois manualmente antes de considerar a tarefa pronta.
 
 **Atualizado em 2026-07-04**: a suíte de testes deixou de depender de Postgres/Redis via Docker (`docker-compose-test.yml`, removido) — os testes de procedure agora rodam contra repositórios e gateways fake in-memory injetados via `TestContext` (`src/test/repositories/`, `src/test/gateways/`), o que também tornou o pre-push mais rápido (segundos, não um container build).
 
