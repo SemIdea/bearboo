@@ -4,6 +4,7 @@ import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/r
 import { IRepositories, repositories } from "./infra/container/repositories";
 import { IHelpers, helpers } from "./infra/container/helpers";
 import { IGateways, gateways } from "./infra/container/gateways";
+import { env } from "@/lib/env";
 
 type IInputAPIContextDTO = {
   headers: Headers;
@@ -14,6 +15,7 @@ type IBaseContextDTO = IInputAPIContextDTO & {
   repositories: IRepositories;
   helpers: IHelpers;
   gateways: IGateways;
+  env: typeof env;
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
@@ -31,7 +33,8 @@ const createTRPCContext = async ({
     headers,
     repositories,
     helpers,
-    gateways
+    gateways,
+    env
   };
 
   const cookies = headers.get("cookie");
