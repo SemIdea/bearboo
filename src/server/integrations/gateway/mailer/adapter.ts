@@ -1,18 +1,18 @@
 type ISendMailReq = {
-  to: string | string[];
-  subject: string;
-  body: string;
+	to: string | string[];
+	subject: string;
+	body: string;
 };
 
 type ISendMailRes = {
-  status: boolean;
-  accepted: string[];
-  rejected: string[];
-  pending: string[];
+	status: boolean;
+	accepted: string[];
+	rejected: string[];
+	pending: string[];
 };
 
 type IMailerGatewayAdapter = {
-  sendMail: (req: ISendMailReq) => Promise<ISendMailRes>;
+	sendMail: (req: ISendMailReq) => Promise<ISendMailRes>;
 };
 
-export type { ISendMailReq, IMailerGatewayAdapter, ISendMailRes };
+export type { IMailerGatewayAdapter, ISendMailReq, ISendMailRes };

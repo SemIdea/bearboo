@@ -1,12 +1,12 @@
 import { verifiedProcedure } from "@/server/createRouter";
 import { domain_deletePost } from "../domain/delete";
-import { deletePostSchema, deletePostOutputSchema } from "../schema";
+import { deletePostOutputSchema, deletePostSchema } from "../schema";
 
 const procedure_deletePost = verifiedProcedure
-  .input(deletePostSchema)
-  .output(deletePostOutputSchema)
-  .mutation(async ({ input, ctx }) =>
-    domain_deletePost({ ctx, input: { ...input, userId: ctx.user.id } })
-  );
+	.input(deletePostSchema)
+	.output(deletePostOutputSchema)
+	.mutation(async ({ input, ctx }) =>
+		domain_deletePost({ ctx, input: { ...input, userId: ctx.user.id } }),
+	);
 
 export { procedure_deletePost };

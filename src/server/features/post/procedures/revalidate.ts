@@ -1,12 +1,12 @@
 import { verifiedProcedure } from "@/server/createRouter";
 import { domain_revalidatePost } from "../domain/revalidate";
-import { revalidatePostSchema, revalidatePostOutputSchema } from "../schema";
+import { revalidatePostOutputSchema, revalidatePostSchema } from "../schema";
 
 const procedure_revalidatePost = verifiedProcedure
-  .input(revalidatePostSchema)
-  .output(revalidatePostOutputSchema)
-  .mutation(async ({ input, ctx }) =>
-    domain_revalidatePost({ ctx, input: { ...input, userId: ctx.user.id } })
-  );
+	.input(revalidatePostSchema)
+	.output(revalidatePostOutputSchema)
+	.mutation(async ({ input, ctx }) =>
+		domain_revalidatePost({ ctx, input: { ...input, userId: ctx.user.id } }),
+	);
 
 export { procedure_revalidatePost };

@@ -1,9 +1,9 @@
-import { ITestContextDTO, IControllerContextDTO } from "./types";
+import { IControllerContextDTO, ITestContextDTO } from "./types";
 
 function isControllerContext(
-  ctx: ITestContextDTO
+	ctx: ITestContextDTO,
 ): ctx is IControllerContextDTO {
-  return ctx.user !== undefined;
+	return ctx.user !== undefined;
 }
 
 export { isControllerContext };

@@ -1,68 +1,68 @@
-import { beforeEach, describe, expect, test } from "vitest";
-import { CommentRouter } from "../index";
-import {
-  createAuthenticatedContext,
-  IControllerContextDTO
-} from "@/test/context";
 import { TRPCError } from "@trpc/server";
+import { beforeEach, describe, expect, test } from "vitest";
 import { CommentErrorCode } from "@/shared/error/comment";
+import {
+	createAuthenticatedContext,
+	IControllerContextDTO,
+} from "@/test/context";
+import { CommentRouter } from "../index";
 
 describe("Update Comment Controller Unitary Testing", () => {
-  let ctx: IControllerContextDTO;
+	let ctx: IControllerContextDTO;
 
-  beforeEach(async () => {
-    ctx = await createAuthenticatedContext();
-  });
+	beforeEach(async () => {
+		ctx = await createAuthenticatedContext();
+	});
 
-  test("Should update a comment successfully", async () => {
-    const comment = await ctx.createComment();
+	test("Should update a comment successfully", async () => {
+		const comment = await ctx.createComment();
 
-    const input = {
-      id: comment.id,
-      content: "This is an updated test comment."
-    };
+		const input = {
+			id: comment.id,
+			content: "This is an updated test comment.",
+		};
 
-    const result = await CommentRouter.createCaller(ctx).update(input);
+		const result = await CommentRouter.createCaller(ctx).update(input);
 
-    expect(result).toBeDefined();
-    expect(result.id).toEqual(comment.id);
-    expect(result.content).toEqual(input.content);
-    expect(result.postId).toEqual(comment.postId);
-    expect(result.userId).toEqual(ctx.user.id);
-  });
+		expect(result).toBeDefined();
+		expect(result.id).toEqual(comment.id);
+		expect(result.content).toEqual(input.content);
+		expect(result.postId).toEqual(comment.postId);
+		expect(result.userId).toEqual(ctx.user.id);
+	});
 
-  test("Should throw an error if the comment does not exist", async () => {
-    const input = {
-      id: ctx.helpers.uid.generate(),
-      content: "This comment does not exist."
-    };
+	test("Should throw an error if the comment does not exist", async () => {
+		const input = {
+			id: ctx.helpers.uid.generate(),
+			content: "This comment does not exist.",
+		};
 
-    await expect(
-      CommentRouter.createCaller(ctx).update(input)
-    ).rejects.toThrowError(
-      new TRPCError({
-        code: "NOT_FOUND",
-        message: CommentErrorCode.COMMENT_NOT_FOUND
-      })
-    );
-  });
+		await expect(
+			CommentRouter.createCaller(ctx).update(input),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "NOT_FOUND",
+				message: CommentErrorCode.COMMENT_NOT_FOUND,
+			}),
+		);
+	});
 
-  test("Should throw an error if the user is not the owner of the comment", async () => {
-    const otherUser = await ctx.createNewUser();
-    const comment = await ctx.createComment({ userId: otherUser.id });
+	test("Should throw an error if the user is not the owner of the comment", async () => {
+		const otherUser = await ctx.createNewUser();
+		const comment = await ctx.createComment({ userId: otherUser.id });
 
-    const input = {
-      id: comment.id,
-      content: "This is an updated test comment."
-    };
+		const input = {
+			id: comment.id,
+			content: "This is an updated test comment.",
+		};
 
-    await expect(
-      CommentRouter.createCaller(ctx).update(input)
-    ).rejects.toThrowError(
-      new TRPCError({
-        code: "FORBIDDEN",
-        message: CommentErrorCode.COMMENT_UPDATE_FORBIDDEN
-      })
-    );
-  });
+		await expect(
+			CommentRouter.createCaller(ctx).update(input),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "FORBIDDEN",
+				message: CommentErrorCode.COMMENT_UPDATE_FORBIDDEN,
+			}),
+		);
+	});
 });

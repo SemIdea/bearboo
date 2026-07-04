@@ -1,62 +1,62 @@
 "use client";
 
-import { trpc } from "@/app/_trpc/client";
-import { ICommentEntityWithUser } from "@/server/models/comment";
 import { useEffect, useState } from "react";
+import { trpc } from "@/app/_trpc/client";
 import { CommentList } from "@/components/commentList";
 import { CreateComment } from "@/components/createComment";
+import { ICommentEntityWithUser } from "@/server/models/comment";
 
 const useComment = (postId: string) => {
-  const [comments, setComments] = useState<ICommentEntityWithUser[]>([]);
+	const [comments, setComments] = useState<ICommentEntityWithUser[]>([]);
 
-  const { data: commentsData, isLoading } = trpc.comment.readAllByPost.useQuery(
-    {
-      postId
-    }
-  );
+	const { data: commentsData, isLoading } = trpc.comment.readAllByPost.useQuery(
+		{
+			postId,
+		},
+	);
 
-  useEffect(() => {
-    if (commentsData) {
-      setComments(commentsData);
-    }
-  }, [commentsData]);
+	useEffect(() => {
+		if (commentsData) {
+			setComments(commentsData);
+		}
+	}, [commentsData]);
 
-  const addLocalComment = (comment: ICommentEntityWithUser) => {
-    setComments((prevComments) => [...prevComments, comment]);
-  };
+	const addLocalComment = (comment: ICommentEntityWithUser) => {
+		setComments((prevComments) => [...prevComments, comment]);
+	};
 
-  const updateLocalComment = (updatedComment: ICommentEntityWithUser) => {
-    setComments((prevComments) =>
-      prevComments.map((comment) =>
-        comment.id === updatedComment.id ? updatedComment : comment
-      )
-    );
-  };
+	const updateLocalComment = (updatedComment: ICommentEntityWithUser) => {
+		setComments((prevComments) =>
+			prevComments.map((comment) =>
+				comment.id === updatedComment.id ? updatedComment : comment,
+			),
+		);
+	};
 
-  const deleteLocalComment = (id: string) => {
-    setComments((prevComments) =>
-      prevComments.filter((comment) => comment.id !== id)
-    );
-  };
+	const deleteLocalComment = (id: string) => {
+		setComments((prevComments) =>
+			prevComments.filter((comment) => comment.id !== id),
+		);
+	};
 
-  return {
-    comments,
-    isLoading,
-    addLocalComment,
-    updateLocalComment,
-    deleteLocalComment
-  };
+	return {
+		comments,
+		isLoading,
+		addLocalComment,
+		updateLocalComment,
+		deleteLocalComment,
+	};
 };
 
 const CommentArea = ({ postId }: { postId: string }) => {
-  const commentHook = useComment(postId);
+	const commentHook = useComment(postId);
 
-  return (
-    <>
-      <CreateComment postId={postId} commentHook={commentHook} />
-      <CommentList commentHook={commentHook} />
-    </>
-  );
+	return (
+		<>
+			<CreateComment postId={postId} commentHook={commentHook} />
+			<CommentList commentHook={commentHook} />
+		</>
+	);
 };
 
 export { CommentArea };

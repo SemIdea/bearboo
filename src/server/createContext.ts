@@ -1,69 +1,69 @@
-import { IUserWithSession } from "./models/user";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
-import { IRepositories, repositories } from "./infra/container/repositories";
-import { IHelpers, helpers } from "./infra/container/helpers";
-import { IGateways, gateways } from "./infra/container/gateways";
 import { env } from "@/lib/env";
+import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
+import { gateways, IGateways } from "./infra/container/gateways";
+import { helpers, IHelpers } from "./infra/container/helpers";
+import { IRepositories, repositories } from "./infra/container/repositories";
+import { IUserWithSession } from "./models/user";
 
 type IInputAPIContextDTO = {
-  headers: Headers;
+	headers: Headers;
 };
 
 type IBaseContextDTO = IInputAPIContextDTO & {
-  headers: Headers;
-  repositories: IRepositories;
-  helpers: IHelpers;
-  gateways: IGateways;
-  env: typeof env;
+	headers: Headers;
+	repositories: IRepositories;
+	helpers: IHelpers;
+	gateways: IGateways;
+	env: typeof env;
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
-  user?: IUserWithSession;
+	user?: IUserWithSession;
 };
 
 type IProtectedAPIContextDTO = IBaseContextDTO & {
-  user: IUserWithSession;
+	user: IUserWithSession;
 };
 
 const createTRPCContext = async ({
-  headers
+	headers,
 }: IInputAPIContextDTO): Promise<IAPIContextDTO> => {
-  const ctx: IAPIContextDTO = {
-    headers,
-    repositories,
-    helpers,
-    gateways,
-    env
-  };
+	const ctx: IAPIContextDTO = {
+		headers,
+		repositories,
+		helpers,
+		gateways,
+		env,
+	};
 
-  const cookies = headers.get("cookie");
+	const cookies = headers.get("cookie");
 
-  if (!cookies) return ctx;
-  const cookieStore = parseCookie(cookies);
-  const accessToken = cookieStore.get("accessToken") || null;
+	if (!cookies) return ctx;
+	const cookieStore = parseCookie(cookies);
+	const accessToken = cookieStore.get("accessToken") || null;
 
-  if (!accessToken) return ctx;
+	if (!accessToken) return ctx;
 
-  const user = await domain_readUserAndSessionByAccessToken({
-    ctx,
-    input: { accessToken }
-  });
+	const user = await domain_readUserAndSessionByAccessToken({
+		ctx,
+		input: { accessToken },
+	});
 
-  if (!user) return ctx;
+	if (!user) return ctx;
 
-  ctx.user = user;
+	ctx.user = user;
 
-  return ctx;
+	return ctx;
 };
 
 type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 
-export { createTRPCContext };
 export type {
-  IInputAPIContextDTO,
-  IBaseContextDTO,
-  IAPIContextDTO,
-  IProtectedAPIContextDTO,
-  Context
+	Context,
+	IAPIContextDTO,
+	IBaseContextDTO,
+	IInputAPIContextDTO,
+	IProtectedAPIContextDTO,
 };
+export { createTRPCContext };

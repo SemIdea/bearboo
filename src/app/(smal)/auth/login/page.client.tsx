@@ -1,70 +1,67 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
+import { FormBase, InputField } from "@/components/formBase";
+import { Button } from "@/components/ui/button";
+import { ErrorMessage } from "@/components/ui/errorMessage";
 import { useAuth } from "@/context/auth";
 import { getErrorMessage } from "@/lib/error";
-import { FormBase, InputField } from "@/components/formBase";
-import {
-  LoginUserInput,
-  loginUserSchema
-} from "@/server/features/user/schema";
-import { ErrorMessage } from "@/components/ui/errorMessage";
+import { LoginUserInput, loginUserSchema } from "@/server/features/user/schema";
 
 const useLoginForm = () => {
-  const router = useRouter();
-  const { updateAuthData } = useAuth();
+	const router = useRouter();
+	const { updateAuthData } = useAuth();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
-  const { mutate: login } = trpc.user.login.useMutation({
-    onSuccess: (data) => {
-      updateAuthData(data);
-      setIsLoading(false);
-      setErrorMessage("");
-      router.push("/");
-    },
-    onError: (error) => {
-      setErrorMessage(getErrorMessage(error.message));
-      setIsLoading(false);
-    }
-  });
+	const { mutate: login } = trpc.user.login.useMutation({
+		onSuccess: (data) => {
+			updateAuthData(data);
+			setIsLoading(false);
+			setErrorMessage("");
+			router.push("/");
+		},
+		onError: (error) => {
+			setErrorMessage(getErrorMessage(error.message));
+			setIsLoading(false);
+		},
+	});
 
-  const handleSubmit = (data: LoginUserInput) => {
-    setIsLoading(true);
-    setErrorMessage("");
+	const handleSubmit = (data: LoginUserInput) => {
+		setIsLoading(true);
+		setErrorMessage("");
 
-    login(data);
-  };
+		login(data);
+	};
 
-  return {
-    isLoading,
-    errorMessage,
-    handleSubmit
-  };
+	return {
+		isLoading,
+		errorMessage,
+		handleSubmit,
+	};
 };
 
 const LoginForm = () => {
-  const { isLoading, errorMessage, handleSubmit } = useLoginForm();
+	const { isLoading, errorMessage, handleSubmit } = useLoginForm();
 
-  return (
-    <FormBase schema={loginUserSchema} onSubmit={handleSubmit}>
-      <InputField name="email" label="Email" placeholder="m@example.com" />
-      <InputField
-        name="password"
-        label="Password"
-        type="password"
-        placeholder="Enter your password"
-      />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Signing in..." : "Login"}
-      </Button>
-      <ErrorMessage error={errorMessage} />
-    </FormBase>
-  );
+	return (
+		<FormBase schema={loginUserSchema} onSubmit={handleSubmit}>
+			<InputField name="email" label="Email" placeholder="m@example.com" />
+			<InputField
+				name="password"
+				label="Password"
+				type="password"
+				placeholder="Enter your password"
+			/>
+			<Button type="submit" className="w-full" disabled={isLoading}>
+				{isLoading ? "Signing in..." : "Login"}
+			</Button>
+			<ErrorMessage error={errorMessage} />
+		</FormBase>
+	);
 };
 
 export { LoginForm };

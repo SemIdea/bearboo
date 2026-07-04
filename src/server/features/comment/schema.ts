@@ -1,42 +1,42 @@
 import { z } from "zod";
 
 const createCommentschema = z.object({
-  postId: z.string(),
-  content: z
-    .string()
-    .min(10, "Comment must be at least 10 characters long.")
-    .max(500, "Comment must not exceed 500 characters.")
+	postId: z.string(),
+	content: z
+		.string()
+		.min(10, "Comment must be at least 10 characters long.")
+		.max(500, "Comment must not exceed 500 characters."),
 });
 
 const readAllCommentsByPostSchema = z.object({
-  postId: z.string()
+	postId: z.string(),
 });
 
 const updateCommentSchema = z.object({
-  id: z.string(),
-  content: z
-    .string()
-    .min(10, "Comment must be at least 10 characters long.")
-    .max(500, "Comment must not exceed 500 characters.")
+	id: z.string(),
+	content: z
+		.string()
+		.min(10, "Comment must be at least 10 characters long.")
+		.max(500, "Comment must not exceed 500 characters."),
 });
 
 const deleteCommentSchema = z.object({
-  id: z.string()
+	id: z.string(),
 });
 
 const commentEntitySchema = z.object({
-  id: z.string(),
-  postId: z.string(),
-  userId: z.string(),
-  content: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date()
+	id: z.string(),
+	postId: z.string(),
+	userId: z.string(),
+	content: z.string(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
 });
 
 const commentEntityWithUserSchema = commentEntitySchema.extend({
-  user: z.object({
-    name: z.string()
-  })
+	user: z.object({
+		name: z.string(),
+	}),
 });
 
 const createCommentOutputSchema = commentEntitySchema;
@@ -49,22 +49,21 @@ type ReadAllCommentsByPostInput = z.TypeOf<typeof readAllCommentsByPostSchema>;
 type UpdateCommentInput = z.TypeOf<typeof updateCommentSchema>;
 type DeleteCommentInput = z.TypeOf<typeof deleteCommentSchema>;
 
-export {
-  createCommentschema,
-  readAllCommentsByPostSchema,
-  updateCommentSchema,
-  deleteCommentSchema,
-  commentEntitySchema,
-  commentEntityWithUserSchema,
-  createCommentOutputSchema,
-  readAllCommentsByPostOutputSchema,
-  updateCommentOutputSchema,
-  deleteCommentOutputSchema
-};
-
 export type {
-  CreateCommentInput,
-  ReadAllCommentsByPostInput,
-  UpdateCommentInput,
-  DeleteCommentInput
+	CreateCommentInput,
+	DeleteCommentInput,
+	ReadAllCommentsByPostInput,
+	UpdateCommentInput,
+};
+export {
+	commentEntitySchema,
+	commentEntityWithUserSchema,
+	createCommentOutputSchema,
+	createCommentschema,
+	deleteCommentOutputSchema,
+	deleteCommentSchema,
+	readAllCommentsByPostOutputSchema,
+	readAllCommentsByPostSchema,
+	updateCommentOutputSchema,
+	updateCommentSchema,
 };

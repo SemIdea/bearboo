@@ -1,74 +1,72 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
-import { Button } from "@/components/ui/button";
-import { getErrorMessage } from "@/lib/error";
 import { FormBase, InputField } from "@/components/formBase";
-import {
-  CreateUserInput,
-  registerUserSchema
-} from "@/server/features/user/schema";
+import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
+import { getErrorMessage } from "@/lib/error";
+import {
+	CreateUserInput,
+	registerUserSchema,
+} from "@/server/features/user/schema";
 
 const useRegisterForm = () => {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
-  const { mutate: register } = trpc.user.register.useMutation({
-    onSuccess: (data) => {
-      router.push(
-        `/auth/verify?email=${encodeURIComponent(data.user.email)}`
-      );
-      setIsLoading(false);
-      setErrorMessage("");
-    },
-    onError: (error) => {
-      setErrorMessage(getErrorMessage(error.message));
-      setIsLoading(false);
-    }
-  });
+	const { mutate: register } = trpc.user.register.useMutation({
+		onSuccess: (data) => {
+			router.push(`/auth/verify?email=${encodeURIComponent(data.user.email)}`);
+			setIsLoading(false);
+			setErrorMessage("");
+		},
+		onError: (error) => {
+			setErrorMessage(getErrorMessage(error.message));
+			setIsLoading(false);
+		},
+	});
 
-  const handleSubmit = async (data: CreateUserInput) => {
-    setIsLoading(true);
-    setErrorMessage("");
+	const handleSubmit = async (data: CreateUserInput) => {
+		setIsLoading(true);
+		setErrorMessage("");
 
-    register(data);
-  };
+		register(data);
+	};
 
-  return {
-    isLoading,
-    errorMessage,
-    handleSubmit
-  };
+	return {
+		isLoading,
+		errorMessage,
+		handleSubmit,
+	};
 };
 
 const RegisterForm = () => {
-  const { isLoading, errorMessage, handleSubmit } = useRegisterForm();
+	const { isLoading, errorMessage, handleSubmit } = useRegisterForm();
 
-  return (
-    <FormBase schema={registerUserSchema} onSubmit={handleSubmit}>
-      <InputField
-        name="email"
-        label="Email"
-        type="email"
-        placeholder="m@example.com"
-      />
-      <InputField name="name" label="Name" type="text" placeholder="John Doe" />
-      <InputField
-        name="password"
-        label="Password"
-        type="password"
-        placeholder="Enter your password"
-      />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Creating account..." : "Create account"}
-      </Button>
-      <ErrorMessage error={errorMessage} />
-    </FormBase>
-  );
+	return (
+		<FormBase schema={registerUserSchema} onSubmit={handleSubmit}>
+			<InputField
+				name="email"
+				label="Email"
+				type="email"
+				placeholder="m@example.com"
+			/>
+			<InputField name="name" label="Name" type="text" placeholder="John Doe" />
+			<InputField
+				name="password"
+				label="Password"
+				type="password"
+				placeholder="Enter your password"
+			/>
+			<Button type="submit" className="w-full" disabled={isLoading}>
+				{isLoading ? "Creating account..." : "Create account"}
+			</Button>
+			<ErrorMessage error={errorMessage} />
+		</FormBase>
+	);
 };
 
 export { RegisterForm };

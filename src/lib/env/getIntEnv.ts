@@ -1,9 +1,9 @@
 function getIntEnv(key: string, fallback: number): number {
-  const value = process.env[key];
+	const value = process.env[key];
 
-  if (!value || isNaN(Number(value))) return fallback;
+	if (!value || isNaN(Number(value))) return fallback;
 
-  return Number(value);
+	return Number(value);
 }
 
 export { getIntEnv };

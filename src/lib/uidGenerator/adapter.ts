@@ -1,5 +1,5 @@
 type IUidGeneratorHelperAdapter = {
-  generate: () => string;
+	generate: () => string;
 };
 
 export type { IUidGeneratorHelperAdapter };

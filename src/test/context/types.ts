@@ -1,28 +1,28 @@
 import { IBaseContextDTO } from "@/server/createContext";
-import { IUserEntity } from "@/server/models/user";
-import { ISessionEntity } from "@/server/models/session";
-import { IPostEntity } from "@/server/models/post";
 import { ICommentEntity } from "@/server/models/comment";
+import { IPostEntity } from "@/server/models/post";
+import { ISessionEntity } from "@/server/models/session";
+import { IUserEntity } from "@/server/models/user";
 
 type IAuthenticatedUserDTO = IUserEntity & {
-  truePassword: string;
-  session: ISessionEntity;
+	truePassword: string;
+	session: ISessionEntity;
 };
 
 type ITestContextDTO = IBaseContextDTO & {
-  user?: IAuthenticatedUserDTO;
-  createAuthenticatedUser: () => Promise<void>;
-  createNewUser: () => Promise<IUserEntity>;
-  createPost: (
-    overrides?: Partial<Pick<IPostEntity, "title" | "content" | "userId">>
-  ) => Promise<IPostEntity>;
-  createComment: (
-    overrides?: Partial<Pick<ICommentEntity, "postId" | "content" | "userId">>
-  ) => Promise<ICommentEntity>;
+	user?: IAuthenticatedUserDTO;
+	createAuthenticatedUser: () => Promise<void>;
+	createNewUser: () => Promise<IUserEntity>;
+	createPost: (
+		overrides?: Partial<Pick<IPostEntity, "title" | "content" | "userId">>,
+	) => Promise<IPostEntity>;
+	createComment: (
+		overrides?: Partial<Pick<ICommentEntity, "postId" | "content" | "userId">>,
+	) => Promise<ICommentEntity>;
 };
 
 type IControllerContextDTO = ITestContextDTO & {
-  user: IAuthenticatedUserDTO;
+	user: IAuthenticatedUserDTO;
 };
 
-export type { IAuthenticatedUserDTO, ITestContextDTO, IControllerContextDTO };
+export type { IAuthenticatedUserDTO, IControllerContextDTO, ITestContextDTO };

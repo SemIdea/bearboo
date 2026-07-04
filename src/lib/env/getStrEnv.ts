@@ -1,7 +1,7 @@
 function getStrEnv(key: string, fallback: string): string {
-  const value = process.env[key];
+	const value = process.env[key];
 
-  return value ?? fallback;
+	return value ?? fallback;
 }
 
 export { getStrEnv };

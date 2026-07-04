@@ -1,36 +1,36 @@
 import { useState } from "react";
 import { ISessionWithUser } from "@/server/models/session";
-import { setAuthData, clearAuthData } from "@/utils/authStorage";
+import { clearAuthData, setAuthData } from "@/utils/authStorage";
 
 const useAuthLogic = () => {
-  const [isLoadingSession, setIsLoadingSession] = useState(true);
-  const [session, setSession] = useState<ISessionWithUser | null>(null);
+	const [isLoadingSession, setIsLoadingSession] = useState(true);
+	const [session, setSession] = useState<ISessionWithUser | null>(null);
 
-  const updateAuthData = (data?: ISessionWithUser) => {
-    if (!data) {
-      setSession(null);
-      clearAuthData();
-      return;
-    }
-    setSession(data);
-    setAuthData(data);
-  };
+	const updateAuthData = (data?: ISessionWithUser) => {
+		if (!data) {
+			setSession(null);
+			clearAuthData();
+			return;
+		}
+		setSession(data);
+		setAuthData(data);
+	};
 
-  const clearSession = () => {
-    updateAuthData();
-  };
+	const clearSession = () => {
+		updateAuthData();
+	};
 
-  return {
-    session,
-    isLoadingSession,
-    setSession,
-    setIsLoadingSession,
-    updateAuthData,
-    clearSession
-  };
+	return {
+		session,
+		isLoadingSession,
+		setSession,
+		setIsLoadingSession,
+		updateAuthData,
+		clearSession,
+	};
 };
 
 type UseAuthLogicReturn = ReturnType<typeof useAuthLogic>;
 
-export { useAuthLogic };
 export type { UseAuthLogicReturn };
+export { useAuthLogic };

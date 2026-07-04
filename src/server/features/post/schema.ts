@@ -1,59 +1,59 @@
 import { z } from "zod";
 
 const createPostSchema = z.object({
-  title: z
-    .string()
-    .min(3, "Post title must be at least 3 characters long.")
-    .max(100, "Post title must not exceed 100 characters."),
-  content: z
-    .string()
-    .min(10, "Post content must be at least 10 characters long.")
-    .max(5000, "Post content must not exceed 5000 characters.")
+	title: z
+		.string()
+		.min(3, "Post title must be at least 3 characters long.")
+		.max(100, "Post title must not exceed 100 characters."),
+	content: z
+		.string()
+		.min(10, "Post content must be at least 10 characters long.")
+		.max(5000, "Post content must not exceed 5000 characters."),
 });
 
 const readPostSchema = z.object({
-  id: z.string()
+	id: z.string(),
 });
 
 const updatePostSchema = z.object({
-  id: z.string(),
-  title: z
-    .string()
-    .min(3, "Post title must be at least 3 characters long.")
-    .optional(),
-  content: z
-    .string()
-    .min(10, "Post content must be at least 10 characters long.")
-    .optional()
+	id: z.string(),
+	title: z
+		.string()
+		.min(3, "Post title must be at least 3 characters long.")
+		.optional(),
+	content: z
+		.string()
+		.min(10, "Post content must be at least 10 characters long.")
+		.optional(),
 });
 
 const deletePostSchema = z.object({
-  id: z.string()
+	id: z.string(),
 });
 
 const revalidatePostSchema = z.object({
-  id: z.string()
+	id: z.string(),
 });
 
 const postEntitySchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  title: z.string(),
-  content: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date()
+	id: z.string(),
+	userId: z.string(),
+	title: z.string(),
+	content: z.string(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
 });
 
 const postEntityWithRelationsSchema = postEntitySchema.extend({
-  user: z.object({
-    id: z.string(),
-    name: z.string()
-  }),
-  comments: z.array(
-    z.object({
-      id: z.string()
-    })
-  )
+	user: z.object({
+		id: z.string(),
+		name: z.string(),
+	}),
+	comments: z.array(
+		z.object({
+			id: z.string(),
+		}),
+	),
 });
 
 const createPostOutputSchema = postEntitySchema;
@@ -69,26 +69,25 @@ type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
 type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
 type RevalidatePostInput = z.TypeOf<typeof revalidatePostSchema>;
 
-export {
-  createPostSchema,
-  readPostSchema,
-  updatePostSchema,
-  deletePostSchema,
-  revalidatePostSchema,
-  postEntitySchema,
-  postEntityWithRelationsSchema,
-  createPostOutputSchema,
-  readPostOutputSchema,
-  updatePostOutputSchema,
-  deletePostOutputSchema,
-  revalidatePostOutputSchema,
-  readRecentPostsOutputSchema
-};
-
 export type {
-  CreatePostInput,
-  ReadPostInput,
-  UpdatePostInput,
-  DeletePostInput,
-  RevalidatePostInput
+	CreatePostInput,
+	DeletePostInput,
+	ReadPostInput,
+	RevalidatePostInput,
+	UpdatePostInput,
+};
+export {
+	createPostOutputSchema,
+	createPostSchema,
+	deletePostOutputSchema,
+	deletePostSchema,
+	postEntitySchema,
+	postEntityWithRelationsSchema,
+	readPostOutputSchema,
+	readPostSchema,
+	readRecentPostsOutputSchema,
+	revalidatePostOutputSchema,
+	revalidatePostSchema,
+	updatePostOutputSchema,
+	updatePostSchema,
 };

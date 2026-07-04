@@ -1,37 +1,37 @@
 import { BaseModel } from "@/server/models/base";
 import {
-  IResetTokenEntity,
-  IResetTokenModel
+	IResetTokenEntity,
+	IResetTokenModel,
 } from "@/server/models/resetToken";
 import { InMemoryDelegate } from "./inMemoryDelegate";
 
 class FakeResetTokenModel
-  extends BaseModel<IResetTokenEntity>
-  implements IResetTokenModel
+	extends BaseModel<IResetTokenEntity>
+	implements IResetTokenModel
 {
-  private readonly memory: InMemoryDelegate<IResetTokenEntity>;
+	private readonly memory: InMemoryDelegate<IResetTokenEntity>;
 
-  constructor() {
-    const memory = new InMemoryDelegate<IResetTokenEntity>();
+	constructor() {
+		const memory = new InMemoryDelegate<IResetTokenEntity>();
 
-    super(memory);
+		super(memory);
 
-    this.memory = memory;
-  }
+		this.memory = memory;
+	}
 
-  async readByToken(token: string): Promise<IResetTokenEntity | null> {
-    const tokens = await this.memory.findMany((entry) => entry.token === token);
+	async readByToken(token: string): Promise<IResetTokenEntity | null> {
+		const tokens = await this.memory.findMany((entry) => entry.token === token);
 
-    return tokens[0] ?? null;
-  }
+		return tokens[0] ?? null;
+	}
 
-  async readByUserId(userId: string): Promise<IResetTokenEntity | null> {
-    const tokens = await this.memory.findMany(
-      (entry) => entry.userId === userId
-    );
+	async readByUserId(userId: string): Promise<IResetTokenEntity | null> {
+		const tokens = await this.memory.findMany(
+			(entry) => entry.userId === userId,
+		);
 
-    return tokens[0] ?? null;
-  }
+		return tokens[0] ?? null;
+	}
 }
 
 export { FakeResetTokenModel };

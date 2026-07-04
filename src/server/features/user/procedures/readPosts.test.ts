@@ -1,58 +1,58 @@
-import { beforeEach, describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
-import { UserRouter } from "../index";
-import {
-  createAuthenticatedContext,
-  IControllerContextDTO
-} from "@/test/context";
+import { beforeEach, describe, expect, test } from "vitest";
 import { UserErrorCode } from "@/shared/error/user";
+import {
+	createAuthenticatedContext,
+	IControllerContextDTO,
+} from "@/test/context";
+import { UserRouter } from "../index";
 
 describe("User Posts Controller Unitary Testing", () => {
-  let ctx: IControllerContextDTO;
+	let ctx: IControllerContextDTO;
 
-  beforeEach(async () => {
-    ctx = await createAuthenticatedContext();
-  });
+	beforeEach(async () => {
+		ctx = await createAuthenticatedContext();
+	});
 
-  test("Should return an empty list when user has no posts", async () => {
-    const result = await UserRouter.createCaller(ctx).readPosts({
-      id: ctx.user.id
-    });
+	test("Should return an empty list when user has no posts", async () => {
+		const result = await UserRouter.createCaller(ctx).readPosts({
+			id: ctx.user.id,
+		});
 
-    expect(result).toBeDefined();
-    expect(result).toEqual([]);
-  });
+		expect(result).toBeDefined();
+		expect(result).toEqual([]);
+	});
 
-  test("Should return all posts from a user", async () => {
-    const posts = [];
-    for (let i = 0; i < 10; i++) {
-      posts.push(
-        await ctx.createPost({
-          title: `Test Post ${i + 1}`,
-          content: `This is test post number ${i + 1}`
-        })
-      );
-    }
+	test("Should return all posts from a user", async () => {
+		const posts = [];
+		for (let i = 0; i < 10; i++) {
+			posts.push(
+				await ctx.createPost({
+					title: `Test Post ${i + 1}`,
+					content: `This is test post number ${i + 1}`,
+				}),
+			);
+		}
 
-    const result = await UserRouter.createCaller(ctx).readPosts({
-      id: ctx.user.id
-    });
+		const result = await UserRouter.createCaller(ctx).readPosts({
+			id: ctx.user.id,
+		});
 
-    expect(result).toBeDefined();
-    expect(result.length).toEqual(10);
-    expect(result.map((post) => post.id)).toEqual(posts.map((post) => post.id));
-  });
+		expect(result).toBeDefined();
+		expect(result.length).toEqual(10);
+		expect(result.map((post) => post.id)).toEqual(posts.map((post) => post.id));
+	});
 
-  test("Should throw an error if user does not exist", async () => {
-    const uuid = ctx.helpers.uid.generate();
+	test("Should throw an error if user does not exist", async () => {
+		const uuid = ctx.helpers.uid.generate();
 
-    await expect(
-      UserRouter.createCaller(ctx).readPosts({ id: uuid })
-    ).rejects.toThrowError(
-      new TRPCError({
-        code: "NOT_FOUND",
-        message: UserErrorCode.USER_NOT_FOUND
-      })
-    );
-  });
+		await expect(
+			UserRouter.createCaller(ctx).readPosts({ id: uuid }),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "NOT_FOUND",
+				message: UserErrorCode.USER_NOT_FOUND,
+			}),
+		);
+	});
 });

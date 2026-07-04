@@ -3,14 +3,14 @@ import { ReadUserPostsInput } from "../schema";
 import { domain_getUserOrThrow } from "./getUserOrThrow";
 
 const domain_getUserPosts = async ({
-  ctx,
-  input
+	ctx,
+	input,
 }: DomainInput<ReadUserPostsInput>) => {
-  await domain_getUserOrThrow({ ctx, input: { id: input.id } });
+	await domain_getUserOrThrow({ ctx, input: { id: input.id } });
 
-  const posts = await ctx.repositories.post.readUserPosts(input.id);
+	const posts = await ctx.repositories.post.readUserPosts(input.id);
 
-  return posts;
+	return posts;
 };
 
 export { domain_getUserPosts };

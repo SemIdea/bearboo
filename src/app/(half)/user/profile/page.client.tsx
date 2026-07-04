@@ -1,74 +1,74 @@
 "use client";
 
-import { trpc } from "@/app/_trpc/client";
-import { Button } from "@/components/ui/button";
-import { IUserWithSession } from "@/server/models/user";
 import { useState } from "react";
+import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
-import {
-  UpdateUserProfileInput,
-  updateUserProfileSchema
-} from "@/server/features/user/schema";
-import { MdEditor } from "@/components/ui/mdEditor";
+import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
+import { MdEditor } from "@/components/ui/mdEditor";
 import { getErrorMessage } from "@/lib/error";
+import {
+	UpdateUserProfileInput,
+	updateUserProfileSchema,
+} from "@/server/features/user/schema";
+import { IUserWithSession } from "@/server/models/user";
 
 const useUpdateUser = () => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<null | string>(null);
-  const [errorMessage, setErrorMessage] = useState<null | string>(null);
+	const [isUploading, setIsUploading] = useState(false);
+	const [successMessage, setSuccessMessage] = useState<null | string>(null);
+	const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
-  const { mutate: updateUser } = trpc.user.update.useMutation({
-    onSuccess: () => {
-      setSuccessMessage("User updated successfully!");
-      setErrorMessage(null);
-      setIsUploading(false);
-    },
-    onError: (error) => {
-      setErrorMessage(getErrorMessage(error.message));
-      setSuccessMessage(null);
-      setIsUploading(false);
-    }
-  });
+	const { mutate: updateUser } = trpc.user.update.useMutation({
+		onSuccess: () => {
+			setSuccessMessage("User updated successfully!");
+			setErrorMessage(null);
+			setIsUploading(false);
+		},
+		onError: (error) => {
+			setErrorMessage(getErrorMessage(error.message));
+			setSuccessMessage(null);
+			setIsUploading(false);
+		},
+	});
 
-  const handleUpdateUser = (data: UpdateUserProfileInput) => {
-    setIsUploading(true);
+	const handleUpdateUser = (data: UpdateUserProfileInput) => {
+		setIsUploading(true);
 
-    updateUser(data);
-  };
+		updateUser(data);
+	};
 
-  return {
-    handleUpdateUser,
-    isUploading,
-    successMessage,
-    errorMessage
-  };
+	return {
+		handleUpdateUser,
+		isUploading,
+		successMessage,
+		errorMessage,
+	};
 };
 
 const UpdateUserForm = ({ user }: { user: IUserWithSession }) => {
-  const { handleUpdateUser, isUploading, successMessage, errorMessage } =
-    useUpdateUser();
+	const { handleUpdateUser, isUploading, successMessage, errorMessage } =
+		useUpdateUser();
 
-  return (
-    <FormBase
-      schema={updateUserProfileSchema}
-      onSubmit={handleUpdateUser}
-      defaultValues={{ ...user }}
-    >
-      <InputField name="name" label="Name" placeholder="John Doe" />
-      <InputField name="email" label="Email" placeholder="m@example.com" />
-      <InputField name="bio" label="Bio">
-        <MdEditor preview="live" />
-      </InputField>
-      <Button type="submit" className="w-full" disabled={isUploading}>
-        {isUploading ? "Updating..." : "Update Profile"}
-      </Button>
-      <ErrorMessage error={errorMessage} />
-      {successMessage && (
-        <div className="text-green-600 mt-2">{successMessage}</div>
-      )}
-    </FormBase>
-  );
+	return (
+		<FormBase
+			schema={updateUserProfileSchema}
+			onSubmit={handleUpdateUser}
+			defaultValues={{ ...user }}
+		>
+			<InputField name="name" label="Name" placeholder="John Doe" />
+			<InputField name="email" label="Email" placeholder="m@example.com" />
+			<InputField name="bio" label="Bio">
+				<MdEditor preview="live" />
+			</InputField>
+			<Button type="submit" className="w-full" disabled={isUploading}>
+				{isUploading ? "Updating..." : "Update Profile"}
+			</Button>
+			<ErrorMessage error={errorMessage} />
+			{successMessage && (
+				<div className="text-green-600 mt-2">{successMessage}</div>
+			)}
+		</FormBase>
+	);
 };
 
 export { UpdateUserForm };
