@@ -5,7 +5,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
-import { CommentRouter } from "../index";
+import { CommentRouter } from "../../index";
 
 describe("Delete Comment Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;

@@ -1,0 +1,207 @@
+import { describe, expect, test } from "vitest";
+import { SessionErrorCode } from "@/shared/error/session";
+import { UserErrorCode } from "@/shared/error/user";
+import { createAuthenticatedContext, createTestContext } from "@/test/context";
+import { domain_createAuthSession } from "../createAuthSession";
+import { domain_createResetToken } from "../createResetToken";
+import { domain_createToken } from "../createToken";
+import { domain_deleteSession } from "../deleteSession";
+import { domain_readSessionByRefreshToken } from "../readSessionByRefreshToken";
+import { domain_readUserAndSessionByAccessToken } from "../readUserAndSessionByAccessToken";
+import { domain_reCreateToken } from "../reCreateToken";
+import { domain_refreshSession } from "../refreshSession";
+
+describe("auth session and token domains", () => {
+	test("creates auth sessions for existing users", async () => {
+		const ctx = await createAuthenticatedContext();
+
+		const session = await domain_createAuthSession({
+			ctx,
+			input: { userId: ctx.user.id },
+		});
+
+		expect(session).toMatchObject({ userId: ctx.user.id });
+		expect(session.id).toEqual(expect.any(String));
+		expect(session.accessToken).toEqual(expect.any(String));
+		expect(session.refreshToken).toEqual(expect.any(String));
+	});
+
+	test("rejects auth session creation for missing users", async () => {
+		const ctx = createTestContext();
+
+		await expect(
+			domain_createAuthSession({ ctx, input: { userId: "missing-user" } }),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: UserErrorCode.USER_NOT_FOUND,
+		});
+	});
+
+	test("creates verification tokens with a future expiration", async () => {
+		const ctx = await createAuthenticatedContext();
+		const beforeCreate = Date.now();
+
+		const token = await domain_createToken({
+			ctx,
+			input: { userId: ctx.user.id },
+		});
+
+		expect(token).toMatchObject({
+			userId: ctx.user.id,
+			used: false,
+		});
+		expect(token.token).toEqual(expect.any(String));
+		expect(token.expiresAt.getTime()).toBeGreaterThan(beforeCreate);
+	});
+
+	test("creates reset tokens from user email", async () => {
+		const ctx = await createAuthenticatedContext();
+
+		const token = await domain_createResetToken({
+			ctx,
+			input: { email: ctx.user.email },
+		});
+
+		expect(token).toMatchObject({
+			userId: ctx.user.id,
+			used: false,
+		});
+		expect(await ctx.repositories.resetToken.readByToken(token.token)).toEqual(
+			token,
+		);
+	});
+
+	test("recreates verification tokens by deleting an existing token first", async () => {
+		const ctx = await createAuthenticatedContext();
+		const existingToken = await domain_createToken({
+			ctx,
+			input: { userId: ctx.user.id },
+		});
+
+		const recreatedToken = await domain_reCreateToken({
+			ctx,
+			input: { userEmail: ctx.user.email },
+		});
+
+		expect(
+			await ctx.repositories.verifyToken.read(existingToken.id),
+		).toBeNull();
+		expect(recreatedToken.userId).toBe(ctx.user.id);
+		expect(recreatedToken.id).not.toBe(existingToken.id);
+	});
+
+	test("reads sessions by refresh token", async () => {
+		const ctx = await createAuthenticatedContext();
+
+		await expect(
+			domain_readSessionByRefreshToken({
+				ctx,
+				input: { refreshToken: ctx.user.session.refreshToken },
+			}),
+		).resolves.toEqual(ctx.user.session);
+	});
+
+	test("throws when refresh token is invalid", async () => {
+		const ctx = createTestContext();
+
+		await expect(
+			domain_readSessionByRefreshToken({
+				ctx,
+				input: { refreshToken: "invalid-token" },
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: SessionErrorCode.INVALID_TOKEN,
+		});
+	});
+
+	test("reads user and session by access token without exposing password", async () => {
+		const ctx = await createAuthenticatedContext();
+
+		const result = await domain_readUserAndSessionByAccessToken({
+			ctx,
+			input: { accessToken: ctx.user.session.accessToken },
+		});
+
+		expect(result).toMatchObject({
+			id: ctx.user.id,
+			email: ctx.user.email,
+			session: {
+				id: ctx.user.session.id,
+				accessToken: ctx.user.session.accessToken,
+				refreshToken: ctx.user.session.refreshToken,
+			},
+		});
+		expect("password" in result).toBe(false);
+		expect("userId" in result.session).toBe(false);
+	});
+
+	test("throws when access token has no session or user", async () => {
+		const ctx = createTestContext();
+
+		await expect(
+			domain_readUserAndSessionByAccessToken({
+				ctx,
+				input: { accessToken: "missing-access-token" },
+			}),
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: SessionErrorCode.INVALID_TOKEN,
+		});
+
+		const session = await ctx.repositories.session.create("session-1", {
+			userId: "missing-user",
+			accessToken: "access-token",
+			refreshToken: "refresh-token",
+		});
+
+		await expect(
+			domain_readUserAndSessionByAccessToken({
+				ctx,
+				input: { accessToken: session.accessToken },
+			}),
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: SessionErrorCode.INVALID_TOKEN,
+		});
+	});
+
+	test("refreshes sessions by rotating tokens", async () => {
+		const ctx = await createAuthenticatedContext();
+
+		const refreshedSession = await domain_refreshSession({
+			ctx,
+			input: { id: ctx.user.session.id },
+		});
+
+		expect(refreshedSession.id).toBe(ctx.user.session.id);
+		expect(refreshedSession.accessToken).not.toBe(ctx.user.session.accessToken);
+		expect(refreshedSession.refreshToken).not.toBe(
+			ctx.user.session.refreshToken,
+		);
+	});
+
+	test("deletes existing sessions and rejects missing sessions", async () => {
+		const ctx = await createAuthenticatedContext();
+
+		await expect(
+			domain_deleteSession({
+				ctx,
+				input: { id: ctx.user.session.id, userId: ctx.user.id },
+			}),
+		).resolves.toBeUndefined();
+		await expect(
+			ctx.repositories.session.read(ctx.user.session.id),
+		).resolves.toBeNull();
+
+		await expect(
+			domain_deleteSession({
+				ctx,
+				input: { id: "missing-session", userId: ctx.user.id },
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: SessionErrorCode.SESSION_NOT_FOUND,
+		});
+	});
+});

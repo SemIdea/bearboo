@@ -5,7 +5,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
-import { AuthRouter } from "../index";
+import { AuthRouter } from "../../index";
 
 describe("Resend Verification Email Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;

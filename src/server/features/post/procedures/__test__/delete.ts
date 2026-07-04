@@ -5,7 +5,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
-import { PostRouter } from "../index";
+import { PostRouter } from "../../index";
 
 describe("Delete Post Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;

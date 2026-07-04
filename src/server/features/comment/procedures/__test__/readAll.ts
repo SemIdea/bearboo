@@ -3,7 +3,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
-import { CommentRouter } from "../index";
+import { CommentRouter } from "../../index";
 
 describe("Read All Comments Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;

@@ -6,7 +6,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
-import { AuthRouter } from "../index";
+import { AuthRouter } from "../../index";
 
 describe("Refresh Session Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;

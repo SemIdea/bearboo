@@ -3,7 +3,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
-import { UserRouter } from "../index";
+import { UserRouter } from "../../index";
 
 describe("Update Profile User Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;

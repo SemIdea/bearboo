@@ -6,7 +6,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
-import { PostRouter } from "../index";
+import { PostRouter } from "../../index";
 
 vi.mock("next/cache", () => ({
 	revalidatePath: vi.fn(),

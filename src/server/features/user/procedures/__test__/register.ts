@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { describe, expect, test, vi } from "vitest";
 import { UserErrorCode } from "@/shared/error/user";
 import { createTestContext } from "@/test/context";
-import { UserRouter } from "../index";
+import { UserRouter } from "../../index";
 
-vi.mock("../../mail/domain/sendMail", () => ({
+vi.mock("../../../mail/domain/sendMail", () => ({
 	domain_sendMail: vi.fn().mockResolvedValue({ success: true }),
 }));
 
@@ -30,7 +30,7 @@ describe("Register User Controller Unitary Testing", () => {
 	});
 
 	test("Should handle email sending failure gracefully", async () => {
-		const { domain_sendMail } = await import("../../mail/domain/sendMail");
+		const { domain_sendMail } = await import("../../../mail/domain/sendMail");
 		vi.mocked(domain_sendMail).mockRejectedValueOnce(
 			new Error("Email service unavailable"),
 		);
