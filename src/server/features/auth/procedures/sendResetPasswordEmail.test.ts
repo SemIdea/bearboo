@@ -1,15 +1,17 @@
-import { isControllerContext, TestContext } from "@/test/context";
-import { describe, expect, test } from "vitest";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
+import { beforeEach, describe, expect, test } from "vitest";
 import { AuthRouter } from "../index";
 import { UserErrorCode } from "@/shared/error/user";
 
-describe("Send Reset Password Email Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
-  await ctx.createAuthenticatedUser();
+describe("Send Reset Password Email Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should create a reset token and send a reset token email", async () => {
     const result = await AuthRouter.createCaller(ctx).sendResetPasswordEmail({

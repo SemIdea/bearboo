@@ -1,27 +1,38 @@
-import { isControllerContext, TestContext } from "@/test/context";
-import { describe, expect, test } from "vitest";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
+import { beforeEach, describe, expect, test } from "vitest";
 import { AuthRouter } from "../index";
 
-describe("Read User From Session Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
-  await ctx.createAuthenticatedUser();
+describe("Read User From Session Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should read user from session successfully", async () => {
     const user = ctx.user;
 
     const result = await AuthRouter.createCaller(ctx).session.me();
 
-    const { truePassword, password, ...userWithoutPassword } = user;
-    const { userId, ...sessionWithoutUserId } = user.session;
-
     expect(result).toBeDefined();
     expect(result).toEqual({
-      ...userWithoutPassword,
-      session: sessionWithoutUserId
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      verified: user.verified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      bio: user.bio,
+      session: {
+        id: user.session.id,
+        accessToken: user.session.accessToken,
+        refreshToken: user.session.refreshToken,
+        createdAt: user.session.createdAt,
+        updatedAt: user.session.updatedAt
+      }
     });
   });
 });

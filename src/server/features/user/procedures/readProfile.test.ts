@@ -1,17 +1,18 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { UserRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { UserErrorCode } from "@/shared/error/user";
 
-describe("Read Profile User Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Read Profile User Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should return user profile", async () => {
     const user = ctx.user;

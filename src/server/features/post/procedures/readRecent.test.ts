@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { PostRouter } from "../index";
-import { TestContext } from "@/test/context";
+import { createTestContext } from "@/test/context";
 
 describe("Read Recent Posts Controller Unitary Testing", () => {
-  const ctx = new TestContext();
+  const ctx = createTestContext();
 
   test("Should return the recent posts", async () => {
     const result = await PostRouter.createCaller(ctx).readRecent();

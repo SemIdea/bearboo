@@ -1,15 +1,16 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { UserRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 
-describe("Update Profile User Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Update Profile User Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should update user profile", async () => {
     const user = ctx.user;

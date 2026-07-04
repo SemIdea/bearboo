@@ -1,27 +1,23 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { PostRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { PostErrorCode } from "@/shared/error/post";
 
-describe("Read Post Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Read Post Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should read a post by ID", async () => {
-    const id = ctx.helpers.uid.generate();
-    const post = await ctx.repositories.post.create(id, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: ctx.user.id
-    });
+    const post = await ctx.createPost();
 
-    const result = await PostRouter.createCaller(ctx).read({ id });
+    const result = await PostRouter.createCaller(ctx).read({ id: post.id });
 
     expect(result).toEqual(post);
   });

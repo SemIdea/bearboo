@@ -1,15 +1,16 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { PostRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 
-describe("Create Post Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Create Post Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should create a post successfully", async () => {
     const user = ctx.user;

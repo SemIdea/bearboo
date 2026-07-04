@@ -1,29 +1,22 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { CommentRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 
-describe("Create Comment Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Create Comment Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should create a comment successfully", async () => {
-    const user = ctx.user;
-
-    const postId = ctx.helpers.uid.generate();
-
-    await ctx.repositories.post.create(postId, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: user.id
-    });
+    const post = await ctx.createPost();
 
     const input = {
-      postId,
+      postId: post.id,
       content: "This is a test comment."
     };
 
@@ -32,6 +25,6 @@ describe("Create Comment Controller Unitary Testing", async () => {
     expect(result).toBeDefined();
     expect(result.content).toEqual(input.content);
     expect(result.postId).toEqual(input.postId);
-    expect(result.userId).toEqual(user.id);
+    expect(result.userId).toEqual(ctx.user.id);
   });
 });

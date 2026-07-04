@@ -1,17 +1,19 @@
-import { isControllerContext, TestContext } from "@/test/context";
-import { describe, expect, test } from "vitest";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
+import { beforeEach, describe, expect, test } from "vitest";
 import { AuthRouter } from "../index";
 import { TRPCError } from "@trpc/server";
 import { SessionErrorCode } from "@/shared/error/session";
 import { UserErrorCode } from "@/shared/error/user";
 
-describe("Logout Session Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
-  await ctx.createAuthenticatedUser();
+describe("Logout Session Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should logout user successfully", async () => {
     const user = ctx.user;
@@ -38,13 +40,6 @@ describe("Logout Session Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if session is not found", async () => {
-    const ctx = new TestContext();
-    await ctx.createAuthenticatedUser();
-
-    if (!isControllerContext(ctx)) {
-      throw new Error("User is not authenticated");
-    }
-
     ctx.user.session.id = "non-existent-session-id";
 
     await expect(

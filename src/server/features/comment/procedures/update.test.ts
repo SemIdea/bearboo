@@ -1,34 +1,21 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { CommentRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { CommentErrorCode } from "@/shared/error/comment";
 
-describe("Update Comment Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Update Comment Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should update a comment successfully", async () => {
-    const user = ctx.user;
-
-    const postId = ctx.helpers.uid.generate();
-    const post = await ctx.repositories.post.create(postId, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: user.id
-    });
-
-    const commentId = ctx.helpers.uid.generate();
-    const comment = await ctx.repositories.comment.create(commentId, {
-      content: "This is a test comment.",
-      postId: post.id,
-      userId: user.id
-    });
+    const comment = await ctx.createComment();
 
     const input = {
       id: comment.id,
@@ -40,8 +27,8 @@ describe("Update Comment Controller Unitary Testing", async () => {
     expect(result).toBeDefined();
     expect(result.id).toEqual(comment.id);
     expect(result.content).toEqual(input.content);
-    expect(result.postId).toEqual(post.id);
-    expect(result.userId).toEqual(user.id);
+    expect(result.postId).toEqual(comment.postId);
+    expect(result.userId).toEqual(ctx.user.id);
   });
 
   test("Should throw an error if the comment does not exist", async () => {
@@ -62,23 +49,10 @@ describe("Update Comment Controller Unitary Testing", async () => {
 
   test("Should throw an error if the user is not the owner of the comment", async () => {
     const otherUser = await ctx.createNewUser();
-
-    const postId = ctx.helpers.uid.generate();
-    const post = await ctx.repositories.post.create(postId, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: otherUser.id
-    });
-
-    const commentId = ctx.helpers.uid.generate();
-    await ctx.repositories.comment.create(commentId, {
-      content: "This is a test comment.",
-      postId: post.id,
-      userId: otherUser.id
-    });
+    const comment = await ctx.createComment({ userId: otherUser.id });
 
     const input = {
-      id: commentId,
+      id: comment.id,
       content: "This is an updated test comment."
     };
 

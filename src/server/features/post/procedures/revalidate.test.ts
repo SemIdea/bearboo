@@ -1,6 +1,9 @@
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { PostRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { revalidatePath } from "next/cache";
 import { TRPCError } from "@trpc/server";
 import { PostErrorCode } from "@/shared/error/post";
@@ -9,23 +12,15 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn()
 }));
 
-describe("Revalidate Post Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
-  await ctx.createAuthenticatedUser();
+describe("Revalidate Post Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should revalidate a post successfully", async () => {
-    const user = ctx.user;
-    const postId = ctx.helpers.uid.generate();
-
-    const post = await ctx.repositories.post.create(postId, {
-      userId: user.id,
-      title: "Test Post",
-      content: "This is a test post content."
-    });
+    const post = await ctx.createPost();
 
     const result = await PostRouter.createCaller(ctx).revalidate({
       id: post.id
@@ -51,16 +46,10 @@ describe("Revalidate Post Controller Unitary Testing", async () => {
 
   test("Should throw an error if user is not the owner of the post", async () => {
     const otherUser = await ctx.createNewUser();
-
-    const postId = ctx.helpers.uid.generate();
-    await ctx.repositories.post.create(postId, {
-      userId: otherUser.id,
-      title: "Another User's Post",
-      content: "This post belongs to another user."
-    });
+    const post = await ctx.createPost({ userId: otherUser.id });
 
     await expect(
-      PostRouter.createCaller(ctx).revalidate({ id: postId })
+      PostRouter.createCaller(ctx).revalidate({ id: post.id })
     ).rejects.toThrowError(
       new TRPCError({
         code: "FORBIDDEN",

@@ -1,44 +1,25 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { CommentRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { CommentErrorCode } from "@/shared/error/comment";
 
-describe("Delete Comment Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Delete Comment Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should delete a comment successfully", async () => {
-    const user = ctx.user;
+    const comment = await ctx.createComment();
 
-    const postId = ctx.helpers.uid.generate();
+    await CommentRouter.createCaller(ctx).delete({ id: comment.id });
 
-    await ctx.repositories.post.create(postId, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: user.id
-    });
-
-    const commentId = ctx.helpers.uid.generate();
-
-    await ctx.repositories.comment.create(commentId, {
-      postId,
-      content: "This is a test comment.",
-      userId: user.id
-    });
-
-    const input = {
-      id: commentId
-    };
-
-    await CommentRouter.createCaller(ctx).delete(input);
-
-    const result = await ctx.repositories.comment.read(commentId);
+    const result = await ctx.repositories.comment.read(comment.id);
 
     expect(result).toBeNull();
   });
@@ -60,29 +41,10 @@ describe("Delete Comment Controller Unitary Testing", async () => {
 
   test("Should throw an error when trying to delete a comment that belongs to another user", async () => {
     const otherUser = await ctx.createNewUser();
-
-    const postId = ctx.helpers.uid.generate();
-
-    await ctx.repositories.post.create(postId, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: otherUser.id
-    });
-
-    const commentId = ctx.helpers.uid.generate();
-
-    await ctx.repositories.comment.create(commentId, {
-      postId,
-      content: "This is a test comment.",
-      userId: otherUser.id
-    });
-
-    const input = {
-      id: commentId
-    };
+    const comment = await ctx.createComment({ userId: otherUser.id });
 
     await expect(
-      CommentRouter.createCaller(ctx).delete(input)
+      CommentRouter.createCaller(ctx).delete({ id: comment.id })
     ).rejects.toThrowError(
       new TRPCError({
         code: "FORBIDDEN",

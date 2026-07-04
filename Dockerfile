@@ -28,15 +28,6 @@ RUN yarn install --frozen-lockfile --prefer-offline \
   && npx prisma generate \
   && yarn cache clean
 
-# Test stage
-FROM base AS test
-WORKDIR /app
-COPY package.json yarn.lock ./
-RUN yarn install --production=false --no-cache
-COPY . .
-CMD ["sh", "-c", "npx prisma db push && yarn test"]
-
-
 # Development image
 FROM base AS dev
 WORKDIR /app

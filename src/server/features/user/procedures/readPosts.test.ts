@@ -1,23 +1,22 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { UserRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { UserErrorCode } from "@/shared/error/user";
 
-describe("User Posts Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("User Posts Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User not authenticated");
-  }
-
-  const user = ctx.user;
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should return an empty list when user has no posts", async () => {
     const result = await UserRouter.createCaller(ctx).readPosts({
-      id: user.id
+      id: ctx.user.id
     });
 
     expect(result).toBeDefined();
@@ -25,25 +24,23 @@ describe("User Posts Controller Unitary Testing", async () => {
   });
 
   test("Should return all posts from a user", async () => {
-    const postIds: string[] = [];
+    const posts = [];
     for (let i = 0; i < 10; i++) {
-      const postId = ctx.helpers.uid.generate();
-      postIds.push(postId);
-
-      await ctx.repositories.post.create(postId, {
-        title: `Test Post ${i + 1}`,
-        content: `This is test post number ${i + 1}`,
-        userId: user.id
-      });
+      posts.push(
+        await ctx.createPost({
+          title: `Test Post ${i + 1}`,
+          content: `This is test post number ${i + 1}`
+        })
+      );
     }
 
     const result = await UserRouter.createCaller(ctx).readPosts({
-      id: user.id
+      id: ctx.user.id
     });
 
     expect(result).toBeDefined();
     expect(result.length).toEqual(10);
-    expect(result.map((post) => post.id)).toEqual(postIds);
+    expect(result.map((post) => post.id)).toEqual(posts.map((post) => post.id));
   });
 
   test("Should throw an error if user does not exist", async () => {

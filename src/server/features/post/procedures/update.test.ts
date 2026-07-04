@@ -1,28 +1,27 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { PostRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { PostErrorCode } from "@/shared/error/post";
 
-describe("Update Post Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Update Post Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should update a post successfully", async () => {
-    const id = ctx.helpers.uid.generate();
-    const post = await ctx.repositories.post.create(id, {
+    const post = await ctx.createPost({
       title: "Original Title",
-      content: "Original Content",
-      userId: ctx.user!.id
+      content: "Original Content"
     });
 
     const result = await PostRouter.createCaller(ctx).update({
-      id,
+      id: post.id,
       content: "Updated Content",
       title: "Updated Title"
     });
@@ -52,17 +51,11 @@ describe("Update Post Controller Unitary Testing", async () => {
 
   test("Should throw error if user tries to update a post they do not own", async () => {
     const otherUser = await ctx.createNewUser();
-
-    const id = ctx.helpers.uid.generate();
-    await ctx.repositories.post.create(id, {
-      title: "Title",
-      content: "Content",
-      userId: otherUser.id
-    });
+    const post = await ctx.createPost({ userId: otherUser.id });
 
     await expect(
       PostRouter.createCaller(ctx).update({
-        id,
+        id: post.id,
         content: "Updated Content",
         title: "Updated Title"
       })

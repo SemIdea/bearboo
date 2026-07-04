@@ -1,25 +1,22 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { PostRouter } from "../index";
-import { isControllerContext, TestContext } from "@/test/context";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
 import { PostErrorCode } from "@/shared/error/post";
 
-describe("Delete Post Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
+describe("Delete Post Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  await ctx.createAuthenticatedUser();
-
-  if (!isControllerContext(ctx)) {
-    throw new Error("User not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should delete a post successfully", async () => {
-    const id = ctx.helpers.uid.generate();
-    await ctx.repositories.post.create(id, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: ctx.user.id
-    });
+    const post = await ctx.createPost();
+    const id = post.id;
 
     await PostRouter.createCaller(ctx).delete({ id });
 
@@ -43,16 +40,10 @@ describe("Delete Post Controller Unitary Testing", async () => {
 
   test("Should throw an error if post does not belong to user", async () => {
     const otherUser = await ctx.createNewUser();
-
-    const otherUserPostId = ctx.helpers.uid.generate();
-    await ctx.repositories.post.create(otherUserPostId, {
-      title: "Other User's Post",
-      content: "This post belongs to another user.",
-      userId: otherUser.id
-    });
+    const post = await ctx.createPost({ userId: otherUser.id });
 
     await expect(
-      PostRouter.createCaller(ctx).delete({ id: otherUserPostId })
+      PostRouter.createCaller(ctx).delete({ id: post.id })
     ).rejects.toThrowError(
       new TRPCError({
         code: "FORBIDDEN",

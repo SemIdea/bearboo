@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 
 import { UserRouter } from "../index";
-import { TestContext } from "@/test/context";
+import { createTestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -10,7 +10,7 @@ vi.mock("../../mail/domain/sendMail", () => ({
 }));
 
 describe("Register User Controller Unitary Testing", () => {
-  const ctx = new TestContext();
+  const ctx = createTestContext();
 
   test("Should register user successfully", async () => {
     const uuid = ctx.helpers.uid.generate();
@@ -43,9 +43,9 @@ describe("Register User Controller Unitary Testing", () => {
       password: "password123"
     };
 
-    await expect(
-      UserRouter.createCaller(ctx).register(input)
-    ).rejects.toThrow("Failed to send verification email");
+    await expect(UserRouter.createCaller(ctx).register(input)).rejects.toThrow(
+      "Failed to send verification email"
+    );
   });
 
   test("Should throw error if user already exists", async () => {

@@ -1,16 +1,18 @@
-import { isControllerContext, TestContext } from "@/test/context";
-import { describe, expect, test } from "vitest";
+import {
+  createAuthenticatedContext,
+  IControllerContextDTO
+} from "@/test/context";
+import { beforeEach, describe, expect, test } from "vitest";
 import { UserRouter } from "../index";
 import { TRPCError } from "@trpc/server";
 import { UserErrorCode } from "@/shared/error/user";
 
-describe("User Comments Controller Unitary Testing", async () => {
-  const ctx = new TestContext();
-  await ctx.createAuthenticatedUser();
+describe("User Comments Controller Unitary Testing", () => {
+  let ctx: IControllerContextDTO;
 
-  if (!isControllerContext(ctx)) {
-    throw new Error("User is not authenticated");
-  }
+  beforeEach(async () => {
+    ctx = await createAuthenticatedContext();
+  });
 
   test("Should return an empty array if user has no comments", async () => {
     const user = ctx.user;
@@ -24,32 +26,18 @@ describe("User Comments Controller Unitary Testing", async () => {
   });
 
   test("Should read user comments successfully", async () => {
-    const user = ctx.user;
-
-    const postId = ctx.helpers.uid.generate();
-    await ctx.repositories.post.create(postId, {
-      title: "Test Post",
-      content: "This is a test post.",
-      userId: user.id
-    });
-
-    const commentId = ctx.helpers.uid.generate();
-    const comment = await ctx.repositories.comment.create(commentId, {
-      postId,
-      content: "This is a test comment.",
-      userId: user.id
-    });
+    const comment = await ctx.createComment();
 
     const result = await UserRouter.createCaller(ctx).readComments({
-      id: user.id
+      id: ctx.user.id
     });
 
     expect(result).toBeDefined();
     expect(result.length).toBeGreaterThanOrEqual(1);
     expect(result[0].id).toEqual(comment.id);
     expect(result[0].content).toEqual(comment.content);
-    expect(result[0].postId).toEqual(postId);
-    expect(result[0].userId).toEqual(user.id);
+    expect(result[0].postId).toEqual(comment.postId);
+    expect(result[0].userId).toEqual(ctx.user.id);
   });
 
   test("Should return an error if user does not exist", async () => {
