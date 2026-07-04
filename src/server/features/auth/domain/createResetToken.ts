@@ -1,20 +1,15 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
 import { SendResetPasswordEmailInput } from "../schema";
+import { domain_getUserByEmailOrThrow } from "@/server/features/user/domain/getUserByEmailOrThrow";
 
 const domain_createResetToken = async ({
   ctx,
   input
 }: DomainInput<SendResetPasswordEmailInput>) => {
-  const user = await ctx.repositories.user.readByEmail(input.email);
-
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
-  }
+  const user = await domain_getUserByEmailOrThrow({
+    ctx,
+    input: { email: input.email }
+  });
 
   const resetTokenId = ctx.helpers.uid.generate();
   const newResetToken = ctx.helpers.uid.generate();

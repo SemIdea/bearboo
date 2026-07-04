@@ -1,20 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
+import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
 
 const domain_deleteSession = async ({
   ctx,
   input
 }: DomainInput<{ id: string; userId: string }>) => {
-  const user = await ctx.repositories.user.read(input.userId);
-
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
-  }
+  await domain_getUserOrThrow({ ctx, input: { id: input.userId } });
 
   const session = await ctx.repositories.session.read(input.id);
 

@@ -1,20 +1,12 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
 import { ReadUserCommentsInput } from "../schema";
+import { domain_getUserOrThrow } from "./getUserOrThrow";
 
 const domain_readUserComments = async ({
   ctx,
   input
 }: DomainInput<ReadUserCommentsInput>) => {
-  const user = await ctx.repositories.user.read(input.id);
-
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
-  }
+  await domain_getUserOrThrow({ ctx, input: { id: input.id } });
 
   const comments = await ctx.repositories.comment.readAllByUserId(input.id);
 

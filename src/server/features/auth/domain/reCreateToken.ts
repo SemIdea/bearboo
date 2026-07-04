@@ -1,20 +1,15 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
 import { domain_createToken } from "./createToken";
+import { domain_getUserByEmailOrThrow } from "@/server/features/user/domain/getUserByEmailOrThrow";
 
 const domain_reCreateToken = async ({
   ctx,
   input
 }: DomainInput<{ userEmail: string }>) => {
-  const user = await ctx.repositories.user.readByEmail(input.userEmail);
-
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
-  }
+  const user = await domain_getUserByEmailOrThrow({
+    ctx,
+    input: { email: input.userEmail }
+  });
 
   const existingToken = await ctx.repositories.verifyToken.readByUserId(
     user.id

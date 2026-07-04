@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
 import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
+import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
 
 const domain_resetPassword = async ({
   ctx,
@@ -10,9 +10,7 @@ const domain_resetPassword = async ({
   token: string;
   newPassword: string;
 }>) => {
-  const resetToken = await ctx.repositories.resetToken.readByToken(
-    input.token
-  );
+  const resetToken = await ctx.repositories.resetToken.readByToken(input.token);
 
   if (!resetToken) {
     throw new TRPCError({
@@ -35,14 +33,10 @@ const domain_resetPassword = async ({
     });
   }
 
-  const user = await ctx.repositories.user.read(resetToken.userId);
-
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
-  }
+  const user = await domain_getUserOrThrow({
+    ctx,
+    input: { id: resetToken.userId }
+  });
 
   await ctx.repositories.resetToken.update(resetToken.id, {
     used: true

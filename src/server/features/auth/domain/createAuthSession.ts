@@ -1,20 +1,16 @@
 import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
+import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
 
 const domain_createAuthSession = async ({
   ctx,
   input
 }: DomainInput<{ userId: string }>) => {
-  const user = await ctx.repositories.user.read(input.userId);
-
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
-  }
+  const user = await domain_getUserOrThrow({
+    ctx,
+    input: { id: input.userId }
+  });
 
   const sessionId = ctx.helpers.uid.generate();
   const accessToken = ctx.helpers.uid.generate();
