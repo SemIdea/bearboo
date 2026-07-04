@@ -1,15 +1,13 @@
-import { createDomain, DomainInput } from "@/server/createDomain";
+import { DomainInput } from "@/server/createDomain";
 import { CreateCommentInput } from "../schema";
 
-const domain_createComment = createDomain(
-  async ({
-    ctx,
-    input
-  }: DomainInput<CreateCommentInput & { userId: string }>) => {
-    const commentId = ctx.helpers.uid.generate();
+const domain_createComment = async ({
+  ctx,
+  input
+}: DomainInput<CreateCommentInput & { userId: string }>) => {
+  const commentId = ctx.helpers.uid.generate();
 
-    return ctx.repositories.comment.create(commentId, input);
-  }
-);
+  return ctx.repositories.comment.create(commentId, input);
+};
 
 export { domain_createComment };
