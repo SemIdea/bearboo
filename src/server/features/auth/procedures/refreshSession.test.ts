@@ -1,8 +1,7 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
 import { refreshSessionController } from "./refreshSession";
-import { SessionEntity } from "@/server/entities/session/entity";
-import { ISessionEntity } from "@/server/entities/session/DTO";
+import { ISessionEntity } from "@/server/models/session";
 import { TRPCError } from "@trpc/server";
 import { SessionErrorCode } from "@/shared/error/session";
 
@@ -26,13 +25,9 @@ describe("Refresh Session Controller Unitary Testing", async () => {
       ctx
     });
 
-    const result = (await SessionEntity.read({
-      id: user.session.id,
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.session
-      }
-    })) as ISessionEntity;
+    const result = (await ctx.repositories.session.read(
+      user.session.id
+    )) as ISessionEntity;
 
     expect(result).toBeDefined();
     expect(result.accessToken).not.toBe(user.session.accessToken);

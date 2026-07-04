@@ -14,8 +14,7 @@ const revalidatePostController = async ({
     userId: ctx.user.id,
     repositories: {
       ...ctx.repositories,
-      database: ctx.repositories.post,
-      cache: ctx.repositories.cache
+      database: ctx.repositories.post
     }
   });
 

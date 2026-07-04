@@ -1,16 +1,12 @@
 import { IReadAllCommentsByPostIdDTO } from "./readAll.dto";
-import { CommentEntity } from "@/server/entities/comment/entity";
 
 const ReadAllCommentsByPostService = async ({
   repositories,
-  ...data
+  postId
 }: IReadAllCommentsByPostIdDTO) => {
-  const comments = await CommentEntity.readAllByPostId({
-    ...data,
-    repositories
-  });
+  const comments = await repositories.database.readAllByPostId(postId);
 
-  return comments;
+  return comments ?? [];
 };
 
 export { ReadAllCommentsByPostService };

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ISessionWithUser } from "@/server/entities/session/DTO";
+import { ISessionWithUser } from "@/server/models/session";
 import { setAuthData, clearAuthData } from "@/utils/authStorage";
 
 const useAuthLogic = () => {

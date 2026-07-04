@@ -1,7 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { IDeleteSessionDTO } from "./deleteSession.dto";
-import { SessionEntity } from "@/server/entities/session/entity";
-import { UserEntity } from "@/server/entities/user/entity";
 import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
 
@@ -9,13 +7,7 @@ const DeleteSessionService = async ({
   repositories,
   ...data
 }: IDeleteSessionDTO) => {
-  const user = await UserEntity.read({
-    id: data.userId,
-    repositories: {
-      ...repositories,
-      database: repositories.user
-    }
-  });
+  const user = await repositories.user.read(data.userId);
 
   if (!user) {
     throw new TRPCError({
@@ -24,10 +16,7 @@ const DeleteSessionService = async ({
     });
   }
 
-  const session = await SessionEntity.read({
-    ...data,
-    repositories
-  });
+  const session = await repositories.database.read(data.id);
 
   if (!session) {
     throw new TRPCError({
@@ -36,11 +25,7 @@ const DeleteSessionService = async ({
     });
   }
 
-  await SessionEntity.delete({
-    ...session,
-    data: session,
-    repositories
-  });
+  await repositories.database.delete(session.id);
 };
 
 export { DeleteSessionService };

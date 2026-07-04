@@ -1,5 +1,4 @@
 import { ICreatePostDTO } from "./create.dto";
-import { PostEntity } from "@/server/entities/post/entity";
 
 const CreatePostService = async ({
   repositories,
@@ -8,11 +7,7 @@ const CreatePostService = async ({
 }: ICreatePostDTO) => {
   const postId = helpers.uid.generate();
 
-  const post = await PostEntity.create({
-    id: postId,
-    data,
-    repositories
-  });
+  const post = await repositories.database.create(postId, data);
 
   return post;
 };

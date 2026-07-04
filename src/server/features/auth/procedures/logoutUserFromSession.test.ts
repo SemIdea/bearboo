@@ -1,7 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
 import { logoutUserFromSessionController } from "./logoutUserFromSession";
-import { SessionEntity } from "@/server/entities/session/entity";
 import { TRPCError } from "@trpc/server";
 import { SessionErrorCode } from "@/shared/error/session";
 import { UserErrorCode } from "@/shared/error/user";
@@ -22,13 +21,7 @@ describe("Logout Session Controller Unitary Testing", async () => {
       ctx
     });
 
-    const result = await SessionEntity.read({
-      id: session.id,
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.session
-      }
-    });
+    const result = await ctx.repositories.session.read(session.id);
 
     expect(result).toBeNull();
   });

@@ -1,20 +1,12 @@
-import { UserEntity } from "@/server/entities/user/entity";
-import { IGetUserCommentsDTO } from "./readComments.dto";
-import { CommentEntity } from "@/server/entities/comment/entity";
 import { TRPCError } from "@trpc/server";
+import { IGetUserCommentsDTO } from "./readComments.dto";
 import { UserErrorCode } from "@/shared/error/user";
 
 const ReadUserCommentsService = async ({
   repositories,
-  ...data
+  id
 }: IGetUserCommentsDTO) => {
-  const user = await UserEntity.read({
-    ...data,
-    repositories: {
-      ...repositories,
-      database: repositories.user
-    }
-  });
+  const user = await repositories.user.read(id);
 
   if (!user) {
     throw new TRPCError({
@@ -23,12 +15,9 @@ const ReadUserCommentsService = async ({
     });
   }
 
-  const comments = await CommentEntity.readAllByUserId({
-    userId: data.id,
-    repositories
-  });
+  const comments = await repositories.database.readAllByUserId(id);
 
-  return comments;
+  return comments ?? [];
 };
 
 export { ReadUserCommentsService };

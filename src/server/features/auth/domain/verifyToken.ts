@@ -1,56 +1,40 @@
-import { VerifyTokenEntity } from "@/server/entities/verifyToken/entity";
 import { TRPCError } from "@trpc/server";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
-import { UserEntity } from "@/server/entities/user/entity";
 import { ITokenServiceDTO } from "./verifyToken.dto";
 
 const VerifyTokenService = async ({
   repositories,
-  ...data
+  token
 }: ITokenServiceDTO) => {
-  const token = await VerifyTokenEntity.readByToken({
-    ...data,
-    repositories
-  });
+  const verifyToken = await repositories.database.readByToken(token);
 
-  if (!token) {
+  if (!verifyToken) {
     throw new TRPCError({
       code: "NOT_FOUND",
       message: VerifyTokenErrorCodes.TOKEN_NOT_FOUND
     });
   }
 
-  if (token.used) {
+  if (verifyToken.used) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: VerifyTokenErrorCodes.TOKEN_ALREADY_USED
     });
   }
 
-  if (token.expiresAt < new Date()) {
+  if (verifyToken.expiresAt < new Date()) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: VerifyTokenErrorCodes.TOKEN_EXPIRED
     });
   }
 
-  await UserEntity.update({
-    id: token.userId,
-    data: {
-      verified: true
-    },
-    repositories: {
-      ...repositories,
-      database: repositories.user
-    }
+  await repositories.user.update(verifyToken.userId, {
+    verified: true
   });
 
-  const verifiedToken = await VerifyTokenEntity.update({
-    id: token.id,
-    data: {
-      used: true
-    },
-    repositories
+  const verifiedToken = await repositories.database.update(verifyToken.id, {
+    used: true
   });
 
   return verifiedToken;

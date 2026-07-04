@@ -1,7 +1,6 @@
-import { IResetTokenModel } from "@/server/entities/resetToken/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
+import { IResetTokenModel } from "@/server/models/resetToken";
+import { IUserModel } from "@/server/models/user";
 import { IPasswordHashingHelperAdapter } from "@/server/integrations/helpers/passwordHashing/adapter";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type IResetPasswordDTO = {
   token: string;
@@ -10,7 +9,6 @@ type IResetPasswordDTO = {
   repositories: {
     database: IUserModel;
     resetToken: IResetTokenModel;
-    cache: ICacheRepositoryAdapter;
   };
   helpers: {
     hashing: IPasswordHashingHelperAdapter;

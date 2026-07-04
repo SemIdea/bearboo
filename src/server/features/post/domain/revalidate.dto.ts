@@ -1,12 +1,10 @@
-import { IPostModel } from "@/server/entities/post/DTO";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
+import { IPostModel } from "@/server/models/post";
 
 type IRevalidatePostDTO = {
   id: string;
   userId: string;
   repositories: {
     database: IPostModel;
-    cache: ICacheRepositoryAdapter;
   };
 };
 

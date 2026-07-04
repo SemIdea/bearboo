@@ -2,7 +2,7 @@
 
 import { trpc } from "@/app/_trpc/client";
 import { Button } from "@/components/ui/button";
-import { IUserWithSession } from "@/server/entities/user/DTO";
+import { IUserWithSession } from "@/server/models/user";
 import { useState } from "react";
 import { FormBase, InputField } from "@/components/formBase";
 import {

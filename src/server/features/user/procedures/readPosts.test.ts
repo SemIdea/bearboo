@@ -2,7 +2,6 @@ import { describe, expect, test } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { readUserPostsController } from "./readPosts";
 import { isControllerContext, TestContext } from "@/test/context";
-import { PostEntity } from "@/server/entities/post/entity";
 import { UserErrorCode } from "@/shared/error/user";
 
 describe("User Posts Controller Unitary Testing", async () => {
@@ -32,17 +31,10 @@ describe("User Posts Controller Unitary Testing", async () => {
       const postId = ctx.helpers.uid.generate();
       postIds.push(postId);
 
-      await PostEntity.create({
-        repositories: {
-          ...ctx.repositories,
-          database: ctx.repositories.post
-        },
-        id: postId,
-        data: {
-          title: `Test Post ${i + 1}`,
-          content: `This is test post number ${i + 1}`,
-          userId: user.id
-        }
+      await ctx.repositories.post.create(postId, {
+        title: `Test Post ${i + 1}`,
+        content: `This is test post number ${i + 1}`,
+        userId: user.id
       });
     }
 

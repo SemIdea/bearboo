@@ -1,7 +1,7 @@
 import { trpc } from "@/app/_trpc/client";
 import { useAuth } from "@/context/auth";
 import { getErrorMessage } from "@/lib/error";
-import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
+import { ICommentEntityWithUser } from "@/server/models/comment";
 import { useState } from "react";
 import { Comment } from "./comment";
 import { Separator } from "./ui/separator";

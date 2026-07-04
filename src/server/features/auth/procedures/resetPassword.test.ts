@@ -2,7 +2,6 @@ import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
 import { resetPasswordController } from "./resetPassword";
 import { sendResetPasswordEmailController } from "./sendResetPasswordEmail";
-import { ResetTokenEntity } from "@/server/entities/resetToken/entity";
 import { UserErrorCode } from "@/shared/error/user";
 import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
 import { TRPCError } from "@trpc/server";
@@ -25,13 +24,9 @@ describe("Reset Token Controller Unitary Testing", async () => {
       ctx
     });
 
-    const resetToken = await ResetTokenEntity.readByUserId({
-      userId: ctx.user.id,
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.resetToken
-      }
-    });
+    const resetToken = await ctx.repositories.resetToken.readByUserId(
+      ctx.user.id
+    );
 
     const input = {
       token: resetToken!.token,
@@ -69,19 +64,15 @@ describe("Reset Token Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if token is already used", async () => {
-    const resetToken = await ResetTokenEntity.create({
-      id: ctx.helpers.uid.generate(),
-      data: {
+    const resetToken = await ctx.repositories.resetToken.create(
+      ctx.helpers.uid.generate(),
+      {
         userId: ctx.user.id,
         token: ctx.helpers.uid.generate(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         used: true
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.resetToken
       }
-    });
+    );
 
     const input = {
       token: resetToken.token,
@@ -103,19 +94,15 @@ describe("Reset Token Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if token is expired", async () => {
-    const resetToken = await ResetTokenEntity.create({
-      id: ctx.helpers.uid.generate(),
-      data: {
+    const resetToken = await ctx.repositories.resetToken.create(
+      ctx.helpers.uid.generate(),
+      {
         userId: ctx.user.id,
         token: ctx.helpers.uid.generate(),
         expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24 hours ago
         used: false
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.resetToken
       }
-    });
+    );
 
     const input = {
       token: resetToken.token,
@@ -137,19 +124,15 @@ describe("Reset Token Controller Unitary Testing", async () => {
   });
 
   test("Should throw an error if passwords do not match", async () => {
-    const resetToken = await ResetTokenEntity.create({
-      id: ctx.helpers.uid.generate(),
-      data: {
+    const resetToken = await ctx.repositories.resetToken.create(
+      ctx.helpers.uid.generate(),
+      {
         userId: ctx.user.id,
         token: ctx.helpers.uid.generate(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         used: false
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.resetToken
       }
-    });
+    );
 
     const input = {
       token: resetToken.token,

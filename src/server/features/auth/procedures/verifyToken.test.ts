@@ -1,8 +1,6 @@
-import { VerifyTokenEntity } from "@/server/entities/verifyToken/entity";
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
 import { verifyTokenController } from "./verifyToken";
-import { UserEntity } from "@/server/entities/user/entity";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
 
 describe("Verify Token Controller Unitary Testing", async () => {
@@ -17,18 +15,11 @@ describe("Verify Token Controller Unitary Testing", async () => {
     const verifyTokenId = ctx.helpers.uid.generate();
     const verifyToken = ctx.helpers.uid.generate();
 
-    await VerifyTokenEntity.create({
-      id: verifyTokenId,
-      data: {
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-        token: verifyToken,
-        userId: ctx.user.id,
-        used: false
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.verifyToken
-      }
+    await ctx.repositories.verifyToken.create(verifyTokenId, {
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      token: verifyToken,
+      userId: ctx.user.id,
+      used: false
     });
 
     const result = await verifyTokenController({
@@ -38,13 +29,7 @@ describe("Verify Token Controller Unitary Testing", async () => {
       ctx
     });
 
-    const updatedUser = await UserEntity.read({
-      id: ctx.user.id,
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.user
-      }
-    });
+    const updatedUser = await ctx.repositories.user.read(ctx.user.id);
 
     expect(result).toBeDefined();
     expect(result.used).toBe(true);
@@ -65,19 +50,15 @@ describe("Verify Token Controller Unitary Testing", async () => {
   });
 
   test("Should throw error if token is already used", async () => {
-    const verifyToken = await VerifyTokenEntity.create({
-      id: ctx.helpers.uid.generate(),
-      data: {
+    const verifyToken = await ctx.repositories.verifyToken.create(
+      ctx.helpers.uid.generate(),
+      {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         token: ctx.helpers.uid.generate(),
         userId: ctx.user.id,
         used: true
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.verifyToken
       }
-    });
+    );
 
     const input = {
       token: verifyToken.token
@@ -92,19 +73,15 @@ describe("Verify Token Controller Unitary Testing", async () => {
   });
 
   test("Should throw error if token is expired", async () => {
-    const expiredToken = await VerifyTokenEntity.create({
-      id: ctx.helpers.uid.generate(),
-      data: {
+    const expiredToken = await ctx.repositories.verifyToken.create(
+      ctx.helpers.uid.generate(),
+      {
         expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24 hours ago
         token: ctx.helpers.uid.generate(),
         userId: ctx.user.id,
         used: false
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.verifyToken
       }
-    });
+    );
 
     const input = {
       token: expiredToken.token

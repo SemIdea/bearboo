@@ -1,5 +1,3 @@
-import { CommentEntity } from "@/server/entities/comment/entity";
-import { PostEntity } from "@/server/entities/post/entity";
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
 import { readUserCommentsController } from "./readComments";
@@ -32,31 +30,17 @@ describe("User Comments Controller Unitary Testing", async () => {
     const user = ctx.user;
 
     const postId = ctx.helpers.uid.generate();
-    await PostEntity.create({
-      id: postId,
-      data: {
-        title: "Test Post",
-        content: "This is a test post.",
-        userId: user.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      }
+    await ctx.repositories.post.create(postId, {
+      title: "Test Post",
+      content: "This is a test post.",
+      userId: user.id
     });
 
     const commentId = ctx.helpers.uid.generate();
-    const comment = await CommentEntity.create({
-      id: commentId,
-      data: {
-        postId,
-        content: "This is a test comment.",
-        userId: user.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.comment
-      }
+    const comment = await ctx.repositories.comment.create(commentId, {
+      postId,
+      content: "This is a test comment.",
+      userId: user.id
     });
 
     const result = await readUserCommentsController({

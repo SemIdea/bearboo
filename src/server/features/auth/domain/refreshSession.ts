@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { IRefreshSessionDTO } from "./refreshSession.dto";
-import { SessionEntity } from "@/server/entities/session/entity";
 import { SessionErrorCode } from "@/shared/error/session";
 
 const RefreshSessionService = async ({
@@ -11,14 +10,9 @@ const RefreshSessionService = async ({
   const newAccessToken = helpers.uid.generate();
   const newRefreshToken = helpers.uid.generate();
 
-  const newSession = await SessionEntity.refreshSession({
-    ...data,
-    data: {
-      ...data,
-      newAccessToken: newAccessToken,
-      newRefreshToken: newRefreshToken
-    },
-    repositories
+  const newSession = await repositories.database.update(data.id, {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken
   });
 
   if (!newSession) {

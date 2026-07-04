@@ -1,4 +1,4 @@
-import { IPostEntityWithRelations } from "@/server/entities/post/DTO";
+import { IPostEntityWithRelations } from "@/server/models/post";
 import {
   Card,
   CardContent,

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect } from "react";
 import { useAuthLogic, UseAuthLogicReturn } from "./index.hook";
-import { ISessionWithUser } from "@/server/entities/session/DTO";
+import { ISessionWithUser } from "@/server/models/session";
 
 const AuthContext = createContext<UseAuthLogicReturn>({} as UseAuthLogicReturn);
 

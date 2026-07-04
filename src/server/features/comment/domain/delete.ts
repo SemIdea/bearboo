@@ -1,16 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { IDeleteCommentDTO } from "./delete.dto";
-import { CommentEntity } from "@/server/entities/comment/entity";
 import { CommentErrorCode } from "@/shared/error/comment";
 
 const DeleteCommentService = async ({
   repositories,
   ...data
 }: IDeleteCommentDTO) => {
-  const comment = await CommentEntity.read({
-    ...data,
-    repositories
-  });
+  const comment = await repositories.database.read(data.id);
 
   if (!comment) {
     throw new TRPCError({
@@ -26,11 +22,7 @@ const DeleteCommentService = async ({
     });
   }
 
-  return await CommentEntity.delete({
-    ...data,
-    data: comment,
-    repositories
-  });
+  return await repositories.database.delete(data.id);
 };
 
 export { DeleteCommentService };

@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { IRegisterUserDTO } from "./register.dto";
-import { UserEntity } from "@/server/entities/user/entity";
 import { UserErrorCode } from "@/shared/error/user";
 
 const RegisterUserService = async ({
@@ -8,10 +7,7 @@ const RegisterUserService = async ({
   helpers,
   ...data
 }: IRegisterUserDTO) => {
-  const existingUser = await UserEntity.readByEmail({
-    ...data,
-    repositories
-  });
+  const existingUser = await repositories.database.readByEmail(data.email);
 
   if (existingUser) {
     throw new TRPCError({
@@ -23,14 +19,10 @@ const RegisterUserService = async ({
   const userId = helpers.uid.generate();
   const hashedPassword = await helpers.hashing.hash(data.password);
 
-  const user = await UserEntity.create({
-    id: userId,
-    data: {
-      ...data,
-      password: hashedPassword,
-      verified: false
-    },
-    repositories
+  const user = await repositories.database.create(userId, {
+    ...data,
+    password: hashedPassword,
+    verified: false
   });
 
   return user;

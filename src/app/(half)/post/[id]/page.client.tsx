@@ -1,7 +1,7 @@
 "use client";
 
 import { trpc } from "@/app/_trpc/client";
-import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
+import { ICommentEntityWithUser } from "@/server/models/comment";
 import { useEffect, useState } from "react";
 import { CommentList } from "@/components/commentList";
 import { CreateComment } from "@/components/createComment";

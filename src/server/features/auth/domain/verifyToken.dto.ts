@@ -1,5 +1,5 @@
-import { IVerifyTokenModel } from "@/server/entities/verifyToken/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
+import { IVerifyTokenModel } from "@/server/models/verifyToken";
+import { IUserModel } from "@/server/models/user";
 
 type ITokenServiceDTO = {
   token: string;

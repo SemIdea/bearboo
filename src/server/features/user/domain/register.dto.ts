@@ -1,5 +1,4 @@
-import { IUserModel } from "@/server/entities/user/DTO";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
+import { IUserModel } from "@/server/models/user";
 import { IPasswordHashingHelperAdapter } from "@/server/integrations/helpers/passwordHashing/adapter";
 import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
 
@@ -9,7 +8,6 @@ type IRegisterUserDTO = {
   password: string;
   repositories: {
     database: IUserModel;
-    cache: ICacheRepositoryAdapter;
   };
   helpers: {
     hashing: IPasswordHashingHelperAdapter;

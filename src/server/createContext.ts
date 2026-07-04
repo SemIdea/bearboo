@@ -1,4 +1,4 @@
-import { IUserWithSession } from "./entities/user/DTO";
+import { IUserWithSession } from "./models/user";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { ReadUserAndSessionByAccessTokenService } from "./features/auth/domain/readUserAndSessionByAccessToken";
 import { IRepositories, repositories } from "./container/repositories";

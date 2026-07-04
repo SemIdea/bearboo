@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest";
 import { deleteCommentController } from "./delete";
-import { CommentEntity } from "@/server/entities/comment/entity";
-import { PostEntity } from "@/server/entities/post/entity";
 import { isControllerContext, TestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { CommentErrorCode } from "@/shared/error/comment";
@@ -20,32 +18,18 @@ describe("Delete Comment Controller Unitary Testing", async () => {
 
     const postId = ctx.helpers.uid.generate();
 
-    await PostEntity.create({
-      id: postId,
-      data: {
-        title: "Test Post",
-        content: "This is a test post.",
-        userId: user.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      }
+    await ctx.repositories.post.create(postId, {
+      title: "Test Post",
+      content: "This is a test post.",
+      userId: user.id
     });
 
     const commentId = ctx.helpers.uid.generate();
 
-    await CommentEntity.create({
-      id: commentId,
-      data: {
-        postId,
-        content: "This is a test comment.",
-        userId: user.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.comment
-      }
+    await ctx.repositories.comment.create(commentId, {
+      postId,
+      content: "This is a test comment.",
+      userId: user.id
     });
 
     const input = {
@@ -57,13 +41,7 @@ describe("Delete Comment Controller Unitary Testing", async () => {
       input
     });
 
-    const result = await CommentEntity.read({
-      id: commentId,
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.comment
-      }
-    });
+    const result = await ctx.repositories.comment.read(commentId);
 
     expect(result).toBeNull();
   });
@@ -91,32 +69,18 @@ describe("Delete Comment Controller Unitary Testing", async () => {
 
     const postId = ctx.helpers.uid.generate();
 
-    await PostEntity.create({
-      id: postId,
-      data: {
-        title: "Test Post",
-        content: "This is a test post.",
-        userId: otherUser.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      }
+    await ctx.repositories.post.create(postId, {
+      title: "Test Post",
+      content: "This is a test post.",
+      userId: otherUser.id
     });
 
     const commentId = ctx.helpers.uid.generate();
 
-    await CommentEntity.create({
-      id: commentId,
-      data: {
-        postId,
-        content: "This is a test comment.",
-        userId: otherUser.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.comment
-      }
+    await ctx.repositories.comment.create(commentId, {
+      postId,
+      content: "This is a test comment.",
+      userId: otherUser.id
     });
 
     const input = {

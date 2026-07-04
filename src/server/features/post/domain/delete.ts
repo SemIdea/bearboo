@@ -1,13 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { IDeletePostDTO } from "./delete.dto";
-import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";
 
 const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
-  const post = await PostEntity.read({
-    ...data,
-    repositories
-  });
+  const post = await repositories.database.read(data.id);
 
   if (!post) {
     throw new TRPCError({
@@ -23,11 +19,7 @@ const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
     });
   }
 
-  const deletedPost = await PostEntity.delete({
-    id: post.id,
-    data: post,
-    repositories
-  });
+  const deletedPost = await repositories.database.delete(post.id);
 
   return deletedPost;
 };

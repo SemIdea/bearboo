@@ -1,4 +1,4 @@
-import { IVerifyTokenModel } from "@/server/entities/verifyToken/DTO";
+import { IVerifyTokenModel } from "@/server/models/verifyToken";
 import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
 
 type ICreateTokenServiceDTO = {

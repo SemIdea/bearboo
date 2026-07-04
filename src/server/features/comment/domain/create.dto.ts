@@ -1,7 +1,6 @@
-import { ICommentModel } from "@/server/entities/comment/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
+import { ICommentModel } from "@/server/models/comment";
+import { IUserModel } from "@/server/models/user";
 import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type ICreateCommentDTO = {
   userId: string;
@@ -10,7 +9,6 @@ type ICreateCommentDTO = {
   repositories: {
     user: IUserModel;
     database: ICommentModel;
-    cache: ICacheRepositoryAdapter;
   };
   helpers: {
     uid: IUidGeneratorHelperAdapter;

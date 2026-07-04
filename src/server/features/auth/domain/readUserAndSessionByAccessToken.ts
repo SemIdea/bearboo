@@ -1,18 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { IReadUserAndSessionByAccessTokenDTO } from "./readUserAndSessionByAccessToken.dto";
-import { SessionEntity } from "@/server/entities/session/entity";
-import { UserEntity } from "@/server/entities/user/entity";
-import { IUserWithSession } from "@/server/entities/user/DTO";
+import { IUserWithSession } from "@/server/models/user";
 import { SessionErrorCode } from "@/shared/error/session";
 
 const ReadUserAndSessionByAccessTokenService = async ({
   repositories,
-  ...data
+  accessToken
 }: IReadUserAndSessionByAccessTokenDTO) => {
-  const session = await SessionEntity.readByAccessToken({
-    ...data,
-    repositories
-  });
+  const session = await repositories.database.readByAccessToken(accessToken);
 
   if (!session || !session.userId) {
     throw new TRPCError({
@@ -21,13 +16,7 @@ const ReadUserAndSessionByAccessTokenService = async ({
     });
   }
 
-  const user = await UserEntity.read({
-    id: session.userId,
-    repositories: {
-      ...repositories,
-      database: repositories.user
-    }
-  });
+  const user = await repositories.user.read(session.userId);
 
   if (!user) {
     throw new TRPCError({

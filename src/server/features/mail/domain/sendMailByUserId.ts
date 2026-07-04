@@ -1,4 +1,3 @@
-import { UserEntity } from "@/server/entities/user/entity";
 import { ISendMailByUserIdDTO } from "./sendMailByUserId.dto";
 import { SendMailService } from "./sendMail";
 
@@ -9,10 +8,7 @@ const SendMailByUserIdService = async ({
   repositories,
   gateways
 }: ISendMailByUserIdDTO) => {
-  const user = await UserEntity.read({
-    id: userId,
-    repositories
-  });
+  const user = await repositories.database.read(userId);
 
   if (!user) {
     throw new Error("User not found");

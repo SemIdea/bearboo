@@ -1,6 +1,5 @@
-import { ISessionModel } from "@/server/entities/session/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
+import { ISessionModel } from "@/server/models/session";
+import { IUserModel } from "@/server/models/user";
 
 type IDeleteSessionDTO = {
   id: string;
@@ -8,7 +7,6 @@ type IDeleteSessionDTO = {
   repositories: {
     user: IUserModel;
     database: ISessionModel;
-    cache: ICacheRepositoryAdapter;
   };
 };
 

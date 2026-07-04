@@ -1,9 +1,7 @@
-import { IUserModel } from "@/server/entities/user/DTO";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
+import { IUserModel } from "@/server/models/user";
 
 type IUserProfileRepositories = {
   database: IUserModel;
-  cache: ICacheRepositoryAdapter;
 };
 
 type IGetUserProfileDTO = {

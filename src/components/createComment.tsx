@@ -1,6 +1,6 @@
 "use client";
 
-import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
+import { ICommentEntityWithUser } from "@/server/models/comment";
 import { CardBase } from "./cardBase";
 import { Button } from "./ui/button";
 import { useState } from "react";

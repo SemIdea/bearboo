@@ -1,4 +1,4 @@
-import { ICommentModel } from "@/server/entities/comment/DTO";
+import { ICommentModel } from "@/server/models/comment";
 
 type IReadAllCommentsByPostIdDTO = {
   postId: string;

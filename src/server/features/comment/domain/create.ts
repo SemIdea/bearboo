@@ -1,5 +1,4 @@
 import { ICreateCommentDTO } from "./create.dto";
-import { CommentEntity } from "@/server/entities/comment/entity";
 
 const CreateCommentService = async ({
   repositories,
@@ -8,11 +7,7 @@ const CreateCommentService = async ({
 }: ICreateCommentDTO) => {
   const commentId = helpers.uid.generate();
 
-  const comment = await CommentEntity.create({
-    id: commentId,
-    data,
-    repositories
-  });
+  const comment = await repositories.database.create(commentId, data);
 
   return comment;
 };

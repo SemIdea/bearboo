@@ -1,6 +1,5 @@
-import { IPostModel } from "@/server/entities/post/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
+import { IPostModel } from "@/server/models/post";
+import { IUserModel } from "@/server/models/user";
 
 type IUpdatePostDTO = {
   id: string;
@@ -10,7 +9,6 @@ type IUpdatePostDTO = {
   repositories: {
     user: IUserModel;
     database: IPostModel;
-    cache: ICacheRepositoryAdapter;
   };
 };
 

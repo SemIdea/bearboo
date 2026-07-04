@@ -1,5 +1,5 @@
-import { ICommentModel } from "@/server/entities/comment/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
+import { ICommentModel } from "@/server/models/comment";
+import { IUserModel } from "@/server/models/user";
 
 type IGetUserCommentsDTO = {
   id: string;

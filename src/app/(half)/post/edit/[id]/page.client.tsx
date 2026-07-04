@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth";
 import { trpc } from "@/app/_trpc/client";
-import { IPostEntity } from "@/server/entities/post/DTO";
+import { IPostEntity } from "@/server/models/post";
 import { Button } from "@/components/ui/button";
 import { MdEditor } from "@/components/ui/mdEditor";
 import { FormBase, InputField } from "@/components/formBase";

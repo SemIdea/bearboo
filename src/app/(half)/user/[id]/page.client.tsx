@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/dropdown";
 import { BsThreeDots } from "react-icons/bs";
 import { Button } from "@/components/ui/button";
-import { IPostEntity } from "@/server/entities/post/DTO";
-import { ICommentEntity } from "@/server/entities/comment/DTO";
+import { IPostEntity } from "@/server/models/post";
+import { ICommentEntity } from "@/server/models/comment";
 import Link from "next/link";
 
 const Post = ({ post, index }: { post: IPostEntity; index: number }) => {

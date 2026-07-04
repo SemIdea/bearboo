@@ -1,4 +1,4 @@
-import { ICommentEntityWithUser } from "@/server/entities/comment/DTO";
+import { ICommentEntityWithUser } from "@/server/models/comment";
 import { formatDistance } from "date-fns";
 import { By } from "./ui/by";
 import { MdView } from "./ui/mdView";

@@ -2,7 +2,6 @@ import { describe, test, expect, vi } from "vitest";
 import { revalidatePostController } from "./revalidate";
 import { isControllerContext, TestContext } from "@/test/context";
 import { revalidatePath } from "next/cache";
-import { PostEntity } from "@/server/entities/post/entity";
 import { TRPCError } from "@trpc/server";
 import { PostErrorCode } from "@/shared/error/post";
 
@@ -22,17 +21,10 @@ describe("Revalidate Post Controller Unitary Testing", async () => {
     const user = ctx.user;
     const postId = ctx.helpers.uid.generate();
 
-    const post = await PostEntity.create({
-      id: postId,
-      data: {
-        userId: user.id,
-        title: "Test Post",
-        content: "This is a test post content."
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      }
+    const post = await ctx.repositories.post.create(postId, {
+      userId: user.id,
+      title: "Test Post",
+      content: "This is a test post content."
     });
 
     const result = await revalidatePostController({
@@ -69,14 +61,10 @@ describe("Revalidate Post Controller Unitary Testing", async () => {
     const otherUser = await ctx.createNewUser();
 
     const postId = ctx.helpers.uid.generate();
-    await PostEntity.create({
-      id: postId,
-      data: {
-        userId: otherUser.id,
-        title: "Another User's Post",
-        content: "This post belongs to another user."
-      },
-      repositories: { ...ctx.repositories, database: ctx.repositories.post }
+    await ctx.repositories.post.create(postId, {
+      userId: otherUser.id,
+      title: "Another User's Post",
+      content: "This post belongs to another user."
     });
 
     const input = {

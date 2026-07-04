@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { ILoginUserDTO } from "./login.dto";
-import { UserEntity } from "@/server/entities/user/entity";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { UserErrorCode } from "@/shared/error/user";
 
@@ -11,10 +10,7 @@ const LoginUserService = async ({
 }: ILoginUserDTO) => {
   const { email, password } = data;
 
-  const user = await UserEntity.readByEmail({
-    email,
-    repositories
-  });
+  const user = await repositories.database.readByEmail(email);
 
   if (!user) {
     throw new TRPCError({

@@ -1,17 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
 import { IRevalidatePostDTO } from "./revalidate.dto";
-import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";
 
 const RevalidatePostService = async ({
   repositories,
   ...data
 }: IRevalidatePostDTO) => {
-  const post = await PostEntity.read({
-    ...data,
-    repositories
-  });
+  const post = await repositories.database.read(data.id);
 
   if (!post) {
     throw new TRPCError({

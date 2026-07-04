@@ -1,7 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { ICreateAuthSessionDTO } from "./createAuthSession.dto";
-import { SessionEntity } from "@/server/entities/session/entity";
-import { UserEntity } from "@/server/entities/user/entity";
 import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
 
@@ -10,14 +8,7 @@ const CreateAuthSessionService = async ({
   helpers,
   ...data
 }: ICreateAuthSessionDTO) => {
-  const user = await UserEntity.read({
-    id: data.userId,
-    repositories: {
-      ...repositories,
-      database: repositories.user,
-      cache: repositories.cache
-    }
-  });
+  const user = await repositories.user.read(data.userId);
 
   if (!user) {
     throw new TRPCError({
@@ -30,14 +21,10 @@ const CreateAuthSessionService = async ({
   const accessToken = helpers.uid.generate();
   const refreshToken = helpers.uid.generate();
 
-  const session = await SessionEntity.create({
-    id: sessionId,
-    data: {
-      userId: user.id,
-      accessToken,
-      refreshToken
-    },
-    repositories
+  const session = await repositories.database.create(sessionId, {
+    userId: user.id,
+    accessToken,
+    refreshToken
   });
 
   if (!session) {

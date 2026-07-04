@@ -1,8 +1,6 @@
-import { UserEntity } from "@/server/entities/user/entity";
 import { IResetPasswordDTO } from "./resetPassword.dto";
 import { TRPCError } from "@trpc/server";
 import { UserErrorCode } from "@/shared/error/user";
-import { ResetTokenEntity } from "@/server/entities/resetToken/entity";
 import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
 
 const ResetPasswordService = async ({
@@ -10,13 +8,7 @@ const ResetPasswordService = async ({
   helpers,
   ...data
 }: IResetPasswordDTO) => {
-  const resetToken = await ResetTokenEntity.readByToken({
-    token: data.token,
-    repositories: {
-      ...repositories,
-      database: repositories.resetToken
-    }
-  });
+  const resetToken = await repositories.resetToken.readByToken(data.token);
 
   if (!resetToken) {
     throw new TRPCError({
@@ -46,12 +38,7 @@ const ResetPasswordService = async ({
     });
   }
 
-  const user = await UserEntity.read({
-    id: resetToken.userId,
-    repositories: {
-      ...repositories
-    }
-  });
+  const user = await repositories.database.read(resetToken.userId);
 
   if (!user) {
     throw new TRPCError({
@@ -60,25 +47,12 @@ const ResetPasswordService = async ({
     });
   }
 
-  await ResetTokenEntity.update({
-    id: resetToken.id,
-    data: {
-      used: true
-    },
-    repositories: {
-      ...repositories,
-      database: repositories.resetToken
-    }
+  await repositories.resetToken.update(resetToken.id, {
+    used: true
   });
 
-  const updatedUser = await UserEntity.update({
-    id: user.id,
-    data: {
-      password: await helpers.hashing.hash(data.newPassword)
-    },
-    repositories: {
-      ...repositories
-    }
+  const updatedUser = await repositories.database.update(user.id, {
+    password: await helpers.hashing.hash(data.newPassword)
   });
 
   return updatedUser;

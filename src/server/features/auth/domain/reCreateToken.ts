@@ -1,6 +1,4 @@
-import { VerifyTokenEntity } from "@/server/entities/verifyToken/entity";
 import { TRPCError } from "@trpc/server";
-import { UserEntity } from "@/server/entities/user/entity";
 import { UserErrorCode } from "@/shared/error/user";
 import { IReCreateTokenServiceDTO } from "./reCreateToken.dto";
 import { CreateTokenService } from "./createToken";
@@ -10,13 +8,7 @@ const ReCreateTokenService = async ({
   repositories,
   helpers
 }: IReCreateTokenServiceDTO) => {
-  const user = await UserEntity.readByEmail({
-    email: userEmail,
-    repositories: {
-      ...repositories,
-      database: repositories.user
-    }
-  });
+  const user = await repositories.user.readByEmail(userEmail);
 
   if (!user) {
     throw new TRPCError({
@@ -25,17 +17,10 @@ const ReCreateTokenService = async ({
     });
   }
 
-  const existingToken = await VerifyTokenEntity.readByUserId({
-    userId: user.id,
-    repositories
-  });
+  const existingToken = await repositories.database.readByUserId(user.id);
 
   if (existingToken) {
-    await VerifyTokenEntity.delete({
-      id: existingToken.id,
-      data: existingToken,
-      repositories
-    });
+    await repositories.database.delete(existingToken.id);
   }
 
   return CreateTokenService({

@@ -1,7 +1,6 @@
 import { isControllerContext, TestContext } from "@/test/context";
 import { describe, expect, test } from "vitest";
 import { sendResetPasswordEmailController } from "./sendResetPasswordEmail";
-import { ResetTokenEntity } from "@/server/entities/resetToken/entity";
 import { UserErrorCode } from "@/shared/error/user";
 
 describe("Send Reset Password Email Controller Unitary Testing", async () => {
@@ -22,13 +21,9 @@ describe("Send Reset Password Email Controller Unitary Testing", async () => {
       ctx
     });
 
-    const resetToken = await ResetTokenEntity.readByUserId({
-      userId: ctx.user.id,
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.resetToken
-      }
-    });
+    const resetToken = await ctx.repositories.resetToken.readByUserId(
+      ctx.user.id
+    );
 
     expect(resetToken).toBeDefined();
     expect(resetToken?.userId).toBe(ctx.user.id);

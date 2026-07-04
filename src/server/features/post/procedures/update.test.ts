@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
 import { updatePostController } from "./update";
-import { PostEntity } from "@/server/entities/post/entity";
 import { isControllerContext, TestContext } from "@/test/context";
 import { TRPCError } from "@trpc/server";
 import { PostErrorCode } from "@/shared/error/post";
@@ -16,17 +15,10 @@ describe("Update Post Controller Unitary Testing", async () => {
 
   test("Should update a post successfully", async () => {
     const id = ctx.helpers.uid.generate();
-    const post = await PostEntity.create({
-      id,
-      data: {
-        title: "Original Title",
-        content: "Original Content",
-        userId: ctx.user!.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      }
+    const post = await ctx.repositories.post.create(id, {
+      title: "Original Title",
+      content: "Original Content",
+      userId: ctx.user!.id
     });
 
     const result = await updatePostController({
@@ -70,17 +62,10 @@ describe("Update Post Controller Unitary Testing", async () => {
     const otherUser = await ctx.createNewUser();
 
     const id = ctx.helpers.uid.generate();
-    await PostEntity.create({
-      id,
-      data: {
-        title: "Title",
-        content: "Content",
-        userId: otherUser.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      }
+    await ctx.repositories.post.create(id, {
+      title: "Title",
+      content: "Content",
+      userId: otherUser.id
     });
 
     const input = {

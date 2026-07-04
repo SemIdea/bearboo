@@ -1,16 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { IGetUserProfileDTO } from "./readProfile.dto";
-import { UserEntity } from "@/server/entities/user/entity";
 import { UserErrorCode } from "@/shared/error/user";
 
 const ReadUserProfileService = async ({
   repositories,
-  ...data
+  id
 }: IGetUserProfileDTO) => {
-  const userProfile = await UserEntity.read({
-    ...data,
-    repositories
-  });
+  const userProfile = await repositories.database.read(id);
 
   if (!userProfile) {
     throw new TRPCError({

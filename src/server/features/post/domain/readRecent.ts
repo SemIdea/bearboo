@@ -1,12 +1,9 @@
 import { IReadRecentPostsDTO } from "./readRecent.dto";
-import { PostEntity } from "@/server/entities/post/entity";
 
 const ReadRecentPostsService = async ({
   repositories
 }: IReadRecentPostsDTO) => {
-  const posts = await PostEntity.readRecent({
-    repositories
-  });
+  const posts = await repositories.database.readRecents(30);
 
   return posts;
 };

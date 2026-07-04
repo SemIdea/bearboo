@@ -1,16 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { IUpdateCommentDTO } from "./update.dto";
-import { CommentEntity } from "@/server/entities/comment/entity";
 import { CommentErrorCode } from "@/shared/error/comment";
 
 const UpdateCommentService = async ({
   repositories,
   ...data
 }: IUpdateCommentDTO) => {
-  const comment = await CommentEntity.read({
-    ...data,
-    repositories
-  });
+  const comment = await repositories.database.read(data.id);
 
   if (!comment) {
     throw new TRPCError({
@@ -26,10 +22,8 @@ const UpdateCommentService = async ({
     });
   }
 
-  const updatedComment = await CommentEntity.update({
-    ...data,
-    data,
-    repositories
+  const updatedComment = await repositories.database.update(data.id, {
+    content: data.content
   });
 
   return updatedComment;

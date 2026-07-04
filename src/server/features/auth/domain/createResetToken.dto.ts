@@ -1,13 +1,11 @@
-import { IResetTokenModel } from "@/server/entities/resetToken/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
+import { IResetTokenModel } from "@/server/models/resetToken";
+import { IUserModel } from "@/server/models/user";
 import { IUidGeneratorHelperAdapter } from "@/server/integrations/helpers/uidGenerator/adapter";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
 
 type ISendResetPasswordEmailDTO = {
   email: string;
   repositories: {
     database: IUserModel;
-    cache: ICacheRepositoryAdapter;
     resetToken: IResetTokenModel;
   };
   helpers: {

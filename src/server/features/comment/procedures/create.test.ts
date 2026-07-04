@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { createCommentController } from "./create";
 import { isControllerContext, TestContext } from "@/test/context";
-import { PostEntity } from "@/server/entities/post/entity";
 
 describe("Create Comment Controller Unitary Testing", async () => {
   const ctx = new TestContext();
@@ -17,17 +16,10 @@ describe("Create Comment Controller Unitary Testing", async () => {
 
     const postId = ctx.helpers.uid.generate();
 
-    await PostEntity.create({
-      id: postId,
-      data: {
-        title: "Test Post",
-        content: "This is a test post.",
-        userId: user.id
-      },
-      repositories: {
-        ...ctx.repositories,
-        database: ctx.repositories.post
-      }
+    await ctx.repositories.post.create(postId, {
+      title: "Test Post",
+      content: "This is a test post.",
+      userId: user.id
     });
 
     const input = {

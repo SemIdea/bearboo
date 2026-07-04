@@ -1,4 +1,4 @@
-import { IUserModel } from "@/server/entities/user/DTO";
+import { IUserModel } from "@/server/models/user";
 import { IMailerGatewayAdapter } from "@/server/integrations/gateway/mailer/adapter";
 
 type ISendMailByUserIdDTO = {

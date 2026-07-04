@@ -1,20 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { IGetUserPostsDTO } from "./readPosts.dto";
-import { UserEntity } from "@/server/entities/user/entity";
-import { PostEntity } from "@/server/entities/post/entity";
 import { UserErrorCode } from "@/shared/error/user";
 
 const GetUserPostsService = async ({
   repositories,
-  ...data
+  id
 }: IGetUserPostsDTO) => {
-  const user = await UserEntity.read({
-    ...data,
-    repositories: {
-      ...repositories,
-      database: repositories.user
-    }
-  });
+  const user = await repositories.user.read(id);
 
   if (!user) {
     throw new TRPCError({
@@ -23,10 +15,7 @@ const GetUserPostsService = async ({
     });
   }
 
-  const posts = await PostEntity.readUserPosts({
-    userId: data.id,
-    repositories
-  });
+  const posts = await repositories.database.readUserPosts(id);
 
   return posts;
 };

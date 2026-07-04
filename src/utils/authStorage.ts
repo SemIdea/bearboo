@@ -1,6 +1,6 @@
 // utils/authStorage.ts
 
-import { ISessionWithUser } from "@/server/entities/session/DTO";
+import { ISessionWithUser } from "@/server/models/session";
 
 const setAuthData = (data: ISessionWithUser): void => {
   if (!data) return;

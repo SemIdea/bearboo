@@ -1,8 +1,6 @@
-import { UserEntity } from "@/server/entities/user/entity";
-import { SessionEntity } from "@/server/entities/session/entity";
 import { IBaseContextDTO } from "@/server/createContext";
-import { IUserEntity } from "@/server/entities/user/DTO";
-import { ISessionEntity } from "@/server/entities/session/DTO";
+import { IUserEntity } from "@/server/models/user";
+import { ISessionEntity } from "@/server/models/session";
 import { repositories } from "@/server/container/repositories";
 import { helpers } from "@/server/container/helpers";
 import { gateways } from "@/server/container/gateways";
@@ -35,34 +33,20 @@ class TestContext {
       password: "password123"
     };
 
-    const user = await UserEntity.create({
-      id: userId,
-      data: {
-        ...userData,
-        password: await this.helpers.hashing.hash(userData.password),
-        verified: false
-      },
-      repositories: {
-        ...this.repositories,
-        database: this.repositories.user
-      }
+    const user = await this.repositories.user.create(userId, {
+      ...userData,
+      password: await this.helpers.hashing.hash(userData.password),
+      verified: false
     });
 
     const sessionId = this.helpers.uid.generate();
     const accessToken = this.helpers.uid.generate();
     const refreshToken = this.helpers.uid.generate();
 
-    const session = await SessionEntity.create({
-      id: sessionId,
-      data: {
-        userId: user.id,
-        accessToken,
-        refreshToken
-      },
-      repositories: {
-        ...this.repositories,
-        database: this.repositories.session
-      }
+    const session = await this.repositories.session.create(sessionId, {
+      userId: user.id,
+      accessToken,
+      refreshToken
     });
 
     this.user = { ...user, truePassword: userData.password, session };
@@ -76,17 +60,10 @@ class TestContext {
       password: "password123"
     };
 
-    const user = await UserEntity.create({
-      id: userId,
-      data: {
-        ...userData,
-        password: await this.helpers.hashing.hash(userData.password),
-        verified: false
-      },
-      repositories: {
-        ...this.repositories,
-        database: this.repositories.user
-      }
+    const user = await this.repositories.user.create(userId, {
+      ...userData,
+      password: await this.helpers.hashing.hash(userData.password),
+      verified: false
     });
 
     return user;

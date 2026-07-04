@@ -1,21 +1,11 @@
-import { ICommentModel } from "@/server/entities/comment/DTO";
-import { IPostModel } from "@/server/entities/post/DTO";
-import { ISessionModel } from "@/server/entities/session/DTO";
-import { IUserModel } from "@/server/entities/user/DTO";
-import { ICacheRepositoryAdapter } from "@/server/integrations/repositories/cache/adapter";
-
-import { PrismaCommentModel } from "@/server/entities/comment/repositories/prisma";
-import { PrismaPostModel } from "@/server/entities/post/repositories/prisma";
-import { PrismaSessionModel } from "@/server/entities/session/repositories/prisma";
-import { PrismaUserModel } from "@/server/entities/user/repositories/prisma";
-import { RedisCacheRepository } from "@/server/integrations/repositories/cache/implementations/redis";
-import { IVerifyTokenModel } from "../entities/verifyToken/DTO";
-import { PrismaVerifyTokenModel } from "../entities/verifyToken/repositories/prisma";
-import { PrismaResetTokenModel } from "../entities/resetToken/repositories/prisma";
-import { IResetTokenModel } from "../entities/resetToken/DTO";
+import { ICommentModel, CommentModel } from "@/server/models/comment";
+import { IPostModel, PostModel } from "@/server/models/post";
+import { ISessionModel, SessionModel } from "@/server/models/session";
+import { IUserModel, UserModel } from "@/server/models/user";
+import { IVerifyTokenModel, VerifyTokenModel } from "@/server/models/verifyToken";
+import { IResetTokenModel, ResetTokenModel } from "@/server/models/resetToken";
 
 type IRepositories = {
-  cache: ICacheRepositoryAdapter;
   user: IUserModel;
   session: ISessionModel;
   post: IPostModel;
@@ -25,13 +15,12 @@ type IRepositories = {
 };
 
 const repositories: IRepositories = {
-  cache: new RedisCacheRepository(),
-  user: new PrismaUserModel(),
-  session: new PrismaSessionModel(),
-  post: new PrismaPostModel(),
-  comment: new PrismaCommentModel(),
-  verifyToken: new PrismaVerifyTokenModel(),
-  resetToken: new PrismaResetTokenModel()
+  user: UserModel,
+  session: SessionModel,
+  post: PostModel,
+  comment: CommentModel,
+  verifyToken: VerifyTokenModel,
+  resetToken: ResetTokenModel
 };
 
 export { repositories };

@@ -1,13 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { IUpdatePostDTO } from "./update.dto";
-import { PostEntity } from "@/server/entities/post/entity";
 import { PostErrorCode } from "@/shared/error/post";
 
 const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
-  const post = await PostEntity.read({
-    ...data,
-    repositories
-  });
+  const post = await repositories.database.read(data.id);
 
   if (!post) {
     throw new TRPCError({
@@ -23,10 +19,9 @@ const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
     });
   }
 
-  return await PostEntity.update({
-    ...data,
-    data,
-    repositories
+  return await repositories.database.update(data.id, {
+    title: data.title,
+    content: data.content
   });
 };
 
