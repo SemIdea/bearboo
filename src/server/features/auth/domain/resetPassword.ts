@@ -1,13 +1,28 @@
-import { IResetPasswordDTO } from "./resetPassword.dto";
 import { TRPCError } from "@trpc/server";
+import { IResetTokenModel } from "@/server/models/resetToken";
+import { IUserModel } from "@/server/models/user";
+import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
 import { UserErrorCode } from "@/shared/error/user";
 import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
+
+type Params = {
+  token: string;
+  newPassword: string;
+  confirmNewPassword: string;
+  repositories: {
+    database: IUserModel;
+    resetToken: IResetTokenModel;
+  };
+  helpers: {
+    hashing: IPasswordHashingHelperAdapter;
+  };
+};
 
 const ResetPasswordService = async ({
   repositories,
   helpers,
   ...data
-}: IResetPasswordDTO) => {
+}: Params) => {
   const resetToken = await repositories.resetToken.readByToken(data.token);
 
   if (!resetToken) {

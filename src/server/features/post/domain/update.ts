@@ -1,8 +1,18 @@
 import { TRPCError } from "@trpc/server";
-import { IUpdatePostDTO } from "./update.dto";
+import { IPostModel } from "@/server/models/post";
+import { IUserModel } from "@/server/models/user";
 import { PostErrorCode } from "@/shared/error/post";
+import { UpdatePostInput } from "../schema";
 
-const UpdatePostService = async ({ repositories, ...data }: IUpdatePostDTO) => {
+type Params = UpdatePostInput & {
+  userId: string;
+  repositories: {
+    user: IUserModel;
+    database: IPostModel;
+  };
+};
+
+const UpdatePostService = async ({ repositories, ...data }: Params) => {
   const post = await repositories.database.read(data.id);
 
   if (!post) {

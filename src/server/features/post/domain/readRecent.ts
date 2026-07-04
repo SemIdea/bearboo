@@ -1,8 +1,12 @@
-import { IReadRecentPostsDTO } from "./readRecent.dto";
+import { IPostModel } from "@/server/models/post";
 
-const ReadRecentPostsService = async ({
-  repositories
-}: IReadRecentPostsDTO) => {
+type Params = {
+  repositories: {
+    database: IPostModel;
+  };
+};
+
+const ReadRecentPostsService = async ({ repositories }: Params) => {
   const posts = await repositories.database.readRecents(30);
 
   return posts;

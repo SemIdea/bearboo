@@ -1,13 +1,20 @@
 import { TRPCError } from "@trpc/server";
-import { ILoginUserDTO } from "./login.dto";
+import { IUserModel } from "@/server/models/user";
+import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { UserErrorCode } from "@/shared/error/user";
+import { LoginUserInput } from "../schema";
 
-const LoginUserService = async ({
-  repositories,
-  helpers,
-  ...data
-}: ILoginUserDTO) => {
+type Params = LoginUserInput & {
+  repositories: {
+    database: IUserModel;
+  };
+  helpers: {
+    hashing: IPasswordHashingHelperAdapter;
+  };
+};
+
+const LoginUserService = async ({ repositories, helpers, ...data }: Params) => {
   const { email, password } = data;
 
   const user = await repositories.database.readByEmail(email);

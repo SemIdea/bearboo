@@ -1,11 +1,17 @@
 import { TRPCError } from "@trpc/server";
+import { IVerifyTokenModel } from "@/server/models/verifyToken";
+import { IUserModel } from "@/server/models/user";
 import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
-import { ITokenServiceDTO } from "./verifyToken.dto";
+import { VerifyTokenInput } from "../schema";
 
-const VerifyTokenService = async ({
-  repositories,
-  token
-}: ITokenServiceDTO) => {
+type Params = VerifyTokenInput & {
+  repositories: {
+    database: IVerifyTokenModel;
+    user: IUserModel;
+  };
+};
+
+const VerifyTokenService = async ({ repositories, token }: Params) => {
   const verifyToken = await repositories.database.readByToken(token);
 
   if (!verifyToken) {

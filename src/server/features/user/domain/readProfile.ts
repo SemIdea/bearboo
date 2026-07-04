@@ -1,11 +1,15 @@
 import { TRPCError } from "@trpc/server";
-import { IGetUserProfileDTO } from "./readProfile.dto";
+import { IUserModel } from "@/server/models/user";
 import { UserErrorCode } from "@/shared/error/user";
+import { ReadUserProfileInput } from "../schema";
 
-const ReadUserProfileService = async ({
-  repositories,
-  id
-}: IGetUserProfileDTO) => {
+type Params = ReadUserProfileInput & {
+  repositories: {
+    database: IUserModel;
+  };
+};
+
+const ReadUserProfileService = async ({ repositories, id }: Params) => {
   const userProfile = await repositories.database.read(id);
 
   if (!userProfile) {

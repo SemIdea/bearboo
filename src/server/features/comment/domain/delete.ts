@@ -1,11 +1,16 @@
 import { TRPCError } from "@trpc/server";
-import { IDeleteCommentDTO } from "./delete.dto";
+import { ICommentModel } from "@/server/models/comment";
 import { CommentErrorCode } from "@/shared/error/comment";
+import { DeleteCommentInput } from "../schema";
 
-const DeleteCommentService = async ({
-  repositories,
-  ...data
-}: IDeleteCommentDTO) => {
+type Params = DeleteCommentInput & {
+  userId: string;
+  repositories: {
+    database: ICommentModel;
+  };
+};
+
+const DeleteCommentService = async ({ repositories, ...data }: Params) => {
   const comment = await repositories.database.read(data.id);
 
   if (!comment) {

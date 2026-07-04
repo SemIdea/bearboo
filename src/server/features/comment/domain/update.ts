@@ -1,11 +1,16 @@
 import { TRPCError } from "@trpc/server";
-import { IUpdateCommentDTO } from "./update.dto";
+import { ICommentModel } from "@/server/models/comment";
 import { CommentErrorCode } from "@/shared/error/comment";
+import { UpdateCommentInput } from "../schema";
 
-const UpdateCommentService = async ({
-  repositories,
-  ...data
-}: IUpdateCommentDTO) => {
+type Params = UpdateCommentInput & {
+  userId: string;
+  repositories: {
+    database: ICommentModel;
+  };
+};
+
+const UpdateCommentService = async ({ repositories, ...data }: Params) => {
   const comment = await repositories.database.read(data.id);
 
   if (!comment) {

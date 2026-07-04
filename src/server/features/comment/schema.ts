@@ -24,6 +24,26 @@ const deleteCommentSchema = z.object({
   id: z.string()
 });
 
+const commentEntitySchema = z.object({
+  id: z.string(),
+  postId: z.string(),
+  userId: z.string(),
+  content: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date()
+});
+
+const commentEntityWithUserSchema = commentEntitySchema.extend({
+  user: z.object({
+    name: z.string()
+  })
+});
+
+const createCommentOutputSchema = commentEntitySchema;
+const readAllCommentsByPostOutputSchema = z.array(commentEntityWithUserSchema);
+const updateCommentOutputSchema = commentEntitySchema;
+const deleteCommentOutputSchema = z.boolean();
+
 type CreateCommentInput = z.TypeOf<typeof createCommentschema>;
 type ReadAllCommentsByPostInput = z.TypeOf<typeof readAllCommentsByPostSchema>;
 type UpdateCommentInput = z.TypeOf<typeof updateCommentSchema>;
@@ -33,7 +53,13 @@ export {
   createCommentschema,
   readAllCommentsByPostSchema,
   updateCommentSchema,
-  deleteCommentSchema
+  deleteCommentSchema,
+  commentEntitySchema,
+  commentEntityWithUserSchema,
+  createCommentOutputSchema,
+  readAllCommentsByPostOutputSchema,
+  updateCommentOutputSchema,
+  deleteCommentOutputSchema
 };
 
 export type {

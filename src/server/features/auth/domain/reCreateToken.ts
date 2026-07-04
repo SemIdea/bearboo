@@ -1,13 +1,26 @@
 import { TRPCError } from "@trpc/server";
+import { IVerifyTokenModel } from "@/server/models/verifyToken";
+import { IUserModel } from "@/server/models/user";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 import { UserErrorCode } from "@/shared/error/user";
-import { IReCreateTokenServiceDTO } from "./reCreateToken.dto";
 import { CreateTokenService } from "./createToken";
+
+type Params = {
+  userEmail: string;
+  repositories: {
+    database: IVerifyTokenModel;
+    user: IUserModel;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
 
 const ReCreateTokenService = async ({
   userEmail,
   repositories,
   helpers
-}: IReCreateTokenServiceDTO) => {
+}: Params) => {
   const user = await repositories.user.readByEmail(userEmail);
 
   if (!user) {

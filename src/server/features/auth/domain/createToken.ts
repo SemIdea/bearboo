@@ -1,10 +1,21 @@
-import { ICreateTokenServiceDTO } from "./createToken.dto";
+import { IVerifyTokenModel } from "@/server/models/verifyToken";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
+
+type Params = {
+  userId: string;
+  repositories: {
+    database: IVerifyTokenModel;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
 
 const CreateTokenService = async ({
   repositories,
   helpers,
   ...data
-}: ICreateTokenServiceDTO) => {
+}: Params) => {
   const tokenId = helpers.uid.generate();
   const newToken = helpers.uid.generate();
 

@@ -1,6 +1,15 @@
-import { ISendMailDTO } from "./sendMail.dto";
+import { IMailerGatewayAdapter } from "@/server/integrations/gateway/mailer/adapter";
 
-const SendMailService = async ({ gateways, ...data }: ISendMailDTO) => {
+type Params = {
+  to: string | string[];
+  subject: string;
+  body: string;
+  gateways: {
+    mail: IMailerGatewayAdapter;
+  };
+};
+
+const SendMailService = async ({ gateways, ...data }: Params) => {
   return await gateways.mail.sendMail({
     body: data.body,
     subject: data.subject,

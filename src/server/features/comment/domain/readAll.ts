@@ -1,9 +1,16 @@
-import { IReadAllCommentsByPostIdDTO } from "./readAll.dto";
+import { ICommentModel } from "@/server/models/comment";
+import { ReadAllCommentsByPostInput } from "../schema";
+
+type Params = ReadAllCommentsByPostInput & {
+  repositories: {
+    database: ICommentModel;
+  };
+};
 
 const ReadAllCommentsByPostService = async ({
   repositories,
   postId
-}: IReadAllCommentsByPostIdDTO) => {
+}: Params) => {
   const comments = await repositories.database.readAllByPostId(postId);
 
   return comments ?? [];

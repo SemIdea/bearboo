@@ -1,11 +1,17 @@
 import { TRPCError } from "@trpc/server";
-import { IGetUserPostsDTO } from "./readPosts.dto";
+import { IPostModel } from "@/server/models/post";
+import { IUserModel } from "@/server/models/user";
 import { UserErrorCode } from "@/shared/error/user";
+import { ReadUserPostsInput } from "../schema";
 
-const GetUserPostsService = async ({
-  repositories,
-  id
-}: IGetUserPostsDTO) => {
+type Params = ReadUserPostsInput & {
+  repositories: {
+    database: IPostModel;
+    user: IUserModel;
+  };
+};
+
+const GetUserPostsService = async ({ repositories, id }: Params) => {
   const user = await repositories.user.read(id);
 
   if (!user) {

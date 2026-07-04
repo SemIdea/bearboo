@@ -1,12 +1,17 @@
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
-import { IRevalidatePostDTO } from "./revalidate.dto";
+import { IPostModel } from "@/server/models/post";
 import { PostErrorCode } from "@/shared/error/post";
+import { RevalidatePostInput } from "../schema";
 
-const RevalidatePostService = async ({
-  repositories,
-  ...data
-}: IRevalidatePostDTO) => {
+type Params = RevalidatePostInput & {
+  userId: string;
+  repositories: {
+    database: IPostModel;
+  };
+};
+
+const RevalidatePostService = async ({ repositories, ...data }: Params) => {
   const post = await repositories.database.read(data.id);
 
   if (!post) {

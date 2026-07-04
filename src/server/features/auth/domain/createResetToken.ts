@@ -1,12 +1,25 @@
-import { ISendResetPasswordEmailDTO } from "./createResetToken.dto";
 import { TRPCError } from "@trpc/server";
+import { IResetTokenModel } from "@/server/models/resetToken";
+import { IUserModel } from "@/server/models/user";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 import { UserErrorCode } from "@/shared/error/user";
+import { SendResetPasswordEmailInput } from "../schema";
+
+type Params = SendResetPasswordEmailInput & {
+  repositories: {
+    database: IUserModel;
+    resetToken: IResetTokenModel;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
 
 const CreateResetTokenService = async ({
   repositories,
   helpers,
   ...data
-}: ISendResetPasswordEmailDTO) => {
+}: Params) => {
   const user = await repositories.database.readByEmail(data.email);
 
   if (!user) {

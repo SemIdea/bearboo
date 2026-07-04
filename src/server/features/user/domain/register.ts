@@ -1,12 +1,25 @@
 import { TRPCError } from "@trpc/server";
-import { IRegisterUserDTO } from "./register.dto";
+import { IUserModel } from "@/server/models/user";
+import { IPasswordHashingHelperAdapter } from "@/lib/passwordHashing/adapter";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 import { UserErrorCode } from "@/shared/error/user";
+import { CreateUserInput } from "../schema";
+
+type Params = CreateUserInput & {
+  repositories: {
+    database: IUserModel;
+  };
+  helpers: {
+    hashing: IPasswordHashingHelperAdapter;
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
 
 const RegisterUserService = async ({
   repositories,
   helpers,
   ...data
-}: IRegisterUserDTO) => {
+}: Params) => {
   const existingUser = await repositories.database.readByEmail(data.email);
 
   if (existingUser) {

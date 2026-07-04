@@ -1,9 +1,14 @@
-import { IUpdateUserProfileDTO } from "./updateProfile.dto";
+import { IUserModel } from "@/server/models/user";
+import { UpdateUserProfileInput } from "../schema";
 
-const UpdateUserProfileService = async ({
-  repositories,
-  ...data
-}: IUpdateUserProfileDTO) => {
+type Params = UpdateUserProfileInput & {
+  id: string;
+  repositories: {
+    database: IUserModel;
+  };
+};
+
+const UpdateUserProfileService = async ({ repositories, ...data }: Params) => {
   const updatedProfile = await repositories.database.update(data.id, {
     name: data.name,
     email: data.email,

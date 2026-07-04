@@ -35,6 +35,34 @@ const revalidatePostSchema = z.object({
   id: z.string()
 });
 
+const postEntitySchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  title: z.string(),
+  content: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date()
+});
+
+const postEntityWithRelationsSchema = postEntitySchema.extend({
+  user: z.object({
+    id: z.string(),
+    name: z.string()
+  }),
+  comments: z.array(
+    z.object({
+      id: z.string()
+    })
+  )
+});
+
+const createPostOutputSchema = postEntitySchema;
+const readPostOutputSchema = postEntitySchema;
+const updatePostOutputSchema = postEntitySchema;
+const deletePostOutputSchema = z.boolean();
+const revalidatePostOutputSchema = postEntitySchema;
+const readRecentPostsOutputSchema = z.array(postEntityWithRelationsSchema);
+
 type CreatePostInput = z.TypeOf<typeof createPostSchema>;
 type ReadPostInput = z.TypeOf<typeof readPostSchema>;
 type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
@@ -46,7 +74,15 @@ export {
   readPostSchema,
   updatePostSchema,
   deletePostSchema,
-  revalidatePostSchema
+  revalidatePostSchema,
+  postEntitySchema,
+  postEntityWithRelationsSchema,
+  createPostOutputSchema,
+  readPostOutputSchema,
+  updatePostOutputSchema,
+  deletePostOutputSchema,
+  revalidatePostOutputSchema,
+  readRecentPostsOutputSchema
 };
 
 export type {

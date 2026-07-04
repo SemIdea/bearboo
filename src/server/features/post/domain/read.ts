@@ -1,8 +1,15 @@
 import { TRPCError } from "@trpc/server";
-import { IReadPostDTO } from "./read.dto";
+import { IPostModel } from "@/server/models/post";
 import { PostErrorCode } from "@/shared/error/post";
+import { ReadPostInput } from "../schema";
 
-const ReadPostService = async ({ repositories, id }: IReadPostDTO) => {
+type Params = ReadPostInput & {
+  repositories: {
+    database: IPostModel;
+  };
+};
+
+const ReadPostService = async ({ repositories, id }: Params) => {
   const post = await repositories.database.read(id);
 
   if (!post) {

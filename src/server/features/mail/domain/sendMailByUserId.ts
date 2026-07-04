@@ -1,5 +1,18 @@
-import { ISendMailByUserIdDTO } from "./sendMailByUserId.dto";
+import { IUserModel } from "@/server/models/user";
+import { IMailerGatewayAdapter } from "@/server/integrations/gateway/mailer/adapter";
 import { SendMailService } from "./sendMail";
+
+type Params = {
+  userId: string;
+  subject: string;
+  body: string;
+  repositories: {
+    database: IUserModel;
+  };
+  gateways: {
+    mail: IMailerGatewayAdapter;
+  };
+};
 
 const SendMailByUserIdService = async ({
   userId,
@@ -7,7 +20,7 @@ const SendMailByUserIdService = async ({
   body,
   repositories,
   gateways
-}: ISendMailByUserIdDTO) => {
+}: Params) => {
   const user = await repositories.database.read(userId);
 
   if (!user) {

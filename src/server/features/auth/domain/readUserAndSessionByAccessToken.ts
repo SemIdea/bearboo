@@ -1,12 +1,20 @@
 import { TRPCError } from "@trpc/server";
-import { IReadUserAndSessionByAccessTokenDTO } from "./readUserAndSessionByAccessToken.dto";
-import { IUserWithSession } from "@/server/models/user";
+import { ISessionModel } from "@/server/models/session";
+import { IUserModel, IUserWithSession } from "@/server/models/user";
 import { SessionErrorCode } from "@/shared/error/session";
+
+type Params = {
+  accessToken: string;
+  repositories: {
+    user: IUserModel;
+    database: ISessionModel;
+  };
+};
 
 const ReadUserAndSessionByAccessTokenService = async ({
   repositories,
   accessToken
-}: IReadUserAndSessionByAccessTokenDTO) => {
+}: Params) => {
   const session = await repositories.database.readByAccessToken(accessToken);
 
   if (!session || !session.userId) {

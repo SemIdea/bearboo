@@ -1,8 +1,18 @@
 import { TRPCError } from "@trpc/server";
-import { IDeletePostDTO } from "./delete.dto";
+import { IPostModel } from "@/server/models/post";
+import { IUserModel } from "@/server/models/user";
 import { PostErrorCode } from "@/shared/error/post";
+import { DeletePostInput } from "../schema";
 
-const DeletePostService = async ({ repositories, ...data }: IDeletePostDTO) => {
+type Params = DeletePostInput & {
+  userId: string;
+  repositories: {
+    user: IUserModel;
+    database: IPostModel;
+  };
+};
+
+const DeletePostService = async ({ repositories, ...data }: Params) => {
   const post = await repositories.database.read(data.id);
 
   if (!post) {

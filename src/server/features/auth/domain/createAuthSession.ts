@@ -1,13 +1,26 @@
 import { TRPCError } from "@trpc/server";
-import { ICreateAuthSessionDTO } from "./createAuthSession.dto";
+import { ISessionModel } from "@/server/models/session";
+import { IUserModel } from "@/server/models/user";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 import { UserErrorCode } from "@/shared/error/user";
 import { SessionErrorCode } from "@/shared/error/session";
+
+type Params = {
+  userId: string;
+  repositories: {
+    user: IUserModel;
+    database: ISessionModel;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
 
 const CreateAuthSessionService = async ({
   repositories,
   helpers,
   ...data
-}: ICreateAuthSessionDTO) => {
+}: Params) => {
   const user = await repositories.user.read(data.userId);
 
   if (!user) {

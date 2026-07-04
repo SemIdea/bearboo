@@ -1,11 +1,17 @@
 import { TRPCError } from "@trpc/server";
-import { IGetUserCommentsDTO } from "./readComments.dto";
+import { ICommentModel } from "@/server/models/comment";
+import { IUserModel } from "@/server/models/user";
 import { UserErrorCode } from "@/shared/error/user";
+import { ReadUserCommentsInput } from "../schema";
 
-const ReadUserCommentsService = async ({
-  repositories,
-  id
-}: IGetUserCommentsDTO) => {
+type Params = ReadUserCommentsInput & {
+  repositories: {
+    database: ICommentModel;
+    user: IUserModel;
+  };
+};
+
+const ReadUserCommentsService = async ({ repositories, id }: Params) => {
   const user = await repositories.user.read(id);
 
   if (!user) {

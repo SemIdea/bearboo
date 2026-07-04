@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { postEntitySchema } from "../post/schema";
+import { commentEntitySchema } from "../comment/schema";
 
 const registerUserSchema = z.object({
   email: z.email("Invalid email address."),
@@ -31,6 +33,34 @@ const updateUserProfileSchema = z
   })
   .partial();
 
+const userWithoutPasswordSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.email(),
+  verified: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  bio: z.string().nullish()
+});
+
+const loginUserOutputSchema = z.object({
+  id: z.string(),
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  user: userWithoutPasswordSchema
+});
+
+const registerUserOutputSchema = z.object({
+  user: userWithoutPasswordSchema
+});
+
+const readUserProfileOutputSchema = userWithoutPasswordSchema;
+const readUserPostsOutputSchema = z.array(postEntitySchema);
+const readUserCommentsOutputSchema = z.array(commentEntitySchema);
+const updateUserProfileOutputSchema = userWithoutPasswordSchema;
+
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
 type ReadUserProfileInput = z.TypeOf<typeof readUserProfileSchema>;
@@ -44,7 +74,14 @@ export {
   readUserProfileSchema,
   readUserPostsSchema,
   readUserCommentsSchema,
-  updateUserProfileSchema
+  updateUserProfileSchema,
+  userWithoutPasswordSchema,
+  loginUserOutputSchema,
+  registerUserOutputSchema,
+  readUserProfileOutputSchema,
+  readUserPostsOutputSchema,
+  readUserCommentsOutputSchema,
+  updateUserProfileOutputSchema
 };
 
 export type {

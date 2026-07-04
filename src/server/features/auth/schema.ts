@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { userWithoutPasswordSchema } from "../user/schema";
 
 const refreshSessionSchema = z.object({
   refreshToken: z.string()
@@ -31,6 +32,43 @@ const resetPasswordSchema = z
     path: ["confirmPassword"]
   });
 
+const sessionEntitySchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date()
+});
+
+const verifyTokenEntitySchema = z.object({
+  id: z.string(),
+  token: z.string(),
+  expiresAt: z.date(),
+  userId: z.string(),
+  used: z.boolean()
+});
+
+const userWithSessionSchema = userWithoutPasswordSchema.extend({
+  session: z.object({
+    id: z.string(),
+    accessToken: z.string(),
+    refreshToken: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+  })
+});
+
+const refreshSessionOutputSchema = sessionEntitySchema;
+const readUserFromSessionOutputSchema = userWithSessionSchema;
+const logoutUserFromSessionOutputSchema = z.void();
+const verifyTokenOutputSchema = verifyTokenEntitySchema;
+const resendVerificationEmailOutputSchema = verifyTokenEntitySchema;
+const resetPasswordOutputSchema = userWithoutPasswordSchema;
+const sendResetPasswordEmailOutputSchema = z.object({
+  success: z.boolean()
+});
+
 type RefreshSessionInput = z.TypeOf<typeof refreshSessionSchema>;
 type VerifyTokenInput = z.TypeOf<typeof verifyTokenSchema>;
 type ResendVerificationEmailInput = z.infer<
@@ -44,7 +82,17 @@ export {
   verifyTokenSchema,
   resendVerificationEmailSchema,
   sendResetPasswordEmailSchema,
-  resetPasswordSchema
+  resetPasswordSchema,
+  sessionEntitySchema,
+  verifyTokenEntitySchema,
+  userWithSessionSchema,
+  refreshSessionOutputSchema,
+  readUserFromSessionOutputSchema,
+  logoutUserFromSessionOutputSchema,
+  verifyTokenOutputSchema,
+  resendVerificationEmailOutputSchema,
+  resetPasswordOutputSchema,
+  sendResetPasswordEmailOutputSchema
 };
 
 export type {

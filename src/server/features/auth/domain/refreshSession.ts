@@ -1,12 +1,23 @@
 import { TRPCError } from "@trpc/server";
-import { IRefreshSessionDTO } from "./refreshSession.dto";
+import { ISessionModel } from "@/server/models/session";
+import { IUidGeneratorHelperAdapter } from "@/lib/uidGenerator/adapter";
 import { SessionErrorCode } from "@/shared/error/session";
+
+type Params = {
+  id: string;
+  repositories: {
+    database: ISessionModel;
+  };
+  helpers: {
+    uid: IUidGeneratorHelperAdapter;
+  };
+};
 
 const RefreshSessionService = async ({
   repositories,
   helpers,
   ...data
-}: IRefreshSessionDTO) => {
+}: Params) => {
   const newAccessToken = helpers.uid.generate();
   const newRefreshToken = helpers.uid.generate();
 
