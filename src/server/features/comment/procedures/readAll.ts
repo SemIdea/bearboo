@@ -1,15 +1,13 @@
 import { publicProcedure } from "@/server/createRouter";
-import { ReadAllCommentsByPostService } from "../domain/readAll";
+import { domain_readAllCommentsByPost } from "../domain/readAll";
 import {
   readAllCommentsByPostSchema,
   readAllCommentsByPostOutputSchema
 } from "../schema";
 
-const readAllCommentsByPostProcedure = publicProcedure
+const procedure_readAllCommentsByPost = publicProcedure
   .input(readAllCommentsByPostSchema)
   .output(readAllCommentsByPostOutputSchema)
-  .query(async ({ input, ctx }) =>
-    ReadAllCommentsByPostService({ ...input, ctx })
-  );
+  .query(async ({ input, ctx }) => domain_readAllCommentsByPost({ ctx, input }));
 
-export { readAllCommentsByPostProcedure };
+export { procedure_readAllCommentsByPost };

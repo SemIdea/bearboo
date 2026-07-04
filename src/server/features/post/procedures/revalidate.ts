@@ -1,12 +1,12 @@
 import { verifiedProcedure } from "@/server/createRouter";
-import { RevalidatePostService } from "../domain/revalidate";
+import { domain_revalidatePost } from "../domain/revalidate";
 import { revalidatePostSchema, revalidatePostOutputSchema } from "../schema";
 
-const revalidatePostProcedure = verifiedProcedure
+const procedure_revalidatePost = verifiedProcedure
   .input(revalidatePostSchema)
   .output(revalidatePostOutputSchema)
   .mutation(async ({ input, ctx }) =>
-    RevalidatePostService({ ...input, userId: ctx.user.id, ctx })
+    domain_revalidatePost({ ctx, input: { ...input, userId: ctx.user.id } })
   );
 
-export { revalidatePostProcedure };
+export { procedure_revalidatePost };

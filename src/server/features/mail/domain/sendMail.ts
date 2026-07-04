@@ -1,17 +1,20 @@
-import { DomainInput } from "@/server/createDomain";
+import { createDomain, DomainInput } from "@/server/createDomain";
 
-type Input = DomainInput<{
-  to: string | string[];
-  subject: string;
-  body: string;
-}>;
+const domain_sendMail = createDomain(
+  async ({
+    ctx,
+    input
+  }: DomainInput<{
+    to: string | string[];
+    subject: string;
+    body: string;
+  }>) => {
+    return ctx.gateways.mail.sendMail({
+      body: input.body,
+      subject: input.subject,
+      to: input.to
+    });
+  }
+);
 
-const SendMailService = async ({ ctx, ...data }: Input) => {
-  return await ctx.gateways.mail.sendMail({
-    body: data.body,
-    subject: data.subject,
-    to: data.to
-  });
-};
-
-export { SendMailService };
+export { domain_sendMail };

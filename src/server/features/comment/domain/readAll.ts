@@ -1,12 +1,14 @@
-import { DomainInput } from "@/server/createDomain";
+import { createDomain, DomainInput } from "@/server/createDomain";
 import { ReadAllCommentsByPostInput } from "../schema";
 
-type Input = DomainInput<ReadAllCommentsByPostInput>;
+const domain_readAllCommentsByPost = createDomain(
+  async ({ ctx, input }: DomainInput<ReadAllCommentsByPostInput>) => {
+    const comments = await ctx.repositories.comment.readAllByPostId(
+      input.postId
+    );
 
-const ReadAllCommentsByPostService = async ({ ctx, postId }: Input) => {
-  const comments = await ctx.repositories.comment.readAllByPostId(postId);
+    return comments ?? [];
+  }
+);
 
-  return comments ?? [];
-};
-
-export { ReadAllCommentsByPostService };
+export { domain_readAllCommentsByPost };

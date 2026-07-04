@@ -1,8 +1,8 @@
 import { publicProcedure } from "@/server/createRouter";
-import { ReadUserProfileService } from "../domain/readProfile";
+import { domain_readUserProfile } from "../domain/readProfile";
 import { readUserProfileSchema, readUserProfileOutputSchema } from "../schema";
 
-const readUserProfileProcedure = publicProcedure
+const procedure_readUserProfile = publicProcedure
   .input(readUserProfileSchema)
   .output(readUserProfileOutputSchema)
   .query(async ({ input, ctx }) => {
@@ -12,7 +12,7 @@ const readUserProfileProcedure = publicProcedure
       return userWithoutSession;
     }
 
-    return ReadUserProfileService({ ...input, ctx });
+    return domain_readUserProfile({ ctx, input });
   });
 
-export { readUserProfileProcedure };
+export { procedure_readUserProfile };

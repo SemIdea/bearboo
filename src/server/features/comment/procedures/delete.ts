@@ -1,12 +1,12 @@
 import { verifiedProcedure } from "@/server/createRouter";
-import { DeleteCommentService } from "../domain/delete";
+import { domain_deleteComment } from "../domain/delete";
 import { deleteCommentSchema, deleteCommentOutputSchema } from "../schema";
 
-const deleteCommentProcedure = verifiedProcedure
+const procedure_deleteComment = verifiedProcedure
   .input(deleteCommentSchema)
   .output(deleteCommentOutputSchema)
   .mutation(async ({ input, ctx }) =>
-    DeleteCommentService({ ...input, userId: ctx.user.id, ctx })
+    domain_deleteComment({ ctx, input: { ...input, userId: ctx.user.id } })
   );
 
-export { deleteCommentProcedure };
+export { procedure_deleteComment };

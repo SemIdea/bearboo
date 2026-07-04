@@ -1,9 +1,9 @@
 import { publicProcedure } from "@/server/createRouter";
-import { ReadRecentPostsService } from "../domain/readRecent";
+import { domain_readRecentPosts } from "../domain/readRecent";
 import { readRecentPostsOutputSchema } from "../schema";
 
-const readRecentPostsProcedure = publicProcedure
+const procedure_readRecentPosts = publicProcedure
   .output(readRecentPostsOutputSchema)
-  .query(async ({ ctx }) => ReadRecentPostsService({ ctx }));
+  .query(async ({ ctx }) => domain_readRecentPosts({ ctx, input: {} }));
 
-export { readRecentPostsProcedure };
+export { procedure_readRecentPosts };

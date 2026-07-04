@@ -1,17 +1,19 @@
 import { protectedProcedure } from "@/server/createRouter";
-import { DeleteSessionService } from "../domain/deleteSession";
+import { domain_deleteSession } from "../domain/deleteSession";
 import { logoutUserFromSessionOutputSchema } from "../schema";
 
-const logoutUserFromSessionProcedure = protectedProcedure
+const procedure_logoutUserFromSession = protectedProcedure
   .output(logoutUserFromSessionOutputSchema)
   .mutation(async ({ ctx }) => {
     const session = ctx.user.session;
 
-    await DeleteSessionService({
-      id: session.id,
-      userId: ctx.user.id,
-      ctx
+    await domain_deleteSession({
+      ctx,
+      input: {
+        id: session.id,
+        userId: ctx.user.id
+      }
     });
   });
 
-export { logoutUserFromSessionProcedure };
+export { procedure_logoutUserFromSession };

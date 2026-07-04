@@ -1,21 +1,23 @@
 import { publicProcedure } from "@/server/createRouter";
-import { CreateResetTokenService } from "../domain/createResetToken";
-import { SendMailByUserIdService } from "../../mail/domain/sendMailByUserId";
+import { domain_createResetToken } from "../domain/createResetToken";
+import { domain_sendMailByUserId } from "../../mail/domain/sendMailByUserId";
 import {
   sendResetPasswordEmailSchema,
   sendResetPasswordEmailOutputSchema
 } from "../schema";
 
-const sendResetPasswordEmailProcedure = publicProcedure
+const procedure_sendResetPasswordEmail = publicProcedure
   .input(sendResetPasswordEmailSchema)
   .output(sendResetPasswordEmailOutputSchema)
   .mutation(async ({ input, ctx }) => {
-    const resetToken = await CreateResetTokenService({ ...input, ctx });
+    const resetToken = await domain_createResetToken({ ctx, input });
 
-    await SendMailByUserIdService({
-      userId: resetToken.userId,
-      subject: "Reset Your Password",
-      body: `
+    await domain_sendMailByUserId({
+      ctx,
+      input: {
+        userId: resetToken.userId,
+        subject: "Reset Your Password",
+        body: `
         <h2>Password Reset Request</h2>
         <p>Hello {{name}},</p>
         <p>You requested a password reset. Please click the link below to reset your password:</p>
@@ -26,8 +28,8 @@ const sendResetPasswordEmailProcedure = publicProcedure
         <p>If you didn't request this password reset, please ignore this email.</p>
         <br>
         <p>Best regards,<br>The Team</p>
-      `,
-      ctx
+      `
+      }
     });
 
     return {
@@ -35,4 +37,4 @@ const sendResetPasswordEmailProcedure = publicProcedure
     };
   });
 
-export { sendResetPasswordEmailProcedure };
+export { procedure_sendResetPasswordEmail };

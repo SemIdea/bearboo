@@ -1,32 +1,33 @@
 import { TRPCError } from "@trpc/server";
-import { DomainInput } from "@/server/createDomain";
+import { createDomain, DomainInput } from "@/server/createDomain";
 import { CommentErrorCode } from "@/shared/error/comment";
 import { UpdateCommentInput } from "../schema";
 
-type Input = DomainInput<UpdateCommentInput & { userId: string }>;
+const domain_updateComment = createDomain(
+  async ({
+    ctx,
+    input
+  }: DomainInput<UpdateCommentInput & { userId: string }>) => {
+    const comment = await ctx.repositories.comment.read(input.id);
 
-const UpdateCommentService = async ({ ctx, ...data }: Input) => {
-  const comment = await ctx.repositories.comment.read(data.id);
+    if (!comment) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: CommentErrorCode.COMMENT_NOT_FOUND
+      });
+    }
 
-  if (!comment) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: CommentErrorCode.COMMENT_NOT_FOUND
+    if (comment.userId !== input.userId) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: CommentErrorCode.COMMENT_UPDATE_FORBIDDEN
+      });
+    }
+
+    return ctx.repositories.comment.update(input.id, {
+      content: input.content
     });
   }
+);
 
-  if (comment.userId !== data.userId) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: CommentErrorCode.COMMENT_UPDATE_FORBIDDEN
-    });
-  }
-
-  const updatedComment = await ctx.repositories.comment.update(data.id, {
-    content: data.content
-  });
-
-  return updatedComment;
-};
-
-export { UpdateCommentService };
+export { domain_updateComment };

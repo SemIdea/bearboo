@@ -1,12 +1,12 @@
 import { verifiedProcedure } from "@/server/createRouter";
-import { CreateCommentService } from "../domain/create";
+import { domain_createComment } from "../domain/create";
 import { createCommentschema, createCommentOutputSchema } from "../schema";
 
-const createCommentProcedure = verifiedProcedure
+const procedure_createComment = verifiedProcedure
   .input(createCommentschema)
   .output(createCommentOutputSchema)
   .mutation(async ({ input, ctx }) =>
-    CreateCommentService({ ...input, userId: ctx.user.id, ctx })
+    domain_createComment({ ctx, input: { ...input, userId: ctx.user.id } })
   );
 
-export { createCommentProcedure };
+export { procedure_createComment };

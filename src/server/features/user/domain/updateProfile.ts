@@ -1,16 +1,19 @@
-import { DomainInput } from "@/server/createDomain";
+import { createDomain, DomainInput } from "@/server/createDomain";
 import { UpdateUserProfileInput } from "../schema";
 
-type Input = DomainInput<UpdateUserProfileInput & { id: string }>;
+const domain_updateUserProfile = createDomain(
+  async ({
+    ctx,
+    input
+  }: DomainInput<UpdateUserProfileInput & { id: string }>) => {
+    const updatedProfile = await ctx.repositories.user.update(input.id, {
+      name: input.name,
+      email: input.email,
+      bio: input.bio
+    });
 
-const UpdateUserProfileService = async ({ ctx, ...data }: Input) => {
-  const updatedProfile = await ctx.repositories.user.update(data.id, {
-    name: data.name,
-    email: data.email,
-    bio: data.bio
-  });
+    return updatedProfile;
+  }
+);
 
-  return updatedProfile;
-};
-
-export { UpdateUserProfileService };
+export { domain_updateUserProfile };

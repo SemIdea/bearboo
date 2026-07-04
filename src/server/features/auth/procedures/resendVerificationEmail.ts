@@ -1,24 +1,26 @@
 import { publicProcedure } from "@/server/createRouter";
-import { ReCreateTokenService } from "../domain/reCreateToken";
-import { SendMailService } from "../../mail/domain/sendMail";
+import { domain_reCreateToken } from "../domain/reCreateToken";
+import { domain_sendMail } from "../../mail/domain/sendMail";
 import {
   resendVerificationEmailSchema,
   resendVerificationEmailOutputSchema
 } from "../schema";
 
-const resendVerificationEmailProcedure = publicProcedure
+const procedure_resendVerificationEmail = publicProcedure
   .input(resendVerificationEmailSchema)
   .output(resendVerificationEmailOutputSchema)
   .mutation(async ({ input, ctx }) => {
-    const token = await ReCreateTokenService({
-      userEmail: input.email,
-      ctx
+    const token = await domain_reCreateToken({
+      ctx,
+      input: { userEmail: input.email }
     });
 
-    await SendMailService({
-      to: input.email,
-      subject: "Please verify your email address",
-      body: `
+    await domain_sendMail({
+      ctx,
+      input: {
+        to: input.email,
+        subject: "Please verify your email address",
+        body: `
         <h2>Email Verification</h2>
         <p>Hello {{name}},</p>
         <p>You requested a new verification email. Please click the link below to verify your email address:</p>
@@ -29,11 +31,11 @@ const resendVerificationEmailProcedure = publicProcedure
         <p>If you didn't request this verification, please ignore this email.</p>
         <br>
         <p>Best regards,<br>The Team</p>
-      `,
-      ctx
+      `
+      }
     });
 
     return token;
   });
 
-export { resendVerificationEmailProcedure };
+export { procedure_resendVerificationEmail };

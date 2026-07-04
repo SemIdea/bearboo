@@ -1,15 +1,15 @@
 import { verifiedProcedure } from "@/server/createRouter";
-import { UpdateUserProfileService } from "../domain/updateProfile";
+import { domain_updateUserProfile } from "../domain/updateProfile";
 import {
   updateUserProfileSchema,
   updateUserProfileOutputSchema
 } from "../schema";
 
-const updateUserProfileProcedure = verifiedProcedure
+const procedure_updateUserProfile = verifiedProcedure
   .input(updateUserProfileSchema)
   .output(updateUserProfileOutputSchema)
   .mutation(async ({ input, ctx }) =>
-    UpdateUserProfileService({ ...input, id: ctx.user.id, ctx })
+    domain_updateUserProfile({ ctx, input: { ...input, id: ctx.user.id } })
   );
 
-export { updateUserProfileProcedure };
+export { procedure_updateUserProfile };

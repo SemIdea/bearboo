@@ -1,21 +1,26 @@
 import { publicProcedure } from "@/server/createRouter";
-import { RegisterUserService } from "../domain/register";
+import { domain_registerUser } from "../domain/register";
 import { registerUserSchema, registerUserOutputSchema } from "../schema";
-import { SendMailService } from "../../mail/domain/sendMail";
-import { CreateTokenService } from "../../auth/domain/createToken";
+import { domain_sendMail } from "../../mail/domain/sendMail";
+import { domain_createToken } from "../../auth/domain/createToken";
 
-const registerUserProcedure = publicProcedure
+const procedure_registerUser = publicProcedure
   .input(registerUserSchema)
   .output(registerUserOutputSchema)
   .mutation(async ({ input, ctx }) => {
-    const user = await RegisterUserService({ ...input, ctx });
+    const user = await domain_registerUser({ ctx, input });
 
-    const verifyToken = await CreateTokenService({ userId: user.id, ctx });
+    const verifyToken = await domain_createToken({
+      ctx,
+      input: { userId: user.id }
+    });
 
-    await SendMailService({
-      to: user.email,
-      subject: "Please verify your email address",
-      body: `
+    await domain_sendMail({
+      ctx,
+      input: {
+        to: user.email,
+        subject: "Please verify your email address",
+        body: `
         <h2>Welcome to our platform!</h2>
         <p>Hello ${user.name},</p>
         <p>Thank you for registering! To complete your account setup, please verify your email address by clicking the link below:</p>
@@ -26,8 +31,8 @@ const registerUserProcedure = publicProcedure
         <p>If you didn't create an account, please ignore this email.</p>
         <br>
         <p>Best regards,<br>The Team</p>
-      `,
-      ctx
+      `
+      }
     }).catch((error) => {
       console.error("Error sending verification email:", error);
       throw new Error("Failed to send verification email");
@@ -36,4 +41,4 @@ const registerUserProcedure = publicProcedure
     return { user };
   });
 
-export { registerUserProcedure };
+export { procedure_registerUser };

@@ -1,6 +1,6 @@
 import { IUserWithSession } from "./models/user";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { ReadUserAndSessionByAccessTokenService } from "./features/auth/domain/readUserAndSessionByAccessToken";
+import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
 import { IRepositories, repositories } from "./infra/container/repositories";
 import { IHelpers, helpers } from "./infra/container/helpers";
 import { IGateways, gateways } from "./infra/container/gateways";
@@ -42,9 +42,9 @@ const createTRPCContext = async ({
 
   if (!accessToken) return ctx;
 
-  const user = await ReadUserAndSessionByAccessTokenService({
-    accessToken,
-    ctx
+  const user = await domain_readUserAndSessionByAccessToken({
+    ctx,
+    input: { accessToken }
   });
 
   if (!user) return ctx;

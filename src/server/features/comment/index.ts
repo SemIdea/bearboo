@@ -1,14 +1,14 @@
 import { t } from "../../createRouter";
-import { createCommentProcedure } from "./procedures/create";
-import { deleteCommentProcedure } from "./procedures/delete";
-import { readAllCommentsByPostProcedure } from "./procedures/readAll";
-import { updateCommentProcedure } from "./procedures/update";
+import { procedure_createComment } from "./procedures/create";
+import { procedure_deleteComment } from "./procedures/delete";
+import { procedure_readAllCommentsByPost } from "./procedures/readAll";
+import { procedure_updateComment } from "./procedures/update";
 
 const CommentRouter = t.router({
-  create: createCommentProcedure,
-  readAllByPost: readAllCommentsByPostProcedure,
-  update: updateCommentProcedure,
-  delete: deleteCommentProcedure
+  create: procedure_createComment,
+  readAllByPost: procedure_readAllCommentsByPost,
+  update: procedure_updateComment,
+  delete: procedure_deleteComment
 });
 
 export { CommentRouter };

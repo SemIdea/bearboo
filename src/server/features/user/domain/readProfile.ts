@@ -1,23 +1,23 @@
 import { TRPCError } from "@trpc/server";
-import { DomainInput } from "@/server/createDomain";
+import { createDomain, DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { ReadUserProfileInput } from "../schema";
 
-type Input = DomainInput<ReadUserProfileInput>;
+const domain_readUserProfile = createDomain(
+  async ({ ctx, input }: DomainInput<ReadUserProfileInput>) => {
+    const userProfile = await ctx.repositories.user.read(input.id);
 
-const ReadUserProfileService = async ({ ctx, id }: Input) => {
-  const userProfile = await ctx.repositories.user.read(id);
+    if (!userProfile) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: UserErrorCode.USER_NOT_FOUND
+      });
+    }
 
-  if (!userProfile) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
+    const { password, ...userWithoutPassword } = userProfile;
+
+    return userWithoutPassword;
   }
+);
 
-  const { password, ...userWithoutPassword } = userProfile;
-
-  return userWithoutPassword;
-};
-
-export { ReadUserProfileService };
+export { domain_readUserProfile };

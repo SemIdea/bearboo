@@ -1,13 +1,13 @@
 import { publicProcedure } from "@/server/createRouter";
-import { ReadUserCommentsService } from "../domain/readComments";
+import { domain_readUserComments } from "../domain/readComments";
 import {
   readUserCommentsSchema,
   readUserCommentsOutputSchema
 } from "../schema";
 
-const readUserCommentsProcedure = publicProcedure
+const procedure_readUserComments = publicProcedure
   .input(readUserCommentsSchema)
   .output(readUserCommentsOutputSchema)
-  .query(async ({ input, ctx }) => ReadUserCommentsService({ ...input, ctx }));
+  .query(async ({ input, ctx }) => domain_readUserComments({ ctx, input }));
 
-export { readUserCommentsProcedure };
+export { procedure_readUserComments };

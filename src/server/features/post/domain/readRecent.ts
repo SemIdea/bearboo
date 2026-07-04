@@ -1,11 +1,9 @@
-import { DomainInput } from "@/server/createDomain";
+import { createDomain } from "@/server/createDomain";
 
-type Input = DomainInput;
-
-const ReadRecentPostsService = async ({ ctx }: Input) => {
+const domain_readRecentPosts = createDomain(async ({ ctx }) => {
   const posts = await ctx.repositories.post.readRecents(30);
 
   return posts;
-};
+});
 
-export { ReadRecentPostsService };
+export { domain_readRecentPosts };

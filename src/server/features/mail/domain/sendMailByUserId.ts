@@ -1,38 +1,38 @@
-import { DomainInput } from "@/server/createDomain";
-import { SendMailService } from "./sendMail";
+import { createDomain, DomainInput } from "@/server/createDomain";
+import { domain_sendMail } from "./sendMail";
 
-type Input = DomainInput<{
-  userId: string;
-  subject: string;
-  body: string;
-}>;
+const domain_sendMailByUserId = createDomain(
+  async ({
+    ctx,
+    input
+  }: DomainInput<{
+    userId: string;
+    subject: string;
+    body: string;
+  }>) => {
+    const user = await ctx.repositories.user.read(input.userId);
 
-const SendMailByUserIdService = async ({
-  ctx,
-  userId,
-  subject,
-  body
-}: Input) => {
-  const user = await ctx.repositories.user.read(userId);
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  // e.g., {{name}} will be replaced with user.name
-  const newBody = body.replace(/{{(\w+)}}/g, (_, key: string) => {
-    if (key in user) {
-      return String((user as Record<string, unknown>)[key] ?? "");
+    if (!user) {
+      throw new Error("User not found");
     }
-    return "";
-  });
 
-  return SendMailService({
-    to: user.email,
-    subject,
-    body: newBody,
-    ctx
-  });
-};
+    // e.g., {{name}} will be replaced with user.name
+    const newBody = input.body.replace(/{{(\w+)}}/g, (_, key: string) => {
+      if (key in user) {
+        return String((user as Record<string, unknown>)[key] ?? "");
+      }
+      return "";
+    });
 
-export { SendMailByUserIdService };
+    return domain_sendMail({
+      ctx,
+      input: {
+        to: user.email,
+        subject: input.subject,
+        body: newBody
+      }
+    });
+  }
+);
+
+export { domain_sendMailByUserId };

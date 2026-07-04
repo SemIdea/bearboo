@@ -1,15 +1,15 @@
 import { t } from "@/server/createRouter";
-import { ReadSessionByRefreshTokenService } from "../domain/readSessionByRefreshToken";
-import { RefreshSessionService } from "../domain/refreshSession";
+import { domain_readSessionByRefreshToken } from "../domain/readSessionByRefreshToken";
+import { domain_refreshSession } from "../domain/refreshSession";
 import { refreshSessionSchema, refreshSessionOutputSchema } from "../schema";
 
-const refreshSessionProcedure = t.procedure
+const procedure_refreshSession = t.procedure
   .input(refreshSessionSchema)
   .output(refreshSessionOutputSchema)
   .mutation(async ({ input, ctx }) => {
-    const session = await ReadSessionByRefreshTokenService({ ...input, ctx });
+    const session = await domain_readSessionByRefreshToken({ ctx, input });
 
-    return RefreshSessionService({ id: session.id, ctx });
+    return domain_refreshSession({ ctx, input: { id: session.id } });
   });
 
-export { refreshSessionProcedure };
+export { procedure_refreshSession };

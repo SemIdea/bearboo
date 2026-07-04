@@ -1,10 +1,10 @@
 import { publicProcedure } from "@/server/createRouter";
-import { VerifyTokenService } from "../domain/verifyToken";
+import { domain_verifyToken } from "../domain/verifyToken";
 import { verifyTokenSchema, verifyTokenOutputSchema } from "../schema";
 
-const verifyTokenProcedure = publicProcedure
+const procedure_verifyToken = publicProcedure
   .input(verifyTokenSchema)
   .output(verifyTokenOutputSchema)
-  .mutation(async ({ input, ctx }) => VerifyTokenService({ ...input, ctx }));
+  .mutation(async ({ input, ctx }) => domain_verifyToken({ ctx, input }));
 
-export { verifyTokenProcedure };
+export { procedure_verifyToken };

@@ -1,23 +1,23 @@
 import { TRPCError } from "@trpc/server";
-import { DomainInput } from "@/server/createDomain";
+import { createDomain, DomainInput } from "@/server/createDomain";
 import { UserErrorCode } from "@/shared/error/user";
 import { ReadUserCommentsInput } from "../schema";
 
-type Input = DomainInput<ReadUserCommentsInput>;
+const domain_readUserComments = createDomain(
+  async ({ ctx, input }: DomainInput<ReadUserCommentsInput>) => {
+    const user = await ctx.repositories.user.read(input.id);
 
-const ReadUserCommentsService = async ({ ctx, id }: Input) => {
-  const user = await ctx.repositories.user.read(id);
+    if (!user) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: UserErrorCode.USER_NOT_FOUND
+      });
+    }
 
-  if (!user) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: UserErrorCode.USER_NOT_FOUND
-    });
+    const comments = await ctx.repositories.comment.readAllByUserId(input.id);
+
+    return comments ?? [];
   }
+);
 
-  const comments = await ctx.repositories.comment.readAllByUserId(id);
-
-  return comments ?? [];
-};
-
-export { ReadUserCommentsService };
+export { domain_readUserComments };

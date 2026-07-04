@@ -1,12 +1,12 @@
 import { verifiedProcedure } from "@/server/createRouter";
-import { CreatePostService } from "../domain/create";
+import { domain_createPost } from "../domain/create";
 import { createPostSchema, createPostOutputSchema } from "../schema";
 
-const createPostProcedure = verifiedProcedure
+const procedure_createPost = verifiedProcedure
   .input(createPostSchema)
   .output(createPostOutputSchema)
   .mutation(async ({ input, ctx }) =>
-    CreatePostService({ ...input, userId: ctx.user.id, ctx })
+    domain_createPost({ ctx, input: { ...input, userId: ctx.user.id } })
   );
 
-export { createPostProcedure };
+export { procedure_createPost };

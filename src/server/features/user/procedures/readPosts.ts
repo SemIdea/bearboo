@@ -1,10 +1,10 @@
 import { publicProcedure } from "@/server/createRouter";
-import { GetUserPostsService } from "../domain/readPosts";
+import { domain_getUserPosts } from "../domain/readPosts";
 import { readUserPostsSchema, readUserPostsOutputSchema } from "../schema";
 
-const readUserPostsProcedure = publicProcedure
+const procedure_readUserPosts = publicProcedure
   .input(readUserPostsSchema)
   .output(readUserPostsOutputSchema)
-  .query(async ({ input, ctx }) => GetUserPostsService({ ...input, ctx }));
+  .query(async ({ input, ctx }) => domain_getUserPosts({ ctx, input }));
 
-export { readUserPostsProcedure };
+export { procedure_readUserPosts };

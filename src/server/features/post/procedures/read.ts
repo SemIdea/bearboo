@@ -1,10 +1,10 @@
 import { publicProcedure } from "@/server/createRouter";
-import { ReadPostService } from "../domain/read";
+import { domain_readPost } from "../domain/read";
 import { readPostSchema, readPostOutputSchema } from "../schema";
 
-const readPostProcedure = publicProcedure
+const procedure_readPost = publicProcedure
   .input(readPostSchema)
   .output(readPostOutputSchema)
-  .query(async ({ input, ctx }) => ReadPostService({ ...input, ctx }));
+  .query(async ({ input, ctx }) => domain_readPost({ ctx, input }));
 
-export { readPostProcedure };
+export { procedure_readPost };
