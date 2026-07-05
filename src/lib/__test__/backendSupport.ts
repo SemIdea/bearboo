@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { featureFlags } from "@/config/featureFlags";
 import { AuthErrorCode, AuthErrorMessages } from "@/shared/error/auth";
+import { getBoolEnv } from "../env/getBoolEnv";
 import { getIntEnv } from "../env/getIntEnv";
 import { getStrEnv } from "../env/getStrEnv";
 import { getErrorMessage } from "../error";
@@ -9,7 +10,11 @@ import { BycryptPasswordHashingHelper } from "../passwordHashing/implementations
 import { UuidGenerator } from "../uidGenerator/implementations/uuid";
 
 describe("backend support helpers", () => {
-	const managedEnvKeys = ["TEST_INT_ENV", "TEST_STR_ENV"] as const;
+	const managedEnvKeys = [
+		"TEST_BOOL_ENV",
+		"TEST_INT_ENV",
+		"TEST_STR_ENV",
+	] as const;
 	const previousEnv = new Map<string, string | undefined>();
 
 	afterEach(() => {
@@ -45,6 +50,21 @@ describe("backend support helpers", () => {
 
 		setEnv("TEST_INT_ENV", "587");
 		expect(getIntEnv("TEST_INT_ENV", 3000)).toBe(587);
+	});
+
+	test("reads boolean env values with fallback for missing or invalid values", () => {
+		setEnv("TEST_BOOL_ENV");
+		expect(getBoolEnv("TEST_BOOL_ENV", true)).toBe(true);
+		expect(getBoolEnv("TEST_BOOL_ENV", false)).toBe(false);
+
+		setEnv("TEST_BOOL_ENV", "true");
+		expect(getBoolEnv("TEST_BOOL_ENV", false)).toBe(true);
+
+		setEnv("TEST_BOOL_ENV", "false");
+		expect(getBoolEnv("TEST_BOOL_ENV", true)).toBe(false);
+
+		setEnv("TEST_BOOL_ENV", "invalid");
+		expect(getBoolEnv("TEST_BOOL_ENV", true)).toBe(true);
 	});
 
 	test("reads string env values with fallback only when missing", () => {

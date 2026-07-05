@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { NodeMailerGateway } from "../nodemailer";
+import { NodemailerMailTransport } from "../../transports/nodemailer";
 
 const sendMailMock = vi.hoisted(() => vi.fn());
 const createTransportMock = vi.hoisted(() =>
@@ -14,7 +14,7 @@ vi.mock("nodemailer", () => ({
 	},
 }));
 
-describe("NodeMailerGateway", () => {
+describe("NodemailerMailTransport", () => {
 	beforeEach(() => {
 		createTransportMock.mockClear();
 		sendMailMock.mockReset();
@@ -27,7 +27,7 @@ describe("NodeMailerGateway", () => {
 			pending: [],
 		});
 
-		const gateway = new NodeMailerGateway({
+		const gateway = new NodemailerMailTransport({
 			smtpHost: "smtp.example.com",
 			smtpPort: 587,
 			domain: "example.com",

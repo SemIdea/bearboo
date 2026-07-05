@@ -1,5 +1,6 @@
 import path from "node:path";
 import { config } from "dotenv";
+import { getBoolEnv } from "./getBoolEnv";
 import { getIntEnv } from "./getIntEnv";
 import { getStrEnv } from "./getStrEnv";
 
@@ -14,6 +15,7 @@ const env = {
 		"postgresql://postgres:postgres@localhost:5432/postgres?schema=public",
 	),
 	mail: {
+		useProductionMailer: getBoolEnv("MAIL_USE_PRODUCTION_MAILER", false),
 		smtpHost: getStrEnv("MAIL_SMTP_HOST", "smtp.gmail.com"),
 		smtpPort: getIntEnv("MAIL_SMTP_PORT", 587),
 		domain: getStrEnv("MAIL_DOMAIN", "gmail.com"),

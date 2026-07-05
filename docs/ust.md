@@ -26,6 +26,11 @@
 | US-008 | Criar, listar, atualizar e deletar comentário | Comentários | RF-05 | done |
 | US-009 | Ver e editar perfil de usuário | Perfil | RF-06 | done |
 
+## Pendências Técnicas
+
+- Investigar se o mesmo padrão de transport pluggável usado no mailer pode ser aplicado ao Prisma, para reduzir duplicação entre runtime, testes e outros adaptadores.
+- Investigar por que o token enviado nos emails não está funcionando quando o link é aberto. O fluxo de cadastro/verificação parece montar o link corretamente, mas a rota final não completa a ação esperada.
+
 ---
 
 ## Épico Autenticação

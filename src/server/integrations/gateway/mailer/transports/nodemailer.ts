@@ -1,7 +1,8 @@
 import nodemailer from "nodemailer";
-import { IMailerGatewayAdapter, ISendMailReq } from "../adapter";
+import { ISendMailReq, ISendMailRes } from "../adapter";
+import { IMailTransport } from "../transport";
 
-type INodeMailerConfig = {
+type INodemailerTransportConfig = {
 	smtpHost: string;
 	smtpPort: number;
 	domain: string;
@@ -9,10 +10,10 @@ type INodeMailerConfig = {
 	fromPass: string;
 };
 
-class NodeMailerGateway implements IMailerGatewayAdapter {
-	constructor(private readonly config: INodeMailerConfig) {}
+class NodemailerMailTransport implements IMailTransport {
+	constructor(private readonly config: INodemailerTransportConfig) {}
 
-	async sendMail({ body, subject, to }: ISendMailReq) {
+	async sendMail({ body, subject, to }: ISendMailReq): Promise<ISendMailRes> {
 		const transporter = nodemailer.createTransport({
 			host: this.config.smtpHost,
 			port: this.config.smtpPort,
@@ -39,5 +40,5 @@ class NodeMailerGateway implements IMailerGatewayAdapter {
 	}
 }
 
-export type { INodeMailerConfig };
-export { NodeMailerGateway };
+export type { INodemailerTransportConfig };
+export { NodemailerMailTransport };
