@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,10 +10,8 @@ export default defineConfig({
 
 	test: {
 		include: ["src/**/__test__/**/*.ts"],
-		poolOptions: {
-			threads: {
-				singleThread: true,
-			},
-		},
+		pool: "threads",
+		maxWorkers: 1,
+		fileParallelism: false,
 	},
 });
