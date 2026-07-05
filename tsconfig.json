@@ -12,7 +12,7 @@
 		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
-		"jsx": "preserve",
+		"jsx": "react-jsx",
 		"incremental": true,
 		"plugins": [
 			{
@@ -29,7 +29,8 @@
 		"**/*.tsx",
 		".next/types/**/*.ts",
 		"postcss.config.js",
-		"src/.d.ts"
+		"src/.d.ts",
+		".next/dev/types/**/*.ts"
 	],
 	"exclude": ["web/node_modules"]
 }

@@ -3,8 +3,6 @@ import { CardBase } from "@/components/cardBase";
 import { ResendEmailButton } from "./page.client";
 import { EmailParam } from "./page.server";
 
-export const experimental_ppr = true;
-
 const Page = () => {
 	return (
 		<div>
