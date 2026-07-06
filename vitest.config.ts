@@ -9,6 +9,7 @@ export default defineConfig({
 	},
 
 	test: {
+		setupFiles: ["src/test/setup.ts"],
 		include: ["src/**/__test__/**/*.ts"],
 		pool: "threads",
 		maxWorkers: 1,

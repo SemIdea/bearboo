@@ -741,10 +741,20 @@
     esbuild ">=0.12 <1"
     esbuild-register "3.6.0"
 
+"@prisma/debug@6.19.3":
+  version "6.19.3"
+  resolved "https://registry.yarnpkg.com/@prisma/debug/-/debug-6.19.3.tgz#9a93165534246e46b1356aa14e6011a23c8434bc"
+  integrity sha512-ljkJ+SgpXNktLG0Q/n4JGYCkKf0f8oYLyjImS2I8e2q2WCfdRRtWER062ZV/ixaNP2M2VKlWXVJiGzZaUgbKZw==
+
 "@prisma/debug@6.5.0":
   version "6.5.0"
   resolved "https://registry.npmjs.org/@prisma/debug/-/debug-6.5.0.tgz"
   integrity sha512-fc/nusYBlJMzDmDepdUtH9aBsJrda2JNErP9AzuHbgUEQY0/9zQYZdNlXmKoIWENtio+qarPNe/+DQtrX5kMcQ==
+
+"@prisma/dmmf@6.19.3":
+  version "6.19.3"
+  resolved "https://registry.yarnpkg.com/@prisma/dmmf/-/dmmf-6.19.3.tgz#acc2f65934816a0a7fc87617ded63280cb27cbfe"
+  integrity sha512-+D6v7RIF21bJrZAXiiIdW0qR73TleYVCqTDozokdEHdGeqN997O7jJW5z+43s5CVwWTZJIwFGpoeXxDDyXDVxA==
 
 "@prisma/engines-version@6.5.0-73.173f8d54f8d52e692c7e27e72a88314ec7aeff60":
   version "6.5.0-73.173f8d54f8d52e692c7e27e72a88314ec7aeff60"
@@ -774,6 +784,20 @@
     "@prisma/debug" "6.5.0"
     "@prisma/engines-version" "6.5.0-73.173f8d54f8d52e692c7e27e72a88314ec7aeff60"
     "@prisma/get-platform" "6.5.0"
+
+"@prisma/generator-helper@^6.19.0":
+  version "6.19.3"
+  resolved "https://registry.yarnpkg.com/@prisma/generator-helper/-/generator-helper-6.19.3.tgz#72df037a726a4760f607c4adfc1ff2e9b9ebd45f"
+  integrity sha512-13S8ngSWVKcyuRFqaK/JGMyovjQC5sOKJ9A+ufqePQWeIUbvKO2QY2CmhcV4JAa2vuN22//4Sip5mORVKwS0sw==
+  dependencies:
+    "@prisma/debug" "6.19.3"
+    "@prisma/dmmf" "6.19.3"
+    "@prisma/generator" "6.19.3"
+
+"@prisma/generator@6.19.3":
+  version "6.19.3"
+  resolved "https://registry.yarnpkg.com/@prisma/generator/-/generator-6.19.3.tgz#00f018e902017b1b6836678fc865c4e3c4925cf1"
+  integrity sha512-rzHJaIZEnEDUWNjjFAimsyMCS9osPxwbwiAbymwFprSHJSAglMxMDVU+xbQUCLeDsjUF09W5ag/aBPL2t3YqgA==
 
 "@prisma/get-platform@6.5.0":
   version "6.5.0"
@@ -2432,6 +2456,13 @@ isexe@^2.0.0:
   resolved "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
+jest-mock-extended@^3.0.6:
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/jest-mock-extended/-/jest-mock-extended-3.0.7.tgz#3d902dabad99d7831bbe5fccee85ab0371c22675"
+  integrity sha512-7lsKdLFcW9B9l5NzZ66S/yTQ9k8rFtnwYdCNuRU/81fqDWicNDVhitTSPnrGmNeNm0xyw0JHexEOShrIKRCIRQ==
+  dependencies:
+    ts-essentials "^10.0.0"
+
 jiti@2.6.1:
   version "2.6.1"
   resolved "https://registry.npmjs.org/jiti/-/jiti-2.6.1.tgz"
@@ -3317,6 +3348,14 @@ prettier@3.3.3:
   resolved "https://registry.npmjs.org/prettier/-/prettier-3.3.3.tgz"
   integrity sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==
 
+prisma-mock@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/prisma-mock/-/prisma-mock-1.1.0.tgz#4eafb461f93ee438180e983c422103f6527b97ee"
+  integrity sha512-GxFmvBSdxt+eyT7NTUeynMkUw27KYJOZRcRLtvuGYE6TbBRfPXyz4nhn+LgkMaE7lUMf5GNenaN1dtJWHQLeVg==
+  dependencies:
+    "@prisma/generator-helper" "^6.19.0"
+    jest-mock-extended "^3.0.6"
+
 prisma@^6.5.0:
   version "6.5.0"
   resolved "https://registry.npmjs.org/prisma/-/prisma-6.5.0.tgz"
@@ -3880,6 +3919,11 @@ trough@^2.0.0:
   version "2.2.0"
   resolved "https://registry.npmjs.org/trough/-/trough-2.2.0.tgz"
   integrity sha512-tmMpK00BjZiUyVyvrBK7knerNgmgvcV/KLVyuma/SC+TQN167GrMRciANTz09+k3zW8L8t60jWO1GpfkZdjTaw==
+
+ts-essentials@^10.0.0:
+  version "10.2.1"
+  resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-10.2.1.tgz#f16288c2a43d0b09a080f29b4dc7fdfa7b5e6091"
+  integrity sha512-+Id1fRkuir+CsgK2x04/icS2b4V1hQmq7ObzIrDjhN0ozfRYivnP7aaKMVJfLApQm0trjR39A6NIMVchiB9Erw==
 
 tsconfck@^3.0.3:
   version "3.1.6"

@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { InMemoryDelegate } from "@/test/repositories/inMemoryDelegate";
-import { BaseModel, IEntityBasic } from "../base";
+import { BaseModel, IEntityBasic, IPrismaDelegate } from "../base";
 
 type TestEntity = IEntityBasic & {
 	name: string;
@@ -8,9 +7,62 @@ type TestEntity = IEntityBasic & {
 	updatedAt: Date;
 };
 
+class StubDelegate implements IPrismaDelegate<TestEntity> {
+	private readonly store = new Map<string, TestEntity>();
+
+	async create(args: {
+		data: { id: string } & Omit<TestEntity, "id" | "createdAt" | "updatedAt">;
+	}): Promise<TestEntity> {
+		const entity = {
+			...args.data,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
+
+		this.store.set(entity.id, entity);
+
+		return entity;
+	}
+
+	async findUnique(args: {
+		where: { id: string };
+	}): Promise<TestEntity | null> {
+		return this.store.get(args.where.id) ?? null;
+	}
+
+	async update(args: {
+		where: { id: string };
+		data: Partial<Omit<TestEntity, "id">>;
+	}): Promise<TestEntity> {
+		const existing = this.store.get(args.where.id);
+
+		if (!existing) {
+			throw new Error(`Record with id "${args.where.id}" not found`);
+		}
+
+		const updated = { ...existing, ...args.data, updatedAt: new Date() };
+
+		this.store.set(updated.id, updated);
+
+		return updated;
+	}
+
+	async delete(args: { where: { id: string } }): Promise<TestEntity> {
+		const existing = this.store.get(args.where.id);
+
+		if (!existing) {
+			throw new Error(`Record with id "${args.where.id}" not found`);
+		}
+
+		this.store.delete(args.where.id);
+
+		return existing;
+	}
+}
+
 class TestModel extends BaseModel<TestEntity> {
 	constructor() {
-		super(new InMemoryDelegate<TestEntity>());
+		super(new StubDelegate());
 	}
 }
 
