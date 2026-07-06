@@ -103,7 +103,8 @@ src/
 ├── test/
 │   ├── context/                 # TestContext — helper de setup pra testes de procedure
 │   ├── gateways/                # gateways fake in-memory
-│   └── repositories/            # models fake in-memory usados nos testes
+│   ├── prisma/                  # client prisma-mock (fake schema-driven do PrismaClient) + reset
+│   └── setup.ts                 # setupFiles do vitest — mocka o driver Prisma e reseta o estado por teste
 └── utils/                       # authStorage, error, validation (client-side helpers)
 ```
 
@@ -166,7 +167,7 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 - **Conceito:** classe que estende `BaseModel<Entity>` (`src/server/models/base.ts`), fornecendo CRUD genérico (`create/read/update/delete`) + métodos extras específicos da entidade (ex: `PostModel.readRecents`, `PostModel.readUserPosts`).
 - **Implementação:** `src/server/models/<entity>.ts`, instância singleton exportada (`const <Entity>Model = new <Entity>ModelClass()`).
 - **Quando usar:** toda entidade do `prisma/schema.prisma` que precisa de acesso a dado + lógica de leitura/escrita específica.
-- **Nota:** Domain acessa dados via `ctx.repositories.<entity>`; o container injeta os models reais em runtime e os testes injetam models fake in-memory.
+- **Nota:** Domain acessa dados via `ctx.repositories.<entity>`; runtime e testes usam os **mesmos models** — nos testes o driver Prisma é substituído por um client `prisma-mock` gerado do `schema.prisma` (ADR-0011, seam em `src/test/setup.ts` + `src/test/prisma/`).
 
 #### Adapter-like — implementação de porta tipada
 
@@ -212,7 +213,7 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 
 Cobertura atual (proxy `tests/src`): 23 arquivos de teste / 205 arquivos `.ts`/`.tsx` em `src/` (~11.2%). Ver `afm.md` § 3.1 forward-only.
 
-Os testes de procedure rodam sem Postgres/Redis: `createTestContext()` injeta repositories fake in-memory (`src/test/repositories/`) e gateways fake (`src/test/gateways/`). O hook de pre-push roda `yarn test` direto.
+Os testes de procedure rodam sem Postgres/Redis: o vitest mocka o driver Prisma globalmente (`src/test/setup.ts`) com um client **`prisma-mock`** gerado do `schema.prisma` (`src/test/prisma/` — ADR-0011), então os models de produção rodam intactos contra um banco in-memory com unique constraints enforçadas; `createTestContext()` injeta só os gateways fake (`src/test/gateways/`). Isolamento por teste via `resetPrismaMock()` (não usar `$clear()` — ver comentário no seam). O hook de pre-push roda `yarn test` direto.
 
 ### 4.2 TDD duro + types-as-test
 
@@ -237,7 +238,7 @@ Padrão observado no `git log`: vários commits `test:` acompanham `fix:`/`refac
 - **XP + Pragmatic** — DRY, YAGNI, KISS, Broken Windows, Design by Contract, Rubber Duck. Práticas diárias em [`/docs/afm.md`](./afm.md).
 - **Postgres = source of truth de todas as entidades.** Redis cache antigo foi removido; reconstrução futura passa por ADR nova/continuação da ADR-0009.
 - **Tipos no lugar de comentários.** Nome + tipo carregam o *o quê*. Comentário só pra justificar *porquê* surpreendente.
-- **Injeção explícita via `ctx`/`DomainInput`**, nunca acesso direto a driver dentro de Domain/Procedure — mantém a camada testável sem infra real (`TestContext` monta repositórios em memória).
+- **Injeção explícita via `ctx`/`DomainInput`**, nunca acesso direto a driver dentro de Domain/Procedure — mantém a camada testável sem infra real (nos testes o driver vira um client `prisma-mock` in-memory, ADR-0011).
 - **Erro classificado por domínio, nunca genérico** — todo domínio tem seu próprio `<Domínio>ErrorCode` em `src/shared/error/`.
 
 ---

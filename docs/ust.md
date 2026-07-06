@@ -28,7 +28,7 @@
 
 ## Pendências Técnicas
 
-- Investigar se o mesmo padrão de transport pluggável usado no mailer pode ser aplicado ao Prisma, para reduzir duplicação entre runtime, testes e outros adaptadores.
+- ~~Investigar se o mesmo padrão de transport pluggável usado no mailer pode ser aplicado ao Prisma, para reduzir duplicação entre runtime, testes e outros adaptadores.~~ **Resolvido em 2026-07-06** — adotado `prisma-mock` (fake do PrismaClient gerado do schema) no seam do driver; fakes à mão de `src/test/repositories/` deletados. Ver ADR-0011 e `docs/research/001-teste-prisma-sem-banco-real.md`.
 - Investigar por que o token enviado nos emails não está funcionando quando o link é aberto. O fluxo de cadastro/verificação parece montar o link corretamente, mas a rota final não completa a ação esperada.
 
 ---

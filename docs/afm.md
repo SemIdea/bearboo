@@ -172,7 +172,7 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
 
 ### Regras específicas do projeto (a partir de 30)
 
-30. **Domain/Procedure NÃO importa `PrismaClient`/`@prisma/client`/driver Prisma direto.** Acesso a dados passa por `ctx.repositories` injetado; `src/server/models/*` e `src/server/infra/drivers/prisma.ts` são a exceção intencional da camada de dados.
+30. **Domain/Procedure NÃO importa `PrismaClient`/`@prisma/client`/driver Prisma direto.** Acesso a dados passa por `ctx.repositories` injetado; `src/server/models/*`, `src/server/infra/drivers/prisma.ts` e o seam de teste `src/test/prisma/` são a exceção intencional da camada de dados.
     *Verificação:* `rg -n "from.*@prisma/client|new PrismaClient|@/server/infra/drivers/prisma" src/server/features/*/domain/*.ts src/server/features/*/procedures/*.ts` retorna 0. **Compliant hoje.**
 31. **Route handler (`src/app/api/**/route.ts`) é fino.** Delega pro tRPC handler; nenhuma regra de negócio inline.
     *Verificação:* `find src/app/api -name route.ts | xargs wc -l` — todos < 80 linhas. **Compliant hoje** (único route: `src/app/api/trpc/[trpc]/route.ts`).
@@ -259,6 +259,8 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na entrevista de adoção retroativa (2026-06-30): `.husky/pre-commit` roda `lint-staged`, configurado no `package.json` para executar `biome check --write` nos arquivos staged suportados; `.husky/pre-push` roda `yarn lint` + `yarn test` (vitest); `.husky/commit-msg` roda `commitlint`. DoD de merge inclui **test runner + type check**, mesmo sem CI formal hoje — o agente roda os dois manualmente antes de considerar a tarefa pronta.
 
 **Atualizado em 2026-07-04**: a suíte de testes deixou de depender de Postgres/Redis via Docker (`docker-compose-test.yml`, removido) — os testes de procedure agora rodam contra repositórios e gateways fake in-memory injetados via `TestContext` (`src/test/repositories/`, `src/test/gateways/`), o que também tornou o pre-push mais rápido (segundos, não um container build).
+
+**Atualizado em 2026-07-06 (ADR-0011)**: os repositórios fake escritos à mão (`src/test/repositories/`) foram substituídos por **`prisma-mock`** — client fake gerado do `schema.prisma`, plugado no seam do driver via `vi.mock` em `src/test/setup.ts` (`setupFiles` do vitest). Os models de produção rodam intactos nos testes; só os gateways continuam com fake manual (`src/test/gateways/`). Isolamento por teste: `resetPrismaMock()` de `src/test/prisma/` (o `$clear()` da lib é bugado — ver comentário no seam). Racional e alternativas em `docs/research/001-teste-prisma-sem-banco-real.md`.
 
 - [ ] Testes novos cobrem o comportamento adicionado/modificado, e rodam verde.
 - [ ] Suíte inteira roda verde (`yarn test`).
