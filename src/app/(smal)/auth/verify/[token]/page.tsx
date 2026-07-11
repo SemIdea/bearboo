@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { getErrorMessage } from "@/lib/error";
@@ -9,7 +10,15 @@ type Params = {
 	}>;
 };
 
-const Page = async ({ params }: Params) => {
+const Page = (props: Params) => {
+	return (
+		<Suspense fallback={<p>Verifying your email...</p>}>
+			<VerifyContent params={props.params} />
+		</Suspense>
+	);
+};
+
+const VerifyContent = async ({ params }: Params) => {
 	const { token } = await params;
 	const caller = await createCaller();
 

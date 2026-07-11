@@ -1,3 +1,5 @@
+import { cacheLife } from "next/cache";
+import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { MdView } from "@/components/ui/mdView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,10 +12,19 @@ type PageProps = {
 	}>;
 };
 
-export const revalidate = 3600; // 1 hour
+const Page = (props: PageProps) => {
+	return (
+		<Suspense fallback={<p>Loading profile...</p>}>
+			<UserContent params={props.params} />
+		</Suspense>
+	);
+};
 
-const Page = async (props: PageProps) => {
-	const params = await props.params;
+const UserContent = async ({ params: paramsPromise }: PageProps) => {
+	"use cache";
+	cacheLife("hours"); // 1 hour
+
+	const params = await paramsPromise;
 	const caller = await createCaller();
 
 	const { id } = params;

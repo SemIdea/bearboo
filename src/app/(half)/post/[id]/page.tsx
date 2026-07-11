@@ -1,5 +1,7 @@
 import { formatDistance } from "date-fns";
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
+import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
@@ -12,13 +14,15 @@ type PageProps = {
 	}>;
 };
 
-export const revalidate = 3600;
 type Props = {
 	params: Promise<{ id: string }>;
 	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+	"use cache";
+	cacheLife("hours");
+
 	const { id } = await params;
 
 	try {
@@ -47,8 +51,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	}
 }
 
-const Page = async (props: PageProps) => {
-	const params = await props.params;
+const Page = (props: PageProps) => {
+	return (
+		<Suspense fallback={<p>Loading post...</p>}>
+			<PostContent params={props.params} />
+		</Suspense>
+	);
+};
+
+const PostContent = async ({ params: paramsPromise }: PageProps) => {
+	"use cache";
+	cacheLife("hours");
+
+	const params = await paramsPromise;
 	const caller = await createCaller();
 
 	const { id } = params;

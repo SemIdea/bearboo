@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { ResetPasswordForm } from "./page.client";
 
@@ -7,7 +8,15 @@ type Params = {
 	}>;
 };
 
-const Page = async ({ params }: Params) => {
+const Page = (props: Params) => {
+	return (
+		<Suspense fallback={<p>Loading...</p>}>
+			<RecoverContent params={props.params} />
+		</Suspense>
+	);
+};
+
+const RecoverContent = async ({ params }: Params) => {
 	const { token } = await params;
 
 	return (

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
 	Card,
 	CardContent,
@@ -14,9 +15,16 @@ type PageProps = {
 	}>;
 };
 
-const Page = async (props: PageProps) => {
-	const params = await props.params;
-	const { id } = params;
+const Page = (props: PageProps) => {
+	return (
+		<Suspense fallback={<p>Loading post...</p>}>
+			<EditPostContent params={props.params} />
+		</Suspense>
+	);
+};
+
+const EditPostContent = async ({ params }: PageProps) => {
+	const { id } = await params;
 
 	const { caller } = await createDynamicCaller();
 
