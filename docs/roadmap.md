@@ -15,7 +15,7 @@
 | 6 — Busca e descoberta | ⬜ Não iniciada | — |
 | 7 — Analytics interno | ⬜ Não iniciada | — |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
-| 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, alguns testes/error pages já existem; falta logs estruturados, seed, cobertura de teste (~8.6% hoje), rate limiting |
+| 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; falta logs estruturados, cobertura de teste (~8.6% hoje), rate limiting |
 | 10 — CI/CD e deploy | ⬜ Não iniciada | sem `.github/workflows/`, sem deploy configurado |
 | 11 — Observabilidade | ⬜ Não iniciada | sem `/api/health`, sem tracing/métricas |
 
@@ -495,7 +495,7 @@ Adicionar práticas que empresas esperam de um projeto sério.
 * [x] testes unitários (18 arquivos `vitest` — cobertura ~8.6%, ver `docs/afm.md` § 3.1);
 * [ ] testes de integração;
 * [ ] testes e2e básicos;
-* [ ] seed de desenvolvimento (sem `prisma/seed.ts`);
+* [x] seed de desenvolvimento (`prisma/seed.ts` — 3 usuários, posts, comentários, tokens de verify/reset);
 * [x] migrations organizadas (`prisma/migrations/`);
 * [ ] rate limiting em endpoints sensíveis (ver `docs/features/001-auth-hardening/spec.md`).
 
