@@ -47,6 +47,25 @@ describe("Register User Controller Unitary Testing", () => {
 		);
 	});
 
+	test("Should send verification link as a path param, not a query param", async () => {
+		const { domain_sendMail } = await import("../../../mail/domain/sendMail");
+		vi.mocked(domain_sendMail).mockClear();
+
+		const uuid = ctx.helpers.uid.generate();
+		const input = {
+			email: `${uuid}@example.com`,
+			name: "Test User Path Param",
+			password: "password123",
+		};
+
+		await UserRouter.createCaller(ctx).register(input);
+
+		const [{ input: mailInput }] = vi.mocked(domain_sendMail).mock.calls[0];
+
+		expect(mailInput.body).toMatch(/\/auth\/verify\/[^"?\s]+/);
+		expect(mailInput.body).not.toContain("/auth/verify?token=");
+	});
+
 	test("Should throw error if user already exists", async () => {
 		const otherUser = await ctx.createNewUser();
 
