@@ -7,8 +7,8 @@
 | Fase | Status | Nota |
 | --- | --- | --- |
 | 0 — Organização inicial | ✅ Concluída | — |
-| 1 — Blog público bem feito | 🟡 Parcial | slug (`docs/features/002-post-slug/`) e paginação (`docs/features/003-post-pagination/`) implementados e verificados ao vivo; falta tags, categorias, capa, tempo de leitura, relacionados |
-| 2 — Admin/CMS | 🟡 Parcial | CRUD de post já existe, mas sem painel `/admin` dedicado (listagem/filtros/preview) |
+| 1 — Blog público bem feito | 🟡 Parcial | slug (`docs/features/002-post-slug/`), paginação (`docs/features/003-post-pagination/`) e status/publicação (`docs/features/004-post-status/`) implementados e verificados; falta tags, categorias, capa, tempo de leitura, relacionados |
+| 2 — Admin/CMS | 🟡 Parcial | CRUD de post já existe, campo `PostStatus` pronto pro workflow de rascunho/publicar (`docs/features/004-post-status/`), mas sem painel `/admin` dedicado (listagem/filtros/preview) |
 | 3 — Autenticação e permissões | ⬜ Não iniciada | bloqueada até `docs/features/001-auth-hardening/` fechar (ver nota na fase) |
 | 4 — Workflow editorial | ⬜ Não iniciada | — |
 | 5 — SEO e publicação profissional | 🟡 Parcial | metadata + Open Graph por post já existem; falta sitemap/robots/RSS/canonical/Twitter Card/schema.org |
@@ -116,9 +116,10 @@ Ter a parte pública do blog funcionando bem.
 
 ### Funcionalidades
 
-* [x] listar posts publicados (`readRecent`, 30 mais recentes — sem filtro de status, pois `PostStatus` ainda não existe no schema);
+* [x] listar posts publicados (`readRecent`, paginado, filtrado por `status: PUBLISHED` — `docs/features/004-post-status/`);
 * [x] visualizar post por slug — código escrito e verificado (`docs/features/002-post-slug/`, rota pública `/post/[slug]`, `Post.slug` único gerado no `create` via `src/lib/slug/`); `tsc --noEmit` e `vitest` (111/111) verdes; **2026-07-11: migration aplicada num Postgres real e `/post/<slug>` testado ao vivo no browser** — fechado. Achado durante a verificação: seed (`prisma/seed.ts`) estava quebrado por import de `src/lib/slug` incompatível com execução nativa `node`, e slug inexistente caía num `error.tsx` genérico em vez de `notFound()` — ambos corrigidos (commit `a620cde`). Pendência residual: status HTTP da resposta de `notFound()` continua `200`, não `404` (streaming/`Suspense` — ver `docs/ust.md` § Pendências Técnicas);
 * [x] paginação — cursor-based (`Post.id`), tamanho de página default 10, `post.readRecent({ cursor?, limit? })` retorna `{ posts, nextCursor }`; front (`postFeed.client.tsx`) tem botão "Carregar mais" (`docs/features/003-post-pagination/`);
+* [x] status do post — `enum PostStatus { DRAFT PUBLISHED ARCHIVED }`, default `PUBLISHED` (decidido no domain, não no banco); `post.create`/`post.update` aceitam `status` opcional; leituras públicas (`readRecent`, `user.readPosts`, `readBySlug`) só expõem `PUBLISHED` (`docs/features/004-post-status/`). Sem UI de seletor de status ainda — fica pra Fase 2 (Admin/CMS);
 * [ ] tags;
 * [ ] categorias;
 * [x] autor (post/comentário mostram o `user` relacionado);
@@ -149,9 +150,9 @@ enum PostStatus {
 
 ### Regras importantes
 
-* somente posts `PUBLISHED` aparecem no blog público;
+* somente posts `PUBLISHED` aparecem no blog público — implementado (`docs/features/004-post-status/`): `readRecent`, `user.readPosts` filtram na query, `readBySlug` trata post não-`PUBLISHED` como não encontrado;
 * slug deve ser único;
-* post arquivado não aparece em listagens públicas;
+* post arquivado não aparece em listagens públicas — implementado junto do item acima;
 * post sem título não pode ser publicado;
 * post sem conteúdo não pode ser publicado.
 
@@ -170,13 +171,12 @@ Criar um painel administrativo para gerenciar posts.
 * [x] login (existe, mas não há área `/admin` separada — é a auth geral);
 * [x] criar post (`src/app/(half)/post/create/`);
 * [x] editar post (`src/app/(half)/post/edit/[id]/`);
-* [x] deletar post — arquivar não existe (sem `PostStatus`);
-* [ ] publicar post (todo post criado já é implicitamente "publicado" — sem workflow de estado);
-* [ ] salvar como rascunho;
+* [x] deletar post;
+* [ ] publicar post / salvar como rascunho / arquivar — `PostStatus` já existe no schema e é setável via `post.update` (`docs/features/004-post-status/`), mas sem seletor na UI de criar/editar ainda (essa UI é desta fase, não da 004);
 * [ ] upload de imagem de capa;
 * [ ] preview antes de publicar;
 * [ ] listagem de posts no admin (existe listagem pública, não um painel admin com filtros);
-* [ ] filtros por status;
+* [ ] filtros por status — leitura já filtra por `PUBLISHED`; falta o painel admin pra escolher outros status;
 * [ ] filtros por categoria/tag.
 
 ### Telas

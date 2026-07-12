@@ -67,7 +67,7 @@ Proposta de valor em uma frase: *"[A DEFINIR — validar com o dono do produto]"
 
 **Escopo já implementado:** RF-01 a RF-06.
 
-**Do roadmap Fase 1 ainda faltando:** slug único por post (posts usam `id`, não slug), paginação, tags, categorias, imagem de capa, tempo estimado de leitura, posts relacionados. `enum PostStatus` (DRAFT/PUBLISHED/ARCHIVED) também não existe no `prisma/schema.prisma` hoje — todo post criado é implicitamente publicado.
+**Do roadmap Fase 1 ainda faltando:** tags, categorias, imagem de capa, tempo estimado de leitura, posts relacionados. Slug único (`docs/features/002-post-slug/`), paginação (`docs/features/003-post-pagination/`) e `enum PostStatus` (`docs/features/004-post-status/`) já implementados.
 
 **Nota de discrepância com o roadmap:** a "stack sugerida" da Fase 0 do roadmap lista Auth.js/Better Auth, Playwright e GitHub Actions. Playwright/GitHub Actions não foram adotados (testes são `vitest`, sem CI — `.github/workflows/` ausente, ver `ach.md` § CI/hooks). **Auth.js/Better Auth foi decisão explícita de não adotar — ver ADR-0005**: a auth própria (sessão opaca em `Session`, Postgres como source of truth) é mantida, com hardening incremental em vez de substituição por lib.
 
