@@ -124,6 +124,13 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
 				label="Cover image URL"
 				placeholder="https://..."
 			/>
+			<InputField name="status" label="Status">
+				<select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring md:text-sm">
+					<option value="DRAFT">Draft</option>
+					<option value="PUBLISHED">Published</option>
+					<option value="ARCHIVED">Archived</option>
+				</select>
+			</InputField>
 			<Button type="submit" disabled={isUploading}>
 				{isUploading ? "Editing Post..." : "Edit Post"}
 			</Button>

@@ -6,10 +6,12 @@ import { ReadPostBySlugInput } from "../schema";
 const domain_readPostBySlug = async ({
 	ctx,
 	input,
-}: DomainInput<ReadPostBySlugInput>) => {
+}: DomainInput<ReadPostBySlugInput & { callerId?: string }>) => {
 	const post = await ctx.repositories.post.readBySlug(input.slug);
 
-	if (!post || post.status !== "PUBLISHED") {
+	const isOwner = !!post && post.userId === input.callerId;
+
+	if (!post || (post.status !== "PUBLISHED" && !isOwner)) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
 			message: PostErrorCode.POST_NOT_FOUND,

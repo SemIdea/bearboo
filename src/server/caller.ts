@@ -56,4 +56,17 @@ const createDynamicCaller = async () => {
 	};
 };
 
-export { createCaller, createDynamicCaller };
+const createOptionalDynamicCaller = async () => {
+	const cookieHeader = (await cookies())
+		.getAll()
+		.map(({ name, value }) => `${name}=${value}`)
+		.join(";");
+
+	return appRouter.createCaller(
+		await createTRPCContext({
+			headers: new Headers({ cookie: cookieHeader }),
+		}),
+	);
+};
+
+export { createCaller, createDynamicCaller, createOptionalDynamicCaller };

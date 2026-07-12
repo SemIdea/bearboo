@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
-import { createCaller } from "@/server/caller";
+import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { PostErrorCode } from "@/shared/error/post";
 import { CommentArea, RelatedPosts } from "./page.client";
 
@@ -71,16 +71,48 @@ const Page = (props: PageProps) => {
 	);
 };
 
+type Post = Awaited<
+	ReturnType<Awaited<ReturnType<typeof createCaller>>["post"]["readBySlug"]>
+>;
+type User = Awaited<
+	ReturnType<Awaited<ReturnType<typeof createCaller>>["user"]["read"]>
+>;
+
 const PostContent = async ({ params: paramsPromise }: PageProps) => {
 	"use cache";
 	cacheLife("hours");
 
-	const params = await paramsPromise;
+	const { slug } = await paramsPromise;
 	const caller = await createCaller();
 
-	const { slug } = params;
+	let post: Post;
 
-	let post: Awaited<ReturnType<typeof caller.post.readBySlug>>;
+	try {
+		post = await caller.post.readBySlug({ slug });
+	} catch (error) {
+		if (
+			error instanceof TRPCError &&
+			error.message === PostErrorCode.POST_NOT_FOUND
+		) {
+			return (
+				<Suspense fallback={<p>Loading post...</p>}>
+					<OwnerPreview slug={slug} />
+				</Suspense>
+			);
+		}
+
+		throw error;
+	}
+
+	const user = await caller.user.read({ id: post.userId });
+
+	return <PostView post={post} user={user} />;
+};
+
+const OwnerPreview = async ({ slug }: { slug: string }) => {
+	const caller = await createOptionalDynamicCaller();
+
+	let post: Post;
 
 	try {
 		post = await caller.post.readBySlug({ slug });
@@ -97,6 +129,10 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 
 	const user = await caller.user.read({ id: post.userId });
 
+	return <PostView post={post} user={user} />;
+};
+
+const PostView = ({ post, user }: { post: Post; user: User }) => {
 	const isUpdated =
 		new Date(post.createdAt).getTime() !== new Date(post.updatedAt).getTime();
 
@@ -119,6 +155,13 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 			}
 			content={
 				<div className="flex flex-col gap-4">
+					{post.status !== "PUBLISHED" && (
+						<p className="rounded bg-yellow-100 px-3 py-2 text-sm text-yellow-900">
+							{post.status === "DRAFT"
+								? "Draft — only you can see this."
+								: "Archived — only you can see this."}
+						</p>
+					)}
 					{post.coverImageUrl && (
 						<img
 							src={post.coverImageUrl}

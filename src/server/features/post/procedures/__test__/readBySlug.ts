@@ -57,8 +57,12 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 		);
 	});
 
-	test("Should throw not found for a draft post read by slug", async () => {
-		const post = await ctx.createPost({ status: "DRAFT" });
+	test("Should throw not found for a draft post owned by someone else", async () => {
+		const otherUser = await ctx.createNewUser();
+		const post = await ctx.createPost({
+			status: "DRAFT",
+			userId: otherUser.id,
+		});
 
 		await expect(
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
@@ -70,8 +74,12 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 		);
 	});
 
-	test("Should throw not found for an archived post read by slug", async () => {
-		const post = await ctx.createPost({ status: "ARCHIVED" });
+	test("Should throw not found for an archived post owned by someone else", async () => {
+		const otherUser = await ctx.createNewUser();
+		const post = await ctx.createPost({
+			status: "ARCHIVED",
+			userId: otherUser.id,
+		});
 
 		await expect(
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
@@ -81,5 +89,27 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 				message: PostErrorCode.POST_NOT_FOUND,
 			}),
 		);
+	});
+
+	test("Should let the owner read their own draft post by slug", async () => {
+		const post = await ctx.createPost({ status: "DRAFT" });
+
+		const result = await PostRouter.createCaller(ctx).readBySlug({
+			slug: post.slug,
+		});
+
+		expect(result.id).toBe(post.id);
+		expect(result.status).toBe("DRAFT");
+	});
+
+	test("Should let the owner read their own archived post by slug", async () => {
+		const post = await ctx.createPost({ status: "ARCHIVED" });
+
+		const result = await PostRouter.createCaller(ctx).readBySlug({
+			slug: post.slug,
+		});
+
+		expect(result.id).toBe(post.id);
+		expect(result.status).toBe("ARCHIVED");
 	});
 });
