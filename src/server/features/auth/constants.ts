@@ -1,0 +1,16 @@
+const SESSION_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+const SESSION_MAX_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
+
+const LOGIN_RATE_LIMIT = { windowMs: 15 * 60 * 1000, max: 10 };
+const REGISTER_RATE_LIMIT = { windowMs: 60 * 60 * 1000, max: 5 };
+const RESET_RATE_LIMIT = { windowMs: 15 * 60 * 1000, max: 5 };
+const REFRESH_RATE_LIMIT = { windowMs: 15 * 60 * 1000, max: 20 };
+
+export {
+	LOGIN_RATE_LIMIT,
+	REFRESH_RATE_LIMIT,
+	REGISTER_RATE_LIMIT,
+	RESET_RATE_LIMIT,
+	SESSION_IDLE_TIMEOUT_MS,
+	SESSION_MAX_LIFETIME_MS,
+};

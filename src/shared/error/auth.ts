@@ -8,6 +8,7 @@ enum AuthErrorCode {
 	INVALID_EMAIL = "INVALID_EMAIL",
 	NAME_TOO_SHORT = "NAME_TOO_SHORT",
 	PASSWORD_TOO_SHORT = "PASSWORD_TOO_SHORT",
+	TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS",
 }
 
 const AuthErrorMessages = {
@@ -24,6 +25,8 @@ const AuthErrorMessages = {
 	[AuthErrorCode.NAME_TOO_SHORT]: "Name must be at least 3 characters long.",
 	[AuthErrorCode.PASSWORD_TOO_SHORT]:
 		"Password must be at least 8 characters long.",
+	[AuthErrorCode.TOO_MANY_ATTEMPTS]:
+		"Too many attempts. Please try again later.",
 };
 
 export { AuthErrorCode, AuthErrorMessages };

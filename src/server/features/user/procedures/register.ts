@@ -1,4 +1,5 @@
-import { publicProcedure } from "@/server/createRouter";
+import { assertRateLimit, publicProcedure } from "@/server/createRouter";
+import { REGISTER_RATE_LIMIT } from "../../auth/constants";
 import { domain_createToken } from "../../auth/domain/createToken";
 import { domain_sendMail } from "../../mail/domain/sendMail";
 import { domain_registerUser } from "../domain/register";
@@ -8,6 +9,8 @@ const procedure_registerUser = publicProcedure
 	.input(registerUserSchema)
 	.output(registerUserOutputSchema)
 	.mutation(async ({ input, ctx }) => {
+		await assertRateLimit(ctx, `register:${input.email}`, REGISTER_RATE_LIMIT);
+
 		const user = await domain_registerUser({ ctx, input });
 
 		const verifyToken = await domain_createToken({

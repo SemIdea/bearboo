@@ -1,15 +1,45 @@
-import { t } from "@/server/createRouter";
+import { TRPCError } from "@trpc/server";
+import { assertRateLimit, t } from "@/server/createRouter";
+import { SessionErrorCode } from "@/shared/error/session";
+import { REFRESH_RATE_LIMIT, SESSION_MAX_LIFETIME_MS } from "../constants";
 import { domain_readSessionByRefreshToken } from "../domain/readSessionByRefreshToken";
 import { domain_refreshSession } from "../domain/refreshSession";
-import { refreshSessionOutputSchema, refreshSessionSchema } from "../schema";
+import { refreshSessionOutputSchema } from "../schema";
 
 const procedure_refreshSession = t.procedure
-	.input(refreshSessionSchema)
 	.output(refreshSessionOutputSchema)
-	.mutation(async ({ input, ctx }) => {
-		const session = await domain_readSessionByRefreshToken({ ctx, input });
+	.mutation(async ({ ctx }) => {
+		const refreshToken = ctx.refreshToken;
 
-		return domain_refreshSession({ ctx, input: { id: session.id } });
+		if (!refreshToken) {
+			throw new TRPCError({
+				code: "UNAUTHORIZED",
+				message: SessionErrorCode.MISSING_TOKEN,
+			});
+		}
+
+		await assertRateLimit(ctx, `refresh:${refreshToken}`, REFRESH_RATE_LIMIT);
+
+		const session = await domain_readSessionByRefreshToken({
+			ctx,
+			input: { refreshToken },
+		});
+
+		const refreshedSession = await domain_refreshSession({
+			ctx,
+			input: { id: session.id, currentRefreshToken: refreshToken },
+		});
+
+		const maxAgeSeconds = SESSION_MAX_LIFETIME_MS / 1000;
+
+		ctx.resCookies.set("accessToken", refreshedSession.accessToken, {
+			maxAgeSeconds,
+		});
+		ctx.resCookies.set("refreshToken", refreshedSession.refreshToken, {
+			maxAgeSeconds,
+		});
+
+		return { success: true };
 	});
 
 export { procedure_refreshSession };

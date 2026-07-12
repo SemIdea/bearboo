@@ -7,6 +7,7 @@ type ISessionEntity = {
 	userId: string;
 	accessToken: string;
 	refreshToken: string;
+	previousRefreshToken?: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -37,6 +38,16 @@ class SessionModelClass extends BaseModel<ISessionEntity> {
 			},
 		});
 	}
+
+	async readByPreviousRefreshToken(
+		previousRefreshToken: string,
+	): Promise<ISessionEntity | null> {
+		return prisma.session.findFirst({
+			where: {
+				previousRefreshToken,
+			},
+		});
+	}
 }
 
 const SessionModel = new SessionModelClass();
@@ -44,6 +55,9 @@ const SessionModel = new SessionModelClass();
 type ISessionModel = BaseModel<ISessionEntity> & {
 	readByAccessToken: (accessToken: string) => Promise<ISessionEntity | null>;
 	readByRefreshToken: (refreshToken: string) => Promise<ISessionEntity | null>;
+	readByPreviousRefreshToken: (
+		previousRefreshToken: string,
+	) => Promise<ISessionEntity | null>;
 };
 
 export type { ISessionEntity, ISessionModel, ISessionWithUser };

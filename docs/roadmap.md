@@ -9,17 +9,17 @@
 | 0 — Organização inicial | ✅ Concluída | — |
 | 1 — Blog público bem feito | ✅ Concluída (com 1 pendência residual) | todos os itens do checklist implementados: slug, paginação, status/publicação, tags/categorias (`docs/features/002` a `005`), tempo de leitura (`006`), posts relacionados (`007`), imagem de capa (`010`); pendência residual: status HTTP de `/post/[slug]` continua `200` em vez de `404` pra slug inexistente — limitação de framework (Cache Components), aceita como conhecida por ora (`docs/features/009-post-404-status/`) |
 | 2 — Admin/CMS | ✅ Concluída (com 1 pendência adiada) | seletor de status, preview de rascunho na URL real (`docs/features/011-post-status-preview/`), painel "meus posts" com filtros por status/categoria/tag (`docs/features/012-my-posts-panel/`, escopado sem roles — ver nota na fase); pendência adiada: upload de arquivo de imagem de capa vai pra Fase 8 (decisão do dono, 2026-07-12) — capa via URL já existe (`docs/features/010-post-cover-image/`) |
-| 3 — Autenticação e permissões | ⬜ Não iniciada | bloqueada até `docs/features/001-auth-hardening/` fechar (ver nota na fase) |
+| 3 — Autenticação e permissões | ⬜ Não iniciada | pré-requisito `docs/features/001-auth-hardening/` concluído (2026-07-12) — camada de aplicação (sessão/cookies/CSRF/rate limit/mensagens); infra (TLS, `docker-compose.yml`) adiada. Fase em si (papéis ADMIN/EDITOR/AUTHOR) ainda não iniciada |
 | 4 — Workflow editorial | ⬜ Não iniciada | — |
 | 5 — SEO e publicação profissional | 🟡 Parcial | metadata + Open Graph por post já existem; falta sitemap/robots/RSS/canonical/Twitter Card/schema.org |
 | 6 — Busca e descoberta | ⬜ Não iniciada | — |
 | 7 — Analytics interno | ⬜ Não iniciada | — |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
-| 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; falta logs estruturados, cobertura de teste (~8.6% hoje), rate limiting |
+| 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; rate limiting em memória cobre login/registro/reset/refresh (`docs/features/001-auth-hardening/`) — não é rate limiting geral de toda a API; falta logs estruturados, cobertura de teste (~8.6% hoje) |
 | 10 — CI/CD e deploy | ⬜ Não iniciada | sem `.github/workflows/`, sem deploy configurado |
 | 11 — Observabilidade | ⬜ Não iniciada | sem `/api/health`, sem tracing/métricas |
 
-**Fora do roadmap numerado, em andamento:** `docs/features/001-auth-hardening/spec.md` — hardening de segurança da sessão/auth atual (pré-requisito da Fase 3, não uma fase nova).
+**Fora do roadmap numerado, concluído (2026-07-12):** `docs/features/001-auth-hardening/` — hardening de segurança da sessão/auth atual (pré-requisito da Fase 3, não uma fase nova). Camada de aplicação fechada; hardening de infra (TLS/HTTPS via nginx+certificado, remoção de credenciais hardcoded do `docker-compose.yml`, porta do Postgres exposta ao host sem necessidade) foi escopado fora desta rodada — natureza operacional diferente (depende de domínio/certificado, não testável por `vitest`), decisão do dono em 2026-07-12 (`docs/features/001-auth-hardening/spec.md` § 7). Candidato natural: Fase 10 (CI/CD e deploy) quando essa fase começar.
 
 **Nota de sequenciamento (2026-07-11):** o back-end já passou por uma refatoração grande (models com delegate pluggável, camada domain/procedure, etc. — ver `docs/adr/`). Uma refatoração equivalente está planejada para o front-end, mas o desenho ainda não existe. Até lá, o foco é entregar funcionalidades de **back-end** (ex.: paginação); mudanças de front continuam aceitas quando a feature exige (ex.: renderizar os controles de paginação), mas evitando decisão estrutural nova do lado do front (padrão de state management, nova camada de componentes, reorganização de pastas) que a futura refatoração teria que desfazer.
 
@@ -559,6 +559,8 @@ postgres
 redis
 minio opcional
 ```
+
+**Pendência herdada de `001-auth-hardening` (2026-07-12):** `docker-compose.yml` de produção hoje tem credenciais Postgres hardcoded (`postgres`/`postgres`) e expõe a porta do Postgres ao host sem necessidade (app e Postgres já estão na mesma rede Docker). Endereçar junto do hardening de infra desta fase — não é regressão nova, é debt pré-existente que o hardening de aplicação (feature 001) deliberadamente não cobriu (fora de escopo, decisão do dono).
 
 ### Critério de conclusão
 

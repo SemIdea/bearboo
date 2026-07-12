@@ -19,20 +19,23 @@ describe("Read User From Session Controller Unitary Testing", () => {
 
 		expect(result).toBeDefined();
 		expect(result).toEqual({
-			id: user.id,
-			name: user.name,
-			email: user.email,
-			verified: user.verified,
-			createdAt: user.createdAt,
-			updatedAt: user.updatedAt,
-			bio: user.bio,
-			session: {
-				id: user.session.id,
-				accessToken: user.session.accessToken,
-				refreshToken: user.session.refreshToken,
-				createdAt: user.session.createdAt,
-				updatedAt: user.session.updatedAt,
+			user: {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				verified: user.verified,
+				createdAt: user.createdAt,
+				updatedAt: user.updatedAt,
+				bio: user.bio,
 			},
 		});
+	});
+
+	test("Should never include session tokens in the response", async () => {
+		const result = await AuthRouter.createCaller(ctx).session.me();
+
+		expect(result).not.toHaveProperty("session");
+		expect(JSON.stringify(result)).not.toContain(ctx.user.session.accessToken);
+		expect(JSON.stringify(result)).not.toContain(ctx.user.session.refreshToken);
 	});
 });

@@ -26,6 +26,19 @@ describe("Logout Session Controller Unitary Testing", () => {
 		expect(result).toBeNull();
 	});
 
+	test("Should clear the accessToken/refreshToken cookies", async () => {
+		await AuthRouter.createCaller(ctx).session.logout();
+
+		const cookieNames = ctx.resCookies.pending.map((cookie) => cookie.name);
+		expect(cookieNames).toEqual(
+			expect.arrayContaining(["accessToken", "refreshToken"]),
+		);
+		for (const cookie of ctx.resCookies.pending) {
+			expect(cookie.value).toBe("");
+			expect(cookie.expires?.getTime()).toBe(0);
+		}
+	});
+
 	test("Should throw an error if user is not found", async () => {
 		ctx.user.id = "non-existent-user-id";
 

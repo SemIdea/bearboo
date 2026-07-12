@@ -1,15 +1,13 @@
 import { DomainInput } from "@/server/createDomain";
-import { domain_getUserByEmailOrThrow } from "@/server/features/user/domain/getUserByEmailOrThrow";
 import { SendResetPasswordEmailInput } from "../schema";
 
 const domain_createResetToken = async ({
 	ctx,
 	input,
 }: DomainInput<SendResetPasswordEmailInput>) => {
-	const user = await domain_getUserByEmailOrThrow({
-		ctx,
-		input: { email: input.email },
-	});
+	const user = await ctx.repositories.user.readByEmail(input.email);
+
+	if (!user) return null;
 
 	const resetTokenId = ctx.helpers.uid.generate();
 	const newResetToken = ctx.helpers.uid.generate();

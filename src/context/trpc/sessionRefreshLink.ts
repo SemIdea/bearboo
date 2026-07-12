@@ -3,7 +3,6 @@ import { observable } from "@trpc/server/observable";
 import { AppRouter } from "@/server/routers/app.routes";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { SessionErrorCode } from "@/shared/error/session";
-import { clearAuthData } from "@/utils/authStorage";
 import { refreshTokens } from "./session";
 
 const redirectTo = (path: string): void => {
@@ -37,7 +36,6 @@ const sessionRefreshLink: TRPCLink<AppRouter> = () => {
 									unsubscribe = subscribe();
 								})
 								.catch(() => {
-									clearAuthData();
 									redirectTo("/auth/login");
 									observer.error(err);
 								});
@@ -48,7 +46,6 @@ const sessionRefreshLink: TRPCLink<AppRouter> = () => {
 							code === "UNAUTHORIZED" &&
 							message === SessionErrorCode.INVALID_TOKEN
 						) {
-							clearAuthData();
 							redirectTo("/auth/login");
 						}
 

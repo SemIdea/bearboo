@@ -36,7 +36,7 @@ Proposta de valor em uma frase: *"[A DEFINIR — validar com o dono do produto]"
 
 | ID | Requisito | Prioridade |
 | --- | --- | --- |
-| RF-01 | Autenticação de usuário — registro, login, logout e sessão com refresh automático (Postgres como source of truth; Redis cache removido e pendente de reconstrução futura) | P0 |
+| RF-01 | Autenticação de usuário — registro, login, logout e sessão com refresh automático (Postgres como source of truth; Redis cache removido e pendente de reconstrução futura). **Hardening de produção concluído** (`docs/features/001-auth-hardening/`): expiração real de sessão (idle + vida máxima), rotação de refresh token com detecção de reuse, cookies HttpOnly/SameSite=Lax (nunca mais em `document.cookie`/`localStorage`), rate limiting por endpoint, mensagens genéricas em login/reset contra enumeração de email. Hardening de infra (TLS, credenciais do `docker-compose.yml`) adiado — ver `docs/roadmap.md` | P0 |
 | RF-02 | Verificação de email — token de verificação enviado por email, reenvio de token | P0 |
 | RF-03 | Recuperação de senha — token de reset enviado por email, troca de senha | P0 |
 | RF-04 | CRUD de posts — criar, ler, atualizar, deletar, revalidar (ISR) | P0 |

@@ -1,6 +1,7 @@
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { env } from "@/lib/env";
 import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
+import { CookieJar } from "./http/cookieJar";
 import { gateways, IGateways } from "./infra/container/gateways";
 import { helpers, IHelpers } from "./infra/container/helpers";
 import { IRepositories, repositories } from "./infra/container/repositories";
@@ -16,6 +17,8 @@ type IBaseContextDTO = IInputAPIContextDTO & {
 	helpers: IHelpers;
 	gateways: IGateways;
 	env: typeof env;
+	resCookies: CookieJar;
+	refreshToken?: string;
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
@@ -35,6 +38,7 @@ const createTRPCContext = async ({
 		helpers,
 		gateways,
 		env,
+		resCookies: new CookieJar(),
 	};
 
 	const cookies = headers.get("cookie");
@@ -42,7 +46,9 @@ const createTRPCContext = async ({
 	if (!cookies) return ctx;
 	const cookieStore = parseCookie(cookies);
 	const accessToken = cookieStore.get("accessToken") || null;
+	const refreshToken = cookieStore.get("refreshToken") || null;
 
+	if (refreshToken) ctx.refreshToken = refreshToken;
 	if (!accessToken) return ctx;
 
 	const user = await domain_readUserAndSessionByAccessToken({

@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { userWithoutPasswordSchema } from "../user/schema";
 
-const refreshSessionSchema = z.object({
-	refreshToken: z.string(),
-});
-
 const verifyTokenSchema = z.object({
 	token: z.string(),
 });
@@ -32,15 +28,6 @@ const resetPasswordSchema = z
 		path: ["confirmPassword"],
 	});
 
-const sessionEntitySchema = z.object({
-	id: z.string(),
-	userId: z.string(),
-	accessToken: z.string(),
-	refreshToken: z.string(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-});
-
 const verifyTokenEntitySchema = z.object({
 	id: z.string(),
 	token: z.string(),
@@ -49,18 +36,10 @@ const verifyTokenEntitySchema = z.object({
 	used: z.boolean(),
 });
 
-const userWithSessionSchema = userWithoutPasswordSchema.extend({
-	session: z.object({
-		id: z.string(),
-		accessToken: z.string(),
-		refreshToken: z.string(),
-		createdAt: z.date(),
-		updatedAt: z.date(),
-	}),
-});
+const sessionQueryOutputSchema = z.object({ user: userWithoutPasswordSchema });
 
-const refreshSessionOutputSchema = sessionEntitySchema;
-const readUserFromSessionOutputSchema = userWithSessionSchema;
+const refreshSessionOutputSchema = z.object({ success: z.boolean() });
+const readUserFromSessionOutputSchema = sessionQueryOutputSchema;
 const logoutUserFromSessionOutputSchema = z.void();
 const verifyTokenOutputSchema = verifyTokenEntitySchema;
 const resendVerificationEmailOutputSchema = verifyTokenEntitySchema;
@@ -69,7 +48,6 @@ const sendResetPasswordEmailOutputSchema = z.object({
 	success: z.boolean(),
 });
 
-type RefreshSessionInput = z.TypeOf<typeof refreshSessionSchema>;
 type VerifyTokenInput = z.TypeOf<typeof verifyTokenSchema>;
 type ResendVerificationEmailInput = z.infer<
 	typeof resendVerificationEmailSchema
@@ -78,7 +56,6 @@ type SendResetPasswordEmailInput = z.infer<typeof sendResetPasswordEmailSchema>;
 type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 export type {
-	RefreshSessionInput,
 	ResendVerificationEmailInput,
 	ResetPasswordInput,
 	SendResetPasswordEmailInput,
@@ -88,15 +65,12 @@ export {
 	logoutUserFromSessionOutputSchema,
 	readUserFromSessionOutputSchema,
 	refreshSessionOutputSchema,
-	refreshSessionSchema,
 	resendVerificationEmailOutputSchema,
 	resendVerificationEmailSchema,
 	resetPasswordOutputSchema,
 	resetPasswordSchema,
 	sendResetPasswordEmailOutputSchema,
 	sendResetPasswordEmailSchema,
-	sessionEntitySchema,
-	userWithSessionSchema,
 	verifyTokenEntitySchema,
 	verifyTokenOutputSchema,
 	verifyTokenSchema,

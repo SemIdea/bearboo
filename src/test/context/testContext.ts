@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { CookieJar } from "@/server/http/cookieJar";
 import { gateways, IGateways } from "@/server/infra/container/gateways";
 import { helpers } from "@/server/infra/container/helpers";
 import {
@@ -17,6 +18,8 @@ class TestContext {
 	helpers = helpers;
 	gateways: IGateways;
 	env = env;
+	resCookies = new CookieJar();
+	refreshToken?: string;
 	user?: IAuthenticatedUserDTO;
 
 	constructor(

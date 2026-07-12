@@ -1,4 +1,6 @@
 import { beforeEach, vi } from "vitest";
+import { InMemoryRateLimit } from "@/lib/rateLimit/implementations/inMemory";
+import { helpers } from "@/server/infra/container/helpers";
 import { resetPrismaMock } from "@/test/prisma";
 
 vi.mock("@/server/infra/drivers/prisma", async () => {
@@ -9,4 +11,5 @@ vi.mock("@/server/infra/drivers/prisma", async () => {
 
 beforeEach(() => {
 	resetPrismaMock();
+	(helpers.rateLimit as InMemoryRateLimit).reset();
 });

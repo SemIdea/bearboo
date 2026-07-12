@@ -1,5 +1,4 @@
 import { trpc } from "@/app/_trpc/client";
-import { clearAuthData } from "@/utils/authStorage";
 
 let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
@@ -15,22 +14,14 @@ const setTRPCClientInstance = (
 const refreshTokens = async (): Promise<void> => {
 	if (typeof window === "undefined")
 		throw new Error("Server-side can't refresh");
-	const refreshToken = localStorage.getItem("refreshToken");
-	if (!refreshToken || !trpcClientInstance) throw new Error("No refresh setup");
+	if (!trpcClientInstance) throw new Error("No refresh setup");
 
 	if (isRefreshing) return refreshPromise!;
 
 	isRefreshing = true;
 	refreshPromise = (async () => {
 		try {
-			const data = await trpcClientInstance!.auth.refreshSession.mutate({
-				refreshToken,
-			});
-			document.cookie = `accessToken=${data.accessToken}; path=/; secure; samesite=strict`;
-			localStorage.setItem("refreshToken", data.refreshToken);
-		} catch (error) {
-			clearAuthData();
-			throw error;
+			await trpcClientInstance!.auth.refreshSession.mutate();
 		} finally {
 			isRefreshing = false;
 			refreshPromise = null;

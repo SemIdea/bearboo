@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { UserErrorCode } from "@/shared/error/user";
+import { RESET_RATE_LIMIT } from "@/server/features/auth/constants";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -28,11 +28,25 @@ describe("Send Reset Password Email Controller Unitary Testing", () => {
 		expect(result.success).toBe(true);
 	});
 
-	test("Should throw an error if user does not exist", async () => {
+	test("Should always report success, even when the email doesn't exist", async () => {
+		const result = await AuthRouter.createCaller(ctx).sendResetPasswordEmail({
+			email: "nonexistent@example.com",
+		});
+
+		expect(result).toEqual({ success: true });
+	});
+
+	test("Should enforce the reset rate limit", async () => {
+		for (let i = 0; i < RESET_RATE_LIMIT.max; i++) {
+			await AuthRouter.createCaller(ctx).sendResetPasswordEmail({
+				email: "nonexistent@example.com",
+			});
+		}
+
 		await expect(
 			AuthRouter.createCaller(ctx).sendResetPasswordEmail({
 				email: "nonexistent@example.com",
 			}),
-		).rejects.toThrowError(UserErrorCode.USER_NOT_FOUND);
+		).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
 	});
 });

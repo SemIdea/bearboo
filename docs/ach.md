@@ -174,7 +174,7 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 - **Conceito universal:** implementação concreta de uma porta (`adapter.ts`) — mesmo shape de retorno entre implementações (LSP).
 - **Implementação no stack:**
   - Models de dados: `src/server/models/<entity>.ts`.
-  - Helper puro: `src/lib/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`, `slug` — gerador determinístico de slug a partir de título, usado em `domain_createPost`).
+  - Helper puro: `src/lib/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`, `slug` — gerador determinístico de slug a partir de título, usado em `domain_createPost`; `rateLimit` — adicionado em `001-auth-hardening`, `IRateLimitHelperAdapter` + `InMemoryRateLimit`, key opaca prefixada por endpoint no call site, sem dependência de Redis).
   - Gateway externo: `src/server/integrations/gateway/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `mailer`).
 - **OCP em ação:** provider novo (ex: outro mailer) = arquivo novo em `implementations/`, sem `switch (provider)` espalhado.
 
@@ -182,6 +182,12 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 
 - **Implementação:** `src/server/infra/container/{gateways,helpers,repositories}.ts` — resolve qual `implementations/*` concreta cada adapter usa e injeta config/env quando necessário.
 - **Drivers:** `src/server/infra/drivers/prisma.ts` — client singleton cru, consumido só por infra/model.
+
+#### Response cookie jar — peça nova de `001-auth-hardening` (2026-07-12)
+
+- **Conceito:** `src/server/http/cookieJar.ts` (`class CookieJar`) — acumula `Set-Cookie` pendentes durante o request; `src/server/http/serializeCookie.ts` — função pura que formata cada cookie (`HttpOnly`, `SameSite=Lax`, `Secure` condicional a `NODE_ENV=production`).
+- **Contrato:** `createContext.ts` instancia um `CookieJar` por request (`ctx.resCookies`); procedures chamam `ctx.resCookies.set(...)`/`.clear(...)`; `src/app/api/trpc/[trpc]/route.ts` captura a `ctx` criada e usa `responseMeta` do `fetchRequestHandler` pra emitir os headers `set-cookie` depois que o batch resolve.
+- **Por que existe:** o adapter tRPC (`@trpc/server/adapters/fetch`) não tem, por padrão, nenhum jeito de uma procedure influenciar headers da resposta — decisão de arquitetura validada em gate (`docs/features/001-auth-hardening/plan.md` § 4.1), não um padrão pré-existente do stack.
 
 ### 3.2 Componentes de suporte (2ª classe)
 

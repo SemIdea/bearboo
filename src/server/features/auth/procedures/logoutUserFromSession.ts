@@ -14,6 +14,9 @@ const procedure_logoutUserFromSession = protectedProcedure
 				userId: ctx.user.id,
 			},
 		});
+
+		ctx.resCookies.clear("accessToken");
+		ctx.resCookies.clear("refreshToken");
 	});
 
 export { procedure_logoutUserFromSession };

@@ -4,6 +4,10 @@ import { ZodError } from "zod";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { SessionErrorCode } from "@/shared/error/session";
 import { Context } from "./createContext";
+import {
+	SESSION_IDLE_TIMEOUT_MS,
+	SESSION_MAX_LIFETIME_MS,
+} from "./features/auth/constants";
 
 const t = initTRPC.context<Context>().create({
 	transformer: superjson,
@@ -28,14 +32,15 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
 	if (!user) return next();
 	if (!user.session) return next();
 
-	const sessionUpdatedTimestamp = user.session.updatedAt;
+	const sessionUpdatedDate = new Date(user.session.updatedAt);
+	const sessionCreatedDate = new Date(user.session.createdAt);
+	const now = Date.now();
 
-	if (!sessionUpdatedTimestamp) return next();
+	const isIdle = now - sessionUpdatedDate.getTime() > SESSION_IDLE_TIMEOUT_MS;
+	const isPastMaxLifetime =
+		now - sessionCreatedDate.getTime() > SESSION_MAX_LIFETIME_MS;
 
-	const sessionUpdatedDate = new Date(sessionUpdatedTimestamp);
-	const EXPIRES = 1000 * 20;
-
-	if (Date.now() - sessionUpdatedDate.getTime() > EXPIRES) {
+	if (isIdle || isPastMaxLifetime) {
 		throw new TRPCError({
 			code: "UNAUTHORIZED",
 			message: SessionErrorCode.SESSION_EXPIRED,
@@ -48,6 +53,21 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
 		},
 	});
 });
+
+const assertRateLimit = async (
+	ctx: Context,
+	key: string,
+	limit: { max: number; windowMs: number },
+) => {
+	const { allowed } = await ctx.helpers.rateLimit.consume(key, limit);
+
+	if (!allowed) {
+		throw new TRPCError({
+			code: "TOO_MANY_REQUESTS",
+			message: AuthErrorCode.TOO_MANY_ATTEMPTS,
+		});
+	}
+};
 
 const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 	if (!ctx.user) {
@@ -79,4 +99,10 @@ const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 	});
 });
 
-export { protectedProcedure, publicProcedure, t, verifiedProcedure };
+export {
+	assertRateLimit,
+	protectedProcedure,
+	publicProcedure,
+	t,
+	verifiedProcedure,
+};

@@ -1,24 +1,32 @@
 import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
 import { SessionErrorCode } from "@/shared/error/session";
-import { RefreshSessionInput } from "../schema";
+
+const invalidTokenError = new TRPCError({
+	code: "NOT_FOUND",
+	message: SessionErrorCode.INVALID_TOKEN,
+});
 
 const domain_readSessionByRefreshToken = async ({
 	ctx,
 	input,
-}: DomainInput<RefreshSessionInput>) => {
+}: DomainInput<{ refreshToken: string }>) => {
 	const session = await ctx.repositories.session.readByRefreshToken(
 		input.refreshToken,
 	);
 
-	if (!session) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: SessionErrorCode.INVALID_TOKEN,
-		});
+	if (session) return session;
+
+	const reusedSession =
+		await ctx.repositories.session.readByPreviousRefreshToken(
+			input.refreshToken,
+		);
+
+	if (reusedSession) {
+		await ctx.repositories.session.delete(reusedSession.id);
 	}
 
-	return session;
+	throw invalidTokenError;
 };
 
 export { domain_readSessionByRefreshToken };

@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { trpc } from "@/app/_trpc/client";
-import { clearAuthData } from "@/utils/authStorage";
 
 const SessionRefresher = () => {
 	const router = useRouter();
@@ -11,28 +10,16 @@ const SessionRefresher = () => {
 	const redirect = searchParams.get("redirect") || "/";
 
 	const { mutate: refreshSession } = trpc.auth.refreshSession.useMutation({
-		onSuccess: (data) => {
-			document.cookie = `accessToken=${data.accessToken}; path=/;`;
-			localStorage.setItem("refreshToken", data.refreshToken);
-
+		onSuccess: () => {
 			router.push(redirect);
 		},
 		onError: () => {
-			clearAuthData();
 			router.push("/auth/login");
 		},
 	});
 
 	useEffect(() => {
-		const refreshToken = localStorage.getItem("refreshToken");
-
-		if (!refreshToken) {
-			clearAuthData();
-			router.push("/auth/login");
-			return;
-		}
-
-		refreshSession({ refreshToken });
+		refreshSession();
 	}, [redirect]);
 
 	return null;

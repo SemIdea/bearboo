@@ -1,5 +1,6 @@
-import { publicProcedure } from "@/server/createRouter";
+import { assertRateLimit, publicProcedure } from "@/server/createRouter";
 import { domain_sendMailByUserId } from "../../mail/domain/sendMailByUserId";
+import { RESET_RATE_LIMIT } from "../constants";
 import { domain_createResetToken } from "../domain/createResetToken";
 import {
 	sendResetPasswordEmailOutputSchema,
@@ -10,14 +11,17 @@ const procedure_sendResetPasswordEmail = publicProcedure
 	.input(sendResetPasswordEmailSchema)
 	.output(sendResetPasswordEmailOutputSchema)
 	.mutation(async ({ input, ctx }) => {
+		await assertRateLimit(ctx, `reset:${input.email}`, RESET_RATE_LIMIT);
+
 		const resetToken = await domain_createResetToken({ ctx, input });
 
-		await domain_sendMailByUserId({
-			ctx,
-			input: {
-				userId: resetToken.userId,
-				subject: "Reset Your Password",
-				body: `
+		if (resetToken) {
+			await domain_sendMailByUserId({
+				ctx,
+				input: {
+					userId: resetToken.userId,
+					subject: "Reset Your Password",
+					body: `
         <h2>Password Reset Request</h2>
         <p>Hello {{name}},</p>
         <p>You requested a password reset. Please click the link below to reset your password:</p>
@@ -29,8 +33,9 @@ const procedure_sendResetPasswordEmail = publicProcedure
         <br>
         <p>Best regards,<br>The Team</p>
       `,
-			},
-		});
+				},
+			});
+		}
 
 		return {
 			success: true,

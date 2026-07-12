@@ -1,19 +1,14 @@
 import { useState } from "react";
-import { ISessionWithUser } from "@/server/models/session";
-import { clearAuthData, setAuthData } from "@/utils/authStorage";
+import { IUserEntity } from "@/server/models/user";
+
+type IClientSession = { user: Omit<IUserEntity, "password"> };
 
 const useAuthLogic = () => {
 	const [isLoadingSession, setIsLoadingSession] = useState(true);
-	const [session, setSession] = useState<ISessionWithUser | null>(null);
+	const [session, setSession] = useState<IClientSession | null>(null);
 
-	const updateAuthData = (data?: ISessionWithUser) => {
-		if (!data) {
-			setSession(null);
-			clearAuthData();
-			return;
-		}
-		setSession(data);
-		setAuthData(data);
+	const updateAuthData = (data?: IClientSession) => {
+		setSession(data ?? null);
 	};
 
 	const clearSession = () => {
@@ -32,5 +27,5 @@ const useAuthLogic = () => {
 
 type UseAuthLogicReturn = ReturnType<typeof useAuthLogic>;
 
-export type { UseAuthLogicReturn };
+export type { IClientSession, UseAuthLogicReturn };
 export { useAuthLogic };

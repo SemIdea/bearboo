@@ -8,6 +8,10 @@ import {
 	t,
 	verifiedProcedure,
 } from "../createRouter";
+import {
+	SESSION_IDLE_TIMEOUT_MS,
+	SESSION_MAX_LIFETIME_MS,
+} from "../features/auth/constants";
 
 const testRouter = t.router({
 	publicValue: publicProcedure.query(({ ctx }) => ctx.user?.id ?? "anonymous"),
@@ -35,9 +39,11 @@ describe("TRPC procedure guards", () => {
 		});
 	});
 
-	test("blocks expired authenticated sessions on public middleware", async () => {
+	test("blocks idle authenticated sessions on public middleware", async () => {
 		const ctx = await createAuthenticatedContext();
-		ctx.user.session.updatedAt = new Date(Date.now() - 21_000);
+		ctx.user.session.updatedAt = new Date(
+			Date.now() - SESSION_IDLE_TIMEOUT_MS - 1_000,
+		);
 
 		await expect(
 			testRouter.createCaller(ctx).publicValue(),
@@ -45,6 +51,29 @@ describe("TRPC procedure guards", () => {
 			code: "UNAUTHORIZED",
 			message: SessionErrorCode.SESSION_EXPIRED,
 		});
+	});
+
+	test("blocks sessions past the absolute max lifetime even if recently updated", async () => {
+		const ctx = await createAuthenticatedContext();
+		ctx.user.session.createdAt = new Date(
+			Date.now() - SESSION_MAX_LIFETIME_MS - 1_000,
+		);
+		ctx.user.session.updatedAt = new Date();
+
+		await expect(
+			testRouter.createCaller(ctx).publicValue(),
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: SessionErrorCode.SESSION_EXPIRED,
+		});
+	});
+
+	test("allows sessions that are neither idle nor past max lifetime", async () => {
+		const ctx = await createAuthenticatedContext();
+
+		await expect(testRouter.createCaller(ctx).publicValue()).resolves.toBe(
+			ctx.user.id,
+		);
 	});
 
 	test("blocks unverified users from verified procedures", async () => {

@@ -2,7 +2,7 @@
 
 > **Spec:** o quê e o porquê. Sem decisão de tecnologia.
 > **US relacionada(s):** US-002 (Login e criação de sessão), US-003 (Refresh e logout de sessão) — US-001 (Registro) tocada perifericamente.
-> **Status:** draft
+> **Status:** done (2026-07-12 — `tsc --noEmit` limpo, `vitest` 188/188 verdes incl. testes novos de sessão/rotação/reuse-detection/rate-limit/mensagens genéricas; verificado ao vivo contra Postgres real via Docker + `curl`: 2 `Set-Cookie` distintos em login, refresh rotaciona, reuse de token antigo revoga a sessão inteira, rate limit 10/11 rejeita; achado e corrigido durante a verificação ao vivo um bug de key de rate-limit sem escopo por endpoint — ver `plan.md` § 10. Infra (TLS, docker-compose) explicitamente fora de escopo — ver § 4)
 > **Data de abertura:** 2026-06-30
 
 ## 1. Problema (do PRD/UST)
@@ -11,13 +11,13 @@ A auth própria do Bearboo (decisão em `docs/adr/0005-manter-auth-propria.md`) 
 
 ## 2. Critério de sucesso observável
 
-- [ ] Uma sessão comprometida (accessToken/refreshToken vazado) deixa de ser válida sozinha após um tempo determinado — hoje é válida pra sempre.
-- [ ] Nenhuma resposta de `loginUser`, `sendResetPasswordEmail` ou `registerUser` permite distinguir, pela mensagem/código de erro, se um email já tem conta.
-- [ ] Tentativas repetidas de login/registro/reset/refresh acima de um limite são bloqueadas/atrasadas, verificável por teste que dispara N+1 chamadas e observa rejeição.
-- [ ] O token de sessão não é legível por `document.cookie`/`localStorage` a partir de JS da própria página (verificável inspecionando os cookies emitidos: `HttpOnly` presente).
-- [ ] Uma mutation tRPC autenticada não pode ser disparada por uma página de outra origem usando só o cookie ambiente (CSRF).
-- [ ] `docker-compose.yml` de produção não contém credencial hardcoded nem porta de banco exposta ao host sem necessidade.
-- [ ] Tráfego de produção roda sobre HTTPS (certificado + redirect de 80→443 ou HSTS).
+- [x] Uma sessão comprometida (accessToken/refreshToken vazado) deixa de ser válida sozinha após um tempo determinado — hoje é válida pra sempre. Idle timeout (30min) + vida máxima absoluta (30 dias) + rotação de refresh token com detecção de reuse (token antigo reutilizado revoga a sessão inteira).
+- [x] Nenhuma resposta de `loginUser`, `sendResetPasswordEmail` ou `registerUser` permite distinguir, pela mensagem/código de erro, se um email já tem conta. Login e reset genéricos (Clarification 2026-07-12); registro mantém `USER_ALREADY_EXISTS` (decisão explícita, § 7).
+- [x] Tentativas repetidas de login/registro/reset/refresh acima de um limite são bloqueadas/atrasadas, verificável por teste que dispara N+1 chamadas e observa rejeição. Rate limit em memória por endpoint (`src/lib/rateLimit/`), verificado ao vivo (10/11 rejeitado).
+- [x] O token de sessão não é legível por `document.cookie`/`localStorage` a partir de JS da própria página (verificável inspecionando os cookies emitidos: `HttpOnly` presente). Confirmado ao vivo via `curl -v`: `HttpOnly; SameSite=Lax` em ambos os cookies.
+- [x] Uma mutation tRPC autenticada não pode ser disparada por uma página de outra origem usando só o cookie ambiente (CSRF). `SameSite=Lax` bloqueia POST cross-site (mutations tRPC vão por POST via `httpBatchLink`) — ver `plan.md` § 4.2.
+- [ ] `docker-compose.yml` de produção não contém credencial hardcoded nem porta de banco exposta ao host sem necessidade. **Adiado nesta rodada** — ver § 4 e Clarification 2026-07-12.
+- [ ] Tráfego de produção roda sobre HTTPS (certificado + redirect de 80→443 ou HSTS). **Adiado nesta rodada** — ver § 4 e Clarification 2026-07-12.
 
 ## 3. Cenários (Gherkin)
 
@@ -57,13 +57,12 @@ Scenario: Brute-force de login
 - **Gerenciamento de sessões ativas (listar/revogar de outro device).** UX avançada, não é hardening de segurança básico.
 - **CI/CD com security scanning (SAST/dependabot).** Pertence à Fase 10 do `docs/roadmap.md`, não a esta feature.
 - **Migrar de Auth.js/Better Auth.** Já decidido contra em `docs/adr/0005-manter-auth-propria.md`.
+- **Hardening de infraestrutura (TLS/HTTPS via nginx+certificado, credenciais hardcoded do `docker-compose.yml`, porta do Postgres exposta ao host).** Descoberto durante o discovery desta rodada (2026-07-12) que essa camada tem natureza operacional diferente da hardening de aplicação — TLS real depende de domínio/certificado (não testável por `vitest`), verificação é manual/ops em vez de automatizada. Dono decidiu (Clarification 2026-07-12) escopar esta feature só pra camada de aplicação; infra vira item futuro (candidato a nota em `docs/roadmap.md` Fase 10, a confirmar na reconciliação).
 
 ## 5. Assumptions / Open questions
 
-- [NEEDS CLARIFICATION: o timeout de 20 segundos em `src/server/routers/../createRouter.ts` (`EXPIRES = 1000 * 20`) é intencional (idle-timeout agressivo de propósito) ou é valor de debug esquecido? Muda o desenho de quanto tempo um access token deveria durar.]
-- [NEEDS CLARIFICATION: mensagem genérica em login/reset é aceitável do ponto de vista de UX (perde a clareza de "esse email não existe" pro usuário legítimo que errou o email), ou o produto prefere aceitar o risco de enumeração em troca de UX mais clara?]
+- Sem `[NEEDS CLARIFICATION:]` aberto — os 2 desta seção (timeout de 20s; UX de mensagem genérica) foram resolvidos em 2026-07-12, ver § 7 Clarifications.
 - Premissa: manter tokens opacos (UUID) em vez de JWT — já é o padrão hoje e favorece revogação; hardening não deve reverter essa escolha (ver `docs/ach.md` § 3.1, Model/Adapter).
-- Premissa: o hardening de infraestrutura (TLS, credenciais do compose) entra nesta feature porque sem ele o hardening de aplicação é insuficiente — se o dono do produto preferir tratar infra como feature separada, este spec se estreita só pra camada de aplicação.
 - **Premissa (2026-07-01, revisada após ADR-0009):** os critérios de sucesso da § 2 (expiração de sessão, rotação, CSRF, rate limiting, enumeração) são independentes de cache Redis — dependem do `Session` no Postgres (source of truth, `docs/ach.md` § 1) e da camada de cookie/procedure, não da leitura cacheada. Remover o Redis atual (ADR-0009) **não invalida** nenhum critério aqui; só significa que a implementação, quando chegar no `plan.md`, não deve reintroduzir cache como parte do hardening — isso é decisão separada, futura.
 - **Premissa:** ADR-0006/0007 já foram implementadas; a implementação do hardening usa a estrutura atual (`models/`, `domain/`, `procedures/`), não a estrutura antiga (`entities/`, `controller.ts`/`service.ts`).
 
@@ -76,7 +75,11 @@ Scenario: Brute-force de login
 
 ## 7. Clarifications
 
-*(vazio até primeira sessão de `/afm:clarify`.)*
+**2026-07-12 (discovery rodada 1/2, `/afm:deliver`):**
+
+- **Q: o timeout de 20s (`EXPIRES = 1000 * 20`) é intencional ou debug leftover?** Resolvido por evidência de código, não perguntado ao dono: `Session` não tem coluna `expiresAt`, e esse é o **único** mecanismo de expiração hoje — 20s tornaria o app inutilizável em produção (qualquer aba parada por 20s vira `SESSION_EXPIRED`). Não é design intencional. `plan.md` § 4 define a política real (idle timeout + vida máxima absoluta).
+- **Q: mensagem genérica em login/reset (perde clareza de UX) ou específica (aceita risco de enumeração)?** R: **Genérica em login/reset** (padrão OWASP). Registro continua revelando "email já existe" — esconder isso exigiria um fluxo de indireção maior, fora do escopo de hardening pontual.
+- **Q: hardening de infra (TLS, docker-compose) entra nesta rodada ou fica pra depois?** R: **Só aplicação nesta rodada.** TLS real exige domínio+certificado (não testável por `vitest`), natureza operacional diferente do resto. Infra vira item separado (§ 4).
 
 ---
 

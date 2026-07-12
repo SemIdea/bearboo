@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { describe, expect, test, vi } from "vitest";
+import { REGISTER_RATE_LIMIT } from "@/server/features/auth/constants";
 import { UserErrorCode } from "@/shared/error/user";
 import { createTestContext } from "@/test/context";
 import { UserRouter } from "../../index";
@@ -83,5 +84,38 @@ describe("Register User Controller Unitary Testing", () => {
 				message: UserErrorCode.USER_ALREADY_EXISTS,
 			}),
 		);
+	});
+
+	test("Should enforce the register rate limit", async () => {
+		const email = `${ctx.helpers.uid.generate()}@example.com`;
+		const input = { email, name: "Test User", password: "password123" };
+
+		for (let i = 0; i < REGISTER_RATE_LIMIT.max; i++) {
+			await UserRouter.createCaller(ctx)
+				.register(input)
+				.catch(() => undefined);
+		}
+
+		await expect(
+			UserRouter.createCaller(ctx).register(input),
+		).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+	});
+
+	test("Should not share the rate-limit counter with login for the same email", async () => {
+		const email = `${ctx.helpers.uid.generate()}@example.com`;
+		const input = { email, name: "Test User", password: "password123" };
+
+		for (let i = 0; i <= REGISTER_RATE_LIMIT.max; i++) {
+			await UserRouter.createCaller(ctx)
+				.register(input)
+				.catch(() => undefined);
+		}
+
+		const loginResult = await UserRouter.createCaller(ctx).login({
+			email,
+			password: "password123",
+		});
+
+		expect(loginResult.user.email).toBe(email);
 	});
 });

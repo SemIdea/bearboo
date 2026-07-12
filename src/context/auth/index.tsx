@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect } from "react";
-import { ISessionWithUser } from "@/server/models/session";
+import { trpc } from "@/app/_trpc/client";
 import { UseAuthLogicReturn, useAuthLogic } from "./index.hook";
 
 const AuthContext = createContext<UseAuthLogicReturn>({} as UseAuthLogicReturn);
@@ -20,20 +20,16 @@ const Authprovider = ({ children }: ChatProviderProps) => {
 		clearSession,
 	} = useAuthLogic();
 
+	const { data, isFetched } = trpc.auth.session.me.useQuery(undefined, {
+		retry: false,
+	});
+
 	useEffect(() => {
-		const sessionCookie = document.cookie
-			.split("; ")
-			.find((row) => row.startsWith("session="))
-			?.split("=")[1];
+		if (!isFetched) return;
 
-		if (sessionCookie) {
-			const session = JSON.parse(sessionCookie) as ISessionWithUser;
-
-			setSession(session);
-		}
-
+		setSession(data ?? null);
 		setIsLoadingSession(false);
-	}, []);
+	}, [data, isFetched]);
 
 	return (
 		<AuthContext.Provider

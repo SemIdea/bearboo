@@ -1,4 +1,8 @@
-import { publicProcedure } from "@/server/createRouter";
+import { assertRateLimit, publicProcedure } from "@/server/createRouter";
+import {
+	LOGIN_RATE_LIMIT,
+	SESSION_MAX_LIFETIME_MS,
+} from "../../auth/constants";
 import { domain_createAuthSession } from "../../auth/domain/createAuthSession";
 import { domain_loginUser } from "../domain/login";
 import { loginUserOutputSchema, loginUserSchema } from "../schema";
@@ -7,16 +11,20 @@ const procedure_loginUser = publicProcedure
 	.input(loginUserSchema)
 	.output(loginUserOutputSchema)
 	.mutation(async ({ input, ctx }) => {
+		await assertRateLimit(ctx, `login:${input.email}`, LOGIN_RATE_LIMIT);
+
 		const user = await domain_loginUser({ ctx, input });
 		const session = await domain_createAuthSession({
 			ctx,
 			input: { userId: user.id },
 		});
 
-		return {
-			...session,
-			user,
-		};
+		const maxAgeSeconds = SESSION_MAX_LIFETIME_MS / 1000;
+
+		ctx.resCookies.set("accessToken", session.accessToken, { maxAgeSeconds });
+		ctx.resCookies.set("refreshToken", session.refreshToken, { maxAgeSeconds });
+
+		return { user };
 	});
 
 export { procedure_loginUser };

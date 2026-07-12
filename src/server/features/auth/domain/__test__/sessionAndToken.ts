@@ -66,9 +66,20 @@ describe("auth session and token domains", () => {
 			userId: ctx.user.id,
 			used: false,
 		});
-		expect(await ctx.repositories.resetToken.readByToken(token.token)).toEqual(
+		expect(await ctx.repositories.resetToken.readByToken(token!.token)).toEqual(
 			token,
 		);
+	});
+
+	test("returns null for reset tokens when the email doesn't exist", async () => {
+		const ctx = createTestContext();
+
+		await expect(
+			domain_createResetToken({
+				ctx,
+				input: { email: "missing@example.com" },
+			}),
+		).resolves.toBeNull();
 	});
 
 	test("recreates verification tokens by deleting an existing token first", async () => {
@@ -168,17 +179,47 @@ describe("auth session and token domains", () => {
 
 	test("refreshes sessions by rotating tokens", async () => {
 		const ctx = await createAuthenticatedContext();
+		const originalRefreshToken = ctx.user.session.refreshToken;
 
 		const refreshedSession = await domain_refreshSession({
 			ctx,
-			input: { id: ctx.user.session.id },
+			input: {
+				id: ctx.user.session.id,
+				currentRefreshToken: originalRefreshToken,
+			},
 		});
 
 		expect(refreshedSession.id).toBe(ctx.user.session.id);
 		expect(refreshedSession.accessToken).not.toBe(ctx.user.session.accessToken);
-		expect(refreshedSession.refreshToken).not.toBe(
-			ctx.user.session.refreshToken,
-		);
+		expect(refreshedSession.refreshToken).not.toBe(originalRefreshToken);
+		expect(refreshedSession.previousRefreshToken).toBe(originalRefreshToken);
+	});
+
+	test("rejects reuse of a rotated-out refresh token and revokes the session", async () => {
+		const ctx = await createAuthenticatedContext();
+		const originalRefreshToken = ctx.user.session.refreshToken;
+
+		await domain_refreshSession({
+			ctx,
+			input: {
+				id: ctx.user.session.id,
+				currentRefreshToken: originalRefreshToken,
+			},
+		});
+
+		await expect(
+			domain_readSessionByRefreshToken({
+				ctx,
+				input: { refreshToken: originalRefreshToken },
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: SessionErrorCode.INVALID_TOKEN,
+		});
+
+		await expect(
+			ctx.repositories.session.read(ctx.user.session.id),
+		).resolves.toBeNull();
 	});
 
 	test("deletes existing sessions and rejects missing sessions", async () => {

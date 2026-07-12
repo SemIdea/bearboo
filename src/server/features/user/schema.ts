@@ -44,11 +44,6 @@ const userWithoutPasswordSchema = z.object({
 });
 
 const loginUserOutputSchema = z.object({
-	id: z.string(),
-	accessToken: z.string(),
-	refreshToken: z.string(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
 	user: userWithoutPasswordSchema,
 });
 

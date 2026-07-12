@@ -3,16 +3,11 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { SessionErrorCode } from "@/shared/error/session";
 
-vi.mock("@/utils/authStorage", () => ({
-	clearAuthData: vi.fn(),
-}));
-
 vi.mock("../session", () => ({
 	refreshTokens: vi.fn(),
 	setTRPCClientInstance: vi.fn(),
 }));
 
-const { clearAuthData } = await import("@/utils/authStorage");
 const { refreshTokens } = await import("../session");
 const { sessionRefreshLink } = await import("../sessionRefreshLink");
 
@@ -49,7 +44,6 @@ describe("sessionRefreshLink", () => {
 	beforeEach(() => {
 		vi.stubGlobal("window", { location: { href: "" } });
 		vi.mocked(refreshTokens).mockReset();
-		vi.mocked(clearAuthData).mockReset();
 	});
 
 	test("passes a successful value through untouched", () => {
@@ -66,7 +60,7 @@ describe("sessionRefreshLink", () => {
 		link.subscribe({ next: nextSpy, error: vi.fn(), complete: vi.fn() });
 
 		expect(nextSpy).toHaveBeenCalledWith(value);
-		expect(clearAuthData).not.toHaveBeenCalled();
+		expect(window.location.href).toBe("");
 	});
 
 	test("refreshes the session once and retries on SESSION_EXPIRED", async () => {
@@ -102,7 +96,7 @@ describe("sessionRefreshLink", () => {
 		expect(errorSpy).not.toHaveBeenCalled();
 	});
 
-	test("clears auth and redirects to login when the refresh itself fails", async () => {
+	test("redirects to login when the refresh itself fails", async () => {
 		const expiredError = errorWith(
 			"UNAUTHORIZED",
 			SessionErrorCode.SESSION_EXPIRED,
@@ -120,12 +114,11 @@ describe("sessionRefreshLink", () => {
 
 		await flushMicrotasks();
 
-		expect(clearAuthData).toHaveBeenCalledTimes(1);
 		expect(window.location.href).toBe("/auth/login");
 		expect(errorSpy).toHaveBeenCalledWith(expiredError);
 	});
 
-	test("clears auth and redirects to login on INVALID_TOKEN", () => {
+	test("redirects to login on INVALID_TOKEN", () => {
 		const invalidTokenError = errorWith(
 			"UNAUTHORIZED",
 			SessionErrorCode.INVALID_TOKEN,
@@ -140,7 +133,6 @@ describe("sessionRefreshLink", () => {
 		const link = sessionRefreshLink({})({ op: fakeOp, next });
 		link.subscribe({ next: vi.fn(), error: errorSpy, complete: vi.fn() });
 
-		expect(clearAuthData).toHaveBeenCalledTimes(1);
 		expect(window.location.href).toBe("/auth/login");
 		expect(errorSpy).toHaveBeenCalledWith(invalidTokenError);
 	});
@@ -160,7 +152,6 @@ describe("sessionRefreshLink", () => {
 		const link = sessionRefreshLink({})({ op: fakeOp, next });
 		link.subscribe({ next: vi.fn(), error: errorSpy, complete: vi.fn() });
 
-		expect(clearAuthData).not.toHaveBeenCalled();
 		expect(window.location.href).toBe("");
 		expect(errorSpy).toHaveBeenCalledWith(invalidCredentialsError);
 	});

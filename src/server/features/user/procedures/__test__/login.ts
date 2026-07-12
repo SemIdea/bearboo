@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { UserErrorCode } from "@/shared/error/user";
+import { LOGIN_RATE_LIMIT } from "@/server/features/auth/constants";
+import { AuthErrorCode } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -14,7 +15,7 @@ describe("Login User Controller Unitary Testing", () => {
 		ctx = await createAuthenticatedContext();
 	});
 
-	test("Should return a session if valid credentials", async () => {
+	test("Should return only the user on valid credentials, never tokens", async () => {
 		const user = ctx.user;
 
 		const result = await UserRouter.createCaller(ctx).login({
@@ -22,24 +23,59 @@ describe("Login User Controller Unitary Testing", () => {
 			password: user.truePassword,
 		});
 
-		expect(result).toBeDefined();
-		expect(result.id).toBeDefined();
-		expect(result.user.id).toEqual(user.id);
+		expect(result).toEqual({
+			user: expect.objectContaining({ id: user.id }),
+		});
 	});
 
-	test("Should throw an error if user does not exist", async () => {
+	test("Should set accessToken/refreshToken cookies on success", async () => {
+		const user = ctx.user;
+
+		await UserRouter.createCaller(ctx).login({
+			email: user.email,
+			password: user.truePassword,
+		});
+
+		const cookieNames = ctx.resCookies.pending.map((cookie) => cookie.name);
+		expect(cookieNames).toEqual(
+			expect.arrayContaining(["accessToken", "refreshToken"]),
+		);
+	});
+
+	test("Should throw the same error for a missing email as for a wrong password", async () => {
 		const uuid = ctx.helpers.uid.generate();
+		const expectedError = new TRPCError({
+			code: "UNAUTHORIZED",
+			message: AuthErrorCode.INVALID_CREDENTIALS,
+		});
 
 		await expect(
 			UserRouter.createCaller(ctx).login({
 				email: `${uuid}@example.com`,
 				password: "password123",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: UserErrorCode.USER_NOT_FOUND,
+		).rejects.toThrowError(expectedError);
+
+		await expect(
+			UserRouter.createCaller(ctx).login({
+				email: ctx.user.email,
+				password: "wrong-password",
 			}),
-		);
+		).rejects.toThrowError(expectedError);
+	});
+
+	test("Should enforce the login rate limit", async () => {
+		for (let i = 0; i < LOGIN_RATE_LIMIT.max; i++) {
+			await UserRouter.createCaller(ctx)
+				.login({ email: ctx.user.email, password: "wrong-password" })
+				.catch(() => undefined);
+		}
+
+		await expect(
+			UserRouter.createCaller(ctx).login({
+				email: ctx.user.email,
+				password: ctx.user.truePassword,
+			}),
+		).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
 	});
 });
