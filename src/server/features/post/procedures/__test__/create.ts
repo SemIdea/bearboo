@@ -82,6 +82,15 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(second.slug).toEqual("draft-duplicate-2");
 	});
 
+	test("Should include a reading time of at least 1 minute", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "Short content.",
+		});
+
+		expect(result.readingTimeMinutes).toBeGreaterThanOrEqual(1);
+	});
+
 	test("Should create a post without category or tags when none is provided", async () => {
 		const result = await PostRouter.createCaller(ctx).create({
 			title: "Test Post",

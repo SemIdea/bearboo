@@ -99,4 +99,25 @@ describe("Read Recent Posts Controller Unitary Testing", () => {
 
 		expect(result.posts.map((post) => post.id)).toEqual([tagged.id]);
 	});
+
+	test("Should give a longer post a reading time greater than or equal to a shorter one", async () => {
+		const ctx = await createAuthenticatedContext();
+		const longContent = "word ".repeat(600).trim();
+		const shortContent = "Short content.";
+		const longPost = await ctx.createPost({ content: longContent });
+		const shortPost = await ctx.createPost({ content: shortContent });
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			limit: 50,
+		});
+
+		const readingTimeById = new Map(
+			result.posts.map((post) => [post.id, post.readingTimeMinutes]),
+		);
+
+		expect(readingTimeById.get(longPost.id)).toBeGreaterThanOrEqual(
+			readingTimeById.get(shortPost.id) ?? 0,
+		);
+		expect(readingTimeById.get(shortPost.id)).toBeGreaterThanOrEqual(1);
+	});
 });

@@ -55,6 +55,16 @@ describe("User Posts Controller Unitary Testing", () => {
 		expect(result.map((post) => post.id)).toEqual([published.id]);
 	});
 
+	test("Should include a reading time for each post", async () => {
+		await ctx.createPost();
+
+		const result = await UserRouter.createCaller(ctx).readPosts({
+			id: ctx.user.id,
+		});
+
+		expect(result[0].readingTimeMinutes).toBeGreaterThanOrEqual(1);
+	});
+
 	test("Should throw an error if user does not exist", async () => {
 		const uuid = ctx.helpers.uid.generate();
 

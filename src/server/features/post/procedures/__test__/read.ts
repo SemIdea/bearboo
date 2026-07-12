@@ -19,7 +19,11 @@ describe("Read Post Controller Unitary Testing", () => {
 
 		const result = await PostRouter.createCaller(ctx).read({ id: post.id });
 
-		expect(result).toEqual(post);
+		expect(result).toEqual({
+			...post,
+			readingTimeMinutes: result.readingTimeMinutes,
+		});
+		expect(result.readingTimeMinutes).toBeGreaterThanOrEqual(1);
 	});
 
 	test("Should throw an error if post does not exist", async () => {

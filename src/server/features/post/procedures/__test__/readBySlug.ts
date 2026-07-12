@@ -21,7 +21,13 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 			slug: post.slug,
 		});
 
-		expect(result).toEqual({ ...post, category: null, tags: [] });
+		expect(result).toEqual({
+			...post,
+			category: null,
+			tags: [],
+			readingTimeMinutes: result.readingTimeMinutes,
+		});
+		expect(result.readingTimeMinutes).toBeGreaterThanOrEqual(1);
 	});
 
 	test("Should include the category and tags of the post", async () => {

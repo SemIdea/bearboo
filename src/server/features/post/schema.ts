@@ -56,7 +56,21 @@ const readRecentPostsSchema = z
 	})
 	.optional();
 
-const postEntitySchema = z.object({
+const READING_WORDS_PER_MINUTE = 200;
+
+const calculateReadingTimeMinutes = (content: string): number => {
+	const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+
+	return Math.max(1, Math.ceil(wordCount / READING_WORDS_PER_MINUTE));
+};
+
+const withReadingTime = <T extends { content: string }>(schema: z.ZodType<T>) =>
+	schema.transform((post) => ({
+		...post,
+		readingTimeMinutes: calculateReadingTimeMinutes(post.content),
+	}));
+
+const postFieldsSchema = z.object({
 	id: z.string(),
 	userId: z.string(),
 	title: z.string(),
@@ -67,6 +81,8 @@ const postEntitySchema = z.object({
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+const postEntitySchema = withReadingTime(postFieldsSchema);
 
 const postCategorySummarySchema = z
 	.object({
@@ -84,24 +100,28 @@ const postTagSummarySchema = z.array(
 	}),
 );
 
-const postEntityWithRelationsSchema = postEntitySchema.extend({
-	user: z.object({
-		id: z.string(),
-		name: z.string(),
-	}),
-	comments: z.array(
-		z.object({
+const postEntityWithRelationsSchema = withReadingTime(
+	postFieldsSchema.extend({
+		user: z.object({
 			id: z.string(),
+			name: z.string(),
 		}),
-	),
-	category: postCategorySummarySchema,
-	tags: postTagSummarySchema,
-});
+		comments: z.array(
+			z.object({
+				id: z.string(),
+			}),
+		),
+		category: postCategorySummarySchema,
+		tags: postTagSummarySchema,
+	}),
+);
 
-const postEntityWithTaxonomySchema = postEntitySchema.extend({
-	category: postCategorySummarySchema,
-	tags: postTagSummarySchema,
-});
+const postEntityWithTaxonomySchema = withReadingTime(
+	postFieldsSchema.extend({
+		category: postCategorySummarySchema,
+		tags: postTagSummarySchema,
+	}),
+);
 
 const createPostOutputSchema = postEntitySchema;
 const readPostOutputSchema = postEntitySchema;

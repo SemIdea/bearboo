@@ -31,7 +31,9 @@ describe("Update Post Controller Unitary Testing", () => {
 			content: "Updated Content",
 			title: "Updated Title",
 			updatedAt: result.updatedAt,
+			readingTimeMinutes: result.readingTimeMinutes,
 		});
+		expect(result.readingTimeMinutes).toBeGreaterThanOrEqual(1);
 	});
 
 	test("Should update the status of the caller's own post", async () => {
