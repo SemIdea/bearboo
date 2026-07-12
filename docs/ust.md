@@ -25,6 +25,7 @@
 | US-007 | Atualizar, revalidar (ISR) e deletar post | Posts | RF-04 | done |
 | US-008 | Criar, listar, atualizar e deletar comentário | Comentários | RF-05 | done |
 | US-009 | Ver e editar perfil de usuário | Perfil | RF-06 | done |
+| US-010 | Atuar conforme papel (Admin/Editor/Author) | Autenticação | RF-08 | done |
 
 ## Pendências Técnicas
 
@@ -184,6 +185,39 @@ Scenario: Reset com token inválido, usado, expirado, ou senhas não coincidente
 ```
 
 **Metadata:** RF-03. *Test ref:* `src/server/features/auth/resetToken/controller.test.ts`.
+
+---
+
+### US-010 — [Persona] atua conforme seu papel (Admin/Editor/Author)
+
+- **Persona:** `[A DEFINIR]`.
+- **Story:** Como `[persona]` com um papel (`ADMIN`/`EDITOR`/`AUTHOR`), quero que o sistema só me deixe fazer o que meu papel permite — e deixe Admin/Editor agirem sobre conteúdo de qualquer usuário quando o Author só age sobre o próprio.
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Admin edita post de outro usuário
+  Given um post de outro usuário
+  When um Admin chama a edição
+  Then a operação é aceita
+
+Scenario: Author tenta editar post de outro usuário
+  Given um post de outro usuário
+  When um Author (não dono) chama a edição
+  Then a operação é rejeitada
+
+Scenario: Author cria categoria
+  Given um usuário com papel Author
+  When ele tenta criar uma categoria
+  Then a operação é rejeitada
+
+Scenario: Admin promove outro usuário
+  Given um usuário com papel Admin
+  When ele troca o papel de outro usuário
+  Then o papel é atualizado
+```
+
+**Metadata:** RF-08. *Test ref:* `src/lib/permissions/__test__/matrix.ts`, `src/server/features/post/domain/__test__/*`, `src/server/features/category/procedures/__test__/create.ts`, `src/server/features/user/procedures/__test__/updateRole.ts`. *Spec:* `docs/features/013-role-based-permissions/spec.md`.
 
 ---
 

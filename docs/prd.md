@@ -42,7 +42,8 @@ Proposta de valor em uma frase: *"[A DEFINIR — validar com o dono do produto]"
 | RF-04 | CRUD de posts — criar, ler, atualizar, deletar, revalidar (ISR) | P0 |
 | RF-05 | CRUD de comentários em posts — criar, listar, atualizar, deletar | P0 |
 | RF-06 | Perfil de usuário — editar nome/bio, visualizar posts e comentários publicados pelo usuário | P1 |
-| RF-07 | Admin/CMS (autor) — autor controla status de publicação (draft/published/archived), vê preview do próprio post não publicado na URL real, gerencia todos os próprios posts com filtro por status/categoria/tag (`docs/roadmap.md` Fase 2); painel escopado por dono, não site-wide — depende de RF novo (roles) quando Fase 3 começar | P1 |
+| RF-07 | Admin/CMS (autor) — autor controla status de publicação (draft/published/archived), vê preview do próprio post não publicado na URL real, gerencia todos os próprios posts com filtro por status/categoria/tag (`docs/roadmap.md` Fase 2); painel site-wide pra Admin/Editor via RF-08 (`013-role-based-permissions`) | P1 |
+| RF-08 | Papéis e permissões (Admin/Editor/Author) — `docs/roadmap.md` Fase 3: Admin/Editor editam/deletam post de qualquer usuário e gerenciam categorias, Author só o próprio; Admin promove/rebaixa papel de outro usuário; painel de posts (RF-07) fica site-wide pra Admin/Editor. Restrição de publish/archive a Admin/Editor e workflow de revisão ficam pra Fase 4 (`013-role-based-permissions/spec.md` § 4) | P1 |
 
 *(RFs inferidos de `git log` — commits `feat:` de registro/login/sessão, verificação de token, reset de senha, CRUD de post/comentário, e edição de perfil. Ver histórico completo via `git log --oneline --grep=feat`.)*
 

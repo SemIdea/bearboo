@@ -203,9 +203,11 @@ Criar um painel administrativo para gerenciar posts.
 
 Essa fase está pronta quando você consegue gerenciar todo o conteúdo pelo admin, sem mexer direto no banco.
 
-## Fase 3 — Autenticação e permissões
+## Fase 3 — Autenticação e permissões ✅ Concluída (com 1 pendência adiada pra Fase 4)
 
-> **Pré-requisito (2026-06-30):** antes de empilhar papéis/permissões em cima da sessão atual, ver `docs/features/001-auth-hardening/spec.md` — sessão sem expiração no servidor, cookies sem `HttpOnly`/CSRF, sem rate limiting. Adicionar roles sobre essa base propagaria a mesma superfície de ataque pra cada papel novo.
+> **Pré-requisito (2026-06-30):** antes de empilhar papéis/permissões em cima da sessão atual, ver `docs/features/001-auth-hardening/spec.md` — sessão sem expiração no servidor, cookies sem `HttpOnly`/CSRF, sem rate limiting. Adicionar roles sobre essa base propagaria a mesma superfície de ataque pra cada papel novo. **Satisfeito (2026-07-12)** — `001-auth-hardening` done.
+>
+> **Implementação:** `docs/features/013-role-based-permissions/` (RF-08). "Publicar post"/"Arquivar post" na tabela abaixo continuam liberados pro Author sobre o próprio post nesta rodada — restringir a Admin/Editor exigiria o workflow de revisão da Fase 4 (`enviar pra revisão` → `aprovar`), que ainda não existe; aplicar a restrição sem esse workflow travaria qualquer Author sem Admin/Editor com posts presos em `DRAFT`. Decisão do dono, 2026-07-12 (`013-role-based-permissions/spec.md` § 4/§ 7).
 
 ### Objetivo
 
@@ -236,10 +238,10 @@ enum UserRole {
 ### Tarefas
 
 * [x] configurar autenticação (existe — sem papéis ainda, ver `docs/adr/0005-manter-auth-propria.md`);
-* [ ] proteger rotas admin (não existem rotas `/admin` dedicadas hoje);
-* [ ] criar middleware de autorização (`src/middleware.tsx` hoje só seta o header `x-url`, sem lógica de authz);
-* [ ] criar helper de permissões;
-* [ ] adicionar testes das regras de permissão.
+* [x] proteger rotas admin — `roleProcedure(allowed)` (`src/server/createRouter.ts`) gateia `category.create` e `user.updateRole` a `ADMIN`/`EDITOR`; post edit/delete de terceiros liberado pra `ADMIN`/`EDITOR` via bypass de ownership (013);
+* [x] criar middleware de autorização — `roleProcedure`, camada de guard tRPC (mesmo nível de `verifiedProcedure`), não `src/middleware.tsx`/Edge (checagem de role depende do DB, ver `013-role-based-permissions/spec.md` § 5);
+* [x] criar helper de permissões — `src/lib/permissions/` (`MatrixPermission`, mesmo padrão adapter+implementation de `rateLimit`/`slug`);
+* [x] adicionar testes das regras de permissão — `src/lib/permissions/__test__/matrix.ts` + testes de bypass em `post`/`category`/`user` procedures.
 
 ### Critério de conclusão
 
