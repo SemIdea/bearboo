@@ -124,7 +124,7 @@ Ter a parte pública do blog funcionando bem.
 * [x] categorias — `Category` (`Post.categoryId?`, N:1), features `category.create`/`category.readAll`; `post.create`/`post.update` aceitam `categoryId` opcional; `post.readRecent` filtra por `categoryId`, `post.readBySlug` retorna a categoria do post (`docs/features/005-tags-categorias/`). Sem UI de seletor ainda — fica pra Fase 2 (Admin/CMS);
 * [x] autor (post/comentário mostram o `user` relacionado);
 * [ ] imagem de capa (sem campo no schema);
-* [ ] tempo estimado de leitura;
+* [x] tempo estimado de leitura — `readingTimeMinutes` calculado on-the-fly a partir do `content` (200 palavras/minuto, mínimo 1 min), via `z.transform()` no schema de output de post; aparece em todo endpoint que retorna post (`create`, `read`, `readBySlug`, `update`, `revalidate`, `readRecent`, `user.readPosts`) sem tocar domain/model (`docs/features/006-tempo-leitura/`). Sem UI mostrando o valor ainda — fica pra depois da refatoração de front;
 * [ ] posts relacionados;
 * [x] página pública do autor (`src/app/(half)/user/[id]/`).
 
