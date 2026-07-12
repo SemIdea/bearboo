@@ -7,7 +7,7 @@
 | Fase | Status | Nota |
 | --- | --- | --- |
 | 0 — Organização inicial | ✅ Concluída | — |
-| 1 — Blog público bem feito | 🟡 Parcial | slug (`docs/features/002-post-slug/`), paginação (`docs/features/003-post-pagination/`) e status/publicação (`docs/features/004-post-status/`) implementados e verificados; falta tags, categorias, capa, tempo de leitura, relacionados |
+| 1 — Blog público bem feito | 🟡 Parcial | slug (`docs/features/002-post-slug/`), paginação (`docs/features/003-post-pagination/`), status/publicação (`docs/features/004-post-status/`) e tags/categorias (`docs/features/005-tags-categorias/`) implementados e verificados; falta capa, tempo de leitura, relacionados |
 | 2 — Admin/CMS | 🟡 Parcial | CRUD de post já existe, campo `PostStatus` pronto pro workflow de rascunho/publicar (`docs/features/004-post-status/`), mas sem painel `/admin` dedicado (listagem/filtros/preview) |
 | 3 — Autenticação e permissões | ⬜ Não iniciada | bloqueada até `docs/features/001-auth-hardening/` fechar (ver nota na fase) |
 | 4 — Workflow editorial | ⬜ Não iniciada | — |
@@ -120,8 +120,8 @@ Ter a parte pública do blog funcionando bem.
 * [x] visualizar post por slug — código escrito e verificado (`docs/features/002-post-slug/`, rota pública `/post/[slug]`, `Post.slug` único gerado no `create` via `src/lib/slug/`); `tsc --noEmit` e `vitest` (111/111) verdes; **2026-07-11: migration aplicada num Postgres real e `/post/<slug>` testado ao vivo no browser** — fechado. Achado durante a verificação: seed (`prisma/seed.ts`) estava quebrado por import de `src/lib/slug` incompatível com execução nativa `node`, e slug inexistente caía num `error.tsx` genérico em vez de `notFound()` — ambos corrigidos (commit `a620cde`). Pendência residual: status HTTP da resposta de `notFound()` continua `200`, não `404` (streaming/`Suspense` — ver `docs/ust.md` § Pendências Técnicas);
 * [x] paginação — cursor-based (`Post.id`), tamanho de página default 10, `post.readRecent({ cursor?, limit? })` retorna `{ posts, nextCursor }`; front (`postFeed.client.tsx`) tem botão "Carregar mais" (`docs/features/003-post-pagination/`);
 * [x] status do post — `enum PostStatus { DRAFT PUBLISHED ARCHIVED }`, default `PUBLISHED` (decidido no domain, não no banco); `post.create`/`post.update` aceitam `status` opcional; leituras públicas (`readRecent`, `user.readPosts`, `readBySlug`) só expõem `PUBLISHED` (`docs/features/004-post-status/`). Sem UI de seletor de status ainda — fica pra Fase 2 (Admin/CMS);
-* [ ] tags;
-* [ ] categorias;
+* [x] tags — `Tag`/`PostTag` (N:N), features `tag.create`/`tag.readAll`; `post.create`/`post.update` aceitam `tagIds` opcionais; `post.readRecent` filtra por `tagId`, `post.readBySlug` retorna as tags do post (`docs/features/005-tags-categorias/`);
+* [x] categorias — `Category` (`Post.categoryId?`, N:1), features `category.create`/`category.readAll`; `post.create`/`post.update` aceitam `categoryId` opcional; `post.readRecent` filtra por `categoryId`, `post.readBySlug` retorna a categoria do post (`docs/features/005-tags-categorias/`). Sem UI de seletor ainda — fica pra Fase 2 (Admin/CMS);
 * [x] autor (post/comentário mostram o `user` relacionado);
 * [ ] imagem de capa (sem campo no schema);
 * [ ] tempo estimado de leitura;
