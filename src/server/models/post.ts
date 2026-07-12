@@ -97,6 +97,56 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		}));
 	}
 
+	async readRelated(
+		postId: string,
+		categoryId: string | null,
+		tagIds: string[],
+		limit: number,
+	): Promise<IPostEntityWithRelations[]> {
+		if (!categoryId && tagIds.length === 0) return [];
+
+		const posts = await prisma.post.findMany({
+			where: {
+				id: { not: postId },
+				status: "PUBLISHED",
+				OR: [
+					...(categoryId ? [{ categoryId }] : []),
+					...(tagIds.length
+						? [{ postTags: { some: { tagId: { in: tagIds } } } }]
+						: []),
+				],
+			},
+			take: limit,
+			orderBy: {
+				createdAt: "desc",
+			},
+			include: {
+				user: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				comments: {
+					select: {
+						id: true,
+					},
+				},
+				category: true,
+				postTags: {
+					include: {
+						tag: true,
+					},
+				},
+			},
+		});
+
+		return posts.map(({ postTags, ...post }) => ({
+			...post,
+			tags: flattenTags(postTags),
+		}));
+	}
+
 	async readUserPosts(userId: string): Promise<IPostEntity[]> {
 		return prisma.post.findMany({
 			where: {
@@ -171,6 +221,12 @@ type IPostModel = BaseModel<IPostEntity> & {
 	) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
 	readBySlug: (slug: string) => Promise<IPostEntityWithTaxonomy | null>;
+	readRelated: (
+		postId: string,
+		categoryId: string | null,
+		tagIds: string[],
+		limit: number,
+	) => Promise<IPostEntityWithRelations[]>;
 	setTags: (postId: string, tagIds: string[]) => Promise<void>;
 };
 

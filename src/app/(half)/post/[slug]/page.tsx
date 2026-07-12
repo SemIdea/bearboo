@@ -9,7 +9,7 @@ import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
 import { createCaller } from "@/server/caller";
 import { PostErrorCode } from "@/shared/error/post";
-import { CommentArea } from "./page.client";
+import { CommentArea, RelatedPosts } from "./page.client";
 
 type PageProps = {
 	params: Promise<{
@@ -129,6 +129,11 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 					<h2 className="text-4xl font-bold">{post.title}</h2>
 					<MdView source={post.content} />
 					<CommentArea postId={post.id} />
+					<RelatedPosts
+						postId={post.id}
+						categoryId={post.category?.id ?? null}
+						tagIds={post.tags.map((tag) => tag.id)}
+					/>
 				</div>
 			}
 		/>

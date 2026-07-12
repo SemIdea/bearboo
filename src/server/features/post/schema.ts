@@ -58,6 +58,13 @@ const readRecentPostsSchema = z
 	})
 	.optional();
 
+const readRelatedPostsSchema = z.object({
+	postId: z.string(),
+	categoryId: z.string().nullable().optional(),
+	tagIds: z.array(z.string()).optional(),
+	limit: z.number().int().min(1).max(20).optional(),
+});
+
 const READING_WORDS_PER_MINUTE = 200;
 
 const calculateReadingTimeMinutes = (content: string): number => {
@@ -136,6 +143,7 @@ const readRecentPostsOutputSchema = z.object({
 	posts: z.array(postEntityWithRelationsSchema),
 	nextCursor: z.string().nullable(),
 });
+const readRelatedPostsOutputSchema = z.array(postEntityWithRelationsSchema);
 
 type CreatePostInput = z.TypeOf<typeof createPostSchema>;
 type ReadPostInput = z.TypeOf<typeof readPostSchema>;
@@ -144,6 +152,7 @@ type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
 type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
 type RevalidatePostInput = z.TypeOf<typeof revalidatePostSchema>;
 type ReadRecentPostsInput = NonNullable<z.TypeOf<typeof readRecentPostsSchema>>;
+type ReadRelatedPostsInput = z.TypeOf<typeof readRelatedPostsSchema>;
 
 export type {
 	CreatePostInput,
@@ -151,6 +160,7 @@ export type {
 	ReadPostBySlugInput,
 	ReadPostInput,
 	ReadRecentPostsInput,
+	ReadRelatedPostsInput,
 	RevalidatePostInput,
 	UpdatePostInput,
 };
@@ -169,6 +179,8 @@ export {
 	readPostSchema,
 	readRecentPostsOutputSchema,
 	readRecentPostsSchema,
+	readRelatedPostsOutputSchema,
+	readRelatedPostsSchema,
 	revalidatePostOutputSchema,
 	revalidatePostSchema,
 	updatePostOutputSchema,
