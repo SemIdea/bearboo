@@ -23,4 +23,4 @@
 
 - [X] T008 — Atualizar `docs/ust.md` § Pendências Técnicas: marcar o item do `fetcher.ts` como resolvido (strikethrough + nota, mesmo padrão dos 2 itens já resolvidos na mesma seção), referenciando `docs/features/008-trpc-error-link/`.
 - [X] T009 — Atualizar `spec.md` (status → `done`, checkboxes do § 2 marcados) e `plan.md` (já `approved`, sem mudança adicional necessária) com a data/evidência de verificação.
-- [ ] T010 — Commit(s): 1 commit `refactor:` pro código (novo link + wiring + deleção do fetcher antigo + testes), 1 commit `docs:` pra `ust.md`/`spec.md`. Sem push.
+- [X] T010 — Commit(s): 1 commit `refactor:` pro código (novo link + wiring + deleção do fetcher antigo + testes), 1 commit `docs:` pra `ust.md`/`spec.md`. Sem push. (`8af9f7e` / `3510839`)

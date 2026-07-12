@@ -46,6 +46,18 @@
 
 ---
 
+## Next.js — Cache Components (`cacheComponents: true`) proíbe rota sem `<Suspense>`, mesmo que você não queira PPR
+
+**Gatilho:** se você está tentando fazer uma rota bloquear a resposta inteira até os dados chegarem (ex: pra `notFound()` setar status HTTP 404 de verdade antes do shell ser enviado) removendo o `<Suspense>` que envolve a leitura dinâmica.
+
+**Comportamento:** com `cacheComponents: true` (`next.config.ts`), toda leitura assíncrona não-`"use cache"` (inclusive `await params`, `cookies()`, query de DB) precisa estar dentro de um `<Suspense>` — senão o build falha com `Error: Route "...": Uncached data was accessed outside of <Suspense>` (`next build --debug-prerender` aponta o componente exato). Não existe mais `export const dynamic = "force-dynamic"` como escape hatch por rota — essa route segment config foi removida junto da adoção de Cache Components (Next 16). Ou seja: **não dá pra ter uma rota totalmente bloqueante/dinâmica sob Cache Components** — o shell sempre é enviado antes do conteúdo dinâmico resolver, então o status HTTP do shell (200) não pode mais mudar depois. Mordida em `docs/features/009-post-404-status/` (2026-07-12): tentativa de tirar o `Suspense` de `/post/[slug]` pra corrigir o 404 quebrou o `next build` inteiro.
+
+**Solução:** aceitar que, sob Cache Components, `notFound()`/`redirect()` dentro de um boundary `Suspense` muda o conteúdo mas não o status HTTP do shell já enviado. Pra status HTTP real (bots/SEO), a checagem precisa acontecer **antes** do pipeline de render de página — ex. `middleware`/`proxy` (Edge) fazendo o lookup e retornando 404 direto, fora do Cache Components. Isso é infra nova (rota de dados no Edge), não um fix pontual — parar e validar com o dono antes de implementar.
+
+**Ref:** `docs/features/009-post-404-status/`, `docs/ust.md` § Pendências Técnicas. Doc oficial: https://nextjs.org/docs/messages/blocking-route.
+
+---
+
 <!--
 SEED candidato adicional de módulo detectado no scan (Next.js App Router), ainda não confirmado como mordido — ativar só se acontecer.
 
