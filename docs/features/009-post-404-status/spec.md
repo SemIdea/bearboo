@@ -2,7 +2,7 @@
 
 > **Spec:** o quê e o porquê. Sem decisão de tecnologia.
 > **US relacionada(s):** US herdada de `docs/features/002-post-slug/` (visualizar post por slug).
-> **Status:** blocked (2026-07-12 — hipótese original refutada empiricamente; ver § 5 e `plan.md` § 9. Aguardando decisão do dono sobre a alternativa real, que é infra nova, não fix pontual.)
+> **Status:** won't-fix por ora (2026-07-12 — hipótese original refutada empiricamente; ver § 5 e `plan.md` § 9. Dono decidiu aceitar como limitação conhecida do Next 16 Cache Components em vez de investir em infra nova (middleware/Edge) agora. Reabrir se virar bloqueio real, ex. SEO passar a exigir 404 de verdade.)
 > **Data de abertura:** 2026-07-12
 
 ## 1. Problema (do PRD/UST)
@@ -37,7 +37,7 @@ Scenario: Slug existente
 ## 5. Assumptions / Open questions
 
 - ~~Trade-off aceito explicitamente pelo dono (gate desta sessão, 2026-07-12): remover o `<Suspense>` em torno de `PostContent` perde o fallback "Loading post..." — a página passa a bloquear a resposta até os dados chegarem (SSR síncrono), em troca do status HTTP correto.~~ **Refutado empiricamente ao implementar** (ver `plan.md` § 9): a mudança não é uma troca de UX, é impossível sob `cacheComponents: true` — `next build` falha (`Uncached data was accessed outside of <Suspense>`). Revertido.
-- `[NEEDS CLARIFICATION:]` — a alternativa real (checagem de slug fora do Cache Components, ex. `middleware`/`proxy` no Edge) é infra nova (regra dura 11: mudança arquitetural pára e pergunta) e requer decisão do dono sobre custo/benefício antes de qualquer implementação. Ver `plan.md` § 9.
+- ~~`[NEEDS CLARIFICATION:]` — a alternativa real (checagem de slug fora do Cache Components, ex. `middleware`/`proxy` no Edge) é infra nova (regra dura 11) e requer decisão do dono.~~ **Resolvido em 2026-07-12**: dono optou por aceitar a limitação por ora em vez de investir na infra nova. Ver `plan.md` § 9.
 
 ## 6. Dependências
 
