@@ -27,6 +27,9 @@ const AuthenticatedHeader = () => {
 			<Link href="/post/create" className="hover:underline">
 				<FaPlus className="size-4" />
 			</Link>
+			<Link href="/post/mine" className="hover:underline">
+				My posts
+			</Link>
 			<h2>
 				<Link className="hover:underline" href={`/user/${session.user.id}`}>
 					{session.user.name}

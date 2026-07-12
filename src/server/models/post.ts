@@ -156,6 +156,49 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		});
 	}
 
+	async readOwnPosts(
+		userId: string,
+		status?: IPostStatus,
+		categoryId?: string,
+		tagId?: string,
+	): Promise<IPostEntityWithRelations[]> {
+		const posts = await prisma.post.findMany({
+			where: {
+				userId,
+				...(status ? { status } : {}),
+				...(categoryId ? { categoryId } : {}),
+				...(tagId ? { postTags: { some: { tagId } } } : {}),
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+			include: {
+				user: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				comments: {
+					select: {
+						id: true,
+					},
+				},
+				category: true,
+				postTags: {
+					include: {
+						tag: true,
+					},
+				},
+			},
+		});
+
+		return posts.map(({ postTags, ...post }) => ({
+			...post,
+			tags: flattenTags(postTags),
+		}));
+	}
+
 	async readBySlug(slug: string): Promise<IPostEntityWithTaxonomy | null> {
 		const post = await prisma.post.findUnique({
 			where: {
@@ -220,6 +263,12 @@ type IPostModel = BaseModel<IPostEntity> & {
 		tagId?: string,
 	) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
+	readOwnPosts: (
+		userId: string,
+		status?: IPostStatus,
+		categoryId?: string,
+		tagId?: string,
+	) => Promise<IPostEntityWithRelations[]>;
 	readBySlug: (slug: string) => Promise<IPostEntityWithTaxonomy | null>;
 	readRelated: (
 		postId: string,
