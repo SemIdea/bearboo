@@ -1,32 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 import { v4 as uuid } from "uuid";
+import { generateSlug } from "./slug.ts";
 
 const prisma = new PrismaClient();
 
 const SEED_PASSWORD = "Password123!";
-
-// seed roda via `node prisma/seed.ts` (ESM nativo), que exige extensão em todo
-// import relativo — reimportar src/lib/slug quebraria a cadeia (kebabCase -> adapter,
-// ambos sem extensão, resolvidos hoje só via moduleResolution "bundler" do Next).
-// Duplica o mesmo algoritmo de src/lib/slug/implementations/kebabCase.ts.
-const COMBINING_DIACRITICS_START = 0x0300;
-const COMBINING_DIACRITICS_END = 0x036f;
-const DIACRITICS_REGEX = new RegExp(
-	`[${String.fromCharCode(COMBINING_DIACRITICS_START)}-${String.fromCharCode(COMBINING_DIACRITICS_END)}]`,
-	"g",
-);
-
-function generateSlug(title: string): string {
-	return title
-		.normalize("NFD")
-		.replace(DIACRITICS_REGEX, "")
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-+|-+$/g, "")
-		.slice(0, 80)
-		.replace(/-+$/g, "");
-}
 
 async function main() {
 	console.log("Limpando dados existentes...");

@@ -12,7 +12,8 @@
 		"prepare": "husky",
 		"docker:dev": "docker compose -f docker-compose-dev.yml up --build",
 		"docker:start": "docker compose -f docker-compose.yml up --build",
-		"db:seed": "node --env-file=.env prisma/seed.ts"
+		"db:seed": "node --env-file=.env prisma/seed.ts",
+		"db:seed:pagination-test": "node --env-file=.env prisma/seed-pagination-test.ts"
 	},
 	"prisma": {
 		"seed": "node --env-file=.env prisma/seed.ts"
