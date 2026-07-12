@@ -7,7 +7,7 @@
 | Fase | Status | Nota |
 | --- | --- | --- |
 | 0 — Organização inicial | ✅ Concluída | — |
-| 1 — Blog público bem feito | 🟡 Parcial | slug implementado e verificado ao vivo (migration aplicada, `/post/<slug>` testado no browser, `docs/features/002-post-slug/`); falta paginação, tags, categorias, capa, tempo de leitura, relacionados |
+| 1 — Blog público bem feito | 🟡 Parcial | slug (`docs/features/002-post-slug/`) e paginação (`docs/features/003-post-pagination/`) implementados e verificados ao vivo; falta tags, categorias, capa, tempo de leitura, relacionados |
 | 2 — Admin/CMS | 🟡 Parcial | CRUD de post já existe, mas sem painel `/admin` dedicado (listagem/filtros/preview) |
 | 3 — Autenticação e permissões | ⬜ Não iniciada | bloqueada até `docs/features/001-auth-hardening/` fechar (ver nota na fase) |
 | 4 — Workflow editorial | ⬜ Não iniciada | — |
@@ -20,6 +20,8 @@
 | 11 — Observabilidade | ⬜ Não iniciada | sem `/api/health`, sem tracing/métricas |
 
 **Fora do roadmap numerado, em andamento:** `docs/features/001-auth-hardening/spec.md` — hardening de segurança da sessão/auth atual (pré-requisito da Fase 3, não uma fase nova).
+
+**Nota de sequenciamento (2026-07-11):** o back-end já passou por uma refatoração grande (models com delegate pluggável, camada domain/procedure, etc. — ver `docs/adr/`). Uma refatoração equivalente está planejada para o front-end, mas o desenho ainda não existe. Até lá, o foco é entregar funcionalidades de **back-end** (ex.: paginação); mudanças de front continuam aceitas quando a feature exige (ex.: renderizar os controles de paginação), mas evitando decisão estrutural nova do lado do front (padrão de state management, nova camada de componentes, reorganização de pastas) que a futura refatoração teria que desfazer.
 
 ---
 
@@ -116,7 +118,7 @@ Ter a parte pública do blog funcionando bem.
 
 * [x] listar posts publicados (`readRecent`, 30 mais recentes — sem filtro de status, pois `PostStatus` ainda não existe no schema);
 * [x] visualizar post por slug — código escrito e verificado (`docs/features/002-post-slug/`, rota pública `/post/[slug]`, `Post.slug` único gerado no `create` via `src/lib/slug/`); `tsc --noEmit` e `vitest` (111/111) verdes; **2026-07-11: migration aplicada num Postgres real e `/post/<slug>` testado ao vivo no browser** — fechado. Achado durante a verificação: seed (`prisma/seed.ts`) estava quebrado por import de `src/lib/slug` incompatível com execução nativa `node`, e slug inexistente caía num `error.tsx` genérico em vez de `notFound()` — ambos corrigidos (commit `a620cde`). Pendência residual: status HTTP da resposta de `notFound()` continua `200`, não `404` (streaming/`Suspense` — ver `docs/ust.md` § Pendências Técnicas);
-* [ ] paginação (lista é limitada a 30, sem paginar);
+* [x] paginação — cursor-based (`Post.id`), tamanho de página default 10, `post.readRecent({ cursor?, limit? })` retorna `{ posts, nextCursor }`; front (`postFeed.client.tsx`) tem botão "Carregar mais" (`docs/features/003-post-pagination/`);
 * [ ] tags;
 * [ ] categorias;
 * [x] autor (post/comentário mostram o `user` relacionado);

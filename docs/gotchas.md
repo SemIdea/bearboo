@@ -34,6 +34,18 @@
 
 ---
 
+## Node ESM nativo (`prisma/*.ts` via `node`) — não dá pra reimportar `src/lib/*`
+
+**Gatilho:** se você está escrevendo um script em `prisma/` (seed, script de teste manual, etc.) que roda via `node --env-file=.env prisma/algo.ts` — não via Next.js/webpack.
+
+**Comportamento:** `tsconfig.json` usa `moduleResolution: "bundler"`, que permite import relativo sem extensão (`from "../adapter"`) em todo `src/`. Node's execução nativa de TS não aceita isso — exige extensão em todo import relativo. Um script em `prisma/` que importa algo de `src/lib/` quebra assim que esse módulo (ou qualquer coisa que ele importa, em cadeia) tiver um import relativo sem extensão — o que é a convenção padrão do projeto inteiro em `src/`. Mordido 2× (`prisma/seed.ts`, `2026-07-11`; `prisma/seed-pagination-test.ts`, `2026-07-12`) — as duas vezes a "solução" virou duplicar a lógica no script, o que por sua vez duplicou a duplicação.
+
+**Solução:** lógica pura reaproveitada por scripts de `prisma/` vive em `prisma/*.ts` (não em `src/`), sem import relativo próprio (arquivo-folha) — assim outro script de `prisma/` pode importar com extensão explícita (`from "./slug.ts"`) sem cair na cadeia quebrada. Precisa de `"allowImportingTsExtensions": true` no `tsconfig.json` (seguro com `noEmit: true`, que já era o caso). Ver `prisma/slug.ts` (fonte única de `generateSlug`, usada por `seed.ts` e `seed-pagination-test.ts`).
+
+**Ref:** `docs/features/003-post-pagination/` (achado durante a criação de `seed-pagination-test.ts`, 2026-07-12).
+
+---
+
 <!--
 SEED candidato adicional de módulo detectado no scan (Next.js App Router), ainda não confirmado como mordido — ativar só se acontecer.
 
