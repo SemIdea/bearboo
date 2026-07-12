@@ -1,7 +1,7 @@
 import { httpBatchLink, loggerLink } from "@trpc/react-query";
 import superjson from "superjson";
 import { trpc } from "@/app/_trpc/client";
-import { customFetcher } from "./fetcher";
+import { sessionRefreshLink } from "./sessionRefreshLink";
 
 export const createTRPCClient = () => {
 	return trpc.createClient({
@@ -9,10 +9,10 @@ export const createTRPCClient = () => {
 			loggerLink({
 				enabled: () => true,
 			}),
+			sessionRefreshLink,
 			httpBatchLink({
 				transformer: superjson,
 				url: "/api/trpc",
-				fetch: customFetcher,
 			}),
 		],
 	});
