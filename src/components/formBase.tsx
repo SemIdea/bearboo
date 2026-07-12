@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cloneElement, isValidElement, type ReactNode } from "react";
+import { cloneElement, isValidElement, type ReactNode, useRef } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 import z from "zod";
 import { Input } from "@/components/ui/input";
@@ -33,12 +33,25 @@ const FormBase = ({
 		...(defaultValues && { defaultValues }),
 	});
 
+	// Guards against a fast double-click/double-tap submitting twice: react-query's
+	// `isPending` only flips after a render, which leaves a window where a second
+	// click fires before the submit button re-renders as disabled.
+	const isSubmittingRef = useRef(false);
+
+	const guardedSubmit = form.handleSubmit(async (values) => {
+		if (isSubmittingRef.current) return;
+		isSubmittingRef.current = true;
+
+		try {
+			await onSubmit(values);
+		} finally {
+			isSubmittingRef.current = false;
+		}
+	});
+
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className={cn("space-y-8", className)}
-			>
+			<form onSubmit={guardedSubmit} className={cn("space-y-8", className)}>
 				{children}
 			</form>
 		</Form>
