@@ -10,12 +10,12 @@ import { CommentArea } from "./page.client";
 
 type PageProps = {
 	params: Promise<{
-		id: string;
+		slug: string;
 	}>;
 };
 
 type Props = {
-	params: Promise<{ id: string }>;
+	params: Promise<{ slug: string }>;
 	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
@@ -23,11 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	"use cache";
 	cacheLife("hours");
 
-	const { id } = await params;
+	const { slug } = await params;
 
 	try {
 		const caller = await createCaller();
-		const post = await caller.post.read({ id: id });
+		const post = await caller.post.readBySlug({ slug });
 
 		if (!post) {
 			return {
@@ -66,9 +66,9 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 	const params = await paramsPromise;
 	const caller = await createCaller();
 
-	const { id } = params;
+	const { slug } = params;
 
-	const post = await caller.post.read({ id: id });
+	const post = await caller.post.readBySlug({ slug });
 	const user = await caller.user.read({ id: post.userId });
 
 	const isUpdated =

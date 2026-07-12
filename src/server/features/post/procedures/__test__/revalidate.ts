@@ -30,7 +30,7 @@ describe("Revalidate Post Controller Unitary Testing", () => {
 		expect(result.id).toBe(post.id);
 		expect(result.userId).toBe(ctx.user.id);
 
-		expect(revalidatePath).toHaveBeenCalledWith(`/post/${post.id}`);
+		expect(revalidatePath).toHaveBeenCalledWith(`/post/${post.slug}`);
 	});
 
 	test("Should throw an error if post does not exist", async () => {

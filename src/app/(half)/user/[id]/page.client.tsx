@@ -12,7 +12,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown";
 import { useAuth } from "@/context/auth";
-import { ICommentEntity } from "@/server/models/comment";
+import { ICommentEntityWithPost } from "@/server/models/comment";
 import { IPostEntity } from "@/server/models/post";
 
 const Post = ({ post, index }: { post: IPostEntity; index: number }) => {
@@ -20,7 +20,7 @@ const Post = ({ post, index }: { post: IPostEntity; index: number }) => {
 		<li key={post.id} className="flex">
 			<span className="mr-2">{index + 1}.</span>
 			<div>
-				<Link href={`/post/${post.id}`} className="hover:underline">
+				<Link href={`/post/${post.slug}`} className="hover:underline">
 					<h2 className="font-semibold">{post.title}</h2>
 				</Link>
 				<p className="text-gray-600 text-sm">
@@ -57,14 +57,14 @@ const Comment = ({
 	comment,
 	index,
 }: {
-	comment: ICommentEntity;
+	comment: ICommentEntityWithPost;
 	index: number;
 }) => {
 	return (
 		<li key={comment.id} className="flex">
 			<span className="mr-2">{index + 1}.</span>
 			<div>
-				<Link href={`/post/${comment.postId}`} className="hover:underline">
+				<Link href={`/post/${comment.post.slug}`} className="hover:underline">
 					<h2 className="italic">
 						"
 						{comment.content.length > 300

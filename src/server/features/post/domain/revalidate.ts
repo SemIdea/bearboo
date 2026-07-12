@@ -24,7 +24,7 @@ const domain_revalidatePost = async ({
 		});
 	}
 
-	revalidatePath(`/post/${input.id}`);
+	revalidatePath(`/post/${post.slug}`);
 
 	return post;
 };

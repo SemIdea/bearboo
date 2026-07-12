@@ -16,6 +16,12 @@ type ICommentEntityWithUser = ICommentEntity & {
 	};
 };
 
+type ICommentEntityWithPost = ICommentEntity & {
+	post: {
+		slug: string;
+	};
+};
+
 class CommentModelClass extends BaseModel<ICommentEntity> {
 	constructor() {
 		super(prisma.comment);
@@ -38,10 +44,19 @@ class CommentModelClass extends BaseModel<ICommentEntity> {
 		});
 	}
 
-	async readAllByUserId(userId: string): Promise<ICommentEntity[] | null> {
+	async readAllByUserId(
+		userId: string,
+	): Promise<ICommentEntityWithPost[] | null> {
 		return prisma.comment.findMany({
 			where: {
 				userId,
+			},
+			include: {
+				post: {
+					select: {
+						slug: true,
+					},
+				},
 			},
 		});
 	}
@@ -51,8 +66,13 @@ const CommentModel = new CommentModelClass();
 
 type ICommentModel = BaseModel<ICommentEntity> & {
 	readAllByPostId: (postId: string) => Promise<ICommentEntityWithUser[] | null>;
-	readAllByUserId: (userId: string) => Promise<ICommentEntity[] | null>;
+	readAllByUserId: (userId: string) => Promise<ICommentEntityWithPost[] | null>;
 };
 
-export type { ICommentEntity, ICommentEntityWithUser, ICommentModel };
+export type {
+	ICommentEntity,
+	ICommentEntityWithPost,
+	ICommentEntityWithUser,
+	ICommentModel,
+};
 export { CommentModel };

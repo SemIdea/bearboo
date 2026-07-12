@@ -214,9 +214,29 @@ Scenario: Ler post inexistente
 Scenario: Listar posts recentes
   When os posts recentes são solicitados
   Then até 30 posts recentes são retornados
+
+Scenario: Ler post por slug
+  Given um post existente com slug "como-fiz-x"
+  When o post é lido pelo slug "como-fiz-x"
+  Then os dados do post são retornados
+
+Scenario: Ler post por slug inexistente
+  Given um slug que não corresponde a nenhum post
+  When o post é lido por esse slug
+  Then a operação é rejeitada com "post não encontrado"
+
+Scenario: Criar post gera slug derivado do título
+  Given um usuário autenticado e verificado
+  When ele cria um post com título "Como fiz X"
+  Then o post persistido tem um slug no formato "como-fiz-x"
+
+Scenario: Título duplicado gera slug com sufixo
+  Given um post existente com slug "como-fiz-x"
+  When um novo post é criado com o mesmo título "Como fiz X"
+  Then o novo post recebe o slug "como-fiz-x-2"
 ```
 
-**Metadata:** RF-04. *Test ref:* `src/server/features/post/create/controller.test.ts`, `post/read`, `post/readRecent`.
+**Metadata:** RF-04. *Test ref:* `src/server/features/post/create/controller.test.ts`, `post/read`, `post/readRecent`, `post/readBySlug`. *Spec:* `docs/features/002-post-slug/spec.md` (amend — leitura por slug, `in_progress`).
 
 ---
 

@@ -155,6 +155,13 @@ describe("Prisma-backed models", () => {
 		});
 		expect(prismaMock.comment.findMany).toHaveBeenNthCalledWith(2, {
 			where: { userId: "user-1" },
+			include: {
+				post: {
+					select: {
+						slug: true,
+					},
+				},
+			},
 		});
 	});
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { commentEntitySchema } from "../comment/schema";
+import { commentEntityWithPostSchema } from "../comment/schema";
 import { postEntitySchema } from "../post/schema";
 
 const registerUserSchema = z.object({
@@ -58,7 +58,7 @@ const registerUserOutputSchema = z.object({
 
 const readUserProfileOutputSchema = userWithoutPasswordSchema;
 const readUserPostsOutputSchema = z.array(postEntitySchema);
-const readUserCommentsOutputSchema = z.array(commentEntitySchema);
+const readUserCommentsOutputSchema = z.array(commentEntityWithPostSchema);
 const updateUserProfileOutputSchema = userWithoutPasswordSchema;
 
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;

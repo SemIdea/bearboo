@@ -44,7 +44,7 @@ const Post = ({
 			<CardContent>
 				<CardTitle className="flex">
 					<span className="mr-2">{index + 1}.</span>
-					<Link href={`/post/${post.id}`} className="hover:underline">
+					<Link href={`/post/${post.slug}`} className="hover:underline">
 						<h2 className="font-semibold">{post.title}</h2>
 					</Link>
 				</CardTitle>

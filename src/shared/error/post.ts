@@ -6,7 +6,7 @@ enum PostErrorCode {
 }
 
 const PostErrorMessages = {
-	[PostErrorCode.POST_NOT_FOUND]: "Post not found. Please check the ID.",
+	[PostErrorCode.POST_NOT_FOUND]: "Post not found.",
 	[PostErrorCode.POST_UPDATE_FORBIDDEN]:
 		"You are not allowed to update this post.",
 	[PostErrorCode.POST_DELETE_FORBIDDEN]:

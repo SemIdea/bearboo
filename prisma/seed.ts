@@ -1,8 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 import { v4 as uuid } from "uuid";
+import { KebabCaseSlugGenerator } from "../src/lib/slug/implementations/kebabCase";
 
 const prisma = new PrismaClient();
+const slugGenerator = new KebabCaseSlugGenerator();
 
 const SEED_PASSWORD = "Password123!";
 
@@ -76,22 +78,26 @@ async function main() {
 
 	console.log("Criando posts...");
 
+	const anaPost1Title = "Bem-vindo ao Bearboo";
 	const anaPost1 = await prisma.post.create({
 		data: {
 			id: uuid(),
 			userId: ana.id,
-			title: "Bem-vindo ao Bearboo",
+			title: anaPost1Title,
+			slug: slugGenerator.generate(anaPost1Title),
 			content:
 				"# Bem-vindo!\n\nEsse é o primeiro post do blog, escrito em **markdown**.\n\n- item 1\n- item 2\n\nUse esse post pra testar leitura, comentários e edição.",
 		},
 	});
 
 	// post editado — updatedAt != createdAt, testa o label "(edited ...)"
+	const anaPost2Title = "Dicas de markdown para o editor";
 	const anaPost2 = await prisma.post.create({
 		data: {
 			id: uuid(),
 			userId: ana.id,
-			title: "Dicas de markdown para o editor",
+			title: anaPost2Title,
+			slug: slugGenerator.generate(anaPost2Title),
 			content:
 				"Você pode usar `código`, **negrito**, _itálico_ e listas.\n\n1. Primeiro\n2. Segundo\n3. Terceiro",
 		},
@@ -101,11 +107,13 @@ async function main() {
 		data: { content: `${anaPost2.content}\n\n_Editado após publicação._` },
 	});
 
+	const brunoPost1Title = "Por que escolhemos tRPC neste projeto";
 	const brunoPost1 = await prisma.post.create({
 		data: {
 			id: uuid(),
 			userId: bruno.id,
-			title: "Por que escolhemos tRPC neste projeto",
+			title: brunoPost1Title,
+			slug: slugGenerator.generate(brunoPost1Title),
 			content:
 				"tRPC nos dá tipagem ponta a ponta sem precisar gerar client separado. Nesse post explico as trocas que fizemos.",
 		},
@@ -150,9 +158,9 @@ async function main() {
 	console.log(`  verificação: /auth/verify/${verifyToken.token}`);
 	console.log(`  recuperação de senha: /auth/recover/${resetToken.token}\n`);
 	console.log("Posts:");
-	console.log(`  /post/${anaPost1.id}`);
-	console.log(`  /post/${anaPost2.id} (editado)`);
-	console.log(`  /post/${brunoPost1.id}`);
+	console.log(`  /post/${anaPost1.slug}`);
+	console.log(`  /post/${anaPost2.slug} (editado)`);
+	console.log(`  /post/${brunoPost1.slug}`);
 }
 
 main()

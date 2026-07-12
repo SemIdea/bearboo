@@ -6,6 +6,7 @@ type IPostEntity = {
 	userId: string;
 	title: string;
 	content: string;
+	slug: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -55,6 +56,14 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		});
 	}
 
+	async readBySlug(slug: string): Promise<IPostEntity | null> {
+		return prisma.post.findUnique({
+			where: {
+				slug,
+			},
+		});
+	}
+
 	async delete(id: string): Promise<boolean> {
 		try {
 			await prisma.$transaction(async (tx) => {
@@ -83,6 +92,7 @@ const PostModel = new PostModelClass();
 type IPostModel = BaseModel<IPostEntity> & {
 	readRecents: (count: number) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
+	readBySlug: (slug: string) => Promise<IPostEntity | null>;
 };
 
 export type { IPostEntity, IPostEntityWithRelations, IPostModel };

@@ -164,7 +164,7 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 
 #### Model — encapsula acesso Prisma por entidade (camada local, não do vocabulário universal)
 
-- **Conceito:** classe que estende `BaseModel<Entity>` (`src/server/models/base.ts`), fornecendo CRUD genérico (`create/read/update/delete`) + métodos extras específicos da entidade (ex: `PostModel.readRecents`, `PostModel.readUserPosts`).
+- **Conceito:** classe que estende `BaseModel<Entity>` (`src/server/models/base.ts`), fornecendo CRUD genérico (`create/read/update/delete`) + métodos extras específicos da entidade (ex: `PostModel.readRecents`, `PostModel.readUserPosts`, `PostModel.readBySlug`, `UserModel.readByEmail`).
 - **Implementação:** `src/server/models/<entity>.ts`, instância singleton exportada (`const <Entity>Model = new <Entity>ModelClass()`).
 - **Quando usar:** toda entidade do `prisma/schema.prisma` que precisa de acesso a dado + lógica de leitura/escrita específica.
 - **Nota:** Domain acessa dados via `ctx.repositories.<entity>`; runtime e testes usam os **mesmos models** — nos testes o driver Prisma é substituído por um client `prisma-mock` gerado do `schema.prisma` (ADR-0011, seam em `src/test/setup.ts` + `src/test/prisma/`).
@@ -174,7 +174,7 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 - **Conceito universal:** implementação concreta de uma porta (`adapter.ts`) — mesmo shape de retorno entre implementações (LSP).
 - **Implementação no stack:**
   - Models de dados: `src/server/models/<entity>.ts`.
-  - Helper puro: `src/lib/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`).
+  - Helper puro: `src/lib/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`, `slug` — gerador determinístico de slug a partir de título, usado em `domain_createPost`).
   - Gateway externo: `src/server/integrations/gateway/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `mailer`).
 - **OCP em ação:** provider novo (ex: outro mailer) = arquivo novo em `implementations/`, sem `switch (provider)` espalhado.
 
@@ -259,7 +259,7 @@ Consulte as rubricas em [`docs/rubrics/`](./rubrics/) **antes** de escolher onde
 | Domain input | `DomainInput<T>` | `server/createDomain.ts` |
 | Model | `<Entidade>Model` (instância) | `server/models/<entity>.ts` |
 | Adapter (porta) | `I<Nome>Adapter` (tipo) | `adapter.ts` |
-| Test file | mesmo nome + `.test.ts` | mesmo diretório, sem `__tests__/` |
+| Test file | mesmo nome (sem sufixo `.test.ts`) | pasta `__test__/` (singular) vizinha ao código — **corrigido em 2026-07-11**: a versão anterior desta linha ("sem `__tests__/`") divergia do `vitest.config.ts` real (`include: ["src/**/__test__/**/*.ts"]`) e de todo o código existente (`procedures/__test__/<action>.ts`, `src/lib/slug/__test__/kebabCase.ts`) |
 
 ### Tamanho e responsabilidade
 

@@ -26,4 +26,26 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(result.content).toEqual(input.content);
 		expect(result.userId).toEqual(user.id);
 	});
+
+	test("Should generate a slug derived from the title", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Como fiz X",
+			content: "This is a test post content.",
+		});
+
+		expect(result.slug).toEqual("como-fiz-x");
+	});
+
+	test("Should append a numeric suffix when the slug already exists", async () => {
+		const input = {
+			title: "Duplicate Title",
+			content: "This is a test post content.",
+		};
+
+		const first = await PostRouter.createCaller(ctx).create(input);
+		const second = await PostRouter.createCaller(ctx).create(input);
+
+		expect(first.slug).toEqual("duplicate-title");
+		expect(second.slug).toEqual("duplicate-title-2");
+	});
 });

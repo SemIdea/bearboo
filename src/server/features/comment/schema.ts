@@ -39,6 +39,12 @@ const commentEntityWithUserSchema = commentEntitySchema.extend({
 	}),
 });
 
+const commentEntityWithPostSchema = commentEntitySchema.extend({
+	post: z.object({
+		slug: z.string(),
+	}),
+});
+
 const createCommentOutputSchema = commentEntitySchema;
 const readAllCommentsByPostOutputSchema = z.array(commentEntityWithUserSchema);
 const updateCommentOutputSchema = commentEntitySchema;
@@ -57,6 +63,7 @@ export type {
 };
 export {
 	commentEntitySchema,
+	commentEntityWithPostSchema,
 	commentEntityWithUserSchema,
 	createCommentOutputSchema,
 	createCommentschema,

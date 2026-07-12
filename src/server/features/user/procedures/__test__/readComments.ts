@@ -26,7 +26,8 @@ describe("User Comments Controller Unitary Testing", () => {
 	});
 
 	test("Should read user comments successfully", async () => {
-		const comment = await ctx.createComment();
+		const post = await ctx.createPost();
+		const comment = await ctx.createComment({ postId: post.id });
 
 		const result = await UserRouter.createCaller(ctx).readComments({
 			id: ctx.user.id,
@@ -38,6 +39,7 @@ describe("User Comments Controller Unitary Testing", () => {
 		expect(result[0].content).toEqual(comment.content);
 		expect(result[0].postId).toEqual(comment.postId);
 		expect(result[0].userId).toEqual(ctx.user.id);
+		expect(result[0].post.slug).toEqual(post.slug);
 	});
 
 	test("Should return an error if user does not exist", async () => {

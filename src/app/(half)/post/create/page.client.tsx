@@ -24,7 +24,7 @@ const useCreatePost = () => {
 		trpc.post.create.useMutation({
 			onSuccess: (data) => {
 				setErrorMessage(null);
-				router.push(`/post/${data.id}`);
+				router.push(`/post/${data.slug}`);
 			},
 			onError: (error) => {
 				const errorMessage = getErrorMessage(error.message);

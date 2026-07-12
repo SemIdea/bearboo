@@ -69,7 +69,9 @@ class TestContext {
 	}
 
 	async createPost(
-		overrides: Partial<Pick<IPostEntity, "title" | "content" | "userId">> = {},
+		overrides: Partial<
+			Pick<IPostEntity, "title" | "content" | "userId" | "slug">
+		> = {},
 	) {
 		const postId = this.helpers.uid.generate();
 		const userId = overrides.userId ?? this.user?.id;
@@ -81,6 +83,7 @@ class TestContext {
 		return this.repositories.post.create(postId, {
 			title: overrides.title ?? "Test Post",
 			content: overrides.content ?? "This is a test post.",
+			slug: overrides.slug ?? `test-post-${postId}`,
 			userId,
 		});
 	}
