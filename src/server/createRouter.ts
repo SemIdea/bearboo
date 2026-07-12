@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { IRole } from "@/server/models/user";
 import { AuthErrorCode } from "@/shared/error/auth";
 import { SessionErrorCode } from "@/shared/error/session";
 import { Context } from "./createContext";
@@ -99,10 +100,27 @@ const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 	});
 });
 
+const roleProcedure = (allowed: IRole[]) =>
+	verifiedProcedure.use(async ({ ctx, next }) => {
+		if (!allowed.includes(ctx.user.role)) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: AuthErrorCode.INSUFFICIENT_ROLE,
+			});
+		}
+
+		return next({
+			ctx: {
+				user: ctx.user,
+			},
+		});
+	});
+
 export {
 	assertRateLimit,
 	protectedProcedure,
 	publicProcedure,
+	roleProcedure,
 	t,
 	verifiedProcedure,
 };

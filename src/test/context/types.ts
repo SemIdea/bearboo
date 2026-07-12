@@ -4,7 +4,7 @@ import { ICommentEntity } from "@/server/models/comment";
 import { IPostEntity } from "@/server/models/post";
 import { ISessionEntity } from "@/server/models/session";
 import { ITagEntity } from "@/server/models/tag";
-import { IUserEntity } from "@/server/models/user";
+import { IRole, IUserEntity } from "@/server/models/user";
 
 type IAuthenticatedUserDTO = IUserEntity & {
 	truePassword: string;
@@ -13,7 +13,7 @@ type IAuthenticatedUserDTO = IUserEntity & {
 
 type ITestContextDTO = IBaseContextDTO & {
 	user?: IAuthenticatedUserDTO;
-	createAuthenticatedUser: () => Promise<void>;
+	createAuthenticatedUser: (overrides?: { role?: IRole }) => Promise<void>;
 	createNewUser: () => Promise<IUserEntity>;
 	createPost: (
 		overrides?: Partial<

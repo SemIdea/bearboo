@@ -51,4 +51,15 @@ describe("Delete Post Controller Unitary Testing", () => {
 			}),
 		);
 	});
+
+	test("Should allow an admin to delete a post they do not own", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+		const post = await adminCtx.createPost({ userId: ctx.user.id });
+
+		await PostRouter.createCaller(adminCtx).delete({ id: post.id });
+
+		const result = await ctx.repositories.post.read(post.id);
+
+		expect(result).toBeNull();
+	});
 });

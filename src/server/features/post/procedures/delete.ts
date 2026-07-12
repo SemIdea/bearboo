@@ -6,7 +6,10 @@ const procedure_deletePost = verifiedProcedure
 	.input(deletePostSchema)
 	.output(deletePostOutputSchema)
 	.mutation(async ({ input, ctx }) =>
-		domain_deletePost({ ctx, input: { ...input, userId: ctx.user.id } }),
+		domain_deletePost({
+			ctx,
+			input: { ...input, userId: ctx.user.id, role: ctx.user.role },
+		}),
 	);
 
 export { procedure_deletePost };

@@ -2,12 +2,15 @@ import { prisma } from "@/server/infra/drivers/prisma";
 import { BaseModel } from "./base";
 import type { ISessionEntity } from "./session";
 
+type IRole = "ADMIN" | "EDITOR" | "AUTHOR";
+
 type IUserEntity = {
 	id: string;
 	name: string;
 	email: string;
 	password: string;
 	verified: boolean;
+	role: IRole;
 	createdAt: Date;
 	updatedAt: Date;
 	bio?: string | null;
@@ -37,5 +40,5 @@ type IUserModel = BaseModel<IUserEntity> & {
 	readByEmail: (email: string) => Promise<IUserEntity | null>;
 };
 
-export type { IUserEntity, IUserModel, IUserWithSession };
+export type { IRole, IUserEntity, IUserModel, IUserWithSession };
 export { UserModel };

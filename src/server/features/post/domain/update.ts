@@ -1,12 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
+import { IRole } from "@/server/models/user";
 import { PostErrorCode } from "@/shared/error/post";
 import { UpdatePostInput } from "../schema";
 
 const domain_updatePost = async ({
 	ctx,
 	input,
-}: DomainInput<UpdatePostInput & { userId: string }>) => {
+}: DomainInput<UpdatePostInput & { userId: string; role: IRole }>) => {
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
@@ -16,7 +17,10 @@ const domain_updatePost = async ({
 		});
 	}
 
-	if (post.userId !== input.userId) {
+	const isOwner = post.userId === input.userId;
+	const canEditAny = ctx.helpers.permissions.can(input.role, "post:editAny");
+
+	if (!isOwner && !canEditAny) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: PostErrorCode.POST_UPDATE_FORBIDDEN,

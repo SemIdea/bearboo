@@ -9,6 +9,7 @@ enum AuthErrorCode {
 	NAME_TOO_SHORT = "NAME_TOO_SHORT",
 	PASSWORD_TOO_SHORT = "PASSWORD_TOO_SHORT",
 	TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS",
+	INSUFFICIENT_ROLE = "INSUFFICIENT_ROLE",
 }
 
 const AuthErrorMessages = {
@@ -27,6 +28,8 @@ const AuthErrorMessages = {
 		"Password must be at least 8 characters long.",
 	[AuthErrorCode.TOO_MANY_ATTEMPTS]:
 		"Too many attempts. Please try again later.",
+	[AuthErrorCode.INSUFFICIENT_ROLE]:
+		"You do not have permission to perform this action.",
 };
 
 export { AuthErrorCode, AuthErrorMessages };

@@ -94,6 +94,11 @@ const MyPostsPanel = () => {
 							<span className="text-muted-foreground text-xs">
 								{post.status}
 							</span>
+							{session.user.role !== "AUTHOR" && (
+								<span className="text-muted-foreground text-xs">
+									by {post.user.name}
+								</span>
+							)}
 						</CardTitle>
 						<Link
 							href={`/post/edit/${post.id}`}

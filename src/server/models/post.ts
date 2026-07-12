@@ -157,14 +157,14 @@ class PostModelClass extends BaseModel<IPostEntity> {
 	}
 
 	async readOwnPosts(
-		userId: string,
+		userId: string | null,
 		status?: IPostStatus,
 		categoryId?: string,
 		tagId?: string,
 	): Promise<IPostEntityWithRelations[]> {
 		const posts = await prisma.post.findMany({
 			where: {
-				userId,
+				...(userId ? { userId } : {}),
 				...(status ? { status } : {}),
 				...(categoryId ? { categoryId } : {}),
 				...(tagId ? { postTags: { some: { tagId } } } : {}),
@@ -264,7 +264,7 @@ type IPostModel = BaseModel<IPostEntity> & {
 	) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
 	readOwnPosts: (
-		userId: string,
+		userId: string | null,
 		status?: IPostStatus,
 		categoryId?: string,
 		tagId?: string,

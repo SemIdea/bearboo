@@ -137,6 +137,7 @@ describe("auth session and token domains", () => {
 		expect(result).toMatchObject({
 			id: ctx.user.id,
 			email: ctx.user.email,
+			role: ctx.user.role,
 			session: {
 				id: ctx.user.session.id,
 				accessToken: ctx.user.session.accessToken,
@@ -145,6 +146,17 @@ describe("auth session and token domains", () => {
 		});
 		expect("password" in result).toBe(false);
 		expect("userId" in result.session).toBe(false);
+	});
+
+	test("propagates role into ctx.user for a non-default role", async () => {
+		const ctx = await createAuthenticatedContext({ role: "ADMIN" });
+
+		const result = await domain_readUserAndSessionByAccessToken({
+			ctx,
+			input: { accessToken: ctx.user.session.accessToken },
+		});
+
+		expect(result.role).toBe("ADMIN");
 	});
 
 	test("throws when access token has no session or user", async () => {

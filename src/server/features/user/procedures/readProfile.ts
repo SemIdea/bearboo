@@ -12,6 +12,7 @@ const procedure_readUserProfile = publicProcedure
 				name: ctx.user.name,
 				email: ctx.user.email,
 				verified: ctx.user.verified,
+				role: ctx.user.role,
 				createdAt: ctx.user.createdAt,
 				updatedAt: ctx.user.updatedAt,
 				bio: ctx.user.bio,

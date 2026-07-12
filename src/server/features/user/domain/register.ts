@@ -23,6 +23,7 @@ const domain_registerUser = async ({
 		...input,
 		password: hashedPassword,
 		verified: false,
+		role: "AUTHOR",
 	});
 
 	return user;

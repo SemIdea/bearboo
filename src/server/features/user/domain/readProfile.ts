@@ -16,6 +16,7 @@ const domain_readUserProfile = async ({
 		name: userProfile.name,
 		email: userProfile.email,
 		verified: userProfile.verified,
+		role: userProfile.role,
 		createdAt: userProfile.createdAt,
 		updatedAt: userProfile.updatedAt,
 		bio: userProfile.bio,

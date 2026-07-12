@@ -2,6 +2,8 @@ import { z } from "zod";
 import { commentEntityWithPostSchema } from "../comment/schema";
 import { postEntitySchema } from "../post/schema";
 
+const roleSchema = z.enum(["ADMIN", "EDITOR", "AUTHOR"]);
+
 const registerUserSchema = z.object({
 	email: z.email("Invalid email address."),
 	name: z.string().min(3, "Name must be at least 3 characters long."),
@@ -33,11 +35,17 @@ const updateUserProfileSchema = z
 	})
 	.partial();
 
+const updateUserRoleSchema = z.object({
+	userId: z.string(),
+	role: roleSchema,
+});
+
 const userWithoutPasswordSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	email: z.email(),
 	verified: z.boolean(),
+	role: roleSchema,
 	createdAt: z.date(),
 	updatedAt: z.date(),
 	bio: z.string().nullish(),
@@ -55,6 +63,7 @@ const readUserProfileOutputSchema = userWithoutPasswordSchema;
 const readUserPostsOutputSchema = z.array(postEntitySchema);
 const readUserCommentsOutputSchema = z.array(commentEntityWithPostSchema);
 const updateUserProfileOutputSchema = userWithoutPasswordSchema;
+const updateUserRoleOutputSchema = userWithoutPasswordSchema;
 
 type CreateUserInput = z.TypeOf<typeof registerUserSchema>;
 type LoginUserInput = z.TypeOf<typeof loginUserSchema>;
@@ -62,6 +71,7 @@ type ReadUserProfileInput = z.TypeOf<typeof readUserProfileSchema>;
 type ReadUserPostsInput = z.TypeOf<typeof readUserPostsSchema>;
 type ReadUserCommentsInput = z.TypeOf<typeof readUserCommentsSchema>;
 type UpdateUserProfileInput = z.TypeOf<typeof updateUserProfileSchema>;
+type UpdateUserRoleInput = z.TypeOf<typeof updateUserRoleSchema>;
 
 export type {
 	CreateUserInput,
@@ -70,6 +80,7 @@ export type {
 	ReadUserPostsInput,
 	ReadUserProfileInput,
 	UpdateUserProfileInput,
+	UpdateUserRoleInput,
 };
 export {
 	loginUserOutputSchema,
@@ -82,7 +93,10 @@ export {
 	readUserProfileSchema,
 	registerUserOutputSchema,
 	registerUserSchema,
+	roleSchema,
 	updateUserProfileOutputSchema,
 	updateUserProfileSchema,
+	updateUserRoleOutputSchema,
+	updateUserRoleSchema,
 	userWithoutPasswordSchema,
 };

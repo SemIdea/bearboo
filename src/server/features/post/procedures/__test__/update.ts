@@ -120,4 +120,30 @@ describe("Update Post Controller Unitary Testing", () => {
 			}),
 		);
 	});
+
+	test("Should allow an admin to update a post they do not own", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+		const post = await adminCtx.createPost({ userId: ctx.user.id });
+
+		const result = await PostRouter.createCaller(adminCtx).update({
+			id: post.id,
+			content: "Updated by admin",
+			title: "Updated by admin",
+		});
+
+		expect(result.content).toEqual("Updated by admin");
+	});
+
+	test("Should allow an editor to update a post they do not own", async () => {
+		const editorCtx = await createAuthenticatedContext({ role: "EDITOR" });
+		const post = await editorCtx.createPost({ userId: ctx.user.id });
+
+		const result = await PostRouter.createCaller(editorCtx).update({
+			id: post.id,
+			content: "Updated by editor",
+			title: "Updated by editor",
+		});
+
+		expect(result.content).toEqual("Updated by editor");
+	});
 });

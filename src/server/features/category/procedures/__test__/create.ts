@@ -1,4 +1,6 @@
+import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
+import { AuthErrorCode } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -9,7 +11,7 @@ describe("Create Category Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;
 
 	beforeEach(async () => {
-		ctx = await createAuthenticatedContext();
+		ctx = await createAuthenticatedContext({ role: "EDITOR" });
 	});
 
 	test("Should create a category with a new name", async () => {
@@ -31,5 +33,28 @@ describe("Create Category Controller Unitary Testing", () => {
 		});
 
 		expect(second.id).toEqual(first.id);
+	});
+
+	test("Should allow an admin to create a category", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+
+		const result = await CategoryRouter.createCaller(adminCtx).create({
+			name: "Frontend",
+		});
+
+		expect(result.name).toEqual("Frontend");
+	});
+
+	test("Should reject an author trying to create a category", async () => {
+		const authorCtx = await createAuthenticatedContext({ role: "AUTHOR" });
+
+		await expect(
+			CategoryRouter.createCaller(authorCtx).create({ name: "Frontend" }),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "FORBIDDEN",
+				message: AuthErrorCode.INSUFFICIENT_ROLE,
+			}),
+		);
 	});
 });

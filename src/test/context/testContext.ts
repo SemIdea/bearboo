@@ -10,6 +10,7 @@ import { ICategoryEntity } from "@/server/models/category";
 import { ICommentEntity } from "@/server/models/comment";
 import { IPostEntity } from "@/server/models/post";
 import { ITagEntity } from "@/server/models/tag";
+import { IRole } from "@/server/models/user";
 import { IAuthenticatedUserDTO } from "./types";
 
 class TestContext {
@@ -29,7 +30,7 @@ class TestContext {
 		this.gateways = overrides.gateways ?? gateways;
 	}
 
-	async createAuthenticatedUser() {
+	async createAuthenticatedUser(overrides: { role?: IRole } = {}) {
 		const userId = this.helpers.uid.generate();
 		const userData = {
 			email: `${userId}@example.com`,
@@ -41,6 +42,7 @@ class TestContext {
 			...userData,
 			password: await this.helpers.hashing.hash(userData.password),
 			verified: true,
+			role: overrides.role ?? "AUTHOR",
 		});
 
 		const sessionId = this.helpers.uid.generate();
@@ -68,6 +70,7 @@ class TestContext {
 			...userData,
 			password: await this.helpers.hashing.hash(userData.password),
 			verified: false,
+			role: "AUTHOR",
 		});
 
 		return user;

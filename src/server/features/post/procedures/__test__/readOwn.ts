@@ -72,6 +72,29 @@ describe("Read Own Posts Controller Unitary Testing", () => {
 		expect(result.map((p) => p.id)).toEqual([own.id]);
 	});
 
+	test("Should return every user's posts for an admin", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+		const otherUser = await adminCtx.createNewUser();
+		const otherPost = await adminCtx.createPost({ userId: otherUser.id });
+		const own = await adminCtx.createPost();
+
+		const result = await PostRouter.createCaller(adminCtx).readOwn({});
+
+		expect(result.map((p) => p.id).sort()).toEqual(
+			[otherPost.id, own.id].sort(),
+		);
+	});
+
+	test("Should return every user's posts for an editor", async () => {
+		const editorCtx = await createAuthenticatedContext({ role: "EDITOR" });
+		const otherUser = await editorCtx.createNewUser();
+		const otherPost = await editorCtx.createPost({ userId: otherUser.id });
+
+		const result = await PostRouter.createCaller(editorCtx).readOwn({});
+
+		expect(result.map((p) => p.id)).toContain(otherPost.id);
+	});
+
 	test("Should throw an error when called without a session", async () => {
 		const anonymousCtx = createTestContext();
 

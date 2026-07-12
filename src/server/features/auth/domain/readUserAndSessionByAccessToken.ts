@@ -32,6 +32,7 @@ const domain_readUserAndSessionByAccessToken = async ({
 		name: user.name,
 		email: user.email,
 		verified: user.verified,
+		role: user.role,
 		createdAt: user.createdAt,
 		updatedAt: user.updatedAt,
 		bio: user.bio,

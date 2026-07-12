@@ -9,7 +9,7 @@ describe("Read All Categories Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;
 
 	beforeEach(async () => {
-		ctx = await createAuthenticatedContext();
+		ctx = await createAuthenticatedContext({ role: "EDITOR" });
 	});
 
 	test("Should list all created categories", async () => {

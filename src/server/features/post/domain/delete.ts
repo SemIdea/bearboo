@@ -1,12 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
+import { IRole } from "@/server/models/user";
 import { PostErrorCode } from "@/shared/error/post";
 import { DeletePostInput } from "../schema";
 
 const domain_deletePost = async ({
 	ctx,
 	input,
-}: DomainInput<DeletePostInput & { userId: string }>) => {
+}: DomainInput<DeletePostInput & { userId: string; role: IRole }>) => {
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
@@ -16,7 +17,13 @@ const domain_deletePost = async ({
 		});
 	}
 
-	if (post.userId !== input.userId) {
+	const isOwner = post.userId === input.userId;
+	const canDeleteAny = ctx.helpers.permissions.can(
+		input.role,
+		"post:deleteAny",
+	);
+
+	if (!isOwner && !canDeleteAny) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: PostErrorCode.POST_DELETE_FORBIDDEN,

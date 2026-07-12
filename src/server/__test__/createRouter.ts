@@ -5,6 +5,7 @@ import { createAuthenticatedContext, createTestContext } from "@/test/context";
 import {
 	protectedProcedure,
 	publicProcedure,
+	roleProcedure,
 	t,
 	verifiedProcedure,
 } from "../createRouter";
@@ -17,6 +18,7 @@ const testRouter = t.router({
 	publicValue: publicProcedure.query(({ ctx }) => ctx.user?.id ?? "anonymous"),
 	protectedValue: protectedProcedure.query(({ ctx }) => ctx.user.id),
 	verifiedValue: verifiedProcedure.query(({ ctx }) => ctx.user.id),
+	adminValue: roleProcedure(["ADMIN"]).query(({ ctx }) => ctx.user.id),
 });
 
 describe("TRPC procedure guards", () => {
@@ -92,6 +94,25 @@ describe("TRPC procedure guards", () => {
 		const ctx = await createAuthenticatedContext();
 
 		await expect(testRouter.createCaller(ctx).verifiedValue()).resolves.toBe(
+			ctx.user.id,
+		);
+	});
+
+	test("blocks users whose role is not in the allowlist", async () => {
+		const ctx = await createAuthenticatedContext({ role: "AUTHOR" });
+
+		await expect(
+			testRouter.createCaller(ctx).adminValue(),
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: AuthErrorCode.INSUFFICIENT_ROLE,
+		});
+	});
+
+	test("allows users whose role is in the allowlist", async () => {
+		const ctx = await createAuthenticatedContext({ role: "ADMIN" });
+
+		await expect(testRouter.createCaller(ctx).adminValue()).resolves.toBe(
 			ctx.user.id,
 		);
 	});
