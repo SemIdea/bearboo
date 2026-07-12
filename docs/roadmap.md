@@ -172,9 +172,9 @@ Criar um painel administrativo para gerenciar posts.
 * [x] criar post (`src/app/(half)/post/create/`);
 * [x] editar post (`src/app/(half)/post/edit/[id]/`);
 * [x] deletar post;
-* [ ] publicar post / salvar como rascunho / arquivar — `PostStatus` já existe no schema e é setável via `post.update` (`docs/features/004-post-status/`), mas sem seletor na UI de criar/editar ainda (essa UI é desta fase, não da 004);
-* [ ] upload de imagem de capa;
-* [ ] preview antes de publicar;
+* [x] publicar post / salvar como rascunho / arquivar — seletor de status (`<select>`) nos formulários de criar/editar; `PostStatus` já existia no schema (`docs/features/004-post-status/`) (`docs/features/011-post-status-preview/`);
+* [ ] upload de imagem de capa — adiado pra Fase 8 (decisão do dono, 2026-07-12): capa via URL já existe (`docs/features/010-post-cover-image/`), upload de arquivo real exige decisão de storage que pertence à Fase 8 (Upload e mídia), não faz sentido decidir só pro post;
+* [x] preview antes de publicar — dono consegue abrir a URL real do próprio post (`/post/<slug>`) mesmo em DRAFT/ARCHIVED e vê um banner "só você vê isso"; qualquer outra pessoa continua recebendo 404 (`docs/features/011-post-status-preview/`);
 * [ ] listagem de posts no admin (existe listagem pública, não um painel admin com filtros);
 * [ ] filtros por status — leitura já filtra por `PUBLISHED`; falta o painel admin pra escolher outros status;
 * [ ] filtros por categoria/tag.
