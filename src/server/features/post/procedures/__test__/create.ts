@@ -100,6 +100,25 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(result.categoryId).toBeNull();
 	});
 
+	test("Should create a post without a cover image when none is provided", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+		});
+
+		expect(result.coverImageUrl).toBeNull();
+	});
+
+	test("Should persist the cover image URL when provided", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+			coverImageUrl: "https://example.com/cover.png",
+		});
+
+		expect(result.coverImageUrl).toEqual("https://example.com/cover.png");
+	});
+
 	test("Should associate an existing category and tags when provided", async () => {
 		const category = await ctx.createCategory({ name: "Backend" });
 		const tagA = await ctx.createTag({ name: "prisma" });

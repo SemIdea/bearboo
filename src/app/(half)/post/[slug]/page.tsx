@@ -119,6 +119,13 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 			}
 			content={
 				<div className="flex flex-col gap-4">
+					{post.coverImageUrl && (
+						<img
+							src={post.coverImageUrl}
+							alt={post.title}
+							className="max-h-96 w-full rounded object-cover"
+						/>
+					)}
 					<h2 className="text-4xl font-bold">{post.title}</h2>
 					<MdView source={post.content} />
 					<CommentArea postId={post.id} />

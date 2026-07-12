@@ -26,6 +26,7 @@ const domain_createPost = async ({
 	const slug = await resolveAvailableSlug(ctx, baseSlug);
 	const status = input.status ?? "PUBLISHED";
 	const categoryId = input.categoryId ?? null;
+	const coverImageUrl = input.coverImageUrl ?? null;
 
 	const post = await ctx.repositories.post.create(postId, {
 		title: input.title,
@@ -34,6 +35,7 @@ const domain_createPost = async ({
 		slug,
 		status,
 		categoryId,
+		coverImageUrl,
 	});
 
 	if (input.tagIds?.length) {

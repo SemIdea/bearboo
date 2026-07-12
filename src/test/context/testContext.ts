@@ -74,7 +74,13 @@ class TestContext {
 		overrides: Partial<
 			Pick<
 				IPostEntity,
-				"title" | "content" | "userId" | "slug" | "status" | "categoryId"
+				| "title"
+				| "content"
+				| "userId"
+				| "slug"
+				| "status"
+				| "categoryId"
+				| "coverImageUrl"
 			>
 		> & { tagIds?: string[] } = {},
 	) {
@@ -91,6 +97,7 @@ class TestContext {
 			slug: overrides.slug ?? `test-post-${postId}`,
 			status: overrides.status ?? "PUBLISHED",
 			categoryId: overrides.categoryId ?? null,
+			coverImageUrl: overrides.coverImageUrl ?? null,
 			userId,
 		});
 

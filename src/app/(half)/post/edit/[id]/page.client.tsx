@@ -119,6 +119,11 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
 			<InputField name="content" label="Content">
 				<MdEditor preview="live" />
 			</InputField>
+			<InputField
+				name="coverImageUrl"
+				label="Cover image URL"
+				placeholder="https://..."
+			/>
 			<Button type="submit" disabled={isUploading}>
 				{isUploading ? "Editing Post..." : "Edit Post"}
 			</Button>

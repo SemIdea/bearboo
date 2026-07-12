@@ -11,6 +11,7 @@ type IPostEntity = {
 	slug: string;
 	status: IPostStatus;
 	categoryId: string | null;
+	coverImageUrl: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 };

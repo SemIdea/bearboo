@@ -77,6 +77,17 @@ describe("Update Post Controller Unitary Testing", () => {
 		expect(result.categoryId).toEqual(category.id);
 	});
 
+	test("Should update the cover image of the caller's own post", async () => {
+		const post = await ctx.createPost();
+
+		const result = await PostRouter.createCaller(ctx).update({
+			id: post.id,
+			coverImageUrl: "https://example.com/cover.png",
+		});
+
+		expect(result.coverImageUrl).toEqual("https://example.com/cover.png");
+	});
+
 	test("Should throw error if post does not exist", async () => {
 		await expect(
 			PostRouter.createCaller(ctx).update({

@@ -69,6 +69,13 @@ const Post = ({
 	return (
 		<Card className="border-0 shadow-none">
 			<CardContent>
+				{post.coverImageUrl && (
+					<img
+						src={post.coverImageUrl}
+						alt={post.title}
+						className="mb-2 h-40 w-full rounded object-cover"
+					/>
+				)}
 				<CardTitle className="flex">
 					<span className="mr-2">{index + 1}.</span>
 					<Link href={`/post/${post.slug}`} className="hover:underline">

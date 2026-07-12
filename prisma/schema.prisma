@@ -38,19 +38,20 @@ enum PostStatus {
 }
 
 model Post {
-  id         String     @id
-  userId     String
-  user       User       @relation(fields: [userId], references: [id])
-  title      String
-  content    String
-  slug       String     @unique
-  status     PostStatus @default(PUBLISHED)
-  categoryId String?
-  category   Category?  @relation(fields: [categoryId], references: [id])
-  postTags   PostTag[]
-  comments   Comment[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id            String     @id
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  title         String
+  content       String
+  slug          String     @unique
+  status        PostStatus @default(PUBLISHED)
+  categoryId    String?
+  category      Category?  @relation(fields: [categoryId], references: [id])
+  coverImageUrl String?
+  postTags      PostTag[]
+  comments      Comment[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
 model Category {

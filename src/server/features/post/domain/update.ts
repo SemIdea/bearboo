@@ -28,6 +28,7 @@ const domain_updatePost = async ({
 		content: input.content,
 		status: input.status,
 		categoryId: input.categoryId,
+		coverImageUrl: input.coverImageUrl,
 	});
 
 	if (input.tagIds) {

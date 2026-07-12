@@ -60,6 +60,11 @@ const CreatePostForm = () => {
 			<InputField name="content" label="Content">
 				<MdEditor preview="live" />
 			</InputField>
+			<InputField
+				name="coverImageUrl"
+				label="Cover image URL"
+				placeholder="https://..."
+			/>
 			<Button type="submit" disabled={isSubmitting}>
 				{isSubmitting ? "Creating Post..." : "Create Post"}
 			</Button>

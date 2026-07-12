@@ -14,6 +14,7 @@ const createPostSchema = z.object({
 	status: postStatusSchema.optional(),
 	categoryId: z.string().optional(),
 	tagIds: z.array(z.string()).optional(),
+	coverImageUrl: z.string().url().optional(),
 });
 
 const readPostSchema = z.object({
@@ -37,6 +38,7 @@ const updatePostSchema = z.object({
 	status: postStatusSchema.optional(),
 	categoryId: z.string().optional(),
 	tagIds: z.array(z.string()).optional(),
+	coverImageUrl: z.string().url().optional(),
 });
 
 const deletePostSchema = z.object({
@@ -78,6 +80,7 @@ const postFieldsSchema = z.object({
 	slug: z.string(),
 	status: postStatusSchema,
 	categoryId: z.string().nullable(),
+	coverImageUrl: z.string().nullable(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
