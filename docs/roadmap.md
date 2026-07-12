@@ -7,7 +7,7 @@
 | Fase | Status | Nota |
 | --- | --- | --- |
 | 0 — Organização inicial | ✅ Concluída | — |
-| 1 — Blog público bem feito | 🟡 Parcial | slug implementado (`tsc`/testes verdes); falta aplicar migration num Postgres real + checar no browser (`docs/features/002-post-slug/`); falta paginação, tags, categorias, capa, tempo de leitura, relacionados |
+| 1 — Blog público bem feito | 🟡 Parcial | slug implementado e verificado ao vivo (migration aplicada, `/post/<slug>` testado no browser, `docs/features/002-post-slug/`); falta paginação, tags, categorias, capa, tempo de leitura, relacionados |
 | 2 — Admin/CMS | 🟡 Parcial | CRUD de post já existe, mas sem painel `/admin` dedicado (listagem/filtros/preview) |
 | 3 — Autenticação e permissões | ⬜ Não iniciada | bloqueada até `docs/features/001-auth-hardening/` fechar (ver nota na fase) |
 | 4 — Workflow editorial | ⬜ Não iniciada | — |
@@ -115,7 +115,7 @@ Ter a parte pública do blog funcionando bem.
 ### Funcionalidades
 
 * [x] listar posts publicados (`readRecent`, 30 mais recentes — sem filtro de status, pois `PostStatus` ainda não existe no schema);
-* [x] visualizar post por slug — código escrito e verificado (`docs/features/002-post-slug/`, rota pública `/post/[slug]`, `Post.slug` único gerado no `create` via `src/lib/slug/`); `tsc --noEmit` e `vitest` (111/111) verdes; **falta aplicar a migration num Postgres real e abrir `/post/<slug>` no browser** (sem `docker` nesta sessão) antes de fechar de vez;
+* [x] visualizar post por slug — código escrito e verificado (`docs/features/002-post-slug/`, rota pública `/post/[slug]`, `Post.slug` único gerado no `create` via `src/lib/slug/`); `tsc --noEmit` e `vitest` (111/111) verdes; **2026-07-11: migration aplicada num Postgres real e `/post/<slug>` testado ao vivo no browser** — fechado. Achado durante a verificação: seed (`prisma/seed.ts`) estava quebrado por import de `src/lib/slug` incompatível com execução nativa `node`, e slug inexistente caía num `error.tsx` genérico em vez de `notFound()` — ambos corrigidos (commit `a620cde`). Pendência residual: status HTTP da resposta de `notFound()` continua `200`, não `404` (streaming/`Suspense` — ver `docs/ust.md` § Pendências Técnicas);
 * [ ] paginação (lista é limitada a 30, sem paginar);
 * [ ] tags;
 * [ ] categorias;
