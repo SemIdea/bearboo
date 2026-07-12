@@ -123,7 +123,7 @@ Ter a parte pública do blog funcionando bem.
 * [x] tags — `Tag`/`PostTag` (N:N), features `tag.create`/`tag.readAll`; `post.create`/`post.update` aceitam `tagIds` opcionais; `post.readRecent` filtra por `tagId`, `post.readBySlug` retorna as tags do post (`docs/features/005-tags-categorias/`);
 * [x] categorias — `Category` (`Post.categoryId?`, N:1), features `category.create`/`category.readAll`; `post.create`/`post.update` aceitam `categoryId` opcional; `post.readRecent` filtra por `categoryId`, `post.readBySlug` retorna a categoria do post (`docs/features/005-tags-categorias/`). Sem UI de seletor ainda — fica pra Fase 2 (Admin/CMS);
 * [x] autor (post/comentário mostram o `user` relacionado);
-* [ ] imagem de capa (sem campo no schema);
+* [x] imagem de capa — `Post.coverImageUrl?` (migration `add_post_cover_image`); `post.create`/`post.update` aceitam URL opcional (validada com `z.string().url()`); exibida no card da listagem e no topo da página do post (`<img>` simples, sem `next/image` — repo não usa, evita configurar `images.remotePatterns` pra URL arbitrária de usuário) (`docs/features/010-post-cover-image/`). Sem upload de arquivo — fica pra Fase 2 (Admin/CMS);
 * [x] tempo estimado de leitura — `readingTimeMinutes` calculado on-the-fly a partir do `content` (200 palavras/minuto, mínimo 1 min), via `z.transform()` no schema de output de post; aparece em todo endpoint que retorna post (`create`, `read`, `readBySlug`, `update`, `revalidate`, `readRecent`, `user.readPosts`) sem tocar domain/model (`docs/features/006-tempo-leitura/`). Sem UI mostrando o valor ainda — fica pra depois da refatoração de front;
 * [ ] posts relacionados;
 * [x] página pública do autor (`src/app/(half)/user/[id]/`).
