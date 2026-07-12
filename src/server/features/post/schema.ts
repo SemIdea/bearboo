@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const postStatusSchema = z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]);
+
 const createPostSchema = z.object({
 	title: z
 		.string()
@@ -9,6 +11,7 @@ const createPostSchema = z.object({
 		.string()
 		.min(10, "Post content must be at least 10 characters long.")
 		.max(5000, "Post content must not exceed 5000 characters."),
+	status: postStatusSchema.optional(),
 });
 
 const readPostSchema = z.object({
@@ -29,6 +32,7 @@ const updatePostSchema = z.object({
 		.string()
 		.min(10, "Post content must be at least 10 characters long.")
 		.optional(),
+	status: postStatusSchema.optional(),
 });
 
 const deletePostSchema = z.object({
@@ -52,6 +56,7 @@ const postEntitySchema = z.object({
 	title: z.string(),
 	content: z.string(),
 	slug: z.string(),
+	status: postStatusSchema,
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -103,6 +108,7 @@ export {
 	deletePostSchema,
 	postEntitySchema,
 	postEntityWithRelationsSchema,
+	postStatusSchema,
 	readPostBySlugOutputSchema,
 	readPostBySlugSchema,
 	readPostOutputSchema,

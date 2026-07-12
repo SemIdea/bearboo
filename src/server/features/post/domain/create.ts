@@ -24,8 +24,9 @@ const domain_createPost = async ({
 	const postId = ctx.helpers.uid.generate();
 	const baseSlug = ctx.helpers.slug.generate(input.title);
 	const slug = await resolveAvailableSlug(ctx, baseSlug);
+	const status = input.status ?? "PUBLISHED";
 
-	return ctx.repositories.post.create(postId, { ...input, slug });
+	return ctx.repositories.post.create(postId, { ...input, slug, status });
 };
 
 export { domain_createPost };

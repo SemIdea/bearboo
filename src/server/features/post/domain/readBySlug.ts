@@ -9,7 +9,7 @@ const domain_readPostBySlug = async ({
 }: DomainInput<ReadPostBySlugInput>) => {
 	const post = await ctx.repositories.post.readBySlug(input.slug);
 
-	if (!post) {
+	if (!post || post.status !== "PUBLISHED") {
 		throw new TRPCError({
 			code: "NOT_FOUND",
 			message: PostErrorCode.POST_NOT_FOUND,

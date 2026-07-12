@@ -34,4 +34,30 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 			}),
 		);
 	});
+
+	test("Should throw not found for a draft post read by slug", async () => {
+		const post = await ctx.createPost({ status: "DRAFT" });
+
+		await expect(
+			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "NOT_FOUND",
+				message: PostErrorCode.POST_NOT_FOUND,
+			}),
+		);
+	});
+
+	test("Should throw not found for an archived post read by slug", async () => {
+		const post = await ctx.createPost({ status: "ARCHIVED" });
+
+		await expect(
+			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "NOT_FOUND",
+				message: PostErrorCode.POST_NOT_FOUND,
+			}),
+		);
+	});
 });

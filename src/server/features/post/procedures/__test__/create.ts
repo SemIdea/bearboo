@@ -48,4 +48,37 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(first.slug).toEqual("duplicate-title");
 		expect(second.slug).toEqual("duplicate-title-2");
 	});
+
+	test("Should default to PUBLISHED status when none is provided", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+		});
+
+		expect(result.status).toEqual("PUBLISHED");
+	});
+
+	test("Should respect an explicit status when provided", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+			status: "DRAFT",
+		});
+
+		expect(result.status).toEqual("DRAFT");
+	});
+
+	test("Should append a numeric suffix when the slug already exists as a draft", async () => {
+		const input = {
+			title: "Draft Duplicate",
+			content: "This is a test post content.",
+			status: "DRAFT" as const,
+		};
+
+		const first = await PostRouter.createCaller(ctx).create(input);
+		const second = await PostRouter.createCaller(ctx).create(input);
+
+		expect(first.slug).toEqual("draft-duplicate");
+		expect(second.slug).toEqual("draft-duplicate-2");
+	});
 });

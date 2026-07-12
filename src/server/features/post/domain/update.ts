@@ -26,6 +26,7 @@ const domain_updatePost = async ({
 	return ctx.repositories.post.update(input.id, {
 		title: input.title,
 		content: input.content,
+		status: input.status,
 	});
 };
 

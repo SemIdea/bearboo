@@ -1,12 +1,15 @@
 import { prisma } from "@/server/infra/drivers/prisma";
 import { BaseModel } from "./base";
 
+type IPostStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+
 type IPostEntity = {
 	id: string;
 	userId: string;
 	title: string;
 	content: string;
 	slug: string;
+	status: IPostStatus;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -33,6 +36,7 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		return prisma.post.findMany({
 			take: count,
 			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+			where: { status: "PUBLISHED" },
 			orderBy: {
 				createdAt: "desc",
 			},
@@ -56,6 +60,7 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		return prisma.post.findMany({
 			where: {
 				userId,
+				status: "PUBLISHED",
 			},
 		});
 	}
@@ -102,5 +107,5 @@ type IPostModel = BaseModel<IPostEntity> & {
 	readBySlug: (slug: string) => Promise<IPostEntity | null>;
 };
 
-export type { IPostEntity, IPostEntityWithRelations, IPostModel };
+export type { IPostEntity, IPostEntityWithRelations, IPostModel, IPostStatus };
 export { PostModel };

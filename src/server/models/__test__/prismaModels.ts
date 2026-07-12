@@ -80,6 +80,7 @@ describe("Prisma-backed models", () => {
 
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
 			take: 5,
+			where: { status: "PUBLISHED" },
 			orderBy: { createdAt: "desc" },
 			include: {
 				user: {
@@ -107,6 +108,7 @@ describe("Prisma-backed models", () => {
 			take: 5,
 			cursor: { id: "post-1" },
 			skip: 1,
+			where: { status: "PUBLISHED" },
 			orderBy: { createdAt: "desc" },
 			include: {
 				user: {
@@ -130,7 +132,7 @@ describe("Prisma-backed models", () => {
 		await expect(PostModel.readUserPosts("user-1")).resolves.toEqual([]);
 
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
-			where: { userId: "user-1" },
+			where: { userId: "user-1", status: "PUBLISHED" },
 		});
 	});
 

@@ -60,4 +60,17 @@ describe("Read Recent Posts Controller Unitary Testing", () => {
 
 		expect(result.nextCursor).toBeNull();
 	});
+
+	test("Should exclude draft and archived posts from the recent feed", async () => {
+		const ctx = await createAuthenticatedContext();
+		const published = await ctx.createPost({ status: "PUBLISHED" });
+		await ctx.createPost({ status: "DRAFT" });
+		await ctx.createPost({ status: "ARCHIVED" });
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			limit: 50,
+		});
+
+		expect(result.posts.map((post) => post.id)).toEqual([published.id]);
+	});
 });

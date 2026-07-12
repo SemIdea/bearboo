@@ -15,7 +15,7 @@ type ITestContextDTO = IBaseContextDTO & {
 	createNewUser: () => Promise<IUserEntity>;
 	createPost: (
 		overrides?: Partial<
-			Pick<IPostEntity, "title" | "content" | "userId" | "slug">
+			Pick<IPostEntity, "title" | "content" | "userId" | "slug" | "status">
 		>,
 	) => Promise<IPostEntity>;
 	createComment: (

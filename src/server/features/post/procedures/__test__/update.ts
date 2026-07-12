@@ -34,6 +34,17 @@ describe("Update Post Controller Unitary Testing", () => {
 		});
 	});
 
+	test("Should update the status of the caller's own post", async () => {
+		const post = await ctx.createPost({ status: "PUBLISHED" });
+
+		const result = await PostRouter.createCaller(ctx).update({
+			id: post.id,
+			status: "ARCHIVED",
+		});
+
+		expect(result.status).toEqual("ARCHIVED");
+	});
+
 	test("Should throw error if post does not exist", async () => {
 		await expect(
 			PostRouter.createCaller(ctx).update({

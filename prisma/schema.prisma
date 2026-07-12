@@ -31,16 +31,23 @@ model Session {
   updatedAt    DateTime @updatedAt
 }
 
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model Post {
-  id        String    @id
+  id        String     @id
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
   title     String
   content   String
-  slug      String    @unique
+  slug      String     @unique
+  status    PostStatus @default(PUBLISHED)
   comments  Comment[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Comment {

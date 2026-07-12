@@ -43,6 +43,18 @@ describe("User Posts Controller Unitary Testing", () => {
 		expect(result.map((post) => post.id)).toEqual(posts.map((post) => post.id));
 	});
 
+	test("Should exclude draft and archived posts from a user's public post list", async () => {
+		const published = await ctx.createPost({ status: "PUBLISHED" });
+		await ctx.createPost({ status: "DRAFT" });
+		await ctx.createPost({ status: "ARCHIVED" });
+
+		const result = await UserRouter.createCaller(ctx).readPosts({
+			id: ctx.user.id,
+		});
+
+		expect(result.map((post) => post.id)).toEqual([published.id]);
+	});
+
 	test("Should throw an error if user does not exist", async () => {
 		const uuid = ctx.helpers.uid.generate();
 
