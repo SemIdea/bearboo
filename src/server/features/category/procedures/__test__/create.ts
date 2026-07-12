@@ -1,0 +1,35 @@
+import { beforeEach, describe, expect, test } from "vitest";
+import {
+	createAuthenticatedContext,
+	IControllerContextDTO,
+} from "@/test/context";
+import { CategoryRouter } from "../../index";
+
+describe("Create Category Controller Unitary Testing", () => {
+	let ctx: IControllerContextDTO;
+
+	beforeEach(async () => {
+		ctx = await createAuthenticatedContext();
+	});
+
+	test("Should create a category with a new name", async () => {
+		const result = await CategoryRouter.createCaller(ctx).create({
+			name: "Backend",
+		});
+
+		expect(result).toBeDefined();
+		expect(result.name).toEqual("Backend");
+		expect(result.slug).toEqual("backend");
+	});
+
+	test("Should return the existing category when the name already exists", async () => {
+		const first = await CategoryRouter.createCaller(ctx).create({
+			name: "Backend",
+		});
+		const second = await CategoryRouter.createCaller(ctx).create({
+			name: "Backend",
+		});
+
+		expect(second.id).toEqual(first.id);
+	});
+});

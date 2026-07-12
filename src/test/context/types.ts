@@ -1,7 +1,9 @@
 import { IBaseContextDTO } from "@/server/createContext";
+import { ICategoryEntity } from "@/server/models/category";
 import { ICommentEntity } from "@/server/models/comment";
 import { IPostEntity } from "@/server/models/post";
 import { ISessionEntity } from "@/server/models/session";
+import { ITagEntity } from "@/server/models/tag";
 import { IUserEntity } from "@/server/models/user";
 
 type IAuthenticatedUserDTO = IUserEntity & {
@@ -15,12 +17,21 @@ type ITestContextDTO = IBaseContextDTO & {
 	createNewUser: () => Promise<IUserEntity>;
 	createPost: (
 		overrides?: Partial<
-			Pick<IPostEntity, "title" | "content" | "userId" | "slug" | "status">
-		>,
+			Pick<
+				IPostEntity,
+				"title" | "content" | "userId" | "slug" | "status" | "categoryId"
+			>
+		> & { tagIds?: string[] },
 	) => Promise<IPostEntity>;
 	createComment: (
 		overrides?: Partial<Pick<ICommentEntity, "postId" | "content" | "userId">>,
 	) => Promise<ICommentEntity>;
+	createCategory: (
+		overrides?: Partial<Pick<ICategoryEntity, "name" | "slug">>,
+	) => Promise<ICategoryEntity>;
+	createTag: (
+		overrides?: Partial<Pick<ITagEntity, "name" | "slug">>,
+	) => Promise<ITagEntity>;
 };
 
 type IControllerContextDTO = ITestContextDTO & {

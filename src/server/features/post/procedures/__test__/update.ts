@@ -45,6 +45,36 @@ describe("Update Post Controller Unitary Testing", () => {
 		expect(result.status).toEqual("ARCHIVED");
 	});
 
+	test("Should replace the tags of the caller's own post", async () => {
+		const tagA = await ctx.createTag({ name: "prisma" });
+		const tagB = await ctx.createTag({ name: "trpc" });
+		const tagC = await ctx.createTag({ name: "zod" });
+		const post = await ctx.createPost({ tagIds: [tagA.id, tagB.id] });
+
+		await PostRouter.createCaller(ctx).update({
+			id: post.id,
+			tagIds: [tagC.id],
+		});
+
+		const read = await PostRouter.createCaller(ctx).readBySlug({
+			slug: post.slug,
+		});
+
+		expect(read.tags.map((tag) => tag.id)).toEqual([tagC.id]);
+	});
+
+	test("Should change the category of the caller's own post", async () => {
+		const category = await ctx.createCategory({ name: "Backend" });
+		const post = await ctx.createPost();
+
+		const result = await PostRouter.createCaller(ctx).update({
+			id: post.id,
+			categoryId: category.id,
+		});
+
+		expect(result.categoryId).toEqual(category.id);
+	});
+
 	test("Should throw error if post does not exist", async () => {
 		await expect(
 			PostRouter.createCaller(ctx).update({

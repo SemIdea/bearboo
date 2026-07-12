@@ -12,6 +12,8 @@ const domain_readRecentPosts = async ({
 	const fetched = await ctx.repositories.post.readRecents(
 		limit + 1,
 		input.cursor,
+		input.categoryId,
+		input.tagId,
 	);
 
 	const hasNextPage = fetched.length > limit;

@@ -73,4 +73,30 @@ describe("Read Recent Posts Controller Unitary Testing", () => {
 
 		expect(result.posts.map((post) => post.id)).toEqual([published.id]);
 	});
+
+	test("Should filter the recent feed by categoryId", async () => {
+		const ctx = await createAuthenticatedContext();
+		const category = await ctx.createCategory({ name: "Backend" });
+		const inCategory = await ctx.createPost({ categoryId: category.id });
+		await ctx.createPost();
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			categoryId: category.id,
+		});
+
+		expect(result.posts.map((post) => post.id)).toEqual([inCategory.id]);
+	});
+
+	test("Should filter the recent feed by tagId", async () => {
+		const ctx = await createAuthenticatedContext();
+		const tag = await ctx.createTag({ name: "prisma" });
+		const tagged = await ctx.createPost({ tagIds: [tag.id] });
+		await ctx.createPost();
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			tagId: tag.id,
+		});
+
+		expect(result.posts.map((post) => post.id)).toEqual([tagged.id]);
+	});
 });

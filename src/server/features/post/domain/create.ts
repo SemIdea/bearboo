@@ -25,8 +25,22 @@ const domain_createPost = async ({
 	const baseSlug = ctx.helpers.slug.generate(input.title);
 	const slug = await resolveAvailableSlug(ctx, baseSlug);
 	const status = input.status ?? "PUBLISHED";
+	const categoryId = input.categoryId ?? null;
 
-	return ctx.repositories.post.create(postId, { ...input, slug, status });
+	const post = await ctx.repositories.post.create(postId, {
+		title: input.title,
+		content: input.content,
+		userId: input.userId,
+		slug,
+		status,
+		categoryId,
+	});
+
+	if (input.tagIds?.length) {
+		await ctx.repositories.post.setTags(postId, input.tagIds);
+	}
+
+	return post;
 };
 
 export { domain_createPost };

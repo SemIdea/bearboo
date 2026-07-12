@@ -23,11 +23,18 @@ const domain_updatePost = async ({
 		});
 	}
 
-	return ctx.repositories.post.update(input.id, {
+	const updated = await ctx.repositories.post.update(input.id, {
 		title: input.title,
 		content: input.content,
 		status: input.status,
+		categoryId: input.categoryId,
 	});
+
+	if (input.tagIds) {
+		await ctx.repositories.post.setTags(input.id, input.tagIds);
+	}
+
+	return updated;
 };
 
 export { domain_updatePost };

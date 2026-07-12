@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { CategoryModel } from "../category";
 import { CommentModel } from "../comment";
 import { PostModel } from "../post";
 import { ResetTokenModel } from "../resetToken";
 import { SessionModel } from "../session";
+import { TagModel } from "../tag";
 import { UserModel } from "../user";
 import { VerifyTokenModel } from "../verifyToken";
 
@@ -27,6 +29,24 @@ const prismaMock = vi.hoisted(() => ({
 		update: vi.fn(),
 		delete: vi.fn(),
 		deleteMany: vi.fn(),
+	},
+	category: {
+		findMany: vi.fn(),
+		findUnique: vi.fn(),
+		create: vi.fn(),
+		update: vi.fn(),
+		delete: vi.fn(),
+	},
+	tag: {
+		findMany: vi.fn(),
+		findUnique: vi.fn(),
+		create: vi.fn(),
+		update: vi.fn(),
+		delete: vi.fn(),
+	},
+	postTag: {
+		deleteMany: vi.fn(),
+		createMany: vi.fn(),
 	},
 	session: {
 		findFirst: vi.fn(),
@@ -72,37 +92,49 @@ describe("Prisma-backed models", () => {
 		});
 	});
 
+	const postIncludeShape = {
+		user: {
+			select: {
+				id: true,
+				name: true,
+			},
+		},
+		comments: {
+			select: {
+				id: true,
+			},
+		},
+		category: true,
+		postTags: {
+			include: {
+				tag: true,
+			},
+		},
+	};
+
 	test("PostModel reads recent posts with author and comment metadata", async () => {
-		const posts = [{ id: "post-1" }];
+		const posts = [{ id: "post-1", postTags: [] }];
 		prismaMock.post.findMany.mockResolvedValue(posts);
 
-		await expect(PostModel.readRecents(5)).resolves.toBe(posts);
+		await expect(PostModel.readRecents(5)).resolves.toEqual([
+			{ id: "post-1", tags: [] },
+		]);
 
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
 			take: 5,
 			where: { status: "PUBLISHED" },
 			orderBy: { createdAt: "desc" },
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				comments: {
-					select: {
-						id: true,
-					},
-				},
-			},
+			include: postIncludeShape,
 		});
 	});
 
 	test("PostModel reads recent posts from a cursor", async () => {
-		const posts = [{ id: "post-2" }];
+		const posts = [{ id: "post-2", postTags: [] }];
 		prismaMock.post.findMany.mockResolvedValue(posts);
 
-		await expect(PostModel.readRecents(5, "post-1")).resolves.toBe(posts);
+		await expect(PostModel.readRecents(5, "post-1")).resolves.toEqual([
+			{ id: "post-2", tags: [] },
+		]);
 
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
 			take: 5,
@@ -110,19 +142,24 @@ describe("Prisma-backed models", () => {
 			skip: 1,
 			where: { status: "PUBLISHED" },
 			orderBy: { createdAt: "desc" },
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				comments: {
-					select: {
-						id: true,
-					},
-				},
+			include: postIncludeShape,
+		});
+	});
+
+	test("PostModel filters recent posts by categoryId and tagId", async () => {
+		prismaMock.post.findMany.mockResolvedValue([]);
+
+		await PostModel.readRecents(5, undefined, "category-1", "tag-1");
+
+		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
+			take: 5,
+			where: {
+				status: "PUBLISHED",
+				categoryId: "category-1",
+				postTags: { some: { tagId: "tag-1" } },
 			},
+			orderBy: { createdAt: "desc" },
+			include: postIncludeShape,
 		});
 	});
 
@@ -134,6 +171,57 @@ describe("Prisma-backed models", () => {
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
 			where: { userId: "user-1", status: "PUBLISHED" },
 		});
+	});
+
+	test("PostModel reads a post by slug with category and tags", async () => {
+		const tag = { id: "tag-1", name: "prisma", slug: "prisma" };
+		prismaMock.post.findUnique.mockResolvedValue({
+			id: "post-1",
+			category: null,
+			postTags: [{ tag }],
+		});
+
+		await expect(PostModel.readBySlug("my-post")).resolves.toEqual({
+			id: "post-1",
+			category: null,
+			tags: [tag],
+		});
+
+		expect(prismaMock.post.findUnique).toHaveBeenCalledWith({
+			where: { slug: "my-post" },
+			include: {
+				category: true,
+				postTags: { include: { tag: true } },
+			},
+		});
+	});
+
+	test("PostModel returns null when the slug does not exist", async () => {
+		prismaMock.post.findUnique.mockResolvedValue(null);
+
+		await expect(PostModel.readBySlug("missing")).resolves.toBeNull();
+	});
+
+	test("PostModel replaces a post's tags in one transaction", async () => {
+		prismaMock.$transaction.mockResolvedValue(undefined);
+		prismaMock.postTag.deleteMany.mockReturnValue("delete-op");
+		prismaMock.postTag.createMany.mockReturnValue("create-op");
+
+		await PostModel.setTags("post-1", ["tag-1", "tag-2"]);
+
+		expect(prismaMock.postTag.deleteMany).toHaveBeenCalledWith({
+			where: { postId: "post-1" },
+		});
+		expect(prismaMock.postTag.createMany).toHaveBeenCalledWith({
+			data: [
+				{ postId: "post-1", tagId: "tag-1" },
+				{ postId: "post-1", tagId: "tag-2" },
+			],
+		});
+		expect(prismaMock.$transaction).toHaveBeenCalledWith([
+			"delete-op",
+			"create-op",
+		]);
 	});
 
 	test("PostModel deletes comments and post in one transaction", async () => {
@@ -191,6 +279,38 @@ describe("Prisma-backed models", () => {
 					},
 				},
 			},
+		});
+	});
+
+	test("CategoryModel reads a category by name and lists all sorted by name", async () => {
+		const category = { id: "category-1", name: "Backend", slug: "backend" };
+		prismaMock.category.findUnique.mockResolvedValue(category);
+		prismaMock.category.findMany.mockResolvedValue([category]);
+
+		await expect(CategoryModel.readByName("Backend")).resolves.toBe(category);
+		await expect(CategoryModel.readAll()).resolves.toEqual([category]);
+
+		expect(prismaMock.category.findUnique).toHaveBeenCalledWith({
+			where: { name: "Backend" },
+		});
+		expect(prismaMock.category.findMany).toHaveBeenCalledWith({
+			orderBy: { name: "asc" },
+		});
+	});
+
+	test("TagModel reads a tag by name and lists all sorted by name", async () => {
+		const tag = { id: "tag-1", name: "prisma", slug: "prisma" };
+		prismaMock.tag.findUnique.mockResolvedValue(tag);
+		prismaMock.tag.findMany.mockResolvedValue([tag]);
+
+		await expect(TagModel.readByName("prisma")).resolves.toBe(tag);
+		await expect(TagModel.readAll()).resolves.toEqual([tag]);
+
+		expect(prismaMock.tag.findUnique).toHaveBeenCalledWith({
+			where: { name: "prisma" },
+		});
+		expect(prismaMock.tag.findMany).toHaveBeenCalledWith({
+			orderBy: { name: "asc" },
 		});
 	});
 

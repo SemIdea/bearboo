@@ -12,6 +12,8 @@ const createPostSchema = z.object({
 		.min(10, "Post content must be at least 10 characters long.")
 		.max(5000, "Post content must not exceed 5000 characters."),
 	status: postStatusSchema.optional(),
+	categoryId: z.string().optional(),
+	tagIds: z.array(z.string()).optional(),
 });
 
 const readPostSchema = z.object({
@@ -33,6 +35,8 @@ const updatePostSchema = z.object({
 		.min(10, "Post content must be at least 10 characters long.")
 		.optional(),
 	status: postStatusSchema.optional(),
+	categoryId: z.string().optional(),
+	tagIds: z.array(z.string()).optional(),
 });
 
 const deletePostSchema = z.object({
@@ -47,6 +51,8 @@ const readRecentPostsSchema = z
 	.object({
 		cursor: z.string().optional(),
 		limit: z.number().int().min(1).max(50).optional(),
+		categoryId: z.string().optional(),
+		tagId: z.string().optional(),
 	})
 	.optional();
 
@@ -57,9 +63,26 @@ const postEntitySchema = z.object({
 	content: z.string(),
 	slug: z.string(),
 	status: postStatusSchema,
+	categoryId: z.string().nullable(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+const postCategorySummarySchema = z
+	.object({
+		id: z.string(),
+		name: z.string(),
+		slug: z.string(),
+	})
+	.nullable();
+
+const postTagSummarySchema = z.array(
+	z.object({
+		id: z.string(),
+		name: z.string(),
+		slug: z.string(),
+	}),
+);
 
 const postEntityWithRelationsSchema = postEntitySchema.extend({
 	user: z.object({
@@ -71,11 +94,18 @@ const postEntityWithRelationsSchema = postEntitySchema.extend({
 			id: z.string(),
 		}),
 	),
+	category: postCategorySummarySchema,
+	tags: postTagSummarySchema,
+});
+
+const postEntityWithTaxonomySchema = postEntitySchema.extend({
+	category: postCategorySummarySchema,
+	tags: postTagSummarySchema,
 });
 
 const createPostOutputSchema = postEntitySchema;
 const readPostOutputSchema = postEntitySchema;
-const readPostBySlugOutputSchema = postEntitySchema;
+const readPostBySlugOutputSchema = postEntityWithTaxonomySchema;
 const updatePostOutputSchema = postEntitySchema;
 const deletePostOutputSchema = z.boolean();
 const revalidatePostOutputSchema = postEntitySchema;
@@ -108,6 +138,7 @@ export {
 	deletePostSchema,
 	postEntitySchema,
 	postEntityWithRelationsSchema,
+	postEntityWithTaxonomySchema,
 	postStatusSchema,
 	readPostBySlugOutputSchema,
 	readPostBySlugSchema,

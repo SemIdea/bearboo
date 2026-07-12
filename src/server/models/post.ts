@@ -10,8 +10,21 @@ type IPostEntity = {
 	content: string;
 	slug: string;
 	status: IPostStatus;
+	categoryId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+};
+
+type IPostCategorySummary = {
+	id: string;
+	name: string;
+	slug: string;
+};
+
+type IPostTagSummary = {
+	id: string;
+	name: string;
+	slug: string;
 };
 
 type IPostEntityWithRelations = IPostEntity & {
@@ -22,7 +35,17 @@ type IPostEntityWithRelations = IPostEntity & {
 	comments: {
 		id: string;
 	}[];
+	category: IPostCategorySummary | null;
+	tags: IPostTagSummary[];
 };
+
+type IPostEntityWithTaxonomy = IPostEntity & {
+	category: IPostCategorySummary | null;
+	tags: IPostTagSummary[];
+};
+
+const flattenTags = (postTags: { tag: IPostTagSummary }[]): IPostTagSummary[] =>
+	postTags.map(({ tag }) => tag);
 
 class PostModelClass extends BaseModel<IPostEntity> {
 	constructor() {
@@ -32,11 +55,17 @@ class PostModelClass extends BaseModel<IPostEntity> {
 	async readRecents(
 		count: number,
 		cursor?: string,
+		categoryId?: string,
+		tagId?: string,
 	): Promise<IPostEntityWithRelations[]> {
-		return prisma.post.findMany({
+		const posts = await prisma.post.findMany({
 			take: count,
 			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-			where: { status: "PUBLISHED" },
+			where: {
+				status: "PUBLISHED",
+				...(categoryId ? { categoryId } : {}),
+				...(tagId ? { postTags: { some: { tagId } } } : {}),
+			},
 			orderBy: {
 				createdAt: "desc",
 			},
@@ -52,8 +81,19 @@ class PostModelClass extends BaseModel<IPostEntity> {
 						id: true,
 					},
 				},
+				category: true,
+				postTags: {
+					include: {
+						tag: true,
+					},
+				},
 			},
 		});
+
+		return posts.map(({ postTags, ...post }) => ({
+			...post,
+			tags: flattenTags(postTags),
+		}));
 	}
 
 	async readUserPosts(userId: string): Promise<IPostEntity[]> {
@@ -65,12 +105,35 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		});
 	}
 
-	async readBySlug(slug: string): Promise<IPostEntity | null> {
-		return prisma.post.findUnique({
+	async readBySlug(slug: string): Promise<IPostEntityWithTaxonomy | null> {
+		const post = await prisma.post.findUnique({
 			where: {
 				slug,
 			},
+			include: {
+				category: true,
+				postTags: {
+					include: {
+						tag: true,
+					},
+				},
+			},
 		});
+
+		if (!post) return null;
+
+		const { postTags, ...rest } = post;
+
+		return { ...rest, tags: flattenTags(postTags) };
+	}
+
+	async setTags(postId: string, tagIds: string[]): Promise<void> {
+		await prisma.$transaction([
+			prisma.postTag.deleteMany({ where: { postId } }),
+			prisma.postTag.createMany({
+				data: tagIds.map((tagId) => ({ postId, tagId })),
+			}),
+		]);
 	}
 
 	async delete(id: string): Promise<boolean> {
@@ -102,10 +165,21 @@ type IPostModel = BaseModel<IPostEntity> & {
 	readRecents: (
 		count: number,
 		cursor?: string,
+		categoryId?: string,
+		tagId?: string,
 	) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
-	readBySlug: (slug: string) => Promise<IPostEntity | null>;
+	readBySlug: (slug: string) => Promise<IPostEntityWithTaxonomy | null>;
+	setTags: (postId: string, tagIds: string[]) => Promise<void>;
 };
 
-export type { IPostEntity, IPostEntityWithRelations, IPostModel, IPostStatus };
+export type {
+	IPostCategorySummary,
+	IPostEntity,
+	IPostEntityWithRelations,
+	IPostEntityWithTaxonomy,
+	IPostModel,
+	IPostStatus,
+	IPostTagSummary,
+};
 export { PostModel };

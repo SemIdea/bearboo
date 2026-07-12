@@ -81,4 +81,37 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(first.slug).toEqual("draft-duplicate");
 		expect(second.slug).toEqual("draft-duplicate-2");
 	});
+
+	test("Should create a post without category or tags when none is provided", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+		});
+
+		expect(result.categoryId).toBeNull();
+	});
+
+	test("Should associate an existing category and tags when provided", async () => {
+		const category = await ctx.createCategory({ name: "Backend" });
+		const tagA = await ctx.createTag({ name: "prisma" });
+		const tagB = await ctx.createTag({ name: "trpc" });
+
+		const created = await PostRouter.createCaller(ctx).create({
+			title: "Post With Taxonomy",
+			content: "This is a test post content.",
+			categoryId: category.id,
+			tagIds: [tagA.id, tagB.id],
+		});
+
+		expect(created.categoryId).toEqual(category.id);
+
+		const read = await PostRouter.createCaller(ctx).readBySlug({
+			slug: created.slug,
+		});
+
+		expect(read.category?.id).toEqual(category.id);
+		expect(read.tags.map((tag) => tag.id).sort()).toEqual(
+			[tagA.id, tagB.id].sort(),
+		);
+	});
 });
