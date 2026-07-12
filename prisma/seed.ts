@@ -1,12 +1,32 @@
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
 import { v4 as uuid } from "uuid";
-import { KebabCaseSlugGenerator } from "../src/lib/slug/implementations/kebabCase";
 
 const prisma = new PrismaClient();
-const slugGenerator = new KebabCaseSlugGenerator();
 
 const SEED_PASSWORD = "Password123!";
+
+// seed roda via `node prisma/seed.ts` (ESM nativo), que exige extensão em todo
+// import relativo — reimportar src/lib/slug quebraria a cadeia (kebabCase -> adapter,
+// ambos sem extensão, resolvidos hoje só via moduleResolution "bundler" do Next).
+// Duplica o mesmo algoritmo de src/lib/slug/implementations/kebabCase.ts.
+const COMBINING_DIACRITICS_START = 0x0300;
+const COMBINING_DIACRITICS_END = 0x036f;
+const DIACRITICS_REGEX = new RegExp(
+	`[${String.fromCharCode(COMBINING_DIACRITICS_START)}-${String.fromCharCode(COMBINING_DIACRITICS_END)}]`,
+	"g",
+);
+
+function generateSlug(title: string): string {
+	return title
+		.normalize("NFD")
+		.replace(DIACRITICS_REGEX, "")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.slice(0, 80)
+		.replace(/-+$/g, "");
+}
 
 async function main() {
 	console.log("Limpando dados existentes...");
@@ -84,7 +104,7 @@ async function main() {
 			id: uuid(),
 			userId: ana.id,
 			title: anaPost1Title,
-			slug: slugGenerator.generate(anaPost1Title),
+			slug: generateSlug(anaPost1Title),
 			content:
 				"# Bem-vindo!\n\nEsse é o primeiro post do blog, escrito em **markdown**.\n\n- item 1\n- item 2\n\nUse esse post pra testar leitura, comentários e edição.",
 		},
@@ -97,7 +117,7 @@ async function main() {
 			id: uuid(),
 			userId: ana.id,
 			title: anaPost2Title,
-			slug: slugGenerator.generate(anaPost2Title),
+			slug: generateSlug(anaPost2Title),
 			content:
 				"Você pode usar `código`, **negrito**, _itálico_ e listas.\n\n1. Primeiro\n2. Segundo\n3. Terceiro",
 		},
@@ -113,7 +133,7 @@ async function main() {
 			id: uuid(),
 			userId: bruno.id,
 			title: brunoPost1Title,
-			slug: slugGenerator.generate(brunoPost1Title),
+			slug: generateSlug(brunoPost1Title),
 			content:
 				"tRPC nos dá tipagem ponta a ponta sem precisar gerar client separado. Nesse post explico as trocas que fizemos.",
 		},

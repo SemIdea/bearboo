@@ -1,11 +1,14 @@
+import { TRPCError } from "@trpc/server";
 import { formatDistance } from "date-fns";
 import { Metadata } from "next";
 import { cacheLife } from "next/cache";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
 import { createCaller } from "@/server/caller";
+import { PostErrorCode } from "@/shared/error/post";
 import { CommentArea } from "./page.client";
 
 type PageProps = {
@@ -44,7 +47,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 				type: "article",
 			},
 		};
-	} catch {
+	} catch (error) {
+		if (
+			error instanceof TRPCError &&
+			error.message === PostErrorCode.POST_NOT_FOUND
+		) {
+			return {
+				title: "Post Not Found",
+			};
+		}
+
 		return {
 			title: "Error | Bearboo",
 		};
@@ -68,7 +80,21 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 
 	const { slug } = params;
 
-	const post = await caller.post.readBySlug({ slug });
+	let post: Awaited<ReturnType<typeof caller.post.readBySlug>>;
+
+	try {
+		post = await caller.post.readBySlug({ slug });
+	} catch (error) {
+		if (
+			error instanceof TRPCError &&
+			error.message === PostErrorCode.POST_NOT_FOUND
+		) {
+			notFound();
+		}
+
+		throw error;
+	}
+
 	const user = await caller.user.read({ id: post.userId });
 
 	const isUpdated =
