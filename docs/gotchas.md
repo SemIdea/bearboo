@@ -58,6 +58,18 @@
 
 ---
 
+## Next.js — página `"use cache"` nunca sabe quem está pedindo (sem cookies)
+
+**Gatilho:** se você precisa personalizar o conteúdo de uma rota que hoje é `"use cache"`/`cacheLife(...)` com base em quem está logado (ex: dono vê algo que visitante não vê).
+
+**Comportamento:** `src/server/caller.ts` tem dois callers: `createCaller()` (usado dentro de componentes `"use cache"`, monta o contexto com `headers: new Headers()` **sempre vazio, sem cookies**) e `createDynamicCaller()` (lê cookies de verdade, mas **redireciona pra `/auth/login` se não houver sessão** — só serve pra página 100% autenticada). Nenhum dos dois serve sozinho pra "página pública que às vezes precisa saber quem é o dono": `createCaller()` nunca vê `ctx.user` (mordida em `docs/features/011-post-status-preview/plan.md` § 9 — tentar passar `ctx.user?.id` pro domain dentro de um componente `"use cache"` simplesmente nunca resolve, porque o caller usado ali nunca teve cookies em primeiro lugar). E não dá pra só chamar `cookies()` dentro do componente `"use cache"` — Cache Components proíbe leitura dinâmica nesse escopo (mesma família de regra do gotcha anterior).
+
+**Solução:** criar um terceiro caller — `createOptionalDynamicCaller()` (`src/server/caller.ts`) — que lê cookies como `createDynamicCaller` mas **não redireciona** se não houver sessão. Estruturar a página em dois componentes: o cacheado (`"use cache"`, caminho público/comum, via `createCaller()`) tenta primeiro; só quando ele não encontra nada, um componente **novo, não-cacheado, dentro do próprio `<Suspense>`**, tenta de novo com `createOptionalDynamicCaller()`. Isso preserva o cache pro caminho comum e paga o custo dinâmico só no caso raro que precisa de identidade. Não dá pra remover `"use cache"` da página inteira sem perder o cache pro tráfego comum — só faça isso se o caso "personalizado" for a maioria do tráfego, não a exceção.
+
+**Ref:** `docs/features/011-post-status-preview/plan.md` § 9, `src/server/caller.ts`.
+
+---
+
 <!--
 SEED candidato adicional de módulo detectado no scan (Next.js App Router), ainda não confirmado como mordido — ativar só se acontecer.
 

@@ -42,6 +42,7 @@ Proposta de valor em uma frase: *"[A DEFINIR — validar com o dono do produto]"
 | RF-04 | CRUD de posts — criar, ler, atualizar, deletar, revalidar (ISR) | P0 |
 | RF-05 | CRUD de comentários em posts — criar, listar, atualizar, deletar | P0 |
 | RF-06 | Perfil de usuário — editar nome/bio, visualizar posts e comentários publicados pelo usuário | P1 |
+| RF-07 | Admin/CMS (autor) — autor controla status de publicação (draft/published/archived), vê preview do próprio post não publicado na URL real, gerencia todos os próprios posts com filtro por status/categoria/tag (`docs/roadmap.md` Fase 2); painel escopado por dono, não site-wide — depende de RF novo (roles) quando Fase 3 começar | P1 |
 
 *(RFs inferidos de `git log` — commits `feat:` de registro/login/sessão, verificação de token, reset de senha, CRUD de post/comentário, e edição de perfil. Ver histórico completo via `git log --oneline --grep=feat`.)*
 
@@ -65,9 +66,9 @@ Proposta de valor em uma frase: *"[A DEFINIR — validar com o dono do produto]"
 
 **Objetivo:** blog público + auth + CRUD de posts/comentários funcionando fim-a-fim (Fase 0 do roadmap concluída; Fase 1 "Blog público bem feito" parcialmente concluída).
 
-**Escopo já implementado:** RF-01 a RF-06.
+**Escopo já implementado:** RF-01 a RF-07.
 
-**Do roadmap Fase 1 ainda faltando:** imagem de capa, posts relacionados. Slug único (`docs/features/002-post-slug/`), paginação (`docs/features/003-post-pagination/`), `enum PostStatus` (`docs/features/004-post-status/`), tags/categorias (`docs/features/005-tags-categorias/`) e tempo estimado de leitura (`docs/features/006-tempo-leitura/`) já implementados.
+**Fase 1 do roadmap concluída** (com 1 pendência residual aceita — status HTTP de `/post/[slug]`, ver `docs/features/009-post-404-status/`). **Fase 2 concluída** (com 1 pendência adiada pra Fase 8 — upload de arquivo de capa). Ver `docs/roadmap.md` § Progresso geral pro detalhamento por feature.
 
 **Nota de discrepância com o roadmap:** a "stack sugerida" da Fase 0 do roadmap lista Auth.js/Better Auth, Playwright e GitHub Actions. Playwright/GitHub Actions não foram adotados (testes são `vitest`, sem CI — `.github/workflows/` ausente, ver `ach.md` § CI/hooks). **Auth.js/Better Auth foi decisão explícita de não adotar — ver ADR-0005**: a auth própria (sessão opaca em `Session`, Postgres como source of truth) é mantida, com hardening incremental em vez de substituição por lib.
 
@@ -96,7 +97,7 @@ Busca (6), analytics interno (7), upload de mídia (8), qualidade de produção/
 ## 9. Não-escopo (v1)
 
 - **Busca semântica de posts.** Mencionada no README como funcionalidade/futuro, sem implementação atual — fora de escopo até virar RF confirmado.
-- **Tudo das Fases 2-11 do `docs/roadmap.md`** (admin/CMS, papéis e permissões, workflow editorial, SEO, busca, analytics, upload de mídia, CI/CD, observabilidade) — planejado, não construído. Não é "fora de escopo" permanente, é *ainda não* — cada fase entra como RF novo quando a implementação começar (ver § 4).
+- **Tudo das Fases 3-11 do `docs/roadmap.md`** (papéis e permissões, workflow editorial, SEO completo, busca, analytics, upload de mídia, CI/CD, observabilidade) — planejado, não construído (Fase 2, admin/CMS, virou RF-07 e já está concluída). Não é "fora de escopo" permanente, é *ainda não* — cada fase entra como RF novo quando a implementação começar (ver § 4).
 
 ## 10. Glossário
 
