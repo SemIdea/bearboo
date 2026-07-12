@@ -97,6 +97,33 @@ describe("Prisma-backed models", () => {
 		});
 	});
 
+	test("PostModel reads recent posts from a cursor", async () => {
+		const posts = [{ id: "post-2" }];
+		prismaMock.post.findMany.mockResolvedValue(posts);
+
+		await expect(PostModel.readRecents(5, "post-1")).resolves.toBe(posts);
+
+		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
+			take: 5,
+			cursor: { id: "post-1" },
+			skip: 1,
+			orderBy: { createdAt: "desc" },
+			include: {
+				user: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				comments: {
+					select: {
+						id: true,
+					},
+				},
+			},
+		});
+	});
+
 	test("PostModel reads posts by user", async () => {
 		prismaMock.post.findMany.mockResolvedValue([]);
 

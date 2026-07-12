@@ -26,9 +26,13 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		super(prisma.post);
 	}
 
-	async readRecents(count: number): Promise<IPostEntityWithRelations[]> {
+	async readRecents(
+		count: number,
+		cursor?: string,
+	): Promise<IPostEntityWithRelations[]> {
 		return prisma.post.findMany({
 			take: count,
+			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
 			orderBy: {
 				createdAt: "desc",
 			},
@@ -90,7 +94,10 @@ class PostModelClass extends BaseModel<IPostEntity> {
 const PostModel = new PostModelClass();
 
 type IPostModel = BaseModel<IPostEntity> & {
-	readRecents: (count: number) => Promise<IPostEntityWithRelations[]>;
+	readRecents: (
+		count: number,
+		cursor?: string,
+	) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
 	readBySlug: (slug: string) => Promise<IPostEntity | null>;
 };

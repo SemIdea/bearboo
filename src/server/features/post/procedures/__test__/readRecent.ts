@@ -1,14 +1,63 @@
 import { describe, expect, test } from "vitest";
-import { createTestContext } from "@/test/context";
+import { createAuthenticatedContext } from "@/test/context";
 import { PostRouter } from "../../index";
 
 describe("Read Recent Posts Controller Unitary Testing", () => {
-	const ctx = createTestContext();
+	test("Should return the recent posts capped at the default page size", async () => {
+		const ctx = await createAuthenticatedContext();
 
-	test("Should return the recent posts", async () => {
 		const result = await PostRouter.createCaller(ctx).readRecent();
 
-		expect(result).toBeDefined();
-		expect(result.length).toBeLessThanOrEqual(30);
+		expect(result.posts.length).toBeLessThanOrEqual(10);
+		expect(result).toHaveProperty("nextCursor");
+	});
+
+	test("Should return a nextCursor when there are more posts than the limit", async () => {
+		const ctx = await createAuthenticatedContext();
+		await ctx.createPost();
+		await ctx.createPost();
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			limit: 1,
+		});
+
+		expect(result.posts).toHaveLength(1);
+		expect(result.nextCursor).not.toBeNull();
+	});
+
+	test("Should paginate through all posts without repeating or skipping any", async () => {
+		const ctx = await createAuthenticatedContext();
+		const post1 = await ctx.createPost();
+		const post2 = await ctx.createPost();
+		const post3 = await ctx.createPost();
+
+		const caller = PostRouter.createCaller(ctx);
+
+		const firstPage = await caller.readRecent({ limit: 2 });
+		expect(firstPage.posts).toHaveLength(2);
+		expect(firstPage.nextCursor).not.toBeNull();
+
+		const secondPage = await caller.readRecent({
+			limit: 2,
+			cursor: firstPage.nextCursor ?? undefined,
+		});
+		expect(secondPage.posts).toHaveLength(1);
+		expect(secondPage.nextCursor).toBeNull();
+
+		const seenIds = [...firstPage.posts, ...secondPage.posts]
+			.map((post) => post.id)
+			.sort();
+		expect(seenIds).toEqual([post1.id, post2.id, post3.id].sort());
+	});
+
+	test("Should return a null nextCursor when the last page is reached", async () => {
+		const ctx = await createAuthenticatedContext();
+		await ctx.createPost();
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			limit: 50,
+		});
+
+		expect(result.nextCursor).toBeNull();
 	});
 });

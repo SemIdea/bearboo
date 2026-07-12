@@ -39,6 +39,13 @@ const revalidatePostSchema = z.object({
 	id: z.string(),
 });
 
+const readRecentPostsSchema = z
+	.object({
+		cursor: z.string().optional(),
+		limit: z.number().int().min(1).max(50).optional(),
+	})
+	.optional();
+
 const postEntitySchema = z.object({
 	id: z.string(),
 	userId: z.string(),
@@ -67,7 +74,10 @@ const readPostBySlugOutputSchema = postEntitySchema;
 const updatePostOutputSchema = postEntitySchema;
 const deletePostOutputSchema = z.boolean();
 const revalidatePostOutputSchema = postEntitySchema;
-const readRecentPostsOutputSchema = z.array(postEntityWithRelationsSchema);
+const readRecentPostsOutputSchema = z.object({
+	posts: z.array(postEntityWithRelationsSchema),
+	nextCursor: z.string().nullable(),
+});
 
 type CreatePostInput = z.TypeOf<typeof createPostSchema>;
 type ReadPostInput = z.TypeOf<typeof readPostSchema>;
@@ -75,12 +85,14 @@ type ReadPostBySlugInput = z.TypeOf<typeof readPostBySlugSchema>;
 type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
 type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
 type RevalidatePostInput = z.TypeOf<typeof revalidatePostSchema>;
+type ReadRecentPostsInput = NonNullable<z.TypeOf<typeof readRecentPostsSchema>>;
 
 export type {
 	CreatePostInput,
 	DeletePostInput,
 	ReadPostBySlugInput,
 	ReadPostInput,
+	ReadRecentPostsInput,
 	RevalidatePostInput,
 	UpdatePostInput,
 };
@@ -96,6 +108,7 @@ export {
 	readPostOutputSchema,
 	readPostSchema,
 	readRecentPostsOutputSchema,
+	readRecentPostsSchema,
 	revalidatePostOutputSchema,
 	revalidatePostSchema,
 	updatePostOutputSchema,
