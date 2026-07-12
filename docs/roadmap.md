@@ -7,7 +7,7 @@
 | Fase | Status | Nota |
 | --- | --- | --- |
 | 0 — Organização inicial | ✅ Concluída | — |
-| 1 — Blog público bem feito | 🟡 Parcial | slug (`docs/features/002-post-slug/`), paginação (`docs/features/003-post-pagination/`), status/publicação (`docs/features/004-post-status/`) e tags/categorias (`docs/features/005-tags-categorias/`) implementados e verificados; falta capa, tempo de leitura, relacionados |
+| 1 — Blog público bem feito | ✅ Concluída (com 1 pendência residual) | todos os itens do checklist implementados: slug, paginação, status/publicação, tags/categorias (`docs/features/002` a `005`), tempo de leitura (`006`), posts relacionados (`007`), imagem de capa (`010`); pendência residual: status HTTP de `/post/[slug]` continua `200` em vez de `404` pra slug inexistente — limitação de framework (Cache Components), fix real é infra nova (Edge/middleware), decisão pausada (`docs/features/009-post-404-status/`) |
 | 2 — Admin/CMS | 🟡 Parcial | CRUD de post já existe, campo `PostStatus` pronto pro workflow de rascunho/publicar (`docs/features/004-post-status/`), mas sem painel `/admin` dedicado (listagem/filtros/preview) |
 | 3 — Autenticação e permissões | ⬜ Não iniciada | bloqueada até `docs/features/001-auth-hardening/` fechar (ver nota na fase) |
 | 4 — Workflow editorial | ⬜ Não iniciada | — |
@@ -108,7 +108,7 @@ pnpm install
 pnpm dev
 ```
 
-## Fase 1 — Blog público bem feito 🟡 Parcial
+## Fase 1 — Blog público bem feito ✅ Concluída (com 1 pendência residual)
 
 ### Objetivo
 
