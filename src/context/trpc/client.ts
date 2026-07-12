@@ -7,7 +7,18 @@ export const createTRPCClient = () => {
 	return trpc.createClient({
 		links: [
 			loggerLink({
-				enabled: () => true,
+				enabled: (opts) => {
+					// `path` is spread into `opts` at runtime for the "down" direction too
+					// (see @trpc/client's loggerLink), but its public type omits it there.
+					const path = (opts as { path?: string }).path;
+					const isExpectedAnonymousSessionCheck =
+						opts.direction === "down" &&
+						path === "auth.session.me" &&
+						"data" in opts.result &&
+						opts.result.data?.code === "UNAUTHORIZED";
+
+					return !isExpectedAnonymousSessionCheck;
+				},
 			}),
 			sessionRefreshLink,
 			httpBatchLink({
