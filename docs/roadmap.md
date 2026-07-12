@@ -125,7 +125,7 @@ Ter a parte pública do blog funcionando bem.
 * [x] autor (post/comentário mostram o `user` relacionado);
 * [x] imagem de capa — `Post.coverImageUrl?` (migration `add_post_cover_image`); `post.create`/`post.update` aceitam URL opcional (validada com `z.string().url()`); exibida no card da listagem e no topo da página do post (`<img>` simples, sem `next/image` — repo não usa, evita configurar `images.remotePatterns` pra URL arbitrária de usuário) (`docs/features/010-post-cover-image/`). Sem upload de arquivo — fica pra Fase 2 (Admin/CMS);
 * [x] tempo estimado de leitura — `readingTimeMinutes` calculado on-the-fly a partir do `content` (200 palavras/minuto, mínimo 1 min), via `z.transform()` no schema de output de post; aparece em todo endpoint que retorna post (`create`, `read`, `readBySlug`, `update`, `revalidate`, `readRecent`, `user.readPosts`) sem tocar domain/model (`docs/features/006-tempo-leitura/`). Sem UI mostrando o valor ainda — fica pra depois da refatoração de front;
-* [ ] posts relacionados;
+* [x] posts relacionados — `post.readRelated` (mesma categoria OU pelo menos uma tag em comum, exclui o próprio post, só `PUBLISHED`, ordena por mais recente); seção "Related posts" na página do post (`docs/features/007-posts-relacionados/`). Sem ranking ponderado — fica pra Fase 6 (busca/descoberta);
 * [x] página pública do autor (`src/app/(half)/user/[id]/`).
 
 ### Modelos principais
