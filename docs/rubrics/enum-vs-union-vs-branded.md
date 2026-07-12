@@ -4,7 +4,7 @@
 
 | Caso | Escolha | Anti-pattern |
 | --- | --- | --- |
-| Valor existe no DB (status, role, plano) | **Enum do ORM** (Prisma enum, etc) — único caminho que sobrevive a `generate` | Enum TS puro espelhando o do ORM — duplicação |
+| Valor existe no DB (status, role, plano) — **neste repo** | `enum` no `schema.prisma` pra persistência **+ union literal hand-rolled** no model do app (`src/server/models/<entity>.ts`, ex. `IPostStatus`/`IRole`), nunca o tipo gerado importado de `@prisma/client` fora de `infra/drivers/`/`test/prisma/` | Importar o tipo do Prisma client (`import { Role } from "@prisma/client"`) em domain/procedure/lib — acopla o app ao client gerado onde o resto do código já não faz isso |
 | ≤ 5 valores fechados, só vivem em código | **Union literal** (`"latest" \| "next" \| "beta"`) | Enum TS puro — gera lixo de transpilação, não tree-shakeable |
 | String aberta com regra (user-input, dist-tag livre) | **Schema parser** (Zod) + parse no boundary | Validar dentro do domain (viola regra dura 16) |
 | Primitivo com invariante semântica (sha256, userId ≠ sessionId, currency cents) | **Branded type** (`type Hash = string & { __brand: "Hash" }`) | `string` cru — perde checagem em call-site |
@@ -24,7 +24,7 @@
 
 ## Antiexemplos
 
-- ❌ `enum Plan { FREE = "FREE", PRO = "PRO" }` em TS quando o Prisma já tem `enum Plan { FREE, PRO }` — usa o do Prisma direto.
+- ❌ `enum Plan { FREE = "FREE", PRO = "PRO" }` em TS (enum de verdade, não union) quando o Prisma já tem `enum Plan { FREE, PRO }` — usa union literal (`"FREE" | "PRO"`) hand-rolled no model, não um enum TS espelhado nem o tipo importado de `@prisma/client` (ver linha da tabela acima — corrigido 2026-07-12 após achar o precedente real, `IPostStatus`/`IRole`, durante `013-role-based-permissions`).
 - ❌ `type DistTag = string` aceitando qualquer coisa — usa union literal se fechado, ou Zod se aberto com regra.
 - ❌ `copy(src: string, dst: string)` chamado como `copy(dst, src)` por engano — branded `SrcPath` e `DstPath` resolvem.
 - ❌ Branded em todo `string` "por consistência" — overhead sem ganho de checagem.
