@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 0 — Organização inicial | ✅ Concluída | — |
 | 1 — Blog público bem feito | ✅ Concluída (com 1 pendência residual) | todos os itens do checklist implementados: slug, paginação, status/publicação, tags/categorias (`docs/features/002` a `005`), tempo de leitura (`006`), posts relacionados (`007`), imagem de capa (`010`); pendência residual: status HTTP de `/post/[slug]` continua `200` em vez de `404` pra slug inexistente — limitação de framework (Cache Components), aceita como conhecida por ora (`docs/features/009-post-404-status/`) |
-| 2 — Admin/CMS | 🟡 Parcial | CRUD de post já existe, campo `PostStatus` pronto pro workflow de rascunho/publicar (`docs/features/004-post-status/`), mas sem painel `/admin` dedicado (listagem/filtros/preview) |
+| 2 — Admin/CMS | ✅ Concluída (com 1 pendência adiada) | seletor de status, preview de rascunho na URL real (`docs/features/011-post-status-preview/`), painel "meus posts" com filtros por status/categoria/tag (`docs/features/012-my-posts-panel/`, escopado sem roles — ver nota na fase); pendência adiada: upload de arquivo de imagem de capa vai pra Fase 8 (decisão do dono, 2026-07-12) — capa via URL já existe (`docs/features/010-post-cover-image/`) |
 | 3 — Autenticação e permissões | ⬜ Não iniciada | bloqueada até `docs/features/001-auth-hardening/` fechar (ver nota na fase) |
 | 4 — Workflow editorial | ⬜ Não iniciada | — |
 | 5 — SEO e publicação profissional | 🟡 Parcial | metadata + Open Graph por post já existem; falta sitemap/robots/RSS/canonical/Twitter Card/schema.org |
@@ -160,7 +160,7 @@ enum PostStatus {
 
 Essa fase está pronta quando o usuário consegue acessar o blog público, ver posts, navegar por tags/categorias e abrir posts individuais.
 
-## Fase 2 — Admin/CMS próprio 🟡 Parcial
+## Fase 2 — Admin/CMS próprio ✅ Concluída (com 1 pendência adiada)
 
 ### Objetivo
 
@@ -175,9 +175,9 @@ Criar um painel administrativo para gerenciar posts.
 * [x] publicar post / salvar como rascunho / arquivar — seletor de status (`<select>`) nos formulários de criar/editar; `PostStatus` já existia no schema (`docs/features/004-post-status/`) (`docs/features/011-post-status-preview/`);
 * [ ] upload de imagem de capa — adiado pra Fase 8 (decisão do dono, 2026-07-12): capa via URL já existe (`docs/features/010-post-cover-image/`), upload de arquivo real exige decisão de storage que pertence à Fase 8 (Upload e mídia), não faz sentido decidir só pro post;
 * [x] preview antes de publicar — dono consegue abrir a URL real do próprio post (`/post/<slug>`) mesmo em DRAFT/ARCHIVED e vê um banner "só você vê isso"; qualquer outra pessoa continua recebendo 404 (`docs/features/011-post-status-preview/`);
-* [ ] listagem de posts no admin (existe listagem pública, não um painel admin com filtros);
-* [ ] filtros por status — leitura já filtra por `PUBLISHED`; falta o painel admin pra escolher outros status;
-* [ ] filtros por categoria/tag.
+* [x] listagem de posts no admin — escopado como painel **"meus posts"** (`/post/mine`), não site-wide: sem roles (Fase 3 ainda não iniciada), a única regra de autorização hoje é "dono edita/deleta o próprio post", então o painel só lista os posts do usuário logado; quando Fase 3 trouxer roles, um `ADMIN` pode ganhar acesso a ver posts de outros usuários como extensão desta tela (`docs/features/012-my-posts-panel/`);
+* [x] filtros por status — painel "meus posts" filtra por qualquer status, não só `PUBLISHED` (`docs/features/012-my-posts-panel/`);
+* [x] filtros por categoria/tag — idem, no mesmo painel (`docs/features/012-my-posts-panel/`).
 
 ### Telas
 
