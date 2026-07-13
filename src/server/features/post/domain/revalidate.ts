@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { DomainInput } from "@/server/createDomain";
 import { PostErrorCode } from "@/shared/error/post";
 import { RevalidatePostInput } from "../schema";
@@ -24,7 +24,7 @@ const domain_revalidatePost = async ({
 		});
 	}
 
-	revalidatePath(`/post/${post.slug}`);
+	revalidateTag("posts", "hours");
 
 	return post;
 };

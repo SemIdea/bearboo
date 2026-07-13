@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { PostErrorCode } from "@/shared/error/post";
 import {
@@ -9,7 +9,7 @@ import {
 import { PostRouter } from "../../index";
 
 vi.mock("next/cache", () => ({
-	revalidatePath: vi.fn(),
+	revalidateTag: vi.fn(),
 }));
 
 describe("Revalidate Post Controller Unitary Testing", () => {
@@ -30,7 +30,7 @@ describe("Revalidate Post Controller Unitary Testing", () => {
 		expect(result.id).toBe(post.id);
 		expect(result.userId).toBe(ctx.user.id);
 
-		expect(revalidatePath).toHaveBeenCalledWith(`/post/${post.slug}`);
+		expect(revalidateTag).toHaveBeenCalledWith("posts", "hours");
 	});
 
 	test("Should throw an error if post does not exist", async () => {

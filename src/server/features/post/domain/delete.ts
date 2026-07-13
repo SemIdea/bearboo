@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { revalidateTag } from "next/cache";
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
 import { PostErrorCode } from "@/shared/error/post";
@@ -30,7 +31,11 @@ const domain_deletePost = async ({
 		});
 	}
 
-	return ctx.repositories.post.delete(post.id);
+	const deleted = await ctx.repositories.post.delete(post.id);
+
+	revalidateTag("posts", "hours");
+
+	return deleted;
 };
 
 export { domain_deletePost };

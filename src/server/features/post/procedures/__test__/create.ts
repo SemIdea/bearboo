@@ -1,9 +1,14 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { revalidateTag } from "next/cache";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
 import { PostRouter } from "../../index";
+
+vi.mock("next/cache", () => ({
+	revalidateTag: vi.fn(),
+}));
 
 describe("Create Post Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;
@@ -25,6 +30,15 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(result.title).toEqual(input.title);
 		expect(result.content).toEqual(input.content);
 		expect(result.userId).toEqual(user.id);
+	});
+
+	test("Should revalidate the posts cache tag after creating", async () => {
+		await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+		});
+
+		expect(revalidateTag).toHaveBeenCalledWith("posts", "hours");
 	});
 
 	test("Should generate a slug derived from the title", async () => {

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { formatDistance } from "date-fns";
 import { Metadata } from "next";
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
@@ -25,6 +25,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	"use cache";
 	cacheLife("hours");
+	cacheTag("posts");
 
 	const { slug } = await params;
 
@@ -81,6 +82,7 @@ type User = Awaited<
 const PostContent = async ({ params: paramsPromise }: PageProps) => {
 	"use cache";
 	cacheLife("hours");
+	cacheTag("posts");
 
 	const { slug } = await paramsPromise;
 	const caller = await createCaller();

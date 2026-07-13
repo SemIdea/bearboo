@@ -1,11 +1,16 @@
 import { TRPCError } from "@trpc/server";
-import { beforeEach, describe, expect, test } from "vitest";
+import { revalidateTag } from "next/cache";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { PostErrorCode } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
 import { PostRouter } from "../../index";
+
+vi.mock("next/cache", () => ({
+	revalidateTag: vi.fn(),
+}));
 
 describe("Delete Post Controller Unitary Testing", () => {
 	let ctx: IControllerContextDTO;
@@ -23,6 +28,14 @@ describe("Delete Post Controller Unitary Testing", () => {
 		const result = await ctx.repositories.post.read(id);
 
 		expect(result).toBeNull();
+	});
+
+	test("Should revalidate the posts cache tag after deleting", async () => {
+		const post = await ctx.createPost();
+
+		await PostRouter.createCaller(ctx).delete({ id: post.id });
+
+		expect(revalidateTag).toHaveBeenCalledWith("posts", "hours");
 	});
 
 	test("Should throw an error if post does not exist", async () => {

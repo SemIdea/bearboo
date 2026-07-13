@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { IBaseContextDTO } from "@/server/createContext";
 import { DomainInput } from "@/server/createDomain";
 import { CreatePostInput } from "../schema";
@@ -41,6 +42,8 @@ const domain_createPost = async ({
 	if (input.tagIds?.length) {
 		await ctx.repositories.post.setTags(postId, input.tagIds);
 	}
+
+	revalidateTag("posts", "hours");
 
 	return post;
 };
