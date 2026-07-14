@@ -26,6 +26,7 @@
 | US-008 | Criar, listar, atualizar e deletar comentário | Comentários | RF-05 | done |
 | US-009 | Ver e editar perfil de usuário | Perfil | RF-06 | done |
 | US-010 | Atuar conforme papel (Admin/Editor/Author) | Autenticação | RF-08 | done |
+| US-011 | Publicar post via workflow de revisão | Posts | RF-09 | done |
 
 ## Pendências Técnicas
 
@@ -222,6 +223,54 @@ Scenario: Admin promove outro usuário
 ---
 
 ## Épico Posts
+
+### US-011 — [Persona] publica post via workflow de revisão
+
+- **Persona:** `[A DEFINIR]`.
+- **Story:** Como `[persona]` com um papel (`ADMIN`/`EDITOR`/`AUTHOR`), quero que a publicação de um post siga um workflow de revisão — Author envia pra revisão, Admin/Editor aprova/rejeita/publica/agenda/arquiva — em vez de qualquer dono publicar/arquivar o próprio post livremente.
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Author cria post e ele nasce DRAFT
+  Given um usuário com papel AUTHOR
+  When ele cria um post sem informar status
+  Then o post é persistido como DRAFT
+
+Scenario: Author envia o próprio rascunho pra revisão
+  Given um post DRAFT pertencente ao usuário logado
+  When ele envia o post pra revisão
+  Then o post fica IN_REVIEW
+
+Scenario: Editor aprova e publica um post em revisão
+  Given um post IN_REVIEW
+  When um Editor aprova o post sem data de agendamento
+  Then o post fica PUBLISHED imediatamente
+
+Scenario: Admin agenda a publicação de um post em revisão
+  Given um post IN_REVIEW
+  When um Admin aprova o post informando uma data futura
+  Then o post fica SCHEDULED, e passa a aparecer publicamente só quando a data chega
+
+Scenario: Editor rejeita um post em revisão com motivo
+  Given um post IN_REVIEW
+  When um Editor rejeita informando um motivo
+  Then o post volta pra DRAFT e o motivo fica visível pro dono
+
+Scenario: Admin arquiva um post de qualquer usuário
+  Given um post de outro usuário
+  When um Admin arquiva o post
+  Then o post fica ARCHIVED
+
+Scenario: Author tenta publicar ou arquivar o próprio post direto
+  Given um post pertencente ao usuário logado (papel AUTHOR)
+  When ele tenta publicar ou arquivar esse post diretamente
+  Then a operação é rejeitada (FORBIDDEN)
+```
+
+**Metadata:** RF-09. *Test ref:* `src/server/features/post/procedures/__test__/{submitForReview,publish,reject,archive,readReviewComments}.ts`. *Spec:* `docs/features/014-post-review-workflow/spec.md`.
+
+---
 
 ### US-006 — [Persona] cria e lê posts
 

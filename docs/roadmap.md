@@ -10,7 +10,7 @@
 | 1 — Blog público bem feito | ✅ Concluída (com 1 pendência residual) | todos os itens do checklist implementados: slug, paginação, status/publicação, tags/categorias (`docs/features/002` a `005`), tempo de leitura (`006`), posts relacionados (`007`), imagem de capa (`010`); pendência residual: status HTTP de `/post/[slug]` continua `200` em vez de `404` pra slug inexistente — limitação de framework (Cache Components), aceita como conhecida por ora (`docs/features/009-post-404-status/`) |
 | 2 — Admin/CMS | ✅ Concluída (com 1 pendência adiada) | seletor de status, preview de rascunho na URL real (`docs/features/011-post-status-preview/`), painel "meus posts" com filtros por status/categoria/tag (`docs/features/012-my-posts-panel/`, escopado sem roles — ver nota na fase); pendência adiada: upload de arquivo de imagem de capa vai pra Fase 8 (decisão do dono, 2026-07-12) — capa via URL já existe (`docs/features/010-post-cover-image/`) |
 | 3 — Autenticação e permissões | ⬜ Não iniciada | pré-requisito `docs/features/001-auth-hardening/` concluído (2026-07-12) — camada de aplicação (sessão/cookies/CSRF/rate limit/mensagens); infra (TLS, `docker-compose.yml`) adiada. Fase em si (papéis ADMIN/EDITOR/AUTHOR) ainda não iniciada |
-| 4 — Workflow editorial | ⬜ Não iniciada | — |
+| 4 — Workflow editorial | ✅ Concluída (com 1 pendência adiada) | `docs/features/014-post-review-workflow/`: `IN_REVIEW`/`SCHEDULED`, enviar/aprovar/rejeitar (motivo obrigatório)/publicar direto/agendar/arquivar, `PostReviewComment`; restrição de publish/archive a Admin/Editor (fecha a pendência da Fase 3); agendamento via checagem lazy no read, sem scheduler novo. Pendência adiada: histórico de diffs de edição (`PostRevision`) — mesmo padrão da Fase 2, que adiou upload de imagem pra Fase 8 |
 | 5 — SEO e publicação profissional | 🟡 Parcial | metadata + Open Graph por post já existem; falta sitemap/robots/RSS/canonical/Twitter Card/schema.org |
 | 6 — Busca e descoberta | ⬜ Não iniciada | — |
 | 7 — Analytics interno | ⬜ Não iniciada | — |
@@ -249,7 +249,9 @@ Essa fase está pronta quando o sistema impede ações indevidas tanto no fronte
 
 Ponto importante: **não confie só no botão escondido no frontend**. A regra precisa estar protegida no backend também.
 
-## Fase 4 — Workflow editorial ⬜ Não iniciada
+## Fase 4 — Workflow editorial ✅ Concluída (com 1 pendência adiada)
+
+> **Implementação:** `docs/features/014-post-review-workflow/` (RF-09). Fecha a pendência deixada pela Fase 3 (`013-role-based-permissions/spec.md` § 4): Author não publica/arquiva mais o próprio post direto, precisa passar pelo workflow de revisão. "Histórico de alterações" (diff de cada edição, `PostRevision`) fica adiado — decisão do dono, 2026-07-14 (`014-post-review-workflow/spec.md` § 4), mesmo padrão da Fase 2 (upload de imagem adiado pra Fase 8).
 
 ### Objetivo
 
@@ -269,14 +271,14 @@ enum PostStatus {
 
 ### Funcionalidades
 
-* [ ] enviar post para revisão;
-* [ ] aprovar post;
-* [ ] rejeitar post;
-* [ ] publicar imediatamente;
-* [ ] agendar publicação;
-* [ ] arquivar post;
-* [ ] histórico de alterações;
-* [ ] comentários internos de revisão.
+* [x] enviar post para revisão — `post.submitForReview` (dono, só a partir de `DRAFT`);
+* [x] aprovar post — `post.publish` a partir de `IN_REVIEW` (Admin/Editor);
+* [x] rejeitar post — `post.reject`, motivo obrigatório, volta pra `DRAFT` (Admin/Editor);
+* [x] publicar imediatamente — `post.publish` a partir de `DRAFT`, pulando revisão (Admin/Editor);
+* [x] agendar publicação — `post.publish` com `scheduledAt` futuro → `SCHEDULED`; visibilidade pública resolvida via checagem lazy no read (`scheduledAt <= now`), sem scheduler/job novo;
+* [x] arquivar post — `post.archive`, qualquer status exceto já arquivado (Admin/Editor; Author perde o bypass que tinha na Fase 3);
+* [ ] histórico de alterações — adiado (diff de cada edição, `PostRevision`), ver nota acima;
+* [x] comentários internos de revisão — `PostReviewComment`, lido via `post.readReviewComments` (dono do post ou Admin/Editor).
 
 ### Modelos novos
 

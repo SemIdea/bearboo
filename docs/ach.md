@@ -174,7 +174,7 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 - **Conceito universal:** implementação concreta de uma porta (`adapter.ts`) — mesmo shape de retorno entre implementações (LSP).
 - **Implementação no stack:**
   - Models de dados: `src/server/models/<entity>.ts`.
-  - Helper puro: `src/lib/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`, `slug` — gerador determinístico de slug a partir de título, usado em `domain_createPost`; `rateLimit` — adicionado em `001-auth-hardening`, `IRateLimitHelperAdapter` + `InMemoryRateLimit`, key opaca prefixada por endpoint no call site, sem dependência de Redis; `permissions` — adicionado em `013-role-based-permissions`, `IPermissionHelperAdapter` + `MatrixPermission`, `can(role, action)` puro contra a matriz fixa da Fase 3, sem I/O).
+  - Helper puro: `src/lib/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `uidGenerator`, `passwordHashing`, `slug` — gerador determinístico de slug a partir de título, usado em `domain_createPost`; `rateLimit` — adicionado em `001-auth-hardening`, `IRateLimitHelperAdapter` + `InMemoryRateLimit`, key opaca prefixada por endpoint no call site, sem dependência de Redis; `permissions` — adicionado em `013-role-based-permissions`, `IPermissionHelperAdapter` + `MatrixPermission`, `can(role, action)` puro contra a matriz fixa da Fase 3, sem I/O; ganhou a ação `post:publish` em `014-post-review-workflow` — Fase 4, gateia `submitForReview`/`publish`/`reject`/`archive`).
   - Gateway externo: `src/server/integrations/gateway/<name>/adapter.ts` + `implementations/<concreto>.ts` (ex: `mailer`).
 - **OCP em ação:** provider novo (ex: outro mailer) = arquivo novo em `implementations/`, sem `switch (provider)` espalhado.
 
@@ -194,6 +194,12 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 - **Conceito:** `src/server/createRouter.ts` — `roleProcedure(allowed: IRole[])`, 4ª camada da cadeia de guard tRPC (`public` → `protected` → `verified` → `role`), parametrizada por allowlist de papel em vez de fixa (cada call site passa os papéis que pode aceitar, ex. `roleProcedure(["ADMIN","EDITOR"])`). Lança `FORBIDDEN`/`AuthErrorCode.INSUFFICIENT_ROLE` se `ctx.user.role` não está na allowlist.
 - **Quando usar:** ação que **nunca** depende de dono de recurso (`category.create`, `user.updateRole`). Ownership condicional (post update/delete: "dono OU tem permissão de bypass") fica em `verifiedProcedure` + checagem no domain via `ctx.helpers.permissions.can(role, action)` — `roleProcedure` não serve pra isso porque a decisão depende do dado (quem é o dono), não só do papel do chamador (`013-role-based-permissions/plan.md` § 4.2).
 - **`IRole`:** union literal hand-rolled (`"ADMIN" | "EDITOR" | "AUTHOR"`) em `src/server/models/user.ts`, mesmo padrão de `IPostStatus`/`PostStatus` — não importa o enum gerado pelo Prisma client em código de app (só `infra/drivers/prisma.ts`/`test/prisma/` importam `@prisma/client` direto).
+
+#### Workflow de status (state machine em domain, sem novo componente) — peça nova de `014-post-review-workflow` (2026-07-14)
+
+- **Conceito:** transições de `Post.status` (`submitForReview`/`publish`/`reject`/`archive`) viram 4 domain functions dedicadas em vez de aceitar `status` livre em `post.update` — cada uma valida estado de origem + permissão antes de escrever. `updatePostSchema` **não** aceita mais `status` (regra dura 16 — validação no boundary continua em `schema.ts`, mas a *state machine* em si vive no domain).
+- **`SCHEDULED` sem scheduler:** visibilidade pública de post `SCHEDULED` é resolvida com `scheduledAt <= now` no momento da query (`PostModel.readRecents`/`readRelated`/`readUserPosts`/`readBySlug`), não por um job que flipa o status no banco — evita introduzir o primeiro componente Task-like do projeto (`afm.md` § 3 regra 12) só pra isso (`014-post-review-workflow/plan.md` § 4.1).
+- **`PostReviewComment`:** model novo (`src/server/models/reviewComment.ts`), mesmo padrão de `Comment` — guarda motivo de aprovação (opcional) ou rejeição (obrigatório), lido via `post.readReviewComments` (dono do post ou quem tem `post:publish`).
 
 ### 3.2 Componentes de suporte (2ª classe)
 
