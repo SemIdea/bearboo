@@ -176,8 +176,10 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
     *Verificação:* `rg -n "from.*@prisma/client|new PrismaClient|@/server/infra/drivers/prisma" src/server/features/*/domain/*.ts src/server/features/*/procedures/*.ts` retorna 0. **Compliant hoje.**
 31. **Route handler (`src/app/api/**/route.ts`) é fino.** Delega pro tRPC handler; nenhuma regra de negócio inline.
     *Verificação:* `find src/app/api -name route.ts | xargs wc -l` — todos < 80 linhas. **Compliant hoje** (único route: `src/app/api/trpc/[trpc]/route.ts`).
+32. **Nenhum commit direto em `main`/`develop`.** Todo trabalho de código acontece num branch de feature criado a partir de `develop` (nome em inglês, ex. `feature/016-search-content`), commits seguindo `.commitlintrc` (Conventional Commits, em inglês). PR contra `develop` usando `.github/pull_request_template.md`; só o dono aprova/faz merge no GitHub. `main` só recebe merge de `develop` em release/deploy, nunca commit ou merge de feature branch direto. Branch protection no GitHub (`main`/`develop`, PR obrigatório) é camada extra — o enforcement primário é este check antes de commitar.
+    *Verificação:* `git rev-parse --abbrev-ref HEAD` não é `main` nem `develop`. Se for, cria/troca pra branch de feature antes de qualquer `git commit`.
 
-{{Adicione regras duras específicas do projeto aqui — numere a partir de 32.}}
+{{Adicione regras duras específicas do projeto aqui — numere a partir de 33.}}
 
 ---
 
