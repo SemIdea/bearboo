@@ -7,7 +7,9 @@ import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
+import { env } from "@/lib/env";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
+import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
 import { PostErrorCode } from "@/shared/error/post";
 import { CommentArea, RelatedPosts } from "./page.client";
 
@@ -39,13 +41,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			};
 		}
 
+		const description = post.content.substring(0, 160);
+		const images = post.coverImageUrl ? [post.coverImageUrl] : undefined;
+
 		return {
 			title: post.title,
-			description: post.content.substring(0, 160),
+			description,
+			alternates: {
+				canonical: `/post/${slug}`,
+			},
 			openGraph: {
 				title: post.title,
-				description: post.content.substring(0, 160),
+				description,
 				type: "article",
+				url: `/post/${slug}`,
+				images,
+			},
+			twitter: {
+				card: images ? "summary_large_image" : "summary",
+				title: post.title,
+				description,
+				images,
 			},
 		};
 	} catch (error) {
@@ -145,6 +161,17 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 		addSuffix: true,
 	});
 
+	const articleJsonLd = buildArticleJsonLd({
+		siteUrl: env.siteUrl,
+		slug: post.slug,
+		title: post.title,
+		description: post.content.substring(0, 160),
+		imageUrl: post.coverImageUrl,
+		authorName: user.name,
+		createdAt: new Date(post.createdAt),
+		updatedAt: new Date(post.updatedAt),
+	});
+
 	return (
 		<CardBase
 			title="Post Details"
@@ -157,6 +184,10 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 			}
 			content={
 				<div className="flex flex-col gap-4">
+					<script
+						type="application/ld+json"
+						dangerouslySetInnerHTML={{ __html: articleJsonLd }}
+					/>
 					{post.status !== "PUBLISHED" && (
 						<p className="rounded bg-yellow-100 px-3 py-2 text-sm text-yellow-900">
 							{post.status === "DRAFT"

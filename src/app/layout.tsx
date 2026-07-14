@@ -4,9 +4,11 @@ import { Metadata, Viewport } from "next";
 import { Header } from "@/components/header";
 import { fontSans } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
+import { env } from "@/lib/env";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
+	metadataBase: new URL(env.siteUrl),
 	title: {
 		default: siteConfig.name,
 		template: `%s - ${siteConfig.name}`,
