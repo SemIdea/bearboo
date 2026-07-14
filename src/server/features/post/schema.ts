@@ -63,6 +63,14 @@ const readRecentPostsSchema = z
 	})
 	.optional();
 
+const searchPostsSchema = z.object({
+	query: z.string().min(2, "Search query must be at least 2 characters long."),
+	cursor: z.string().optional(),
+	limit: z.number().int().min(1).max(50).optional(),
+	categoryId: z.string().optional(),
+	tagId: z.string().optional(),
+});
+
 const readOwnPostsSchema = z.object({
 	status: postStatusSchema.optional(),
 	categoryId: z.string().optional(),
@@ -183,6 +191,10 @@ const readRecentPostsOutputSchema = z.object({
 	posts: z.array(postEntityWithRelationsSchema),
 	nextCursor: z.string().nullable(),
 });
+const searchPostsOutputSchema = z.object({
+	posts: z.array(postEntityWithRelationsSchema),
+	nextCursor: z.string().nullable(),
+});
 const readRelatedPostsOutputSchema = z.array(postEntityWithRelationsSchema);
 const readOwnPostsOutputSchema = z.array(postEntityWithRelationsSchema);
 const submitForReviewPostOutputSchema = postEntitySchema;
@@ -213,6 +225,7 @@ type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
 type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
 type RevalidatePostInput = z.TypeOf<typeof revalidatePostSchema>;
 type ReadRecentPostsInput = NonNullable<z.TypeOf<typeof readRecentPostsSchema>>;
+type SearchPostsInput = z.TypeOf<typeof searchPostsSchema>;
 type ReadRelatedPostsInput = z.TypeOf<typeof readRelatedPostsSchema>;
 type ReadOwnPostsInput = z.TypeOf<typeof readOwnPostsSchema>;
 type SubmitForReviewPostInput = z.TypeOf<typeof submitForReviewPostSchema>;
@@ -234,6 +247,7 @@ export type {
 	ReadReviewCommentsInput,
 	RejectPostInput,
 	RevalidatePostInput,
+	SearchPostsInput,
 	SubmitForReviewPostInput,
 	UpdatePostInput,
 };
@@ -267,6 +281,8 @@ export {
 	revalidatePostOutputSchema,
 	revalidatePostSchema,
 	reviewCommentsOutputSchema,
+	searchPostsOutputSchema,
+	searchPostsSchema,
 	submitForReviewPostOutputSchema,
 	submitForReviewPostSchema,
 	updatePostOutputSchema,

@@ -12,6 +12,7 @@ import { procedure_readReviewComments } from "./procedures/readReviewComments";
 import { procedure_readSitemapEntries } from "./procedures/readSitemapEntries";
 import { procedure_rejectPost } from "./procedures/reject";
 import { procedure_revalidatePost } from "./procedures/revalidate";
+import { procedure_searchPosts } from "./procedures/search";
 import { procedure_submitForReviewPost } from "./procedures/submitForReview";
 import { procedure_updatePost } from "./procedures/update";
 
@@ -24,6 +25,7 @@ const PostRouter = t.router({
 	readRelated: procedure_readRelatedPosts,
 	readReviewComments: procedure_readReviewComments,
 	readSitemapEntries: procedure_readSitemapEntries,
+	search: procedure_searchPosts,
 	update: procedure_updatePost,
 	revalidate: procedure_revalidatePost,
 	delete: procedure_deletePost,

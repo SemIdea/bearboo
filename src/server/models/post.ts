@@ -115,6 +115,41 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		}));
 	}
 
+	async search(
+		query: string,
+		count: number,
+		cursor?: string,
+		categoryId?: string,
+		tagId?: string,
+	): Promise<IPostEntityWithRelations[]> {
+		const posts = await prisma.post.findMany({
+			take: count,
+			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+			where: {
+				AND: [
+					{ OR: publicVisibilityFilter() },
+					{
+						OR: [
+							{ title: { contains: query, mode: "insensitive" as const } },
+							{ content: { contains: query, mode: "insensitive" as const } },
+						],
+					},
+					...(categoryId ? [{ categoryId }] : []),
+					...(tagId ? [{ postTags: { some: { tagId } } }] : []),
+				],
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+			include: postRelationsInclude,
+		});
+
+		return posts.map(({ postTags, ...post }) => ({
+			...post,
+			tags: flattenTags(postTags),
+		}));
+	}
+
 	async readRelated(
 		postId: string,
 		categoryId: string | null,
@@ -258,6 +293,13 @@ const PostModel = new PostModelClass();
 
 type IPostModel = BaseModel<IPostEntity> & {
 	readRecents: (
+		count: number,
+		cursor?: string,
+		categoryId?: string,
+		tagId?: string,
+	) => Promise<IPostEntityWithRelations[]>;
+	search: (
+		query: string,
 		count: number,
 		cursor?: string,
 		categoryId?: string,
