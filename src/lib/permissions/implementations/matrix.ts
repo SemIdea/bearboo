@@ -4,6 +4,7 @@ import { IPermissionAction, IPermissionHelperAdapter } from "../adapter";
 const PERMISSION_MATRIX: Record<IPermissionAction, IRole[]> = {
 	"post:editAny": ["ADMIN", "EDITOR"],
 	"post:deleteAny": ["ADMIN", "EDITOR"],
+	"post:publish": ["ADMIN", "EDITOR"],
 	"category:manage": ["ADMIN", "EDITOR"],
 	"user:manageRoles": ["ADMIN"],
 };

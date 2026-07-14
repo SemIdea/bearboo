@@ -36,15 +36,15 @@ describe("Update Post Controller Unitary Testing", () => {
 		expect(result.readingTimeMinutes).toBeGreaterThanOrEqual(1);
 	});
 
-	test("Should update the status of the caller's own post", async () => {
+	test("Should not change the status of a post via update", async () => {
 		const post = await ctx.createPost({ status: "PUBLISHED" });
 
 		const result = await PostRouter.createCaller(ctx).update({
 			id: post.id,
-			status: "ARCHIVED",
+			title: "Updated Title",
 		});
 
-		expect(result.status).toEqual("ARCHIVED");
+		expect(result.status).toEqual("PUBLISHED");
 	});
 
 	test("Should replace the tags of the caller's own post", async () => {

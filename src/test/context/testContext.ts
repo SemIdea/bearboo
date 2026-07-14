@@ -85,6 +85,7 @@ class TestContext {
 				| "userId"
 				| "slug"
 				| "status"
+				| "scheduledAt"
 				| "categoryId"
 				| "coverImageUrl"
 			>
@@ -102,6 +103,7 @@ class TestContext {
 			content: overrides.content ?? "This is a test post.",
 			slug: overrides.slug ?? `test-post-${postId}`,
 			status: overrides.status ?? "PUBLISHED",
+			scheduledAt: overrides.scheduledAt ?? null,
 			categoryId: overrides.categoryId ?? null,
 			coverImageUrl: overrides.coverImageUrl ?? null,
 			userId,

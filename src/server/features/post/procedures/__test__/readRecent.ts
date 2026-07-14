@@ -74,6 +74,34 @@ describe("Read Recent Posts Controller Unitary Testing", () => {
 		expect(result.posts.map((post) => post.id)).toEqual([published.id]);
 	});
 
+	test("Should include a scheduled post whose date has already passed", async () => {
+		const ctx = await createAuthenticatedContext();
+		const past = await ctx.createPost({
+			status: "SCHEDULED",
+			scheduledAt: new Date(Date.now() - 60_000),
+		});
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			limit: 50,
+		});
+
+		expect(result.posts.map((post) => post.id)).toContain(past.id);
+	});
+
+	test("Should exclude a scheduled post whose date is still in the future", async () => {
+		const ctx = await createAuthenticatedContext();
+		const future = await ctx.createPost({
+			status: "SCHEDULED",
+			scheduledAt: new Date(Date.now() + 60_000),
+		});
+
+		const result = await PostRouter.createCaller(ctx).readRecent({
+			limit: 50,
+		});
+
+		expect(result.posts.map((post) => post.id)).not.toContain(future.id);
+	});
+
 	test("Should filter the recent feed by categoryId", async () => {
 		const ctx = await createAuthenticatedContext();
 		const category = await ctx.createCategory({ name: "Backend" });

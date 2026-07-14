@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-const postStatusSchema = z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]);
+const postStatusSchema = z.enum([
+	"DRAFT",
+	"IN_REVIEW",
+	"SCHEDULED",
+	"PUBLISHED",
+	"ARCHIVED",
+]);
 
 const createPostSchema = z.object({
 	title: z
@@ -35,7 +41,6 @@ const updatePostSchema = z.object({
 		.string()
 		.min(10, "Post content must be at least 10 characters long.")
 		.optional(),
-	status: postStatusSchema.optional(),
 	categoryId: z.string().optional(),
 	tagIds: z.array(z.string()).optional(),
 	coverImageUrl: z.string().url().optional(),
@@ -71,6 +76,29 @@ const readRelatedPostsSchema = z.object({
 	limit: z.number().int().min(1).max(20).optional(),
 });
 
+const submitForReviewPostSchema = z.object({
+	id: z.string(),
+});
+
+const publishPostSchema = z.object({
+	id: z.string(),
+	scheduledAt: z.coerce.date().optional(),
+	comment: z.string().optional(),
+});
+
+const rejectPostSchema = z.object({
+	id: z.string(),
+	comment: z.string().min(1, "A reason is required to reject a post."),
+});
+
+const archivePostSchema = z.object({
+	id: z.string(),
+});
+
+const readReviewCommentsSchema = z.object({
+	postId: z.string(),
+});
+
 const READING_WORDS_PER_MINUTE = 200;
 
 const calculateReadingTimeMinutes = (content: string): number => {
@@ -92,6 +120,7 @@ const postFieldsSchema = z.object({
 	content: z.string(),
 	slug: z.string(),
 	status: postStatusSchema,
+	scheduledAt: z.date().nullable(),
 	categoryId: z.string().nullable(),
 	coverImageUrl: z.string().nullable(),
 	createdAt: z.date(),
@@ -151,6 +180,24 @@ const readRecentPostsOutputSchema = z.object({
 });
 const readRelatedPostsOutputSchema = z.array(postEntityWithRelationsSchema);
 const readOwnPostsOutputSchema = z.array(postEntityWithRelationsSchema);
+const submitForReviewPostOutputSchema = postEntitySchema;
+const publishPostOutputSchema = postEntitySchema;
+const rejectPostOutputSchema = postEntitySchema;
+const archivePostOutputSchema = postEntitySchema;
+const reviewCommentsOutputSchema = z.array(
+	z.object({
+		id: z.string(),
+		postId: z.string(),
+		reviewerId: z.string(),
+		reviewer: z.object({
+			id: z.string(),
+			name: z.string(),
+		}),
+		type: z.enum(["APPROVAL", "REJECTION"]),
+		content: z.string().nullable(),
+		createdAt: z.date(),
+	}),
+);
 
 type CreatePostInput = z.TypeOf<typeof createPostSchema>;
 type ReadPostInput = z.TypeOf<typeof readPostSchema>;
@@ -161,19 +208,31 @@ type RevalidatePostInput = z.TypeOf<typeof revalidatePostSchema>;
 type ReadRecentPostsInput = NonNullable<z.TypeOf<typeof readRecentPostsSchema>>;
 type ReadRelatedPostsInput = z.TypeOf<typeof readRelatedPostsSchema>;
 type ReadOwnPostsInput = z.TypeOf<typeof readOwnPostsSchema>;
+type SubmitForReviewPostInput = z.TypeOf<typeof submitForReviewPostSchema>;
+type PublishPostInput = z.TypeOf<typeof publishPostSchema>;
+type RejectPostInput = z.TypeOf<typeof rejectPostSchema>;
+type ArchivePostInput = z.TypeOf<typeof archivePostSchema>;
+type ReadReviewCommentsInput = z.TypeOf<typeof readReviewCommentsSchema>;
 
 export type {
+	ArchivePostInput,
 	CreatePostInput,
 	DeletePostInput,
+	PublishPostInput,
 	ReadOwnPostsInput,
 	ReadPostBySlugInput,
 	ReadPostInput,
 	ReadRecentPostsInput,
 	ReadRelatedPostsInput,
+	ReadReviewCommentsInput,
+	RejectPostInput,
 	RevalidatePostInput,
+	SubmitForReviewPostInput,
 	UpdatePostInput,
 };
 export {
+	archivePostOutputSchema,
+	archivePostSchema,
 	createPostOutputSchema,
 	createPostSchema,
 	deletePostOutputSchema,
@@ -182,6 +241,8 @@ export {
 	postEntityWithRelationsSchema,
 	postEntityWithTaxonomySchema,
 	postStatusSchema,
+	publishPostOutputSchema,
+	publishPostSchema,
 	readOwnPostsOutputSchema,
 	readOwnPostsSchema,
 	readPostBySlugOutputSchema,
@@ -192,8 +253,14 @@ export {
 	readRecentPostsSchema,
 	readRelatedPostsOutputSchema,
 	readRelatedPostsSchema,
+	readReviewCommentsSchema,
+	rejectPostOutputSchema,
+	rejectPostSchema,
 	revalidatePostOutputSchema,
 	revalidatePostSchema,
+	reviewCommentsOutputSchema,
+	submitForReviewPostOutputSchema,
+	submitForReviewPostSchema,
 	updatePostOutputSchema,
 	updatePostSchema,
 };

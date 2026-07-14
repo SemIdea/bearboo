@@ -14,18 +14,19 @@ enum Role {
 }
 
 model User {
-  id        String    @id
-  email     String    @unique
-  password  String
-  name      String
-  bio       String?
-  role      Role      @default(AUTHOR)
-  sessions  Session[]
-  Post      Post[]
-  comments  Comment[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  verified  Boolean   @default(false)
+  id                String              @id
+  email             String              @unique
+  password          String
+  name              String
+  bio               String?
+  role              Role                @default(AUTHOR)
+  sessions          Session[]
+  Post              Post[]
+  comments          Comment[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  verified          Boolean             @default(false)
+  reviewComments    PostReviewComment[]
 }
 
 model Session {
@@ -41,25 +42,45 @@ model Session {
 
 enum PostStatus {
   DRAFT
+  IN_REVIEW
+  SCHEDULED
   PUBLISHED
   ARCHIVED
 }
 
 model Post {
-  id            String     @id
-  userId        String
-  user          User       @relation(fields: [userId], references: [id])
-  title         String
-  content       String
-  slug          String     @unique
-  status        PostStatus @default(PUBLISHED)
-  categoryId    String?
-  category      Category?  @relation(fields: [categoryId], references: [id])
-  coverImageUrl String?
-  postTags      PostTag[]
-  comments      Comment[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id             String              @id
+  userId         String
+  user           User                @relation(fields: [userId], references: [id])
+  title          String
+  content        String
+  slug           String              @unique
+  status         PostStatus          @default(PUBLISHED)
+  scheduledAt    DateTime?
+  categoryId     String?
+  category       Category?           @relation(fields: [categoryId], references: [id])
+  coverImageUrl  String?
+  postTags       PostTag[]
+  comments       Comment[]
+  reviewComments PostReviewComment[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+enum ReviewCommentType {
+  APPROVAL
+  REJECTION
+}
+
+model PostReviewComment {
+  id         String            @id
+  postId     String
+  post       Post              @relation(fields: [postId], references: [id])
+  reviewerId String
+  reviewer   User              @relation(fields: [reviewerId], references: [id])
+  type       ReviewCommentType
+  content    String?
+  createdAt  DateTime          @default(now())
 }
 
 model Category {

@@ -112,6 +112,11 @@ describe("Prisma-backed models", () => {
 		},
 	};
 
+	const publicVisibilityOr = [
+		{ status: "PUBLISHED" },
+		{ status: "SCHEDULED", scheduledAt: { lte: expect.any(Date) } },
+	];
+
 	test("PostModel reads recent posts with author and comment metadata", async () => {
 		const posts = [{ id: "post-1", postTags: [] }];
 		prismaMock.post.findMany.mockResolvedValue(posts);
@@ -122,7 +127,7 @@ describe("Prisma-backed models", () => {
 
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
 			take: 5,
-			where: { status: "PUBLISHED" },
+			where: { OR: publicVisibilityOr },
 			orderBy: { createdAt: "desc" },
 			include: postIncludeShape,
 		});
@@ -140,7 +145,7 @@ describe("Prisma-backed models", () => {
 			take: 5,
 			cursor: { id: "post-1" },
 			skip: 1,
-			where: { status: "PUBLISHED" },
+			where: { OR: publicVisibilityOr },
 			orderBy: { createdAt: "desc" },
 			include: postIncludeShape,
 		});
@@ -154,7 +159,7 @@ describe("Prisma-backed models", () => {
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
 			take: 5,
 			where: {
-				status: "PUBLISHED",
+				OR: publicVisibilityOr,
 				categoryId: "category-1",
 				postTags: { some: { tagId: "tag-1" } },
 			},
@@ -169,7 +174,7 @@ describe("Prisma-backed models", () => {
 		await expect(PostModel.readUserPosts("user-1")).resolves.toEqual([]);
 
 		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
-			where: { userId: "user-1", status: "PUBLISHED" },
+			where: { userId: "user-1", OR: publicVisibilityOr },
 		});
 	});
 

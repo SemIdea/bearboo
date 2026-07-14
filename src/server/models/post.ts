@@ -1,7 +1,12 @@
 import { prisma } from "@/server/infra/drivers/prisma";
 import { BaseModel } from "./base";
 
-type IPostStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+type IPostStatus =
+	| "DRAFT"
+	| "IN_REVIEW"
+	| "SCHEDULED"
+	| "PUBLISHED"
+	| "ARCHIVED";
 
 type IPostEntity = {
 	id: string;
@@ -10,6 +15,7 @@ type IPostEntity = {
 	content: string;
 	slug: string;
 	status: IPostStatus;
+	scheduledAt: Date | null;
 	categoryId: string | null;
 	coverImageUrl: string | null;
 	createdAt: Date;
@@ -48,6 +54,31 @@ type IPostEntityWithTaxonomy = IPostEntity & {
 const flattenTags = (postTags: { tag: IPostTagSummary }[]): IPostTagSummary[] =>
 	postTags.map(({ tag }) => tag);
 
+const publicVisibilityFilter = () => [
+	{ status: "PUBLISHED" as const },
+	{ status: "SCHEDULED" as const, scheduledAt: { lte: new Date() } },
+];
+
+const postRelationsInclude = {
+	user: {
+		select: {
+			id: true,
+			name: true,
+		},
+	},
+	comments: {
+		select: {
+			id: true,
+		},
+	},
+	category: true,
+	postTags: {
+		include: {
+			tag: true,
+		},
+	},
+} as const;
+
 class PostModelClass extends BaseModel<IPostEntity> {
 	constructor() {
 		super(prisma.post);
@@ -63,32 +94,14 @@ class PostModelClass extends BaseModel<IPostEntity> {
 			take: count,
 			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
 			where: {
-				status: "PUBLISHED",
+				OR: publicVisibilityFilter(),
 				...(categoryId ? { categoryId } : {}),
 				...(tagId ? { postTags: { some: { tagId } } } : {}),
 			},
 			orderBy: {
 				createdAt: "desc",
 			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				comments: {
-					select: {
-						id: true,
-					},
-				},
-				category: true,
-				postTags: {
-					include: {
-						tag: true,
-					},
-				},
-			},
+			include: postRelationsInclude,
 		});
 
 		return posts.map(({ postTags, ...post }) => ({
@@ -108,37 +121,23 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		const posts = await prisma.post.findMany({
 			where: {
 				id: { not: postId },
-				status: "PUBLISHED",
-				OR: [
-					...(categoryId ? [{ categoryId }] : []),
-					...(tagIds.length
-						? [{ postTags: { some: { tagId: { in: tagIds } } } }]
-						: []),
+				AND: [
+					{ OR: publicVisibilityFilter() },
+					{
+						OR: [
+							...(categoryId ? [{ categoryId }] : []),
+							...(tagIds.length
+								? [{ postTags: { some: { tagId: { in: tagIds } } } }]
+								: []),
+						],
+					},
 				],
 			},
 			take: limit,
 			orderBy: {
 				createdAt: "desc",
 			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				comments: {
-					select: {
-						id: true,
-					},
-				},
-				category: true,
-				postTags: {
-					include: {
-						tag: true,
-					},
-				},
-			},
+			include: postRelationsInclude,
 		});
 
 		return posts.map(({ postTags, ...post }) => ({
@@ -151,7 +150,7 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		return prisma.post.findMany({
 			where: {
 				userId,
-				status: "PUBLISHED",
+				OR: publicVisibilityFilter(),
 			},
 		});
 	}
@@ -172,25 +171,7 @@ class PostModelClass extends BaseModel<IPostEntity> {
 			orderBy: {
 				createdAt: "desc",
 			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				comments: {
-					select: {
-						id: true,
-					},
-				},
-				category: true,
-				postTags: {
-					include: {
-						tag: true,
-					},
-				},
-			},
+			include: postRelationsInclude,
 		});
 
 		return posts.map(({ postTags, ...post }) => ({

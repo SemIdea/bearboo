@@ -2,6 +2,10 @@ import { CategoryModel, ICategoryModel } from "@/server/models/category";
 import { CommentModel, ICommentModel } from "@/server/models/comment";
 import { IPostModel, PostModel } from "@/server/models/post";
 import { IResetTokenModel, ResetTokenModel } from "@/server/models/resetToken";
+import {
+	IReviewCommentModel,
+	ReviewCommentModel,
+} from "@/server/models/reviewComment";
 import { ISessionModel, SessionModel } from "@/server/models/session";
 import { ITagModel, TagModel } from "@/server/models/tag";
 import { IUserModel, UserModel } from "@/server/models/user";
@@ -19,6 +23,7 @@ type IRepositories = {
 	tag: ITagModel;
 	verifyToken: IVerifyTokenModel;
 	resetToken: IResetTokenModel;
+	reviewComment: IReviewCommentModel;
 };
 
 const repositories: IRepositories = {
@@ -30,6 +35,7 @@ const repositories: IRepositories = {
 	tag: TagModel,
 	verifyToken: VerifyTokenModel,
 	resetToken: ResetTokenModel,
+	reviewComment: ReviewCommentModel,
 };
 
 export type { IRepositories };

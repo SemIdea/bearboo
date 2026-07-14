@@ -7,7 +7,11 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { createDynamicCaller } from "@/server/caller";
-import { DeletePostButton, UpdatePostForm } from "./page.client";
+import {
+	DeletePostButton,
+	PostWorkflowActions,
+	UpdatePostForm,
+} from "./page.client";
 
 type PageProps = {
 	params: Promise<{
@@ -43,6 +47,7 @@ const EditPostContent = async ({ params }: PageProps) => {
 			</CardHeader>
 			<CardContent>
 				<UpdatePostForm post={post} />
+				<PostWorkflowActions post={post} />
 			</CardContent>
 		</Card>
 	);

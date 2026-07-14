@@ -19,7 +19,13 @@ type ITestContextDTO = IBaseContextDTO & {
 		overrides?: Partial<
 			Pick<
 				IPostEntity,
-				"title" | "content" | "userId" | "slug" | "status" | "categoryId"
+				| "title"
+				| "content"
+				| "userId"
+				| "slug"
+				| "status"
+				| "scheduledAt"
+				| "categoryId"
 			>
 		> & { tagIds?: string[] },
 	) => Promise<IPostEntity>;

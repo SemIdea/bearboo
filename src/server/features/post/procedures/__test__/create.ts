@@ -63,8 +63,29 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(second.slug).toEqual("duplicate-title-2");
 	});
 
-	test("Should default to PUBLISHED status when none is provided", async () => {
+	test("Should default an Author's post to DRAFT when none is provided", async () => {
 		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+		});
+
+		expect(result.status).toEqual("DRAFT");
+	});
+
+	test("Should ignore an explicit status from an Author and force DRAFT", async () => {
+		const result = await PostRouter.createCaller(ctx).create({
+			title: "Test Post",
+			content: "This is a test post content.",
+			status: "PUBLISHED",
+		});
+
+		expect(result.status).toEqual("DRAFT");
+	});
+
+	test("Should default an Admin's post to PUBLISHED when none is provided", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+
+		const result = await PostRouter.createCaller(adminCtx).create({
 			title: "Test Post",
 			content: "This is a test post content.",
 		});
@@ -72,14 +93,16 @@ describe("Create Post Controller Unitary Testing", () => {
 		expect(result.status).toEqual("PUBLISHED");
 	});
 
-	test("Should respect an explicit status when provided", async () => {
-		const result = await PostRouter.createCaller(ctx).create({
+	test("Should respect an explicit status from an Admin", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+
+		const result = await PostRouter.createCaller(adminCtx).create({
 			title: "Test Post",
 			content: "This is a test post content.",
-			status: "DRAFT",
+			status: "ARCHIVED",
 		});
 
-		expect(result.status).toEqual("DRAFT");
+		expect(result.status).toEqual("ARCHIVED");
 	});
 
 	test("Should append a numeric suffix when the slug already exists as a draft", async () => {

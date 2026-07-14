@@ -112,4 +112,67 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 		expect(result.id).toBe(post.id);
 		expect(result.status).toBe("ARCHIVED");
 	});
+
+	test("Should let an Admin read a draft owned by someone else", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+		const post = await adminCtx.createPost({
+			status: "DRAFT",
+			userId: ctx.user.id,
+		});
+
+		const result = await PostRouter.createCaller(adminCtx).readBySlug({
+			slug: post.slug,
+		});
+
+		expect(result.id).toBe(post.id);
+	});
+
+	test("Should not let an Author read a draft owned by someone else", async () => {
+		const otherAuthorCtx = await createAuthenticatedContext();
+		const post = await otherAuthorCtx.createPost({
+			status: "IN_REVIEW",
+			userId: ctx.user.id,
+		});
+
+		await expect(
+			PostRouter.createCaller(otherAuthorCtx).readBySlug({ slug: post.slug }),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "NOT_FOUND",
+				message: PostErrorCode.POST_NOT_FOUND,
+			}),
+		);
+	});
+
+	test("Should read a scheduled post whose date has already passed", async () => {
+		const post = await ctx.createPost({
+			status: "SCHEDULED",
+			scheduledAt: new Date(Date.now() - 60_000),
+		});
+		const anonymousCtx = await createAuthenticatedContext();
+
+		const result = await PostRouter.createCaller(anonymousCtx).readBySlug({
+			slug: post.slug,
+		});
+
+		expect(result.id).toBe(post.id);
+	});
+
+	test("Should throw not found for a scheduled post whose date is in the future", async () => {
+		const otherUser = await ctx.createNewUser();
+		const post = await ctx.createPost({
+			status: "SCHEDULED",
+			scheduledAt: new Date(Date.now() + 60_000),
+			userId: otherUser.id,
+		});
+
+		await expect(
+			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
+		).rejects.toThrowError(
+			new TRPCError({
+				code: "NOT_FOUND",
+				message: PostErrorCode.POST_NOT_FOUND,
+			}),
+		);
+	});
 });

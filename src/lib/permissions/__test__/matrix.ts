@@ -7,6 +7,7 @@ const ROLES: IRole[] = ["ADMIN", "EDITOR", "AUTHOR"];
 const ACTIONS: IPermissionAction[] = [
 	"post:editAny",
 	"post:deleteAny",
+	"post:publish",
 	"category:manage",
 	"user:manageRoles",
 ];
@@ -14,6 +15,7 @@ const ACTIONS: IPermissionAction[] = [
 const EXPECTED: Record<IPermissionAction, Record<IRole, boolean>> = {
 	"post:editAny": { ADMIN: true, EDITOR: true, AUTHOR: false },
 	"post:deleteAny": { ADMIN: true, EDITOR: true, AUTHOR: false },
+	"post:publish": { ADMIN: true, EDITOR: true, AUTHOR: false },
 	"category:manage": { ADMIN: true, EDITOR: true, AUTHOR: false },
 	"user:manageRoles": { ADMIN: true, EDITOR: false, AUTHOR: false },
 };

@@ -53,6 +53,8 @@ const MyPostsPanel = () => {
 				>
 					<option value="">All statuses</option>
 					<option value="DRAFT">Draft</option>
+					<option value="IN_REVIEW">In review</option>
+					<option value="SCHEDULED">Scheduled</option>
 					<option value="PUBLISHED">Published</option>
 					<option value="ARCHIVED">Archived</option>
 				</select>
