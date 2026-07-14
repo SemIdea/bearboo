@@ -99,6 +99,11 @@ const readReviewCommentsSchema = z.object({
 	postId: z.string(),
 });
 
+const sitemapEntrySchema = z.object({
+	slug: z.string(),
+	updatedAt: z.date(),
+});
+
 const READING_WORDS_PER_MINUTE = 200;
 
 const calculateReadingTimeMinutes = (content: string): number => {
@@ -184,6 +189,8 @@ const submitForReviewPostOutputSchema = postEntitySchema;
 const publishPostOutputSchema = postEntitySchema;
 const rejectPostOutputSchema = postEntitySchema;
 const archivePostOutputSchema = postEntitySchema;
+const readSitemapEntriesOutputSchema = z.array(sitemapEntrySchema);
+
 const reviewCommentsOutputSchema = z.array(
 	z.object({
 		id: z.string(),
@@ -254,6 +261,7 @@ export {
 	readRelatedPostsOutputSchema,
 	readRelatedPostsSchema,
 	readReviewCommentsSchema,
+	readSitemapEntriesOutputSchema,
 	rejectPostOutputSchema,
 	rejectPostSchema,
 	revalidatePostOutputSchema,

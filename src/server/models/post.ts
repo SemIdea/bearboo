@@ -51,6 +51,11 @@ type IPostEntityWithTaxonomy = IPostEntity & {
 	tags: IPostTagSummary[];
 };
 
+type IPostSitemapEntry = {
+	slug: string;
+	updatedAt: Date;
+};
+
 const flattenTags = (postTags: { tag: IPostTagSummary }[]): IPostTagSummary[] =>
 	postTags.map(({ tag }) => tag);
 
@@ -202,6 +207,21 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		return { ...rest, tags: flattenTags(postTags) };
 	}
 
+	async readAllPublicSlugs(): Promise<IPostSitemapEntry[]> {
+		return prisma.post.findMany({
+			where: {
+				OR: publicVisibilityFilter(),
+			},
+			select: {
+				slug: true,
+				updatedAt: true,
+			},
+			orderBy: {
+				updatedAt: "desc",
+			},
+		});
+	}
+
 	async setTags(postId: string, tagIds: string[]): Promise<void> {
 		await prisma.$transaction([
 			prisma.postTag.deleteMany({ where: { postId } }),
@@ -251,6 +271,7 @@ type IPostModel = BaseModel<IPostEntity> & {
 		tagId?: string,
 	) => Promise<IPostEntityWithRelations[]>;
 	readBySlug: (slug: string) => Promise<IPostEntityWithTaxonomy | null>;
+	readAllPublicSlugs: () => Promise<IPostSitemapEntry[]>;
 	readRelated: (
 		postId: string,
 		categoryId: string | null,
@@ -266,6 +287,7 @@ export type {
 	IPostEntityWithRelations,
 	IPostEntityWithTaxonomy,
 	IPostModel,
+	IPostSitemapEntry,
 	IPostStatus,
 	IPostTagSummary,
 };

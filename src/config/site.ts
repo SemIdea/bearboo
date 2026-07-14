@@ -1,8 +1,9 @@
 export type SiteConfig = typeof siteConfig;
 
 const siteConfig = {
-	name: "Next.js + HeroUI",
-	description: "Make beautiful websites regardless of your design experience.",
+	name: "Bearboo",
+	description:
+		"Blog técnico pessoal com foco em performance, organização de código e boas práticas modernas.",
 };
 
 export { siteConfig };

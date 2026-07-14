@@ -178,6 +178,19 @@ describe("Prisma-backed models", () => {
 		});
 	});
 
+	test("PostModel reads all publicly visible slugs for the sitemap", async () => {
+		const entries = [{ slug: "my-post", updatedAt: new Date("2026-07-01") }];
+		prismaMock.post.findMany.mockResolvedValue(entries);
+
+		await expect(PostModel.readAllPublicSlugs()).resolves.toEqual(entries);
+
+		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
+			where: { OR: publicVisibilityOr },
+			select: { slug: true, updatedAt: true },
+			orderBy: { updatedAt: "desc" },
+		});
+	});
+
 	test("PostModel reads a post by slug with category and tags", async () => {
 		const tag = { id: "tag-1", name: "prisma", slug: "prisma" };
 		prismaMock.post.findUnique.mockResolvedValue({
