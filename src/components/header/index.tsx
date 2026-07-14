@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CardBase } from "../cardBase";
+import { SearchBox } from "../searchBox";
 import { AuthSection } from "./index.client";
 
 const Header = () => {
@@ -11,6 +12,7 @@ const Header = () => {
 						<h2 className="text-2xl font-bold hover:underline">BearBoo</h2>
 					</Link>
 					<div className="flex items-center gap-4">
+						<SearchBox />
 						<AuthSection />
 					</div>
 				</div>
