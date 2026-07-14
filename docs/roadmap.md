@@ -12,7 +12,7 @@
 | 3 — Autenticação e permissões | ✅ Concluída (com 1 pendência adiada pra Fase 4) | `docs/features/013-role-based-permissions/`: papéis ADMIN/EDITOR/AUTHOR, `roleProcedure`, `src/lib/permissions/` (matrix); pré-requisito `001-auth-hardening` (2026-07-12) satisfeito. Pendência (restringir publish/archive a Admin/Editor) fechada pela Fase 4 |
 | 4 — Workflow editorial | ✅ Concluída (com 1 pendência adiada) | `docs/features/014-post-review-workflow/`: `IN_REVIEW`/`SCHEDULED`, enviar/aprovar/rejeitar (motivo obrigatório)/publicar direto/agendar/arquivar, `PostReviewComment`; restrição de publish/archive a Admin/Editor (fecha a pendência da Fase 3); agendamento via checagem lazy no read, sem scheduler novo. Pendência adiada: histórico de diffs de edição (`PostRevision`) — mesmo padrão da Fase 2, que adiou upload de imagem pra Fase 8 |
 | 5 — SEO e publicação profissional | 🟡 Parcial (com 2 pendências adiadas) | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration; pendências adiadas: slug amigável + redirect (slug nunca muda hoje) e campos editáveis de override de SEO |
-| 6 — Busca e descoberta | ⬜ Não iniciada | — |
+| 6 — Busca e descoberta | 🟡 Parcial (com 1 pendência adiada) | `docs/features/016-search-content/`: busca por título/conteúdo via `contains`/`insensitive` (não `tsvector` nativo — ADR-0011), autocomplete no header; filtro por tag/categoria e posts relacionados já existiam de fases anteriores; ordenação por mais acessado adiada pra Fase 7 |
 | 7 — Analytics interno | ⬜ Não iniciada | — |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
 | 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; rate limiting em memória cobre login/registro/reset/refresh (`docs/features/001-auth-hardening/`) — não é rate limiting geral de toda a API; falta logs estruturados, cobertura de teste (~8.6% hoje) |
@@ -352,7 +352,9 @@ updatedAt
 
 Essa fase está pronta quando cada post tem SEO completo e pode ser compartilhado corretamente no Discord, LinkedIn, WhatsApp, etc. **Satisfeito** pros itens automáticos (`015`); slug amigável + redirect ficam pra rodada futura, se/quando slug passar a mudar.
 
-## Fase 6 — Busca e descoberta de conteúdo ⬜ Não iniciada
+## Fase 6 — Busca e descoberta de conteúdo 🟡 Parcial (com 1 pendência adiada)
+
+> **Implementação:** `docs/features/016-search-content/` (RF-11). `post.search` busca por título/conteúdo (`contains`/`insensitive` do Prisma, não `tsvector` nativo — ver nota abaixo), com sugestões enquanto digita no header reusando o mesmo endpoint. Decisão do dono, 2026-07-14 (`016-search-content/spec.md` § 4/§ 7): ordenação por mais acessado fica pra Fase 7 (Analytics interno), que já é dona do contador de views.
 
 ### Objetivo
 
@@ -360,14 +362,14 @@ Melhorar navegação e descoberta dos posts.
 
 ### Funcionalidades
 
-* [ ] busca por título;
-* [ ] busca por conteúdo;
-* [ ] filtro por tag;
-* [ ] filtro por categoria;
+* [x] busca por título (`post.search`, `016`);
+* [x] busca por conteúdo (`post.search`, `016`);
+* [x] filtro por tag (já existia via `readRecent`/`readOwn`/`readRelated`; `016` estende o mesmo parâmetro pro `search`);
+* [x] filtro por categoria (idem);
 * [x] ordenação por mais recente (`readRecent` já ordena assim);
-* [ ] ordenação por mais acessado;
-* [ ] posts relacionados;
-* [ ] autocomplete opcional.
+* [ ] ordenação por mais acessado — **adiado pra Fase 7**: depende de contador de visualização que a própria Fase 7 já lista como seu item ("registrar visualização de post"/"contar views");
+* [x] posts relacionados (`post.readRelated`, já implementado na Fase 1 — `007-posts-relacionados`);
+* [x] autocomplete opcional (`016` — sugestões no `SearchBox` do header, reusando `post.search` com `limit` pequeno, sem endpoint dedicado).
 
 ### Primeira implementação
 
@@ -382,6 +384,8 @@ Elasticsearch
 ```
 
 Mas eu começaria com Postgres mesmo. Menos infra, mais chance de terminar.
+
+> **Nota (`016`, 2026-07-14):** a busca desta rodada usa `contains`/`insensitive` do Prisma, não `tsvector`/`ts_rank` nativo do Postgres. O test harness do projeto (`ADR-0011`) roda contra `prisma-mock`, um fake em JS sem parser SQL — `$queryRaw`/`to_tsvector` ficaria sem cobertura de teste automatizada (regra dura 1). Full-text search nativo (com ranking por relevância) fica pra quando existir teste de integração contra Postgres real (já cogitado em `ADR-0011` como candidato de Fase 9/10).
 
 ### Critério de conclusão
 

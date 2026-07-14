@@ -306,6 +306,39 @@ Scenario: Post compartilhado tem preview rico
 
 ---
 
+### US-013 — [Persona] busca posts por título ou conteúdo
+
+- **Persona:** `[A DEFINIR]` (leitor do blog público — não um papel autenticado do sistema).
+- **Story:** Como leitor navegando o blog, quero buscar posts por uma palavra-chave presente no título ou no conteúdo, com sugestões enquanto digito, pra encontrar um post específico sem depender de rolar a listagem cronológica.
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Busca encontra post pelo título
+  Given um post PUBLISHED com título "Guia de Prisma"
+  When o leitor busca por "prisma"
+  Then o post aparece no resultado
+
+Scenario: Busca encontra post pelo conteúdo
+  Given um post PUBLISHED cujo conteúdo menciona "tsvector" mas o título não
+  When o leitor busca por "tsvector"
+  Then o post aparece no resultado
+
+Scenario: Busca não vaza posts não-públicos
+  Given um post DRAFT com título "Rascunho Secreto"
+  When o leitor busca por "secreto"
+  Then o post não aparece no resultado
+
+Scenario: Busca é paginada
+  Given 15 posts PUBLISHED cujo título contém "teste"
+  When o leitor busca por "teste" com limit 10
+  Then a primeira página retorna 10 posts e um nextCursor não nulo
+```
+
+**Metadata:** RF-11. *Test ref:* `src/server/features/post/procedures/__test__/search.ts`, `src/server/models/__test__/prismaModels.ts` (`search`). *Spec:* `docs/features/016-search-content/spec.md`.
+
+---
+
 ### US-006 — [Persona] cria e lê posts
 
 - **Persona:** `[A DEFINIR]`.
