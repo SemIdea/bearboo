@@ -27,6 +27,7 @@
 | US-009 | Ver e editar perfil de usuário | Perfil | RF-06 | done |
 | US-010 | Atuar conforme papel (Admin/Editor/Author) | Autenticação | RF-08 | done |
 | US-011 | Publicar post via workflow de revisão | Posts | RF-09 | done |
+| US-012 | Compartilhar e indexar post com SEO completo | Posts | RF-10 | done |
 
 ## Pendências Técnicas
 
@@ -269,6 +270,39 @@ Scenario: Author tenta publicar ou arquivar o próprio post direto
 ```
 
 **Metadata:** RF-09. *Test ref:* `src/server/features/post/procedures/__test__/{submitForReview,publish,reject,archive,readReviewComments}.ts`. *Spec:* `docs/features/014-post-review-workflow/spec.md`.
+
+---
+
+### US-012 — [Persona] compartilha e indexa um post com SEO completo
+
+- **Persona:** `[A DEFINIR]` (leitor externo/buscador — não um papel autenticado do sistema).
+- **Story:** Como leitor que compartilha um link de post (Discord/LinkedIn/WhatsApp) ou como buscador indexando o site, quero que cada post publicado tenha metadata completa (canonical, Open Graph com imagem, Twitter Card, schema.org) e que o site exponha sitemap/robots/RSS, pra que o preview seja rico e a indexação funcione.
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Sitemap lista só posts publicamente visíveis
+  Given um post PUBLISHED, um DRAFT, um IN_REVIEW, um ARCHIVED, um SCHEDULED no futuro e um SCHEDULED no passado
+  When o sitemap é gerado
+  Then aparecem só o PUBLISHED e o SCHEDULED no passado
+
+Scenario: Robots.txt bloqueia rotas privadas
+  When robots.txt é gerado
+  Then rotas de criar/editar/meus-posts, perfil, auth e api aparecem em Disallow
+  And o robots.txt referencia a URL do sitemap
+
+Scenario: RSS feed reflete posts recentes publicados
+  Given 3 posts PUBLISHED e 1 DRAFT
+  When o feed.xml é lido
+  Then contém os 3 posts publicados, não contém o DRAFT
+
+Scenario: Post compartilhado tem preview rico
+  Given um post PUBLISHED com imagem de capa
+  When a página do post é carregada
+  Then a metadata inclui canonical, Open Graph com imagem, Twitter Card summary_large_image e JSON-LD Article válido
+```
+
+**Metadata:** RF-10. *Test ref:* `src/server/models/__test__/prismaModels.ts` (`readAllPublicSlugs`), `src/server/features/post/procedures/__test__/readSitemapEntries.ts`, `src/server/http/__test__/{buildRssXml,buildArticleJsonLd}.ts`. *Spec:* `docs/features/015-seo-metadata/spec.md`.
 
 ---
 

@@ -9,9 +9,9 @@
 | 0 — Organização inicial | ✅ Concluída | — |
 | 1 — Blog público bem feito | ✅ Concluída (com 1 pendência residual) | todos os itens do checklist implementados: slug, paginação, status/publicação, tags/categorias (`docs/features/002` a `005`), tempo de leitura (`006`), posts relacionados (`007`), imagem de capa (`010`); pendência residual: status HTTP de `/post/[slug]` continua `200` em vez de `404` pra slug inexistente — limitação de framework (Cache Components), aceita como conhecida por ora (`docs/features/009-post-404-status/`) |
 | 2 — Admin/CMS | ✅ Concluída (com 1 pendência adiada) | seletor de status, preview de rascunho na URL real (`docs/features/011-post-status-preview/`), painel "meus posts" com filtros por status/categoria/tag (`docs/features/012-my-posts-panel/`, escopado sem roles — ver nota na fase); pendência adiada: upload de arquivo de imagem de capa vai pra Fase 8 (decisão do dono, 2026-07-12) — capa via URL já existe (`docs/features/010-post-cover-image/`) |
-| 3 — Autenticação e permissões | ⬜ Não iniciada | pré-requisito `docs/features/001-auth-hardening/` concluído (2026-07-12) — camada de aplicação (sessão/cookies/CSRF/rate limit/mensagens); infra (TLS, `docker-compose.yml`) adiada. Fase em si (papéis ADMIN/EDITOR/AUTHOR) ainda não iniciada |
+| 3 — Autenticação e permissões | ✅ Concluída (com 1 pendência adiada pra Fase 4) | `docs/features/013-role-based-permissions/`: papéis ADMIN/EDITOR/AUTHOR, `roleProcedure`, `src/lib/permissions/` (matrix); pré-requisito `001-auth-hardening` (2026-07-12) satisfeito. Pendência (restringir publish/archive a Admin/Editor) fechada pela Fase 4 |
 | 4 — Workflow editorial | ✅ Concluída (com 1 pendência adiada) | `docs/features/014-post-review-workflow/`: `IN_REVIEW`/`SCHEDULED`, enviar/aprovar/rejeitar (motivo obrigatório)/publicar direto/agendar/arquivar, `PostReviewComment`; restrição de publish/archive a Admin/Editor (fecha a pendência da Fase 3); agendamento via checagem lazy no read, sem scheduler novo. Pendência adiada: histórico de diffs de edição (`PostRevision`) — mesmo padrão da Fase 2, que adiou upload de imagem pra Fase 8 |
-| 5 — SEO e publicação profissional | 🟡 Parcial | metadata + Open Graph por post já existem; falta sitemap/robots/RSS/canonical/Twitter Card/schema.org |
+| 5 — SEO e publicação profissional | 🟡 Parcial (com 2 pendências adiadas) | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration; pendências adiadas: slug amigável + redirect (slug nunca muda hoje) e campos editáveis de override de SEO |
 | 6 — Busca e descoberta | ⬜ Não iniciada | — |
 | 7 — Analytics interno | ⬜ Não iniciada | — |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
@@ -306,7 +306,9 @@ DRAFT -> IN_REVIEW -> SCHEDULED/PUBLISHED
 
 Aqui o projeto começa a ficar com cara de pleno, porque deixa de ser CRUD e passa a ter **regra de negócio**.
 
-## Fase 5 — SEO e publicação profissional 🟡 Parcial
+## Fase 5 — SEO e publicação profissional 🟡 Parcial (com 2 pendências adiadas)
+
+> **Implementação:** `docs/features/015-seo-metadata/` (RF-10). SEO automático — sitemap/robots/RSS/canonical/Twitter Card/schema.org — tudo computado dos campos já existentes do post (`title`/`content`/`slug`/`coverImageUrl`/`createdAt`/`updatedAt`), sem migration. Decisão do dono, 2026-07-14 (`015-seo-metadata/spec.md` § 4/§ 7): campos editáveis de override (`seoTitle`/`seoDescription`/`canonicalUrl`) e "slug amigável + redirect quando slug mudar" ficam adiados — hoje o slug nunca muda depois de criado, então o redirect pressupõe uma feature de slug-mutation-on-edit que não existe ainda.
 
 ### Objetivo
 
@@ -314,17 +316,17 @@ Fazer o blog ser indexável e bem apresentado quando compartilhado.
 
 ### Funcionalidades
 
-* [x] metadata dinâmica por post (`generateMetadata` em `src/app/(half)/post/[id]/page.tsx`);
+* [x] metadata dinâmica por post (`generateMetadata` em `src/app/(half)/post/[slug]/page.tsx`);
 * [x] title e description por post;
-* [x] Open Graph (title/description/type — sem `ogImageUrl`, pois não há imagem de capa);
-* [ ] Twitter Card;
-* [ ] canonical URL;
-* [ ] sitemap.xml dinâmico;
-* [ ] robots.txt;
-* [ ] RSS feed;
-* [ ] schema.org para artigo;
-* [ ] slug amigável (depende do slug da Fase 1);
-* [ ] redirect quando slug mudar.
+* [x] Open Graph (title/description/type/image — `coverImageUrl` já wireado como `ogImageUrl`, `015`);
+* [x] Twitter Card (`summary_large_image` com capa, `summary` sem capa, `015`);
+* [x] canonical URL (self-referencial via `alternates.canonical` + `metadataBase`, `015`);
+* [x] sitemap.xml dinâmico (`src/app/sitemap.ts`, só posts publicamente visíveis, `015`);
+* [x] robots.txt (`src/app/robots.ts`, bloqueia rotas privadas, aponta pro sitemap, `015`);
+* [x] RSS feed (`src/app/feed.xml/route.ts`, hand-rolled RSS 2.0, `015`);
+* [x] schema.org para artigo (JSON-LD `Article` embutido em `PostView`, `015`);
+* [ ] slug amigável (depende do slug da Fase 1) — **adiado**: nenhum pedido de slug mudar depois de criado ainda existe;
+* [ ] redirect quando slug mudar — **adiado**, pressupõe o item acima.
 
 ### Campos novos no post
 
@@ -337,16 +339,18 @@ publishedAt
 updatedAt
 ```
 
+> **Nota (`015`, 2026-07-14):** nenhum desses campos foi adicionado ao schema nesta rodada — `ogImageUrl` reusa `coverImageUrl` (`010`) já existente; `seoTitle`/`seoDescription`/`canonicalUrl` como colunas editáveis ficaram adiados (sem pedido de UI pra customizar SEO diferente do conteúdo do post); `publishedAt` não foi necessário — `lastModified`/`pubDate` usam `updatedAt`/`createdAt` já existentes.
+
 ### Regras importantes
 
-* todo post publicado precisa ter metadata;
-* slug antigo deve redirecionar para slug novo;
-* sitemap só inclui posts publicados;
-* posts arquivados não entram no sitemap.
+* todo post publicado precisa ter metadata — ✅ (`generateMetadata` roda pra qualquer slug lido);
+* slug antigo deve redirecionar para slug novo — **adiado**, ver nota acima;
+* sitemap só inclui posts publicados — ✅ (reusa `publicVisibilityFilter()` de `014`, inclui `SCHEDULED` já vencido);
+* posts arquivados não entram no sitemap — ✅ (mesma regra).
 
 ### Critério de conclusão
 
-Essa fase está pronta quando cada post tem SEO completo e pode ser compartilhado corretamente no Discord, LinkedIn, WhatsApp, etc.
+Essa fase está pronta quando cada post tem SEO completo e pode ser compartilhado corretamente no Discord, LinkedIn, WhatsApp, etc. **Satisfeito** pros itens automáticos (`015`); slug amigável + redirect ficam pra rodada futura, se/quando slug passar a mudar.
 
 ## Fase 6 — Busca e descoberta de conteúdo ⬜ Não iniciada
 

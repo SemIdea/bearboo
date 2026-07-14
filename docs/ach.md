@@ -201,6 +201,13 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 - **`SCHEDULED` sem scheduler:** visibilidade pública de post `SCHEDULED` é resolvida com `scheduledAt <= now` no momento da query (`PostModel.readRecents`/`readRelated`/`readUserPosts`/`readBySlug`), não por um job que flipa o status no banco — evita introduzir o primeiro componente Task-like do projeto (`afm.md` § 3 regra 12) só pra isso (`014-post-review-workflow/plan.md` § 4.1).
 - **`PostReviewComment`:** model novo (`src/server/models/reviewComment.ts`), mesmo padrão de `Comment` — guarda motivo de aprovação (opcional) ou rejeição (obrigatório), lido via `post.readReviewComments` (dono do post ou quem tem `post:publish`).
 
+#### Superfície HTTP pública não-tRPC (App Router special files) — peça nova de `015-seo-metadata` (2026-07-14)
+
+- **Conceito:** `sitemap.xml`, `robots.txt` e `feed.xml` não são endpoints tRPC — são convenções de arquivo especial do próprio Next.js (`src/app/sitemap.ts`, `src/app/robots.ts`, `src/app/feed.xml/route.ts`), no mesmo nível de `page.tsx`/`layout.tsx` já existentes. Não é uma camada arquitetural nova: todos os 3 chamam `createCaller()` (mesmo caller usado por `generateMetadata`) pra ler dado via tRPC, e `sitemap.ts`/`feed.xml/route.ts` usam a mesma tríade `"use cache"` + `cacheLife("hours")` + `cacheTag("posts")` já estabelecida em `post/[slug]/page.tsx` (`014-post-review-workflow/plan.md`).
+- **Pegadinha:** `"use cache"` não pode envolver uma função que retorna `NextResponse`/`Response` (classe, não serializável) — a leitura de dado cacheada fica numa função separada que retorna um valor plano (string/array), e o `Response` é construído fora do cache, no handler (`src/app/feed.xml/route.ts`: `readFeedXml()` cacheada retorna `string`; `GET()` não-cacheada monta o `NextResponse`).
+- **`src/server/http/` deixa de ser só cookie jar:** ganhou `buildRssXml.ts` (RSS 2.0 hand-rolled) e `buildArticleJsonLd.ts` (JSON-LD `schema.org/Article`, com escape de `<` pra não quebrar a tag `<script>`) — funções puras de formatação de output, mesmo critério do `serializeCookie.ts` (transport glue, não regra de negócio — por isso não vivem em `domain/`).
+- **`post.readSitemapEntries`:** procedure pública nova, enxuta (só `slug`+`updatedAt`, sem `include` de relations, sem paginação) — não reusa `post.readRecent` pro sitemap pra não pagar o custo do include completo nem generalizar uma procedure já usada em produção (`015-seo-metadata/plan.md` § 4.1).
+
 ### 3.2 Componentes de suporte (2ª classe)
 
 #### Schema — validação no boundary
