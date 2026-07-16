@@ -13,7 +13,7 @@
 | 4 — Workflow editorial | ✅ Concluída (com 1 pendência adiada) | `docs/features/014-post-review-workflow/`: `IN_REVIEW`/`SCHEDULED`, enviar/aprovar/rejeitar (motivo obrigatório)/publicar direto/agendar/arquivar, `PostReviewComment`; restrição de publish/archive a Admin/Editor (fecha a pendência da Fase 3); agendamento via checagem lazy no read, sem scheduler novo. Pendência adiada: histórico de diffs de edição (`PostRevision`) — mesmo padrão da Fase 2, que adiou upload de imagem pra Fase 8 |
 | 5 — SEO e publicação profissional | 🟡 Parcial (com 2 pendências adiadas) | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration; pendências adiadas: slug amigável + redirect (slug nunca muda hoje) e campos editáveis de override de SEO |
 | 6 — Busca e descoberta | 🟡 Parcial (com 1 pendência adiada) | `docs/features/016-search-content/`: busca por título/conteúdo via `contains`/`insensitive` (não `tsvector` nativo — ADR-0011), autocomplete no header; filtro por tag/categoria e posts relacionados já existiam de fases anteriores; ordenação por mais acessado adiada pra Fase 7 |
-| 7 — Analytics interno | ⬜ Não iniciada | — |
+| 7 — Analytics interno | 🟡 Parcial (com pendências adiadas) | docs/features/017-post-view-analytics/: registrar view (dedup por visitante 24h via Redis/cookie, ADR-0013), contar total, posts mais acessados, dashboard Admin/Editor; contagem por período e origem de tráfego/UA/referrer adiadas (retenção/privacidade não discutida) |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
 | 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; rate limiting em memória cobre login/registro/reset/refresh (`docs/features/001-auth-hardening/`) — não é rate limiting geral de toda a API; falta logs estruturados, cobertura de teste (~8.6% hoje) |
 | 10 — CI/CD e deploy | ⬜ Não iniciada | sem `.github/workflows/`, sem deploy configurado |
@@ -391,7 +391,9 @@ Mas eu começaria com Postgres mesmo. Menos infra, mais chance de terminar.
 
 Essa fase está pronta quando o usuário consegue encontrar posts facilmente sem depender só da listagem cronológica.
 
-## Fase 7 — Analytics interno ⬜ Não iniciada
+## Fase 7 — Analytics interno 🟡 Parcial (com pendências adiadas)
+
+> **Implementação:** `docs/features/017-post-view-analytics/` (RF-12). `analytics.recordView` registra visualização de post público (dedup por visitante em 24h via cookie de primeira parte + Redis, `ADR-0013`), `analytics.readDashboard` (Admin/Editor) mostra total de views e ranking de mais acessados. Decisão do dono, 2026-07-15/16 (`017-post-view-analytics/spec.md § 4/§ 7`): contagem por período (7/30 dias) e origem de tráfego/user agent/referrer ficam pra rodada futura — exigem decidir retenção/privacidade de dados brutos, não discutido ainda.
 
 ### Objetivo
 
@@ -399,14 +401,14 @@ Criar um painel para acompanhar desempenho dos posts.
 
 ### Funcionalidades
 
-* [ ] registrar visualização de post;
-* [ ] contar views totais;
-* [ ] contar views por período;
-* [ ] posts mais acessados;
-* [ ] origem do tráfego;
-* [ ] user agent;
-* [ ] referrer;
-* [ ] dashboard administrativo.
+* [x] registrar visualização de post (`017`, dedup por visitante em 24h);
+* [x] contar views totais (`017`);
+* [ ] contar views por período — **adiado**, ver nota acima;
+* [x] posts mais acessados (`017`);
+* [ ] origem do tráfego — **adiado**, ver nota acima;
+* [ ] user agent — **adiado**, ver nota acima;
+* [ ] referrer — **adiado**, ver nota acima;
+* [x] dashboard administrativo (`/analytics`, restrito a Admin/Editor via `roleProcedure`, `017`).
 
 ### Modelo inicial
 
