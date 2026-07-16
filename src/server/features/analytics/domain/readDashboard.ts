@@ -1,6 +1,5 @@
 import { DomainInput } from "@/server/createDomain";
-
-const DASHBOARD_MOST_VIEWED_LIMIT = 20;
+import { DASHBOARD_MOST_VIEWED_LIMIT } from "../constants";
 
 const domain_readDashboard = async ({ ctx }: DomainInput<{}>) => {
 	const deltas = await ctx.gateways.viewCounter.drainPendingCounts();

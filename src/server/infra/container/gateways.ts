@@ -12,15 +12,21 @@ type IGateways = {
 	viewCounter: IViewCounterGatewayAdapter;
 };
 
-const gateways: IGateways = {
-	mail: new MailerGateway(
+const resolveMailGateway = (): IMailerGatewayAdapter =>
+	new MailerGateway(
 		env.mail.useProductionMailer || process.env.NODE_ENV !== "development"
 			? new NodemailerMailTransport(env.mail)
 			: new ConsoleMailTransport(),
-	),
-	viewCounter: env.disableRedis
+	);
+
+const resolveViewCounterGateway = (): IViewCounterGatewayAdapter =>
+	env.disableRedis
 		? new InMemoryViewCounterGateway()
-		: new RedisViewCounterGateway(env.redisUrl),
+		: new RedisViewCounterGateway(env.redisUrl);
+
+const gateways: IGateways = {
+	mail: resolveMailGateway(),
+	viewCounter: resolveViewCounterGateway(),
 };
 
 export type { IGateways };
