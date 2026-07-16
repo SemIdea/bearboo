@@ -19,6 +19,7 @@ type IBaseContextDTO = IInputAPIContextDTO & {
 	env: typeof env;
 	resCookies: CookieJar;
 	refreshToken?: string;
+	visitorId?: string;
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
@@ -47,8 +48,10 @@ const createTRPCContext = async ({
 	const cookieStore = parseCookie(cookies);
 	const accessToken = cookieStore.get("accessToken") || null;
 	const refreshToken = cookieStore.get("refreshToken") || null;
+	const visitorId = cookieStore.get("visitorId") || null;
 
 	if (refreshToken) ctx.refreshToken = refreshToken;
+	if (visitorId) ctx.visitorId = visitorId;
 	if (!accessToken) return ctx;
 
 	const user = await domain_readUserAndSessionByAccessToken({

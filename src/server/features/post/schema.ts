@@ -136,6 +136,7 @@ const postFieldsSchema = z.object({
 	scheduledAt: z.date().nullable(),
 	categoryId: z.string().nullable(),
 	coverImageUrl: z.string().nullable(),
+	viewCount: z.number(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });

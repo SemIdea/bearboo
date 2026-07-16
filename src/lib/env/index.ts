@@ -15,6 +15,8 @@ const env = {
 		"postgresql://postgres:postgres@localhost:5432/postgres?schema=public",
 	),
 	siteUrl: getStrEnv("SITE_URL", "http://localhost:3000"),
+	redisUrl: getStrEnv("REDIS_URL", "redis://localhost:6379/0"),
+	disableRedis: getBoolEnv("DISABLE_REDIS", false),
 	mail: {
 		useProductionMailer: getBoolEnv("MAIL_USE_PRODUCTION_MAILER", false),
 		smtpHost: getStrEnv("MAIL_SMTP_HOST", "smtp.gmail.com"),
