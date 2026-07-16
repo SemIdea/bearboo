@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
+import { ViewTracker } from "@/components/viewTracker";
 import { env } from "@/lib/env";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
@@ -204,6 +205,7 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 					)}
 					<h2 className="text-4xl font-bold">{post.title}</h2>
 					<MdView source={post.content} />
+					<ViewTracker postId={post.id} />
 					<CommentArea postId={post.id} />
 					<RelatedPosts
 						postId={post.id}
