@@ -21,6 +21,7 @@ class TestContext {
 	env = env;
 	resCookies = new CookieJar();
 	refreshToken?: string;
+	visitorId?: string;
 	user?: IAuthenticatedUserDTO;
 
 	constructor(
@@ -88,6 +89,7 @@ class TestContext {
 				| "scheduledAt"
 				| "categoryId"
 				| "coverImageUrl"
+				| "viewCount"
 			>
 		> & { tagIds?: string[] } = {},
 	) {
@@ -106,6 +108,7 @@ class TestContext {
 			scheduledAt: overrides.scheduledAt ?? null,
 			categoryId: overrides.categoryId ?? null,
 			coverImageUrl: overrides.coverImageUrl ?? null,
+			viewCount: overrides.viewCount ?? 0,
 			userId,
 		});
 

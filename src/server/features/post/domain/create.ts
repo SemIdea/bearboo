@@ -43,6 +43,7 @@ const domain_createPost = async ({
 		scheduledAt: null,
 		categoryId,
 		coverImageUrl,
+		viewCount: 0,
 	});
 
 	if (input.tagIds?.length) {

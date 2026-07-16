@@ -85,3 +85,15 @@ SEED candidato adicional de módulo detectado no scan (Next.js App Router), aind
 ---
 
 *Adicionar gotcha novo: copia o formato acima. Coloca em ordem alfabética por área. Se não tem área pra colocar, cria seção H2 nova.*
+
+## Pre-push hook — roda testes escopados, não suite completa
+
+**Gatilho:** se você está fazendo push e quer entender por que o pre-push não rodou seu teste favorito.
+
+**Comportamento:** `.husky/pre-push` (desde 2026-07-16) roda `lint-staged --diff "origin/main...HEAD"` em vez de `yarn test` (suite completa). `lint-staged` usa a configuração `.lintstagedrc.json` que chama `vitest related <files>` — ou seja, **só roda testes ligados aos arquivos alterados**. Benefício: pre-push fica rápido (segundos em vez de minutos). Risco: não detecta quebras em arquivos não diretamente relacionados — especialmente relevante em projeto com **mocks compartilhados em estado serial** (`src/test/setup.ts` seam, ADR-0011). Exemplo: teste de `src/server/features/user/procedures/login.ts` é alterado; o pre-push **não roda** testes de `src/server/features/auth/procedures/verify.ts` se não há importação direta.
+
+**Solução:** **Pre-push é gate rápido local, não gate final.** A suite completa (`yarn test`) roda em CI/CD antes de merge — é lá que se detecta quebras cross-módulo. Se suspeita de interação entre módulos:
+- Roda localmente `yarn test` (full suite) antes de push.
+- Se teste falha em CI mas passou no pre-push local: é um efeito colateral não-óbvio via mock compartilhado — suba issue com stack trace + descrição do módulo tocado pro time investigar.
+
+**Ref:** `docs/research/003-pre-push-scoped-tests.md` (decision: Opção 2 — lint-staged + vitest related, trade-off de segurança/cobertura aceitável sob CI completo).

@@ -28,6 +28,8 @@
 | US-010 | Atuar conforme papel (Admin/Editor/Author) | Autenticação | RF-08 | done |
 | US-011 | Publicar post via workflow de revisão | Posts | RF-09 | done |
 | US-012 | Compartilhar e indexar post com SEO completo | Posts | RF-10 | done |
+| US-013 | Busca posts por título ou conteúdo | Posts | RF-11 | done |
+| US-014 | Analytics de visualizações por post | Analytics | RF-12 | done |
 
 ## Pendências Técnicas
 
@@ -336,6 +338,44 @@ Scenario: Busca é paginada
 ```
 
 **Metadata:** RF-11. *Test ref:* `src/server/features/post/procedures/__test__/search.ts`, `src/server/models/__test__/prismaModels.ts` (`search`). *Spec:* `docs/features/016-search-content/spec.md`.
+
+---
+
+### US-014 — Admin/Editor acompanha visualizações de post
+
+- **Persona:** Admin/Editor (papel autenticado do sistema, ver `013-role-based-permissions`).
+- **Story:** Como Admin/Editor, quero ver quantas visualizações cada post recebeu (total e ranking de mais acessados), a partir de views registradas automaticamente quando um leitor abre a página pública de um post, pra entender quais conteúdos performam melhor.
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Visualização de post público é registrada
+  Given um post PUBLISHED
+  When um leitor abre a página do post
+  Then uma view é registrada para aquele post
+
+Scenario: View de post não-público não é registrada
+  Given um post DRAFT ou ARCHIVED
+  When alguém abre a URL do post (ex: preview do próprio dono)
+  Then nenhuma view pública é registrada pra aquele acesso
+
+Scenario: Admin/Editor vê o total de views de um post
+  Given um post com N views registradas
+  When um Admin/Editor abre o dashboard de analytics
+  Then o total de views daquele post aparece
+
+Scenario: Dashboard lista posts mais acessados
+  Given múltiplos posts com contagens de view diferentes
+  When um Admin/Editor abre o dashboard de analytics
+  Then os posts aparecem ordenados por número de views, do mais pro menos acessado
+
+Scenario: Dashboard é restrito a Admin/Editor
+  Given um usuário Author autenticado (sem papel Admin/Editor)
+  When ele tenta acessar o dashboard de analytics
+  Then o acesso é negado
+```
+
+**Metadata:** RF-12. *Test ref:* `src/server/features/analytics/domain/__test__/{recordView,readDashboard}.ts`, `src/server/features/analytics/procedures/__test__/{recordView,readDashboard}.ts`, `src/server/integrations/gateway/viewCounter/implementations/__test__/{redis,inMemory}.ts`. *Spec:* `docs/features/017-post-view-analytics/spec.md`.
 
 ---
 

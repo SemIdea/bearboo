@@ -60,6 +60,7 @@ model Post {
   categoryId     String?
   category       Category?           @relation(fields: [categoryId], references: [id])
   coverImageUrl  String?
+  viewCount      Int                 @default(0)
   postTags       PostTag[]
   comments       Comment[]
   reviewComments PostReviewComment[]

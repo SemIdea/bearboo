@@ -18,6 +18,7 @@ type IPostEntity = {
 	scheduledAt: Date | null;
 	categoryId: string | null;
 	coverImageUrl: string | null;
+	viewCount: number;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -49,6 +50,13 @@ type IPostEntityWithRelations = IPostEntity & {
 type IPostEntityWithTaxonomy = IPostEntity & {
 	category: IPostCategorySummary | null;
 	tags: IPostTagSummary[];
+};
+
+type IPostMostViewedEntry = {
+	id: string;
+	title: string;
+	slug: string;
+	viewCount: number;
 };
 
 type IPostSitemapEntry = {
@@ -257,6 +265,49 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		});
 	}
 
+	async readIfPubliclyVisible(postId: string): Promise<IPostEntity | null> {
+		return prisma.post.findFirst({
+			where: {
+				id: postId,
+				OR: publicVisibilityFilter(),
+			},
+		});
+	}
+
+	async applyViewIncrements(deltas: Record<string, number>): Promise<void> {
+		await Promise.all(
+			Object.entries(deltas).map(([postId, delta]) =>
+				prisma.post.update({
+					where: { id: postId },
+					data: { viewCount: { increment: delta } },
+				}),
+			),
+		);
+	}
+
+	async readMostViewed(limit: number): Promise<IPostMostViewedEntry[]> {
+		return prisma.post.findMany({
+			orderBy: {
+				viewCount: "desc",
+			},
+			take: limit,
+			select: {
+				id: true,
+				title: true,
+				slug: true,
+				viewCount: true,
+			},
+		});
+	}
+
+	async readTotalViews(): Promise<number> {
+		const result = await prisma.post.aggregate({
+			_sum: { viewCount: true },
+		});
+
+		return result._sum.viewCount ?? 0;
+	}
+
 	async setTags(postId: string, tagIds: string[]): Promise<void> {
 		await prisma.$transaction([
 			prisma.postTag.deleteMany({ where: { postId } }),
@@ -321,6 +372,10 @@ type IPostModel = BaseModel<IPostEntity> & {
 		limit: number,
 	) => Promise<IPostEntityWithRelations[]>;
 	setTags: (postId: string, tagIds: string[]) => Promise<void>;
+	readIfPubliclyVisible: (postId: string) => Promise<IPostEntity | null>;
+	applyViewIncrements: (deltas: Record<string, number>) => Promise<void>;
+	readMostViewed: (limit: number) => Promise<IPostMostViewedEntry[]>;
+	readTotalViews: () => Promise<number>;
 };
 
 export type {
@@ -329,6 +384,7 @@ export type {
 	IPostEntityWithRelations,
 	IPostEntityWithTaxonomy,
 	IPostModel,
+	IPostMostViewedEntry,
 	IPostSitemapEntry,
 	IPostStatus,
 	IPostTagSummary,

@@ -1,4 +1,5 @@
 import { t } from "../createRouter";
+import { AnalyticsRouter } from "../features/analytics";
 import { AuthRouter } from "../features/auth";
 import { CategoryRouter } from "../features/category";
 import { CommentRouter } from "../features/comment";
@@ -13,6 +14,7 @@ const appRouter = t.router({
 	comment: CommentRouter,
 	category: CategoryRouter,
 	tag: TagRouter,
+	analytics: AnalyticsRouter,
 });
 
 type AppRouter = typeof appRouter;
