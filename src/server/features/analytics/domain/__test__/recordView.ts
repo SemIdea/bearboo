@@ -59,4 +59,43 @@ describe("domain_recordView", () => {
 		expect(first).toEqual({ counted: true });
 		expect(second).toEqual({ counted: false });
 	});
+
+	test("resolves the referrer bucket and forwards the raw user agent to the buffered event", async () => {
+		const ctx = createTestContext();
+		const user = await ctx.createNewUser();
+		const post = await ctx.createPost({ userId: user.id, status: "PUBLISHED" });
+
+		await domain_recordView({
+			ctx,
+			input: {
+				postId: post.id,
+				visitorId: "visitor-1",
+				referer: "https://www.google.com/search?q=x",
+				userAgent: "some-agent",
+			},
+		});
+
+		const events = await ctx.gateways.viewCounter.drainPendingEvents();
+
+		expect(events[post.id]).toEqual([
+			{ referrerBucket: "SEARCH", userAgent: "some-agent" },
+		]);
+	});
+
+	test("defaults to a DIRECT referrer bucket and empty user agent when none is provided", async () => {
+		const ctx = createTestContext();
+		const user = await ctx.createNewUser();
+		const post = await ctx.createPost({ userId: user.id, status: "PUBLISHED" });
+
+		await domain_recordView({
+			ctx,
+			input: { postId: post.id, visitorId: "visitor-1" },
+		});
+
+		const events = await ctx.gateways.viewCounter.drainPendingEvents();
+
+		expect(events[post.id]).toEqual([
+			{ referrerBucket: "DIRECT", userAgent: "" },
+		]);
+	});
 });

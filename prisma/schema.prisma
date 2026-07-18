@@ -68,8 +68,28 @@ model Post {
   postTags       PostTag[]
   comments       Comment[]
   reviewComments PostReviewComment[]
+  postViews      PostView[]
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
+}
+
+enum ReferrerBucket {
+  DIRECT
+  SEARCH
+  SOCIAL
+  OTHER
+}
+
+model PostView {
+  id             String         @id
+  postId         String
+  post           Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  referrerBucket ReferrerBucket
+  userAgent      String
+  createdAt      DateTime       @default(now())
+
+  @@index([postId, createdAt])
+  @@index([createdAt])
 }
 
 enum ReviewCommentType {

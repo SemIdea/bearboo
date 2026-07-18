@@ -19,7 +19,12 @@ const procedure_recordView = publicProcedure
 
 		const result = await domain_recordView({
 			ctx,
-			input: { postId: input.postId, visitorId },
+			input: {
+				postId: input.postId,
+				visitorId,
+				referer: ctx.headers.get("referer"),
+				userAgent: ctx.headers.get("user-agent"),
+			},
 		});
 
 		if (!result) {

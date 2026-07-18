@@ -13,7 +13,7 @@
 | 4 — Workflow editorial | ✅ Concluída (com 1 pendência adiada) | `docs/features/014-post-review-workflow/`: `IN_REVIEW`/`SCHEDULED`, enviar/aprovar/rejeitar (motivo obrigatório)/publicar direto/agendar/arquivar, `PostReviewComment`; restrição de publish/archive a Admin/Editor (fecha a pendência da Fase 3); agendamento via checagem lazy no read, sem scheduler novo. Pendência adiada: histórico de diffs de edição (`PostRevision`) — mesmo padrão da Fase 2, que adiou upload de imagem pra Fase 8 |
 | 5 — SEO e publicação profissional | ✅ Concluída | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration. `docs/features/018-seo-overrides-slug-redirect/`: campos editáveis de override de SEO (`seoTitle`/`seoDescription`/`canonicalUrl`) e slug editável com redirect 301 automático (`previousSlug`, 1 nível de histórico) — as 2 pendências que ficavam essa fase parcial |
 | 6 — Busca e descoberta | ✅ Concluída | `docs/features/016-search-content/`: busca por título/conteúdo via `contains`/`insensitive` (não `tsvector` nativo — ADR-0011), autocomplete no header; filtro por tag/categoria e posts relacionados já existiam de fases anteriores. `docs/features/019-search-sort-by-views/`: ordenação por mais acessado (`sortBy: "mostViewed"`), desbloqueada pelo `Post.viewCount` da Fase 7 — a pendência que deixava essa fase parcial |
-| 7 — Analytics interno | 🟡 Parcial (com pendências adiadas) | docs/features/017-post-view-analytics/: registrar view (dedup por visitante 24h via Redis/cookie, ADR-0013), contar total, posts mais acessados, dashboard Admin/Editor; contagem por período e origem de tráfego/UA/referrer adiadas (retenção/privacidade não discutida) |
+| 7 — Analytics interno | ✅ Concluída | `docs/features/017-post-view-analytics/`: registrar view (dedup por visitante 24h via Redis/cookie, ADR-0013), contar total, posts mais acessados, dashboard Admin/Editor. `docs/features/020-view-analytics-breakdown/`: contagem por período (7/30 dias), origem de tráfego e navegador/SO — pendências que deixavam a fase parcial, fechadas com retenção de 30 dias (deleção lazy) e sem persistir IP |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
 | 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; rate limiting em memória cobre login/registro/reset/refresh (`docs/features/001-auth-hardening/`) — não é rate limiting geral de toda a API; falta logs estruturados, cobertura de teste (~8.6% hoje) |
 | 10 — CI/CD e deploy | ⬜ Não iniciada | sem `.github/workflows/`, sem deploy configurado |
@@ -393,9 +393,9 @@ Mas eu começaria com Postgres mesmo. Menos infra, mais chance de terminar.
 
 Essa fase está pronta quando o usuário consegue encontrar posts facilmente sem depender só da listagem cronológica.
 
-## Fase 7 — Analytics interno 🟡 Parcial (com pendências adiadas)
+## Fase 7 — Analytics interno ✅ Concluída
 
-> **Implementação:** `docs/features/017-post-view-analytics/` (RF-12). `analytics.recordView` registra visualização de post público (dedup por visitante em 24h via cookie de primeira parte + Redis, `ADR-0013`), `analytics.readDashboard` (Admin/Editor) mostra total de views e ranking de mais acessados. Decisão do dono, 2026-07-15/16 (`017-post-view-analytics/spec.md § 4/§ 7`): contagem por período (7/30 dias) e origem de tráfego/user agent/referrer ficam pra rodada futura — exigem decidir retenção/privacidade de dados brutos, não discutido ainda.
+> **Implementação:** `docs/features/017-post-view-analytics/` (RF-12). `analytics.recordView` registra visualização de post público (dedup por visitante em 24h via cookie de primeira parte + Redis, `ADR-0013`), `analytics.readDashboard` (Admin/Editor) mostra total de views e ranking de mais acessados. `docs/features/020-view-analytics-breakdown/` (2026-07-18) fechou a pendência adiada em `017-post-view-analytics/spec.md § 4`: breakdown por período (últimos 7/30 dias), origem de tráfego (classificada do header `Referer`) e navegador/SO (classificado do `User-Agent` bruto). Decisão de retenção/privacidade (owner, 2026-07-18): eventos brutos retidos 30 dias com deleção lazy no read (sem cron), nenhum IP persistido.
 
 ### Objetivo
 
@@ -405,11 +405,11 @@ Criar um painel para acompanhar desempenho dos posts.
 
 * [x] registrar visualização de post (`017`, dedup por visitante em 24h);
 * [x] contar views totais (`017`);
-* [ ] contar views por período — **adiado**, ver nota acima;
+* [x] contar views por período (últimos 7/30 dias, `020-view-analytics-breakdown`, 2026-07-18);
 * [x] posts mais acessados (`017`);
-* [ ] origem do tráfego — **adiado**, ver nota acima;
-* [ ] user agent — **adiado**, ver nota acima;
-* [ ] referrer — **adiado**, ver nota acima;
+* [x] origem do tráfego (classificada do header `Referer` em direto/busca/social/outro, `020-view-analytics-breakdown`, 2026-07-18);
+* [x] user agent (categorizado em navegador/SO por regex na leitura, sem lib nova, `020-view-analytics-breakdown`, 2026-07-18);
+* [x] referrer (mesmo mecanismo do item "origem do tráfego" acima — um único breakdown, não dois separados);
 * [x] dashboard administrativo (`/analytics`, restrito a Admin/Editor via `roleProcedure`, `017`).
 
 ### Modelo inicial
@@ -425,6 +425,8 @@ PostView {
   createdAt
 }
 ```
+
+> Esboço original da fase, anterior à implementação — mantido por histórico. O modelo real (`020-view-analytics-breakdown/plan.md § 3`) difere por decisão de privacidade do dono: sem `ipHash`/`visitorId` na tabela (dedup já resolvido via Redis, `ADR-0013`), `referrer` vira `referrerBucket` (classificado em DIRECT/SEARCH/SOCIAL/OTHER na escrita, não guarda a URL bruta), e retenção de 30 dias com deleção lazy no read.
 
 ### Dashboard
 
