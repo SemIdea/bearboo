@@ -18,6 +18,20 @@ const readDashboardOutputSchema = z.object({
 			viewCount: z.number(),
 		}),
 	),
+	viewsLast7Days: z.number(),
+	viewsLast30Days: z.number(),
+	trafficOrigin: z.array(
+		z.object({
+			bucket: z.enum(["DIRECT", "SEARCH", "SOCIAL", "OTHER"]),
+			count: z.number(),
+		}),
+	),
+	browsers: z.array(
+		z.object({
+			name: z.string(),
+			count: z.number(),
+		}),
+	),
 });
 
 type RecordViewInput = z.infer<typeof recordViewSchema>;

@@ -24,7 +24,14 @@ describe("Analytics readDashboard Controller Unitary Testing", () => {
 		const result =
 			await AnalyticsRouter.createCaller(editorCtx).readDashboard();
 
-		expect(result).toEqual({ totalViews: 0, posts: [] });
+		expect(result).toEqual({
+			totalViews: 0,
+			posts: [],
+			viewsLast7Days: 0,
+			viewsLast30Days: 0,
+			trafficOrigin: [],
+			browsers: [],
+		});
 	});
 
 	test("Should let an admin read the dashboard", async () => {
@@ -32,6 +39,31 @@ describe("Analytics readDashboard Controller Unitary Testing", () => {
 
 		const result = await AnalyticsRouter.createCaller(adminCtx).readDashboard();
 
-		expect(result).toEqual({ totalViews: 0, posts: [] });
+		expect(result).toEqual({
+			totalViews: 0,
+			posts: [],
+			viewsLast7Days: 0,
+			viewsLast30Days: 0,
+			trafficOrigin: [],
+			browsers: [],
+		});
+	});
+
+	test("Should include period/origin/browser breakdowns after views are recorded", async () => {
+		const adminCtx = await createAuthenticatedContext({ role: "ADMIN" });
+		const post = await adminCtx.createPost({
+			userId: adminCtx.user.id,
+			status: "PUBLISHED",
+		});
+
+		await AnalyticsRouter.createCaller(adminCtx).recordView({
+			postId: post.id,
+		});
+
+		const result = await AnalyticsRouter.createCaller(adminCtx).readDashboard();
+
+		expect(result.viewsLast7Days).toBe(1);
+		expect(result.viewsLast30Days).toBe(1);
+		expect(result.trafficOrigin).toEqual([{ bucket: "DIRECT", count: 1 }]);
 	});
 });

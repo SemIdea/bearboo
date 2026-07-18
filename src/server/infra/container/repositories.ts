@@ -1,6 +1,7 @@
 import { CategoryModel, ICategoryModel } from "@/server/models/category";
 import { CommentModel, ICommentModel } from "@/server/models/comment";
 import { IPostModel, PostModel } from "@/server/models/post";
+import { IPostViewModel, PostViewModel } from "@/server/models/postView";
 import { IResetTokenModel, ResetTokenModel } from "@/server/models/resetToken";
 import {
 	IReviewCommentModel,
@@ -18,6 +19,7 @@ type IRepositories = {
 	user: IUserModel;
 	session: ISessionModel;
 	post: IPostModel;
+	postView: IPostViewModel;
 	comment: ICommentModel;
 	category: ICategoryModel;
 	tag: ITagModel;
@@ -30,6 +32,7 @@ const repositories: IRepositories = {
 	user: UserModel,
 	session: SessionModel,
 	post: PostModel,
+	postView: PostViewModel,
 	comment: CommentModel,
 	category: CategoryModel,
 	tag: TagModel,

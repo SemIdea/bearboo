@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import { IViewCounterGatewayAdapter } from "../adapter";
+import { IViewCounterGatewayAdapter, IViewEvent } from "../adapter";
 
 const DEDUP_TTL_SECONDS = 86400;
 const KEY_PREFIX = "viewcounter";
@@ -11,10 +11,11 @@ class RedisViewCounterGateway implements IViewCounterGatewayAdapter {
 		this.redis = new Redis(redisUrl);
 	}
 
-	async recordView(postId: string, visitorId: string) {
+	async recordView(postId: string, visitorId: string, event: IViewEvent) {
 		const dateKey = new Date().toISOString().slice(0, 10);
 		const visitorsKey = `${KEY_PREFIX}:${postId}:visitors:${dateKey}`;
 		const pendingKey = `${KEY_PREFIX}:${postId}:pending`;
+		const eventsKey = `${KEY_PREFIX}:${postId}:events`;
 
 		const added = await this.redis.sadd(visitorsKey, visitorId);
 
@@ -22,6 +23,7 @@ class RedisViewCounterGateway implements IViewCounterGatewayAdapter {
 
 		await this.redis.expire(visitorsKey, DEDUP_TTL_SECONDS);
 		await this.redis.incr(pendingKey);
+		await this.redis.rpush(eventsKey, JSON.stringify(event));
 
 		return { counted: true };
 	}
@@ -39,6 +41,21 @@ class RedisViewCounterGateway implements IViewCounterGatewayAdapter {
 		}
 
 		return deltas;
+	}
+
+	async drainPendingEvents() {
+		const keys = await this.redis.keys(`${KEY_PREFIX}:*:events`);
+		const events: Record<string, IViewEvent[]> = {};
+
+		for (const key of keys) {
+			const rawEvents = await this.redis.lrange(key, 0, -1);
+			await this.redis.del(key);
+
+			const postId = key.slice(KEY_PREFIX.length + 1, -":events".length);
+			events[postId] = rawEvents.map((raw) => JSON.parse(raw) as IViewEvent);
+		}
+
+		return events;
 	}
 }
 
