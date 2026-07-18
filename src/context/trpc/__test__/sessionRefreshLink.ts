@@ -42,7 +42,7 @@ const fakeOp = {
 
 describe("sessionRefreshLink", () => {
 	beforeEach(() => {
-		vi.stubGlobal("window", { location: { href: "" } });
+		vi.stubGlobal("window", { location: { href: "", pathname: "" } });
 		vi.mocked(refreshTokens).mockReset();
 	});
 
@@ -154,6 +154,28 @@ describe("sessionRefreshLink", () => {
 
 		expect(window.location.href).toBe("");
 		expect(errorSpy).toHaveBeenCalledWith(invalidCredentialsError);
+	});
+
+	test("does not reload the page when INVALID_TOKEN fires while already on /auth/login (avoids the infinite reload loop when a stale cookie keeps being resent)", () => {
+		vi.stubGlobal("window", {
+			location: { href: "", pathname: "/auth/login" },
+		});
+		const invalidTokenError = errorWith(
+			"UNAUTHORIZED",
+			SessionErrorCode.INVALID_TOKEN,
+		);
+		const next = vi
+			.fn()
+			.mockReturnValue(
+				fakeObservable((observer) => observer.error(invalidTokenError)),
+			);
+
+		const errorSpy = vi.fn();
+		const link = sessionRefreshLink({})({ op: fakeOp, next });
+		link.subscribe({ next: vi.fn(), error: errorSpy, complete: vi.fn() });
+
+		expect(window.location.href).toBe("");
+		expect(errorSpy).toHaveBeenCalledWith(invalidTokenError);
 	});
 
 	test("redirects to /auth/verify on USER_NOT_VERIFIED without swallowing the error", () => {
