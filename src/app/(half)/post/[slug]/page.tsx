@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { formatDistance } from "date-fns";
 import { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
@@ -42,25 +42,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			};
 		}
 
-		const description = post.content.substring(0, 160);
+		const title = post.seoTitle ?? post.title;
+		const description = post.seoDescription ?? post.content.substring(0, 160);
+		const canonical = post.canonicalUrl ?? `/post/${slug}`;
 		const images = post.coverImageUrl ? [post.coverImageUrl] : undefined;
 
 		return {
-			title: post.title,
+			title,
 			description,
 			alternates: {
-				canonical: `/post/${slug}`,
+				canonical,
 			},
 			openGraph: {
-				title: post.title,
+				title,
 				description,
 				type: "article",
-				url: `/post/${slug}`,
+				url: canonical,
 				images,
 			},
 			twitter: {
 				card: images ? "summary_large_image" : "summary",
-				title: post.title,
+				title,
 				description,
 				images,
 			},
@@ -113,6 +115,12 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 			error instanceof TRPCError &&
 			error.message === PostErrorCode.POST_NOT_FOUND
 		) {
+			const redirectTarget = await caller.post.readRedirectSlug({ slug });
+
+			if (redirectTarget) {
+				permanentRedirect(`/post/${redirectTarget.slug}`);
+			}
+
 			return (
 				<Suspense fallback={<p>Loading post...</p>}>
 					<OwnerPreview slug={slug} />

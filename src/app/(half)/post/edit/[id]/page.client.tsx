@@ -127,6 +127,22 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
 				label="Cover image URL"
 				placeholder="https://..."
 			/>
+			<InputField name="slug" label="Slug" placeholder="url-friendly-slug" />
+			<InputField
+				name="seoTitle"
+				label="SEO title override (optional)"
+				placeholder="Leave empty to use the post title"
+			/>
+			<InputField
+				name="seoDescription"
+				label="SEO description override (optional)"
+				placeholder="Leave empty to use the post content"
+			/>
+			<InputField
+				name="canonicalUrl"
+				label="Canonical URL override (optional)"
+				placeholder="https://... (e.g. cross-posted original)"
+			/>
 			<Button type="submit" disabled={isUploading}>
 				{isUploading ? "Editing Post..." : "Edit Post"}
 			</Button>
