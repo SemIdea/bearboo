@@ -30,6 +30,7 @@
 | US-012 | Compartilhar e indexar post com SEO completo | Posts | RF-10 | done |
 | US-013 | Busca posts por título ou conteúdo | Posts | RF-11 | done |
 | US-014 | Analytics de visualizações por post | Analytics | RF-12 | done |
+| US-015 | Autor/Editor customiza SEO e URL amigável do post | Posts | RF-10 | done |
 
 ## Pendências Técnicas
 
@@ -376,6 +377,45 @@ Scenario: Dashboard é restrito a Admin/Editor
 ```
 
 **Metadata:** RF-12. *Test ref:* `src/server/features/analytics/domain/__test__/{recordView,readDashboard}.ts`, `src/server/features/analytics/procedures/__test__/{recordView,readDashboard}.ts`, `src/server/integrations/gateway/viewCounter/implementations/__test__/{redis,inMemory}.ts`. *Spec:* `docs/features/017-post-view-analytics/spec.md`.
+
+---
+
+### US-015 — Autor/Editor customiza SEO e URL amigável do post
+
+- **Persona:** Autor/Editor (dono do post ou quem tem `post:editAny` — mesma regra de `post.update` hoje).
+- **Story:** Como Autor/Editor, quero poder sobrescrever o title/description/canonical usados no SEO de um post (quando o título/conteúdo não são o ideal pra compartilhamento ou o post é republicado de outro lugar) e poder corrigir o slug de um post já publicado sem quebrar links antigos, pra ter controle editorial completo sobre como o post é indexado e compartilhado (`docs/roadmap.md` Fase 5, pendências adiadas em `015-seo-metadata/spec.md § 4`).
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Override de SEO é usado na metadata em vez do conteúdo do post
+  Given um post com seoTitle/seoDescription/canonicalUrl preenchidos
+  When a página do post é carregada
+  Then <title>, meta description, Open Graph e canonical usam os valores de override, não title/content/URL própria
+
+Scenario: Sem override, comportamento atual é preservado
+  Given um post sem seoTitle/seoDescription/canonicalUrl (campos vazios)
+  When a página do post é carregada
+  Then a metadata é computada de title/content/URL própria, igual antes de 018
+
+Scenario: Editar o slug de um post gera um novo slug válido e único
+  Given um post existente com slug "como-fiz-x"
+  When o Autor/Editor edita o slug pra "como-fiz-x-de-verdade"
+  Then o post passa a responder em "/post/como-fiz-x-de-verdade"
+  And o slug antigo "como-fiz-x" fica registrado como slug anterior
+
+Scenario: Slug antigo redireciona pro slug novo
+  Given um post cujo slug mudou de "como-fiz-x" pra "como-fiz-x-de-verdade"
+  When alguém acessa "/post/como-fiz-x"
+  Then a resposta é um redirect permanente (301) pra "/post/como-fiz-x-de-verdade"
+
+Scenario: Novo slug colide com um já existente
+  Given um post publicado com slug "titulo-legal"
+  When o Autor/Editor edita outro post pro mesmo slug "titulo-legal"
+  Then o post editado recebe um sufixo numérico ("titulo-legal-2"), mesmo padrão do slug gerado na criação
+```
+
+**Metadata:** RF-10. *Test ref:* `docs/features/018-seo-overrides-slug-redirect/`. *Spec:* `docs/features/018-seo-overrides-slug-redirect/spec.md`.
 
 ---
 

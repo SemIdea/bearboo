@@ -14,6 +14,10 @@ type IPostEntity = {
 	title: string;
 	content: string;
 	slug: string;
+	previousSlug: string | null;
+	seoTitle: string | null;
+	seoDescription: string | null;
+	canonicalUrl: string | null;
 	status: IPostStatus;
 	scheduledAt: Date | null;
 	categoryId: string | null;
@@ -250,6 +254,19 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		return { ...rest, tags: flattenTags(postTags) };
 	}
 
+	async readByPreviousSlug(slug: string): Promise<{ slug: string } | null> {
+		const post = await prisma.post.findUnique({
+			where: {
+				previousSlug: slug,
+			},
+			select: {
+				slug: true,
+			},
+		});
+
+		return post;
+	}
+
 	async readAllPublicSlugs(): Promise<IPostSitemapEntry[]> {
 		return prisma.post.findMany({
 			where: {
@@ -364,6 +381,7 @@ type IPostModel = BaseModel<IPostEntity> & {
 		tagId?: string,
 	) => Promise<IPostEntityWithRelations[]>;
 	readBySlug: (slug: string) => Promise<IPostEntityWithTaxonomy | null>;
+	readByPreviousSlug: (slug: string) => Promise<{ slug: string } | null>;
 	readAllPublicSlugs: () => Promise<IPostSitemapEntry[]>;
 	readRelated: (
 		postId: string,

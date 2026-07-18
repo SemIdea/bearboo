@@ -92,8 +92,40 @@ SEED candidato adicional de módulo detectado no scan (Next.js App Router), aind
 
 **Comportamento:** `.husky/pre-push` (desde 2026-07-16) roda `lint-staged --diff "origin/main...HEAD"` em vez de `yarn test` (suite completa). `lint-staged` usa a configuração `.lintstagedrc.json` que chama `vitest related <files>` — ou seja, **só roda testes ligados aos arquivos alterados**. Benefício: pre-push fica rápido (segundos em vez de minutos). Risco: não detecta quebras em arquivos não diretamente relacionados — especialmente relevante em projeto com **mocks compartilhados em estado serial** (`src/test/setup.ts` seam, ADR-0011). Exemplo: teste de `src/server/features/user/procedures/login.ts` é alterado; o pre-push **não roda** testes de `src/server/features/auth/procedures/verify.ts` se não há importação direta.
 
-**Solução:** **Pre-push é gate rápido local, não gate final.** A suite completa (`yarn test`) roda em CI/CD antes de merge — é lá que se detecta quebras cross-módulo. Se suspeita de interação entre módulos:
-- Roda localmente `yarn test` (full suite) antes de push.
-- Se teste falha em CI mas passou no pre-push local: é um efeito colateral não-óbvio via mock compartilhado — suba issue com stack trace + descrição do módulo tocado pro time investigar.
+**Solução:** **Pre-push é gate rápido local, e hoje é o único gate automatizado que existe** — `docs/roadmap.md` Fase 10 (CI/CD) ainda não começou (sem `.github/workflows/`), então não há um gate de suite completa rodando em merge pra pegar quebras cross-módulo depois. Mitigação até a Fase 10 existir:
+- Roda localmente `yarn test` (full suite) antes de push quando a mudança toca múltiplos módulos ou mexe em algo usado pelos mocks compartilhados (`src/test/setup.ts`, ADR-0011).
+- Quando a Fase 10 (CI/CD) for implementada, o ideal é a suite completa rodar lá como o gate real — até então, a suite completa só roda se alguém rodar `yarn test` manualmente.
 
-**Ref:** `docs/research/003-pre-push-scoped-tests.md` (decision: Opção 2 — lint-staged + vitest related, trade-off de segurança/cobertura aceitável sob CI completo).
+**Ref:** `docs/research/003-pre-push-scoped-tests.md` (decision: Opção 2 — lint-staged + vitest related; a research já registrava esse trade-off, esta nota corrige o gotcha que tinha assumido CI/CD como backstop existente).
+
+---
+
+## Zod v3 → v4 — validators de formato de string viraram funções top-level (deprecated, não erro)
+
+**Gatilho:** se você está escrevendo/revisando um `z.object()` em `schema.ts` de qualquer feature e usa `z.string().url()`, `.email()`, `.uuid()`, `.cuid()`/`.cuid2()`, `.ulid()`, `.datetime()`, `.date()`, `.time()`, `.duration()`, `.ip()`/`.cidr()`, ou `z.nativeEnum()`/`.merge()` em qualquer schema Zod.
+
+**Comportamento:** o projeto está em `zod@^4.0.10` (`package.json`), mas esses métodos ainda **compilam e funcionam** — são API v3 mantida por compat, sem erro de tipo nem warning de lint, então passam despercebidos em review. Zod v4 moveu os validadores de formato de string pra funções top-level; a forma antiga fica **deprecated silenciosamente**. Pego em `018-seo-overrides-slug-redirect` (`post/schema.ts`): `coverImageUrl`/`canonicalUrl` usavam `z.string().url()`.
+
+**Solução — troca 1:1, sem mudança de comportamento:**
+
+| v3 (deprecated, ainda funciona) | v4 (correto) |
+| --- | --- |
+| `z.string().url()` | `z.url()` |
+| `z.string().email()` | `z.email()` |
+| `z.string().uuid()` | `z.uuid()` |
+| `z.string().cuid()` / `.cuid2()` | `z.cuid()` / `z.cuid2()` |
+| `z.string().ulid()` | `z.ulid()` |
+| `z.string().datetime()` | `z.iso.datetime()` |
+| `z.string().date()` | `z.iso.date()` |
+| `z.string().time()` | `z.iso.time()` |
+| `z.string().duration()` | `z.iso.duration()` |
+| `z.string().ip()` | `z.ipv4()` / `z.ipv6()` (v4 separou os dois) |
+| `z.string().cidr()` | `z.cidrv4()` / `z.cidrv6()` |
+| `z.nativeEnum(MyEnum)` | `z.enum(MyEnum)` (v4 aceita TS native enum direto) |
+| `schemaA.merge(schemaB)` | `schemaA.extend(schemaB.shape)` |
+| `error.format()` / `.flatten()` | `z.treeifyError(error)` / `z.prettifyError(error)` |
+| `{ message: "..." }` em refinements/checks | `{ error: "..." }` (v4 unificou `message`/`invalid_type_error`/`required_error` num único `error`) |
+
+**Não achou no scan de 2026-07-18** (só documentado como referência preventiva, YAGNI de fix — regra de entrada de gotcha satisfeita por ser "comportamento documentado de SDK externo conhecido por surpreender", não por já ter mordido 2×): `nativeEnum`, `.merge()`, `.format()`/`.flatten()`, `email`/`uuid`/`cuid`/`datetime`/`ip`. Só `z.string().url()` foi achado e corrigido (`post/schema.ts`).
+
+**Ref:** confirmado pelo dono (2026-07-18) revisando `018-seo-overrides-slug-redirect`; motivo de virar gotcha em vez de fix silencioso é exatamente não ter dado erro de tipo — sem essa entrada, o padrão antigo volta a vazar em schema novo sem ninguém notar.
