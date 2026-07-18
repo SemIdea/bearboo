@@ -380,9 +380,30 @@ Scenario: Dashboard é restrito a Admin/Editor
   Given um usuário Author autenticado (sem papel Admin/Editor)
   When ele tenta acessar o dashboard de analytics
   Then o acesso é negado
+
+Scenario: Dashboard mostra views dos últimos 7 e 30 dias
+  Given um post com views registradas em datas diferentes, algumas há mais de 30 dias
+  When um Admin/Editor abre o dashboard de analytics
+  Then o dashboard mostra a contagem de views dos últimos 7 dias e dos últimos 30 dias
+  And views com mais de 30 dias não entram nessas contagens
+
+Scenario: Dashboard mostra origem de tráfego
+  Given visitas com header Referer de busca, de rede social, sem Referer (direto) e de outro site
+  When um Admin/Editor abre o dashboard de analytics
+  Then o dashboard mostra a contagem de views por categoria de origem (direto/busca/social/outro)
+
+Scenario: Dashboard mostra breakdown de navegador/SO
+  Given visitas de diferentes User-Agents
+  When um Admin/Editor abre o dashboard de analytics
+  Then o dashboard mostra a contagem de views por navegador/SO reconhecido
+
+Scenario: Views antigas não contam mais pro breakdown (retenção)
+  Given uma view registrada há mais de 30 dias
+  When o dashboard de analytics é lido novamente
+  Then essa view não aparece em nenhum dos breakdowns nem é recontada nas métricas de período
 ```
 
-**Metadata:** RF-12. *Test ref:* `src/server/features/analytics/domain/__test__/{recordView,readDashboard}.ts`, `src/server/features/analytics/procedures/__test__/{recordView,readDashboard}.ts`, `src/server/integrations/gateway/viewCounter/implementations/__test__/{redis,inMemory}.ts`. *Spec:* `docs/features/017-post-view-analytics/spec.md`.
+**Metadata:** RF-12. *Test ref:* `src/server/features/analytics/domain/__test__/{recordView,readDashboard}.ts`, `src/server/features/analytics/procedures/__test__/{recordView,readDashboard}.ts`, `src/server/integrations/gateway/viewCounter/implementations/__test__/{redis,inMemory}.ts`, `src/server/models/__test__/postView.ts`, `src/lib/{referrerClassifier,userAgentClassifier}/__test__/regex.ts`. *Spec:* `docs/features/017-post-view-analytics/spec.md`, `docs/features/020-view-analytics-breakdown/spec.md`.
 
 ---
 

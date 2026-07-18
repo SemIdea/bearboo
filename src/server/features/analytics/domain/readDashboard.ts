@@ -27,19 +27,25 @@ const domain_readDashboard = async ({ ctx }: DomainInput<{}>) => {
 
 	await ctx.repositories.postView.deleteOlderThan(VIEW_EVENT_RETENTION_DAYS);
 
-	const [posts, totalViews, viewsLast7Days, viewsLast30Days, trafficOrigin, userAgents] =
-		await Promise.all([
-			ctx.repositories.post.readMostViewed(DASHBOARD_MOST_VIEWED_LIMIT),
-			ctx.repositories.post.readTotalViews(),
-			ctx.repositories.postView.countSince(DASHBOARD_TREND_WINDOW_DAYS.last7),
-			ctx.repositories.postView.countSince(DASHBOARD_TREND_WINDOW_DAYS.last30),
-			ctx.repositories.postView.readReferrerBreakdown(
-				DASHBOARD_TREND_WINDOW_DAYS.last30,
-			),
-			ctx.repositories.postView.readUserAgents(
-				DASHBOARD_TREND_WINDOW_DAYS.last30,
-			),
-		]);
+	const [
+		posts,
+		totalViews,
+		viewsLast7Days,
+		viewsLast30Days,
+		trafficOrigin,
+		userAgents,
+	] = await Promise.all([
+		ctx.repositories.post.readMostViewed(DASHBOARD_MOST_VIEWED_LIMIT),
+		ctx.repositories.post.readTotalViews(),
+		ctx.repositories.postView.countSince(DASHBOARD_TREND_WINDOW_DAYS.last7),
+		ctx.repositories.postView.countSince(DASHBOARD_TREND_WINDOW_DAYS.last30),
+		ctx.repositories.postView.readReferrerBreakdown(
+			DASHBOARD_TREND_WINDOW_DAYS.last30,
+		),
+		ctx.repositories.postView.readUserAgents(
+			DASHBOARD_TREND_WINDOW_DAYS.last30,
+		),
+	]);
 
 	const browserCounts = new Map<string, number>();
 

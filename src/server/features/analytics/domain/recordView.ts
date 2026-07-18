@@ -13,9 +13,7 @@ const domain_recordView = async ({
 
 	if (!post) return null;
 
-	const referrerBucket = ctx.helpers.referrerClassifier.classify(
-		input.referer,
-	);
+	const referrerBucket = ctx.helpers.referrerClassifier.classify(input.referer);
 
 	try {
 		return await ctx.gateways.viewCounter.recordView(

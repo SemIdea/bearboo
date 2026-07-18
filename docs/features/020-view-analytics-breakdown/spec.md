@@ -2,7 +2,7 @@
 
 > **Spec:** o quê e o porquê. Sem decisão de tecnologia.
 > **US relacionada(s):** US-014 (Admin/Editor acompanha visualizações de post)
-> **Status:** planned
+> **Status:** done (2026-07-18 — `tsc --noEmit` limpo, `yarn test` 338/338 verdes, `yarn build` verde (`/analytics` prerenderou); verificado ao vivo contra Postgres/Redis reais via `next dev` — `analytics.recordView` bufferizou o evento (referrer classificado, UA bruto) no Redis, `analytics.readDashboard` persistiu em `PostView` e retornou `viewsLast7Days`/`viewsLast30Days`/`trafficOrigin`/`browsers` corretos)
 > **Data de abertura:** 2026-07-18
 
 ## 1. Problema (do PRD/UST)

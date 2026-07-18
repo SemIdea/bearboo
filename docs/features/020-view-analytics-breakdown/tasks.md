@@ -31,15 +31,15 @@
 
 - [X] T017 — RED+GREEN: `src/server/features/analytics/procedures/__test__/recordView.ts` — procedure extrai `ctx.headers.get("referer")`/`.get("user-agent")` e repassa pro domain (US-014).
 - [X] T018 — RED+GREEN: `src/server/features/analytics/procedures/__test__/readDashboard.ts` — output inclui os 4 campos novos; `FORBIDDEN` pra papel insuficiente continua igual (regressão) (US-014).
-- [ ] T019 [P] — `src/app/(half)/analytics/page.client.tsx`: cards "últimos 7 dias"/"últimos 30 dias" + listas de origem de tráfego e navegador/SO, consumindo o novo shape de `analytics.readDashboard`. Verificado ao vivo via `next dev` (sem teste unitário — mesmo padrão de UI de `019-search-sort-by-views/tasks.md` T011).
+- [X] T019 [P] — `src/app/(half)/analytics/page.client.tsx`: cards "últimos 7 dias"/"últimos 30 dias" + listas de origem de tráfego e navegador/SO, consumindo o novo shape de `analytics.readDashboard`. Verificado ao vivo via `next dev` contra Postgres/Redis reais: `analytics.recordView` (Referer de busca + UA Chrome, e sem Referer + UA Firefox) confirmado bufferizando no Redis (`viewcounter:<id>:events`, bucket classificado corretamente) e `analytics.readDashboard` retornou `viewsLast7Days: 2`, `viewsLast30Days: 2`, `trafficOrigin: [{DIRECT,1},{SEARCH,1}]`, `browsers: [{Chrome,1},{Firefox,1}]` — dados persistidos em `PostView` e agregados corretamente contra Postgres real (sem teste unitário — mesmo padrão de UI de `019-search-sort-by-views/tasks.md` T011).
 
 `yarn test`, `npx tsc --noEmit`, `yarn lint` e `yarn build` verdes ao fim da Phase 3.
 
 ## Phase 4 — Reconciliação (8.5)
 
-- [ ] T020 — `docs/ust.md` US-014: adiciona os cenários Gherkin novos (período, origem, UA, retenção) aos critérios de aceitação; adiciona `docs/features/020-view-analytics-breakdown/` aos *Test ref*/*Spec*. `docs/prd.md` RF-12: atualiza a nota que citava o detalhamento adiado pro `plan.md` de 017. `docs/roadmap.md` Fase 7: marca `[x]` contar views por período / origem do tráfego / user agent / referrer; Fase 7 vira ✅ Concluída (sem pendências adiadas) na tabela de progresso geral e na seção detalhada. `spec.md` status → `done`.
-- [ ] T021 — ADR documentando a decisão de retenção de 30 dias + não persistir IP + buffer de eventos no Redis via `viewCounter` (decisão load-bearing de privacidade/arquitetura, mesmo nível da ADR-0013) — via `/afm:adr`.
-- [ ] T022 — Commit(s) em `feature/020-view-analytics-breakdown` (criada a partir de `develop`, regra dura 32). Sem push (RF-12).
+- [X] T020 — `docs/ust.md` US-014: adiciona os cenários Gherkin novos (período, origem, UA, retenção) aos critérios de aceitação; adiciona `docs/features/020-view-analytics-breakdown/` aos *Test ref*/*Spec*. `docs/prd.md` RF-12: atualiza a nota que citava o detalhamento adiado pro `plan.md` de 017. `docs/roadmap.md` Fase 7: marca `[x]` contar views por período / origem do tráfego / user agent / referrer; Fase 7 vira ✅ Concluída (sem pendências adiadas) na tabela de progresso geral e na seção detalhada. `docs/ach.md § 3.1`: estende a entrada `viewCounter` (novo `drainPendingEvents`) e adiciona entrada nova pro breakdown (`PostView`, `referrerClassifier`, `userAgentClassifier`). `spec.md` status → `done`.
+- [X] T021 — `docs/adr/0014-analytics-breakdown-retencao-30-dias-sem-ip.md` documentando a decisão de retenção de 30 dias + não persistir IP + buffer de eventos no Redis via `viewCounter` (decisão load-bearing de privacidade/arquitetura, mesmo nível da ADR-0013).
+- [X] T022 — Commit(s) em `feature/020-view-analytics-breakdown` (criada a partir de `develop`, regra dura 32). Sem push (RF-12).
 
 ---
 
