@@ -68,6 +68,8 @@ type IPostSitemapEntry = {
 	updatedAt: Date;
 };
 
+type IPostSearchSortBy = "recent" | "mostViewed";
+
 const flattenTags = (postTags: { tag: IPostTagSummary }[]): IPostTagSummary[] =>
 	postTags.map(({ tag }) => tag);
 
@@ -133,6 +135,7 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		cursor?: string,
 		categoryId?: string,
 		tagId?: string,
+		sortBy?: IPostSearchSortBy,
 	): Promise<IPostEntityWithRelations[]> {
 		const posts = await prisma.post.findMany({
 			take: count,
@@ -150,9 +153,10 @@ class PostModelClass extends BaseModel<IPostEntity> {
 					...(tagId ? [{ postTags: { some: { tagId } } }] : []),
 				],
 			},
-			orderBy: {
-				createdAt: "desc",
-			},
+			orderBy:
+				sortBy === "mostViewed"
+					? [{ viewCount: "desc" as const }, { id: "asc" as const }]
+					: [{ createdAt: "desc" as const }, { id: "asc" as const }],
 			include: postRelationsInclude,
 		});
 
@@ -372,6 +376,7 @@ type IPostModel = BaseModel<IPostEntity> & {
 		cursor?: string,
 		categoryId?: string,
 		tagId?: string,
+		sortBy?: IPostSearchSortBy,
 	) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
 	readOwnPosts: (
@@ -403,6 +408,7 @@ export type {
 	IPostEntityWithTaxonomy,
 	IPostModel,
 	IPostMostViewedEntry,
+	IPostSearchSortBy,
 	IPostSitemapEntry,
 	IPostStatus,
 	IPostTagSummary,
