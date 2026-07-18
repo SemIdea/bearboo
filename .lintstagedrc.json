@@ -1,4 +1,4 @@
 {
-  "src/**/__test__/**/*.ts": ["vitest related --run --reporter verbose"],
-  "src/**/*.ts": ["vitest related --run --reporter verbose"]
+	"src/**/__test__/**/*.ts": ["vitest related --run --reporter verbose"],
+	"src/**/*.ts": ["vitest related --run --reporter verbose"]
 }

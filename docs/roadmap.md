@@ -11,7 +11,7 @@
 | 2 — Admin/CMS | ✅ Concluída (com 1 pendência adiada) | seletor de status, preview de rascunho na URL real (`docs/features/011-post-status-preview/`), painel "meus posts" com filtros por status/categoria/tag (`docs/features/012-my-posts-panel/`, escopado sem roles — ver nota na fase); pendência adiada: upload de arquivo de imagem de capa vai pra Fase 8 (decisão do dono, 2026-07-12) — capa via URL já existe (`docs/features/010-post-cover-image/`) |
 | 3 — Autenticação e permissões | ✅ Concluída (com 1 pendência adiada pra Fase 4) | `docs/features/013-role-based-permissions/`: papéis ADMIN/EDITOR/AUTHOR, `roleProcedure`, `src/lib/permissions/` (matrix); pré-requisito `001-auth-hardening` (2026-07-12) satisfeito. Pendência (restringir publish/archive a Admin/Editor) fechada pela Fase 4 |
 | 4 — Workflow editorial | ✅ Concluída (com 1 pendência adiada) | `docs/features/014-post-review-workflow/`: `IN_REVIEW`/`SCHEDULED`, enviar/aprovar/rejeitar (motivo obrigatório)/publicar direto/agendar/arquivar, `PostReviewComment`; restrição de publish/archive a Admin/Editor (fecha a pendência da Fase 3); agendamento via checagem lazy no read, sem scheduler novo. Pendência adiada: histórico de diffs de edição (`PostRevision`) — mesmo padrão da Fase 2, que adiou upload de imagem pra Fase 8 |
-| 5 — SEO e publicação profissional | 🟡 Parcial (com 2 pendências adiadas) | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration; pendências adiadas: slug amigável + redirect (slug nunca muda hoje) e campos editáveis de override de SEO |
+| 5 — SEO e publicação profissional | ✅ Concluída | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration. `docs/features/018-seo-overrides-slug-redirect/`: campos editáveis de override de SEO (`seoTitle`/`seoDescription`/`canonicalUrl`) e slug editável com redirect 301 automático (`previousSlug`, 1 nível de histórico) — as 2 pendências que ficavam essa fase parcial |
 | 6 — Busca e descoberta | 🟡 Parcial (com 1 pendência adiada) | `docs/features/016-search-content/`: busca por título/conteúdo via `contains`/`insensitive` (não `tsvector` nativo — ADR-0011), autocomplete no header; filtro por tag/categoria e posts relacionados já existiam de fases anteriores; ordenação por mais acessado adiada pra Fase 7 |
 | 7 — Analytics interno | 🟡 Parcial (com pendências adiadas) | docs/features/017-post-view-analytics/: registrar view (dedup por visitante 24h via Redis/cookie, ADR-0013), contar total, posts mais acessados, dashboard Admin/Editor; contagem por período e origem de tráfego/UA/referrer adiadas (retenção/privacidade não discutida) |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
@@ -306,9 +306,9 @@ DRAFT -> IN_REVIEW -> SCHEDULED/PUBLISHED
 
 Aqui o projeto começa a ficar com cara de pleno, porque deixa de ser CRUD e passa a ter **regra de negócio**.
 
-## Fase 5 — SEO e publicação profissional 🟡 Parcial (com 2 pendências adiadas)
+## Fase 5 — SEO e publicação profissional ✅ Concluída
 
-> **Implementação:** `docs/features/015-seo-metadata/` (RF-10). SEO automático — sitemap/robots/RSS/canonical/Twitter Card/schema.org — tudo computado dos campos já existentes do post (`title`/`content`/`slug`/`coverImageUrl`/`createdAt`/`updatedAt`), sem migration. Decisão do dono, 2026-07-14 (`015-seo-metadata/spec.md` § 4/§ 7): campos editáveis de override (`seoTitle`/`seoDescription`/`canonicalUrl`) e "slug amigável + redirect quando slug mudar" ficam adiados — hoje o slug nunca muda depois de criado, então o redirect pressupõe uma feature de slug-mutation-on-edit que não existe ainda.
+> **Implementação:** `docs/features/015-seo-metadata/` (RF-10). SEO automático — sitemap/robots/RSS/canonical/Twitter Card/schema.org — tudo computado dos campos já existentes do post (`title`/`content`/`slug`/`coverImageUrl`/`createdAt`/`updatedAt`), sem migration. Decisão do dono, 2026-07-14 (`015-seo-metadata/spec.md` § 4/§ 7): campos editáveis de override (`seoTitle`/`seoDescription`/`canonicalUrl`) e "slug amigável + redirect quando slug mudar" ficavam adiados por falta de demanda — fechadas em `docs/features/018-seo-overrides-slug-redirect/` (2026-07-18, US-015): slug agora é editável (Autor/Editor, mesma regra de `post.update`), com resolução de colisão via sufixo numérico (mesmo algoritmo do create) e redirect 301 automático do slug antigo pro novo (`Post.previousSlug`, 1 nível de histórico — ver `docs/ach.md § 3.1`); `seoTitle`/`seoDescription`/`canonicalUrl` editáveis no form de edição, com fallback pro comportamento computado quando vazios.
 
 ### Objetivo
 
@@ -325,8 +325,8 @@ Fazer o blog ser indexável e bem apresentado quando compartilhado.
 * [x] robots.txt (`src/app/robots.ts`, bloqueia rotas privadas, aponta pro sitemap, `015`);
 * [x] RSS feed (`src/app/feed.xml/route.ts`, hand-rolled RSS 2.0, `015`);
 * [x] schema.org para artigo (JSON-LD `Article` embutido em `PostView`, `015`);
-* [ ] slug amigável (depende do slug da Fase 1) — **adiado**: nenhum pedido de slug mudar depois de criado ainda existe;
-* [ ] redirect quando slug mudar — **adiado**, pressupõe o item acima.
+* [x] slug amigável (editável pelo Autor/Editor, `018`);
+* [x] redirect quando slug muda (301 automático via `previousSlug`, `018`).
 
 ### Campos novos no post
 
@@ -340,17 +340,19 @@ updatedAt
 ```
 
 > **Nota (`015`, 2026-07-14):** nenhum desses campos foi adicionado ao schema nesta rodada — `ogImageUrl` reusa `coverImageUrl` (`010`) já existente; `seoTitle`/`seoDescription`/`canonicalUrl` como colunas editáveis ficaram adiados (sem pedido de UI pra customizar SEO diferente do conteúdo do post); `publishedAt` não foi necessário — `lastModified`/`pubDate` usam `updatedAt`/`createdAt` já existentes.
+>
+> **Nota (`018`, 2026-07-18):** `seoTitle`/`seoDescription`/`canonicalUrl` adicionados ao schema (nullable) + editáveis no form de edição do post; `Post.previousSlug` (nullable, `@unique`) adicionado pra suportar o redirect — não estava listado acima porque a decisão de como implementar o redirect (coluna única vs. tabela de histórico) só foi tomada nesta rodada (ver `018-seo-overrides-slug-redirect/plan.md § 4`).
 
 ### Regras importantes
 
 * todo post publicado precisa ter metadata — ✅ (`generateMetadata` roda pra qualquer slug lido);
-* slug antigo deve redirecionar para slug novo — **adiado**, ver nota acima;
+* slug antigo deve redirecionar para slug novo — ✅ (`018`, `previousSlug` + `post.readRedirectSlug` + `permanentRedirect` em `PostContent`; só 1 nível de histórico — ver `018-seo-overrides-slug-redirect/spec.md § 4`);
 * sitemap só inclui posts publicados — ✅ (reusa `publicVisibilityFilter()` de `014`, inclui `SCHEDULED` já vencido);
 * posts arquivados não entram no sitemap — ✅ (mesma regra).
 
 ### Critério de conclusão
 
-Essa fase está pronta quando cada post tem SEO completo e pode ser compartilhado corretamente no Discord, LinkedIn, WhatsApp, etc. **Satisfeito** pros itens automáticos (`015`); slug amigável + redirect ficam pra rodada futura, se/quando slug passar a mudar.
+Essa fase está pronta quando cada post tem SEO completo e pode ser compartilhado corretamente no Discord, LinkedIn, WhatsApp, etc. **Satisfeito** — itens automáticos (`015`) e slug amigável + redirect + overrides de SEO editáveis (`018`).
 
 ## Fase 6 — Busca e descoberta de conteúdo 🟡 Parcial (com 1 pendência adiada)
 

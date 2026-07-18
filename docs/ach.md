@@ -215,6 +215,12 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 - **Flush lazy, sem scheduler:** `domain_readDashboard` drena os contadores pendentes do gateway e aplica no Postgres (`PostModel.applyViewIncrements`) toda vez que o dashboard é lido — mesmo truque já usado pra visibilidade de `SCHEDULED` (`014-post-review-workflow`), evita introduzir o primeiro componente Task-like do projeto (`afm.md § 3` regra 12).
 - **Cookie de visitante:** `src/server/createContext.ts` lê o cookie `visitorId` (mesmo `parseCookie` já usado pra `accessToken`/`refreshToken`); `analytics.recordView` gera um novo via `ctx.helpers.uid.generate()` e seta via `ctx.resCookies` (mesmo mecanismo de `001-auth-hardening`) quando ausente.
 
+#### Slug editável + redirect e domain helper compartilhado — peça nova de `018-seo-overrides-slug-redirect` (2026-07-18)
+
+- **`domain_resolveAvailableSlug`:** `src/server/features/post/domain/resolveAvailableSlug.ts` — algoritmo de sufixo numérico incremental (`titulo`, `titulo-2`, ...) extraído de `domain_createPost` pra ser reusado por `domain_updatePost` (edição de slug), com parâmetro opcional `excludePostId` pra ignorar colisão com o próprio post sendo editado. Mesmo padrão de domain helper compartilhado dentro de uma feature já usado em `user/domain/getUserOrThrow.ts` (regra dura 7 — 1 export por arquivo de domain, então extração vira arquivo novo, não função extra no mesmo arquivo).
+- **`previousSlug` (1 coluna, não tabela de histórico):** `Post.previousSlug` guarda só o slug imediatamente anterior — decisão consciente de cobrir "corrigi um slug uma vez" e não reescritas repetidas (YAGNI, mesmo raciocínio de evitar componente Task-like só pra `SCHEDULED` em `014-post-review-workflow`). Redirect resolvido por `domain_readRedirectSlug` → `post.readRedirectSlug` (procedure pública enxuta, mesmo padrão de `post.readSitemapEntries`), chamado em `PostContent` (`post/[slug]/page.tsx`) no catch de `POST_NOT_FOUND`, antes do fallback `OwnerPreview`; se resolver, `permanentRedirect()` (`next/navigation`). Redirect roda só no render, não em `generateMetadata` (`018-seo-overrides-slug-redirect/plan.md § 4`).
+- **Overrides de SEO (`seoTitle`/`seoDescription`/`canonicalUrl`):** nullable no `Post`, lidos em `generateMetadata` com fallback pro comportamento computado anterior (`post.seoTitle ?? post.title`, etc.) — zero regressão pra post sem override.
+
 ### 3.2 Componentes de suporte (2ª classe)
 
 #### Schema — validação no boundary
