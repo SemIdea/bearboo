@@ -336,9 +336,15 @@ Scenario: Busca é paginada
   Given 15 posts PUBLISHED cujo título contém "teste"
   When o leitor busca por "teste" com limit 10
   Then a primeira página retorna 10 posts e um nextCursor não nulo
+
+Scenario: Busca ordenada por mais acessado
+  Given um post PUBLISHED com título "A" e viewCount 5
+  And um post PUBLISHED com título "B" (mesmo termo de busca) e viewCount 20
+  When o leitor busca pelo termo comum com sortBy "mostViewed"
+  Then o post "B" aparece antes do post "A"
 ```
 
-**Metadata:** RF-11. *Test ref:* `src/server/features/post/procedures/__test__/search.ts`, `src/server/models/__test__/prismaModels.ts` (`search`). *Spec:* `docs/features/016-search-content/spec.md`.
+**Metadata:** RF-11. *Test ref:* `src/server/features/post/procedures/__test__/search.ts`, `src/server/models/__test__/prismaModels.ts` (`search`). *Spec:* `docs/features/016-search-content/spec.md`, `docs/features/019-search-sort-by-views/spec.md`.
 
 ---
 

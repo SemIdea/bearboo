@@ -120,4 +120,60 @@ describe("Search Posts Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).search({ query: "a" }),
 		).rejects.toThrow();
 	});
+
+	test("Should order search results by most viewed when sortBy is mostViewed", async () => {
+		const ctx = await createAuthenticatedContext();
+		const lessViewed = await ctx.createPost({
+			title: "Sort test low views",
+			viewCount: 5,
+		});
+		const moreViewed = await ctx.createPost({
+			title: "Sort test high views",
+			viewCount: 20,
+		});
+
+		const result = await PostRouter.createCaller(ctx).search({
+			query: "sort test",
+			sortBy: "mostViewed",
+		});
+
+		expect(result.posts.map((post) => post.id)).toEqual([
+			moreViewed.id,
+			lessViewed.id,
+		]);
+	});
+
+	test("Should paginate consistently when sortBy is mostViewed and results tie", async () => {
+		const ctx = await createAuthenticatedContext();
+		const posts = [];
+		for (let i = 0; i < 3; i += 1) {
+			posts.push(
+				await ctx.createPost({ title: `Tie test ${i}`, viewCount: 0 }),
+			);
+		}
+
+		const caller = PostRouter.createCaller(ctx);
+
+		const firstPage = await caller.search({
+			query: "tie test",
+			sortBy: "mostViewed",
+			limit: 2,
+		});
+		expect(firstPage.posts).toHaveLength(2);
+		expect(firstPage.nextCursor).not.toBeNull();
+
+		const secondPage = await caller.search({
+			query: "tie test",
+			sortBy: "mostViewed",
+			limit: 2,
+			cursor: firstPage.nextCursor ?? undefined,
+		});
+		expect(secondPage.posts).toHaveLength(1);
+		expect(secondPage.nextCursor).toBeNull();
+
+		const seenIds = [...firstPage.posts, ...secondPage.posts]
+			.map((post) => post.id)
+			.sort();
+		expect(seenIds).toEqual(posts.map((post) => post.id).sort());
+	});
 });

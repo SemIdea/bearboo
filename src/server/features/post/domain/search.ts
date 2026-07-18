@@ -15,6 +15,7 @@ const domain_searchPosts = async ({
 		input.cursor,
 		input.categoryId,
 		input.tagId,
+		input.sortBy,
 	);
 
 	const hasNextPage = fetched.length > limit;

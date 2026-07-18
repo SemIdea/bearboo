@@ -12,7 +12,7 @@
 | 3 — Autenticação e permissões | ✅ Concluída (com 1 pendência adiada pra Fase 4) | `docs/features/013-role-based-permissions/`: papéis ADMIN/EDITOR/AUTHOR, `roleProcedure`, `src/lib/permissions/` (matrix); pré-requisito `001-auth-hardening` (2026-07-12) satisfeito. Pendência (restringir publish/archive a Admin/Editor) fechada pela Fase 4 |
 | 4 — Workflow editorial | ✅ Concluída (com 1 pendência adiada) | `docs/features/014-post-review-workflow/`: `IN_REVIEW`/`SCHEDULED`, enviar/aprovar/rejeitar (motivo obrigatório)/publicar direto/agendar/arquivar, `PostReviewComment`; restrição de publish/archive a Admin/Editor (fecha a pendência da Fase 3); agendamento via checagem lazy no read, sem scheduler novo. Pendência adiada: histórico de diffs de edição (`PostRevision`) — mesmo padrão da Fase 2, que adiou upload de imagem pra Fase 8 |
 | 5 — SEO e publicação profissional | ✅ Concluída | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration. `docs/features/018-seo-overrides-slug-redirect/`: campos editáveis de override de SEO (`seoTitle`/`seoDescription`/`canonicalUrl`) e slug editável com redirect 301 automático (`previousSlug`, 1 nível de histórico) — as 2 pendências que ficavam essa fase parcial |
-| 6 — Busca e descoberta | 🟡 Parcial (com 1 pendência adiada) | `docs/features/016-search-content/`: busca por título/conteúdo via `contains`/`insensitive` (não `tsvector` nativo — ADR-0011), autocomplete no header; filtro por tag/categoria e posts relacionados já existiam de fases anteriores; ordenação por mais acessado adiada pra Fase 7 |
+| 6 — Busca e descoberta | ✅ Concluída | `docs/features/016-search-content/`: busca por título/conteúdo via `contains`/`insensitive` (não `tsvector` nativo — ADR-0011), autocomplete no header; filtro por tag/categoria e posts relacionados já existiam de fases anteriores. `docs/features/019-search-sort-by-views/`: ordenação por mais acessado (`sortBy: "mostViewed"`), desbloqueada pelo `Post.viewCount` da Fase 7 — a pendência que deixava essa fase parcial |
 | 7 — Analytics interno | 🟡 Parcial (com pendências adiadas) | docs/features/017-post-view-analytics/: registrar view (dedup por visitante 24h via Redis/cookie, ADR-0013), contar total, posts mais acessados, dashboard Admin/Editor; contagem por período e origem de tráfego/UA/referrer adiadas (retenção/privacidade não discutida) |
 | 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
 | 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; rate limiting em memória cobre login/registro/reset/refresh (`docs/features/001-auth-hardening/`) — não é rate limiting geral de toda a API; falta logs estruturados, cobertura de teste (~8.6% hoje) |
@@ -354,9 +354,9 @@ updatedAt
 
 Essa fase está pronta quando cada post tem SEO completo e pode ser compartilhado corretamente no Discord, LinkedIn, WhatsApp, etc. **Satisfeito** — itens automáticos (`015`) e slug amigável + redirect + overrides de SEO editáveis (`018`).
 
-## Fase 6 — Busca e descoberta de conteúdo 🟡 Parcial (com 1 pendência adiada)
+## Fase 6 — Busca e descoberta de conteúdo ✅ Concluída
 
-> **Implementação:** `docs/features/016-search-content/` (RF-11). `post.search` busca por título/conteúdo (`contains`/`insensitive` do Prisma, não `tsvector` nativo — ver nota abaixo), com sugestões enquanto digita no header reusando o mesmo endpoint. Decisão do dono, 2026-07-14 (`016-search-content/spec.md` § 4/§ 7): ordenação por mais acessado fica pra Fase 7 (Analytics interno), que já é dona do contador de views.
+> **Implementação:** `docs/features/016-search-content/` (RF-11). `post.search` busca por título/conteúdo (`contains`/`insensitive` do Prisma, não `tsvector` nativo — ver nota abaixo), com sugestões enquanto digita no header reusando o mesmo endpoint. `docs/features/019-search-sort-by-views/` (2026-07-18): `post.search` ganhou `sortBy: "recent" | "mostViewed"` (default `"recent"`, comportamento inalterado), com tiebreak por `id` no `orderBy` pra manter a paginação cursor-based determinística sob empate de `viewCount`; `<select>` em `/search` deixa o leitor escolher. Fechou a pendência que a Fase 7 (contador de views) desbloqueou.
 
 ### Objetivo
 
@@ -368,8 +368,8 @@ Melhorar navegação e descoberta dos posts.
 * [x] busca por conteúdo (`post.search`, `016`);
 * [x] filtro por tag (já existia via `readRecent`/`readOwn`/`readRelated`; `016` estende o mesmo parâmetro pro `search`);
 * [x] filtro por categoria (idem);
-* [x] ordenação por mais recente (`readRecent` já ordena assim);
-* [ ] ordenação por mais acessado — **adiado pra Fase 7**: depende de contador de visualização que a própria Fase 7 já lista como seu item ("registrar visualização de post"/"contar views");
+* [x] ordenação por mais recente (`readRecent` já ordena assim; `post.search` também tem isso como default — `019`);
+* [x] ordenação por mais acessado (`post.search` com `sortBy: "mostViewed"`, `019-search-sort-by-views`, 2026-07-18 — desbloqueado pelo `Post.viewCount` da Fase 7);
 * [x] posts relacionados (`post.readRelated`, já implementado na Fase 1 — `007-posts-relacionados`);
 * [x] autocomplete opcional (`016` — sugestões no `SearchBox` do header, reusando `post.search` com `limit` pequeno, sem endpoint dedicado).
 
