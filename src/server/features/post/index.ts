@@ -7,6 +7,7 @@ import { procedure_readPost } from "./procedures/read";
 import { procedure_readPostBySlug } from "./procedures/readBySlug";
 import { procedure_readOwnPosts } from "./procedures/readOwn";
 import { procedure_readRecentPosts } from "./procedures/readRecent";
+import { procedure_readRedirectSlug } from "./procedures/readRedirectSlug";
 import { procedure_readRelatedPosts } from "./procedures/readRelated";
 import { procedure_readReviewComments } from "./procedures/readReviewComments";
 import { procedure_readSitemapEntries } from "./procedures/readSitemapEntries";
@@ -22,6 +23,7 @@ const PostRouter = t.router({
 	readBySlug: procedure_readPostBySlug,
 	readOwn: procedure_readOwnPosts,
 	readRecent: procedure_readRecentPosts,
+	readRedirectSlug: procedure_readRedirectSlug,
 	readRelated: procedure_readRelatedPosts,
 	readReviewComments: procedure_readReviewComments,
 	readSitemapEntries: procedure_readSitemapEntries,

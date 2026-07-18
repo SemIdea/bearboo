@@ -1,23 +1,8 @@
 import { revalidateTag } from "next/cache";
-import { IBaseContextDTO } from "@/server/createContext";
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
 import { CreatePostInput } from "../schema";
-
-const resolveAvailableSlug = async (
-	ctx: IBaseContextDTO,
-	baseSlug: string,
-): Promise<string> => {
-	let candidate = baseSlug;
-	let suffix = 1;
-
-	while (await ctx.repositories.post.readBySlug(candidate)) {
-		suffix += 1;
-		candidate = `${baseSlug}-${suffix}`;
-	}
-
-	return candidate;
-};
+import { domain_resolveAvailableSlug } from "./resolveAvailableSlug";
 
 const domain_createPost = async ({
 	ctx,
@@ -25,7 +10,7 @@ const domain_createPost = async ({
 }: DomainInput<CreatePostInput & { userId: string; role: IRole }>) => {
 	const postId = ctx.helpers.uid.generate();
 	const baseSlug = ctx.helpers.slug.generate(input.title);
-	const slug = await resolveAvailableSlug(ctx, baseSlug);
+	const slug = await domain_resolveAvailableSlug({ ctx, input: { baseSlug } });
 	const canPublishDirectly = ctx.helpers.permissions.can(
 		input.role,
 		"post:publish",
@@ -39,6 +24,10 @@ const domain_createPost = async ({
 		content: input.content,
 		userId: input.userId,
 		slug,
+		previousSlug: null,
+		seoTitle: null,
+		seoDescription: null,
+		canonicalUrl: null,
 		status,
 		scheduledAt: null,
 		categoryId,

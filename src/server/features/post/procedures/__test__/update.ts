@@ -88,6 +88,33 @@ describe("Update Post Controller Unitary Testing", () => {
 		expect(result.coverImageUrl).toEqual("https://example.com/cover.png");
 	});
 
+	test("Should update the slug of the caller's own post and keep the previous one", async () => {
+		const post = await ctx.createPost({ slug: "titulo-original" });
+
+		const result = await PostRouter.createCaller(ctx).update({
+			id: post.id,
+			slug: "titulo-corrigido",
+		});
+
+		expect(result.slug).toEqual("titulo-corrigido");
+		expect(result.previousSlug).toEqual("titulo-original");
+	});
+
+	test("Should update the SEO overrides of the caller's own post", async () => {
+		const post = await ctx.createPost();
+
+		const result = await PostRouter.createCaller(ctx).update({
+			id: post.id,
+			seoTitle: "Custom SEO title",
+			seoDescription: "Custom SEO description",
+			canonicalUrl: "https://example.com/original",
+		});
+
+		expect(result.seoTitle).toEqual("Custom SEO title");
+		expect(result.seoDescription).toEqual("Custom SEO description");
+		expect(result.canonicalUrl).toEqual("https://example.com/original");
+	});
+
 	test("Should throw error if post does not exist", async () => {
 		await expect(
 			PostRouter.createCaller(ctx).update({

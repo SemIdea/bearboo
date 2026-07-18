@@ -55,6 +55,10 @@ model Post {
   title          String
   content        String
   slug           String              @unique
+  previousSlug   String?             @unique
+  seoTitle       String?
+  seoDescription String?
+  canonicalUrl   String?
   status         PostStatus          @default(PUBLISHED)
   scheduledAt    DateTime?
   categoryId     String?

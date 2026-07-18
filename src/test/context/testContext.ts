@@ -85,6 +85,10 @@ class TestContext {
 				| "content"
 				| "userId"
 				| "slug"
+				| "previousSlug"
+				| "seoTitle"
+				| "seoDescription"
+				| "canonicalUrl"
 				| "status"
 				| "scheduledAt"
 				| "categoryId"
@@ -104,6 +108,10 @@ class TestContext {
 			title: overrides.title ?? "Test Post",
 			content: overrides.content ?? "This is a test post.",
 			slug: overrides.slug ?? `test-post-${postId}`,
+			previousSlug: overrides.previousSlug ?? null,
+			seoTitle: overrides.seoTitle ?? null,
+			seoDescription: overrides.seoDescription ?? null,
+			canonicalUrl: overrides.canonicalUrl ?? null,
 			status: overrides.status ?? "PUBLISHED",
 			scheduledAt: overrides.scheduledAt ?? null,
 			categoryId: overrides.categoryId ?? null,

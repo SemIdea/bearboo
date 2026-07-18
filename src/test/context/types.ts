@@ -23,9 +23,15 @@ type ITestContextDTO = IBaseContextDTO & {
 				| "content"
 				| "userId"
 				| "slug"
+				| "previousSlug"
+				| "seoTitle"
+				| "seoDescription"
+				| "canonicalUrl"
 				| "status"
 				| "scheduledAt"
 				| "categoryId"
+				| "coverImageUrl"
+				| "viewCount"
 			>
 		> & { tagIds?: string[] },
 	) => Promise<IPostEntity>;
