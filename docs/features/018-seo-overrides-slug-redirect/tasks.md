@@ -38,7 +38,7 @@
 
 - [X] T019 — `docs/ach.md § 3.1`: nota sobre `domain_resolveAvailableSlug` como domain helper compartilhado (mesmo padrão de `getUserOrThrow`) e sobre o redirect de slug em `PostContent` (RF-10).
 - [X] T020 — `docs/roadmap.md` Fase 5: marca `[x]` slug amigável / redirect quando slug muda; nota que `seoTitle`/`seoDescription`/`canonicalUrl` agora são editáveis; Fase 5 vira ✅ Concluída. `docs/prd.md` RF-10: atualiza a nota que citava as pendências. `docs/ust.md` US-015 status → `done`. `spec.md` status → `done` (RF-10).
-- [ ] T021 — Commit(s): migration + backend (schema/model/domain/procedure/router), frontend (página do post + form de edição), docs. Sem push (RF-10).
+- [X] T021 — Commit(s) em `feature/018-seo-overrides-slug-redirect` (criada a partir de `develop` — regra dura 32, o trabalho tinha sido feito sem querer direto no working tree de `develop`, corrigido antes do primeiro commit): `e8ac7d9` (backend), `9bcea3c` (frontend), `95adf0f` (docs). Sem push (RF-10).
 
 ---
 
