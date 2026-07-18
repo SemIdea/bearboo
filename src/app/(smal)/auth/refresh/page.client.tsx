@@ -2,24 +2,17 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { trpc } from "@/app/_trpc/client";
+import { refreshTokens } from "@/context/trpc/session";
 
 const SessionRefresher = () => {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const redirect = searchParams.get("redirect") || "/";
 
-	const { mutate: refreshSession } = trpc.auth.refreshSession.useMutation({
-		onSuccess: () => {
-			router.push(redirect);
-		},
-		onError: () => {
-			router.push("/auth/login");
-		},
-	});
-
 	useEffect(() => {
-		refreshSession();
+		refreshTokens()
+			.then(() => router.push(redirect))
+			.catch(() => router.push("/auth/login"));
 	}, [redirect]);
 
 	return null;

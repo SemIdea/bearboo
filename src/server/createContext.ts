@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { env } from "@/lib/env";
 import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
@@ -54,10 +55,22 @@ const createTRPCContext = async ({
 	if (visitorId) ctx.visitorId = visitorId;
 	if (!accessToken) return ctx;
 
-	const user = await domain_readUserAndSessionByAccessToken({
-		ctx,
-		input: { accessToken },
-	});
+	let user: IUserWithSession | null;
+
+	try {
+		user = await domain_readUserAndSessionByAccessToken({
+			ctx,
+			input: { accessToken },
+		});
+	} catch (error) {
+		if (error instanceof TRPCError && error.code === "UNAUTHORIZED") {
+			ctx.resCookies.clear("accessToken");
+			ctx.resCookies.clear("refreshToken");
+			return ctx;
+		}
+
+		throw error;
+	}
 
 	if (!user) return ctx;
 

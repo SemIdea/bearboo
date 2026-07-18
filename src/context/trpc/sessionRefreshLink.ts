@@ -6,6 +6,8 @@ import { SessionErrorCode } from "@/shared/error/session";
 import { refreshTokens } from "./session";
 
 const redirectTo = (path: string): void => {
+	if (window.location.pathname === path) return;
+
 	window.location.href = path;
 };
 

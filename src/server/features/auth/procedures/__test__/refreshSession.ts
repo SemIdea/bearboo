@@ -68,6 +68,43 @@ describe("Refresh Session Controller Unitary Testing", () => {
 		);
 	});
 
+	test("Should clear accessToken/refreshToken cookies when the refresh token is invalid or reused, so the client stops resending a dead cookie", async () => {
+		ctx.refreshToken = "invalid-token";
+
+		await AuthRouter.createCaller(ctx)
+			.refreshSession()
+			.catch(() => undefined);
+
+		expect(ctx.resCookies.pending).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: "accessToken", value: "" }),
+				expect.objectContaining({ name: "refreshToken", value: "" }),
+			]),
+		);
+	});
+
+	test("Should clear cookies when a rotated-out refresh token is reused (e.g. a duplicate refresh call racing the first one)", async () => {
+		const originalRefreshToken = ctx.user.session.refreshToken;
+		ctx.refreshToken = originalRefreshToken;
+
+		await AuthRouter.createCaller(ctx).refreshSession();
+
+		ctx.refreshToken = originalRefreshToken;
+
+		await AuthRouter.createCaller(ctx)
+			.refreshSession()
+			.catch(() => undefined);
+
+		expect(ctx.resCookies.pending.at(-2)).toMatchObject({
+			name: "accessToken",
+			value: "",
+		});
+		expect(ctx.resCookies.pending.at(-1)).toMatchObject({
+			name: "refreshToken",
+			value: "",
+		});
+	});
+
 	test("Should enforce the refresh rate limit", async () => {
 		ctx.refreshToken = "invalid-token";
 

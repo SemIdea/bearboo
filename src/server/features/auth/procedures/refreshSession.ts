@@ -23,6 +23,10 @@ const procedure_refreshSession = t.procedure
 		const session = await domain_readSessionByRefreshToken({
 			ctx,
 			input: { refreshToken },
+		}).catch((error) => {
+			ctx.resCookies.clear("accessToken");
+			ctx.resCookies.clear("refreshToken");
+			throw error;
 		});
 
 		const refreshedSession = await domain_refreshSession({
