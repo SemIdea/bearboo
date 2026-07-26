@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import {
 	Card,
@@ -11,6 +10,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/context/auth";
+import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { IPostStatus } from "@/server/models/post";
 
 const selectClassName =
@@ -36,18 +36,11 @@ const MyPostsDescription = () => {
 };
 
 const MyPostsPanel = () => {
-	const router = useRouter();
-	const { session, isLoadingSession } = useAuth();
+	const session = useRequireAuth();
 
 	const [status, setStatus] = useState<IPostStatus | "">("");
 	const [categoryId, setCategoryId] = useState("");
 	const [tagId, setTagId] = useState("");
-
-	useEffect(() => {
-		if (!isLoadingSession && !session) {
-			router.push("/auth/login");
-		}
-	}, [isLoadingSession, session, router]);
 
 	const { data: categories } = trpc.category.readAll.useQuery();
 	const { data: tags } = trpc.tag.readAll.useQuery();

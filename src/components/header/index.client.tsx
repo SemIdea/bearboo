@@ -30,6 +30,9 @@ const AuthenticatedHeader = () => {
 			<Link href="/post/mine" className="hover:underline">
 				My posts
 			</Link>
+			<Link href="/media" className="hover:underline">
+				Media
+			</Link>
 			<h2>
 				<Link className="hover:underline" href={`/user/${session.user.id}`}>
 					{session.user.name}

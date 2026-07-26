@@ -616,4 +616,59 @@ Scenario: Listar comentários do usuário
 
 ---
 
+## Épico Mídia
+
+### US-016 — Usuário autenticado envia e gerencia mídia
+
+- **Persona:** Autor/Editor/Admin (qualquer usuário autenticado, ver `013-role-based-permissions`).
+- **Story:** Como usuário autenticado, quero enviar um arquivo de imagem, ver a minha biblioteca de mídia, apagar o que enviei e descrever a imagem com texto alternativo, pra poder usar uma imagem própria como capa de post sem depender de uma URL externa (`docs/roadmap.md` Fase 8). Admin/Editor também enxergam e removem mídia enviada por qualquer usuário, mesmo padrão de bypass de `post:deleteAny` (RF-08).
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Upload de imagem válida
+  Given um usuário autenticado
+  When ele envia um arquivo JPEG de 2MB com texto alternativo "foto do evento"
+  Then a mídia é salva e aparece na biblioteca do usuário com a URL pública
+
+Scenario: Upload rejeitado por formato inválido
+  Given um usuário autenticado
+  When ele envia um arquivo .pdf
+  Then o upload é rejeitado antes de tocar o storage
+
+Scenario: Upload rejeitado por tamanho excedido
+  Given um usuário autenticado
+  When ele envia uma imagem de 8MB (acima do limite configurado)
+  Then o upload é rejeitado antes de tocar o storage
+
+Scenario: Usuário vê só a própria biblioteca
+  Given dois usuários, cada um com mídia enviada
+  When um deles lista a própria biblioteca
+  Then só a mídia que ele mesmo enviou aparece
+
+Scenario: Dono apaga a própria mídia
+  Given um usuário dono de uma mídia
+  When ele apaga essa mídia
+  Then o registro e o arquivo físico deixam de existir
+
+Scenario: Usuário sem permissão não apaga mídia de outro
+  Given um usuário Author sem bypass de permissão
+  When ele tenta apagar mídia enviada por outro usuário
+  Then a operação é rejeitada
+
+Scenario: Admin/Editor apaga mídia de qualquer usuário
+  Given um usuário com papel Admin ou Editor
+  When ele apaga mídia enviada por outro usuário
+  Then a mídia é removida normalmente
+
+Scenario: Mídia enviada vira capa do post
+  Given um usuário com uma mídia já enviada
+  When ele escolhe essa mídia como capa ao criar/editar um post
+  Then o post passa a usar a URL pública da mídia como coverImageUrl
+```
+
+**Metadata:** RF-13. *Spec:* `docs/features/021-media-upload/spec.md`.
+
+---
+
 *Adicionar US nova: copia o bloco acima abaixo do épico correspondente. Se o épico não existe, cria H2 novo. Numera o ID sequencialmente do último em uso.*

@@ -7,6 +7,7 @@ const PERMISSION_MATRIX: Record<IPermissionAction, IRole[]> = {
 	"post:publish": ["ADMIN", "EDITOR"],
 	"category:manage": ["ADMIN", "EDITOR"],
 	"user:manageRoles": ["ADMIN"],
+	"media:deleteAny": ["ADMIN", "EDITOR"],
 };
 
 class MatrixPermission implements IPermissionHelperAdapter {
