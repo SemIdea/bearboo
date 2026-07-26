@@ -70,4 +70,37 @@ describe("LocalMediaStorage", () => {
 
 		await expect(storage.delete("never-existed.jpg")).resolves.toBeUndefined();
 	});
+
+	test("a filename with path traversal segments can't escape uploadDir", async () => {
+		const storage = new LocalMediaStorage(uploadDir, "http://localhost:3000");
+
+		const saved = await storage.save({
+			buffer: Buffer.from("bytes"),
+			filename: "../../../etc/passwd",
+			mimeType: "image/png",
+		});
+
+		expect(saved.storageKey).not.toContain("/");
+		expect(saved.storageKey).not.toContain("\\");
+		expect(saved.storageKey).toMatch(/\.\._\.\._\.\._etc_passwd$/);
+		expect(path.dirname(path.join(uploadDir, saved.storageKey))).toBe(
+			uploadDir,
+		);
+		expect(existsSync(path.join(uploadDir, saved.storageKey))).toBe(true);
+	});
+
+	test("an absolute-path filename can't escape uploadDir", async () => {
+		const storage = new LocalMediaStorage(uploadDir, "http://localhost:3000");
+
+		const saved = await storage.save({
+			buffer: Buffer.from("bytes"),
+			filename: "/etc/passwd",
+			mimeType: "image/png",
+		});
+
+		expect(saved.storageKey).not.toContain("/");
+		expect(path.dirname(path.join(uploadDir, saved.storageKey))).toBe(
+			uploadDir,
+		);
+	});
 });

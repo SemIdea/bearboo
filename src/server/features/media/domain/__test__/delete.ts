@@ -1,7 +1,8 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { DomainError } from "@/shared/error/domainError";
 import { MediaErrorCode } from "@/shared/error/media";
-import { createTestContext } from "@/test/context";
+import { createTestContext, TestContext } from "@/test/context";
+import { createFakeGateways } from "@/test/gateways";
 import { FakeMediaStorageGateway } from "@/test/gateways/mediaStorage";
 import { domain_deleteMedia } from "../delete";
 import { domain_uploadMedia } from "../upload";
@@ -85,5 +86,40 @@ describe("domain_deleteMedia", () => {
 				input: { id: "does-not-exist", userId: user.id, role: "AUTHOR" },
 			}),
 		).rejects.toMatchObject(new DomainError(MediaErrorCode.MEDIA_NOT_FOUND));
+	});
+
+	test("keeps the DB record when the storage delete fails", async () => {
+		const ctx = createTestContext();
+		const owner = await ctx.createNewUser();
+		const media = await domain_uploadMedia({
+			ctx,
+			input: {
+				file: new File(["bytes"], "mine.png", { type: "image/png" }),
+				altText: undefined,
+				userId: owner.id,
+			},
+		});
+
+		const failingCtx = new TestContext({
+			gateways: {
+				...createFakeGateways(),
+				mediaStorage: {
+					save: vi.fn(),
+					delete: vi.fn().mockRejectedValue(new Error("disk full")),
+				},
+			},
+		});
+		// TestContext.gateways is a per-instance seam, but the repositories
+		// (Prisma models, mocked globally) are shared — the media created above
+		// via `ctx` is visible through `failingCtx.repositories` too.
+
+		await expect(
+			domain_deleteMedia({
+				ctx: failingCtx,
+				input: { id: media.id, userId: owner.id, role: "AUTHOR" },
+			}),
+		).rejects.toThrow("disk full");
+
+		expect(await ctx.repositories.media.read(media.id)).not.toBeNull();
 	});
 });

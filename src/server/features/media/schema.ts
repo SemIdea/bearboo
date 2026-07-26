@@ -27,6 +27,14 @@ const uploadMediaSchema = z.instanceof(FormData).transform((formData, ctx) => {
 		return z.NEVER;
 	}
 
+	if (typeof altTextRaw === "string" && altTextRaw.length > 300) {
+		ctx.addIssue({
+			code: "custom",
+			message: "Alt text must not exceed 300 characters.",
+		});
+		return z.NEVER;
+	}
+
 	return {
 		file,
 		altText:
