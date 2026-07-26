@@ -14,4 +14,4 @@ type IMediaStorageGatewayAdapter = {
 	delete: (storageKey: string) => Promise<void>;
 };
 
-export type { IMediaStorageGatewayAdapter, ISaveMediaFileReq, ISavedMedia };
+export type { IMediaStorageGatewayAdapter, ISavedMedia, ISaveMediaFileReq };

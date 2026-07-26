@@ -5,10 +5,7 @@ const domain_readOwnMedia = async ({
 	ctx,
 	input,
 }: DomainInput<{ userId: string; role: IRole }>) => {
-	const canReadAny = ctx.helpers.permissions.can(
-		input.role,
-		"media:deleteAny",
-	);
+	const canReadAny = ctx.helpers.permissions.can(input.role, "media:deleteAny");
 
 	return ctx.repositories.media.readByUser(canReadAny ? null : input.userId);
 };

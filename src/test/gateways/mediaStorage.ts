@@ -1,7 +1,7 @@
 import {
 	IMediaStorageGatewayAdapter,
-	ISaveMediaFileReq,
 	ISavedMedia,
+	ISaveMediaFileReq,
 } from "@/server/integrations/gateway/mediaStorage/adapter";
 
 class FakeMediaStorageGateway implements IMediaStorageGatewayAdapter {

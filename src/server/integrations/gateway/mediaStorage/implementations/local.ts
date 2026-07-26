@@ -3,8 +3,8 @@ import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
 	IMediaStorageGatewayAdapter,
-	ISaveMediaFileReq,
 	ISavedMedia,
+	ISaveMediaFileReq,
 } from "../adapter";
 
 const sanitizeFilename = (filename: string) =>
@@ -23,9 +23,7 @@ class LocalMediaStorage implements IMediaStorageGatewayAdapter {
 	}
 
 	async delete(storageKey: string): Promise<void> {
-		await unlink(path.join(this.uploadDir, storageKey)).catch(
-			() => undefined,
-		);
+		await unlink(path.join(this.uploadDir, storageKey)).catch(() => undefined);
 	}
 }
 
