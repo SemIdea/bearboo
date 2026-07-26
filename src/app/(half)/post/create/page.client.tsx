@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
 import { CoverImageMediaPicker } from "@/components/mediaPicker";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { MdEditor } from "@/components/ui/mdEditor";
-import { useAuth } from "@/context/auth";
+import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { getErrorMessage } from "@/lib/error";
 import {
 	CreatePostInput,
@@ -17,7 +17,7 @@ import {
 
 const useCreatePost = () => {
 	const router = useRouter();
-	const { session, isLoadingSession } = useAuth();
+	useRequireAuth();
 
 	const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
@@ -32,12 +32,6 @@ const useCreatePost = () => {
 				setErrorMessage(errorMessage);
 			},
 		});
-
-	useEffect(() => {
-		if (!isLoadingSession && !session) {
-			router.push("/auth/login");
-		}
-	}, [isLoadingSession, session, router]);
 
 	const onSubmit = async (data: CreatePostInput) => {
 		setErrorMessage(null);

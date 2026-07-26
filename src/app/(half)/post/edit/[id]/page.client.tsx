@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
 import { CoverImageMediaPicker } from "@/components/mediaPicker";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { MdEditor } from "@/components/ui/mdEditor";
 import { useAuth } from "@/context/auth";
+import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { getErrorMessage } from "@/lib/error";
 import {
 	UpdatePostInput,
@@ -22,7 +23,7 @@ const textareaClassName =
 const useUpdatePost = (post: IPostEntity) => {
 	const router = useRouter();
 	const { id } = post;
-	const { session, isLoadingSession } = useAuth();
+	useRequireAuth();
 
 	const [isUploading, setIsUploading] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -62,12 +63,6 @@ const useUpdatePost = (post: IPostEntity) => {
 			setIsDeleting(false);
 		},
 	});
-
-	useEffect(() => {
-		if (!isLoadingSession && !session) {
-			router.push("/auth/login");
-		}
-	}, [isLoadingSession]);
 
 	const handleCreate = async (data: UpdatePostInput) => {
 		setErrorMessage(null);

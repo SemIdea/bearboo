@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/auth";
+import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { getErrorMessage } from "@/lib/error";
 import { ACCEPTED_IMAGE_MIME_TYPES } from "@/server/features/media/acceptedImageTypes";
 
@@ -109,14 +108,7 @@ const MediaGrid = () => {
 };
 
 const MediaLibrary = () => {
-	const router = useRouter();
-	const { session, isLoadingSession } = useAuth();
-
-	useEffect(() => {
-		if (!isLoadingSession && !session) {
-			router.push("/auth/login");
-		}
-	}, [isLoadingSession, session, router]);
+	const { session } = useRequireAuth();
 
 	if (!session) {
 		return null;
