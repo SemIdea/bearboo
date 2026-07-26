@@ -36,7 +36,7 @@ const MyPostsDescription = () => {
 };
 
 const MyPostsPanel = () => {
-	const { session } = useRequireAuth();
+	const session = useRequireAuth();
 
 	const [status, setStatus] = useState<IPostStatus | "">("");
 	const [categoryId, setCategoryId] = useState("");

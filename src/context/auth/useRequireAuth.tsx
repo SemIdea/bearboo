@@ -14,7 +14,7 @@ const useRequireAuth = () => {
 		}
 	}, [isLoadingSession, session, router]);
 
-	return { session, isLoadingSession };
+	return session;
 };
 
 export { useRequireAuth };

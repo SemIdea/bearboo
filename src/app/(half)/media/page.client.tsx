@@ -108,7 +108,7 @@ const MediaGrid = () => {
 };
 
 const MediaLibrary = () => {
-	const { session } = useRequireAuth();
+	const session = useRequireAuth();
 
 	if (!session) {
 		return null;
