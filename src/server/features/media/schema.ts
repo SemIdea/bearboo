@@ -1,12 +1,6 @@
 import { z } from "zod";
 import { env } from "@/lib/env";
-
-const ACCEPTED_MIME_TYPES = [
-	"image/jpeg",
-	"image/png",
-	"image/webp",
-	"image/gif",
-];
+import { ACCEPTED_IMAGE_MIME_TYPES } from "./acceptedImageTypes";
 
 // tRPC's multipart/form-data content-type handler hands the raw `FormData`
 // itself as input (not a parsed `{ file, altText }` object) — the transform
@@ -20,7 +14,7 @@ const uploadMediaSchema = z.instanceof(FormData).transform((formData, ctx) => {
 		return z.NEVER;
 	}
 
-	if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
+	if (!ACCEPTED_IMAGE_MIME_TYPES.includes(file.type)) {
 		ctx.addIssue({ code: "custom", message: "Unsupported image format." });
 		return z.NEVER;
 	}

@@ -8,6 +8,7 @@ import { ErrorMessage } from "@/components/ui/errorMessage";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/auth";
 import { getErrorMessage } from "@/lib/error";
+import { ACCEPTED_IMAGE_MIME_TYPES } from "@/server/features/media/acceptedImageTypes";
 
 const UploadMediaForm = () => {
 	const utils = trpc.useUtils();
@@ -45,7 +46,11 @@ const UploadMediaForm = () => {
 
 	return (
 		<form onSubmit={onSubmit} className="flex flex-col gap-2">
-			<Input ref={fileInputRef} type="file" accept="image/*" />
+			<Input
+				ref={fileInputRef}
+				type="file"
+				accept={ACCEPTED_IMAGE_MIME_TYPES.join(",")}
+			/>
 			<Input
 				type="text"
 				placeholder="Alt text (optional)"
