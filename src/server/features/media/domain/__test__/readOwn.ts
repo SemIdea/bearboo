@@ -12,6 +12,7 @@ const uploadFor = async (
 		ctx,
 		input: {
 			file: new File(["bytes"], filename, { type: "image/png" }),
+			altText: undefined,
 			userId,
 		},
 	});

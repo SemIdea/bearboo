@@ -12,9 +12,12 @@ describe("Read Own Media Controller Unitary Testing", () => {
 	test("Should never include another user's media for an author", async () => {
 		const ctx: IControllerContextDTO = await createAuthenticatedContext();
 		const otherUser = await ctx.createNewUser();
-		await MediaRouter.createCaller(ctx).upload({
-			file: new File(["bytes"], "mine.png", { type: "image/png" }),
-		});
+		const formData = new FormData();
+		formData.set(
+			"file",
+			new File(["bytes"], "mine.png", { type: "image/png" }),
+		);
+		await MediaRouter.createCaller(ctx).upload(formData);
 		await ctx.repositories.media.create(ctx.helpers.uid.generate(), {
 			url: "/uploads/theirs.png",
 			storageKey: "theirs.png",

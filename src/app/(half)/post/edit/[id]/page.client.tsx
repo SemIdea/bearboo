@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
+import { CoverImageMediaPicker } from "@/components/mediaPicker";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { MdEditor } from "@/components/ui/mdEditor";
@@ -127,6 +128,7 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
 				label="Cover image URL"
 				placeholder="https://..."
 			/>
+			<CoverImageMediaPicker />
 			<InputField name="slug" label="Slug" placeholder="url-friendly-slug" />
 			<InputField
 				name="seoTitle"

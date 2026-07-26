@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
+import { CoverImageMediaPicker } from "@/components/mediaPicker";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { MdEditor } from "@/components/ui/mdEditor";
@@ -69,6 +70,7 @@ const CreatePostForm = () => {
 				label="Cover image URL"
 				placeholder="https://..."
 			/>
+			<CoverImageMediaPicker />
 			<InputField name="status" label="Status">
 				<select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring md:text-sm">
 					<option value="DRAFT">Draft</option>

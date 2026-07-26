@@ -8,15 +8,21 @@ import {
 } from "@/test/context";
 import { MediaRouter } from "../../index";
 
+const buildFormData = (file: File, altText?: string) => {
+	const formData = new FormData();
+	formData.set("file", file);
+	if (altText) formData.set("altText", altText);
+	return formData;
+};
+
 describe("Upload Media Controller Unitary Testing", () => {
 	test("Should create a media record from an uploaded file", async () => {
 		const ctx: IControllerContextDTO = await createAuthenticatedContext();
 		const file = new File(["bytes"], "cover.png", { type: "image/png" });
 
-		const result = await MediaRouter.createCaller(ctx).upload({
-			file,
-			altText: "cover art",
-		});
+		const result = await MediaRouter.createCaller(ctx).upload(
+			buildFormData(file, "cover art"),
+		);
 
 		expect(result.filename).toBe("cover.png");
 		expect(result.altText).toBe("cover art");
@@ -28,7 +34,7 @@ describe("Upload Media Controller Unitary Testing", () => {
 		const file = new File(["bytes"], "doc.pdf", { type: "application/pdf" });
 
 		await expect(
-			MediaRouter.createCaller(ctx).upload({ file }),
+			MediaRouter.createCaller(ctx).upload(buildFormData(file)),
 		).rejects.toThrow();
 	});
 
@@ -37,7 +43,7 @@ describe("Upload Media Controller Unitary Testing", () => {
 		const file = new File(["bytes"], "cover.png", { type: "image/png" });
 
 		await expect(
-			MediaRouter.createCaller(anonymousCtx).upload({ file }),
+			MediaRouter.createCaller(anonymousCtx).upload(buildFormData(file)),
 		).rejects.toThrowError(
 			new TRPCError({
 				code: "UNAUTHORIZED",

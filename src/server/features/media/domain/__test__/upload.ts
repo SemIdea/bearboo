@@ -31,7 +31,7 @@ describe("domain_uploadMedia", () => {
 
 		const media = await domain_uploadMedia({
 			ctx,
-			input: { file, userId: user.id },
+			input: { file, altText: undefined, userId: user.id },
 		});
 
 		expect(media.altText).toBeNull();

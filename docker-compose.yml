@@ -9,6 +9,8 @@ services:
       REDIS_URL: "redis://cache:6379/0"
     expose:
       - "3000"
+    volumes:
+      - uploads:/app/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,3 +58,4 @@ services:
 volumes:
   pgdata:
   redisdata:
+  uploads:

@@ -14,6 +14,7 @@ describe("domain_deleteMedia", () => {
 			ctx,
 			input: {
 				file: new File(["bytes"], "mine.png", { type: "image/png" }),
+				altText: undefined,
 				userId: owner.id,
 			},
 		});
@@ -38,6 +39,7 @@ describe("domain_deleteMedia", () => {
 			ctx,
 			input: {
 				file: new File(["bytes"], "mine.png", { type: "image/png" }),
+				altText: undefined,
 				userId: owner.id,
 			},
 		});
@@ -60,6 +62,7 @@ describe("domain_deleteMedia", () => {
 			ctx,
 			input: {
 				file: new File(["bytes"], "mine.png", { type: "image/png" }),
+				altText: undefined,
 				userId: owner.id,
 			},
 		});

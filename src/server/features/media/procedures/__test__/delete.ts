@@ -12,9 +12,12 @@ import { MediaRouter } from "../../index";
 describe("Delete Media Controller Unitary Testing", () => {
 	test("Should let the owner delete their own media", async () => {
 		const ctx: IControllerContextDTO = await createAuthenticatedContext();
-		const media = await MediaRouter.createCaller(ctx).upload({
-			file: new File(["bytes"], "mine.png", { type: "image/png" }),
-		});
+		const formData = new FormData();
+		formData.set(
+			"file",
+			new File(["bytes"], "mine.png", { type: "image/png" }),
+		);
+		const media = await MediaRouter.createCaller(ctx).upload(formData);
 
 		const result = await MediaRouter.createCaller(ctx).delete({
 			id: media.id,
