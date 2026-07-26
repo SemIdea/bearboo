@@ -10,6 +10,7 @@ const ACTIONS: IPermissionAction[] = [
 	"post:publish",
 	"category:manage",
 	"user:manageRoles",
+	"media:deleteAny",
 ];
 
 const EXPECTED: Record<IPermissionAction, Record<IRole, boolean>> = {
@@ -18,6 +19,7 @@ const EXPECTED: Record<IPermissionAction, Record<IRole, boolean>> = {
 	"post:publish": { ADMIN: true, EDITOR: true, AUTHOR: false },
 	"category:manage": { ADMIN: true, EDITOR: true, AUTHOR: false },
 	"user:manageRoles": { ADMIN: true, EDITOR: false, AUTHOR: false },
+	"media:deleteAny": { ADMIN: true, EDITOR: true, AUTHOR: false },
 };
 
 describe("MatrixPermission Unitary Testing", () => {

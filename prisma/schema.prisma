@@ -27,6 +27,7 @@ model User {
   updatedAt         DateTime            @updatedAt
   verified          Boolean             @default(false)
   reviewComments    PostReviewComment[]
+  media             Media[]
 }
 
 model Session {
@@ -106,6 +107,21 @@ model PostReviewComment {
   type       ReviewCommentType
   content    String?
   createdAt  DateTime          @default(now())
+}
+
+model Media {
+  id           String   @id
+  url          String
+  storageKey   String
+  filename     String
+  mimeType     String
+  size         Int
+  altText      String?
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@index([uploadedById])
 }
 
 model Category {
