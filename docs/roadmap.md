@@ -14,7 +14,7 @@
 | 5 — SEO e publicação profissional | ✅ Concluída | `docs/features/015-seo-metadata/`: sitemap.xml, robots.txt, RSS feed, canonical, Twitter Card, schema.org — todos computados de campos já existentes, sem migration. `docs/features/018-seo-overrides-slug-redirect/`: campos editáveis de override de SEO (`seoTitle`/`seoDescription`/`canonicalUrl`) e slug editável com redirect 301 automático (`previousSlug`, 1 nível de histórico) — as 2 pendências que ficavam essa fase parcial |
 | 6 — Busca e descoberta | ✅ Concluída | `docs/features/016-search-content/`: busca por título/conteúdo via `contains`/`insensitive` (não `tsvector` nativo — ADR-0011), autocomplete no header; filtro por tag/categoria e posts relacionados já existiam de fases anteriores. `docs/features/019-search-sort-by-views/`: ordenação por mais acessado (`sortBy: "mostViewed"`), desbloqueada pelo `Post.viewCount` da Fase 7 — a pendência que deixava essa fase parcial |
 | 7 — Analytics interno | ✅ Concluída | `docs/features/017-post-view-analytics/`: registrar view (dedup por visitante 24h via Redis/cookie, ADR-0013), contar total, posts mais acessados, dashboard Admin/Editor. `docs/features/020-view-analytics-breakdown/`: contagem por período (7/30 dias), origem de tráfego e navegador/SO — pendências que deixavam a fase parcial, fechadas com retenção de 30 dias (deleção lazy) e sem persistir IP |
-| 8 — Upload e gerenciamento de mídia | ⬜ Não iniciada | — |
+| 8 — Upload e gerenciamento de mídia | ✅ Concluída (com 1 pendência adiada) | `docs/features/021-media-upload/`: upload real de imagem (FormData via tRPC, `ADR-0015`), biblioteca de mídia, apagar (dono ou `media:deleteAny`), alt text, validação de formato/tamanho, capa de post a partir de mídia enviada. Pendência adiada: compressão/otimização de imagem (explicitamente opcional no roadmap; some sozinha se o storage final for um CDN de imagem) |
 | 9 — Qualidade de produção | 🟡 Parcial | Zod, migrations, seed, alguns testes/error pages já existem; rate limiting em memória cobre login/registro/reset/refresh (`docs/features/001-auth-hardening/`) — não é rate limiting geral de toda a API; falta logs estruturados, cobertura de teste (~8.6% hoje) |
 | 10 — CI/CD e deploy | ⬜ Não iniciada | sem `.github/workflows/`, sem deploy configurado |
 | 11 — Observabilidade | ⬜ Não iniciada | sem `/api/health`, sem tracing/métricas |
@@ -450,7 +450,9 @@ Essa fase está pronta quando você consegue abrir o admin e ver quais posts est
 
 Essa parte é muito boa para portfólio porque mostra que você pensa além do CRUD.
 
-## Fase 8 — Upload e gerenciamento de mídia ⬜ Não iniciada
+## Fase 8 — Upload e gerenciamento de mídia ✅ Concluída (com 1 pendência adiada)
+
+> **Implementação:** `docs/features/021-media-upload/` (RF-13, US-016). Upload real de arquivo via `media.upload` (FormData pela mesma rota tRPC — `ADR-0015`), biblioteca "minha mídia" (`media.readOwn`, Admin/Editor veem de todo mundo), apagar (`media.delete`, dono ou `media:deleteAny`), alt text opcional, validação de formato (jpeg/png/webp/gif) e tamanho (5MB default) no boundary. Imagem de capa do post passa a poder vir de uma mídia enviada — a UI só preenche o `coverImageUrl` já existente (`010-post-cover-image`), sem migration em `Post`. Pendência adiada: compressão/otimização automática de imagem (decisão do dono, 2026-07-26, `021-media-upload/spec.md § 4`) — explicitamente opcional no roadmap; se o storage final vier a ser um CDN de imagem com transformação nativa (cogitado: Cloudinary), a compressão deixa de ser necessária e a pendência fecha sozinha.
 
 ### Objetivo
 
@@ -458,14 +460,14 @@ Permitir que o sistema lide com imagens de forma organizada.
 
 ### Funcionalidades
 
-* [ ] upload de imagem;
-* [ ] listagem de mídias;
-* [ ] remover mídia;
-* [ ] imagem de capa para post;
-* [ ] alt text;
-* [ ] validação de tamanho;
-* [ ] validação de formato;
-* [ ] compressão/otimização opcional.
+* [x] upload de imagem (`021`);
+* [x] listagem de mídias (`021`, `/media`);
+* [x] remover mídia (`021`);
+* [x] imagem de capa para post (`021`, reusa `coverImageUrl` de `010`);
+* [x] alt text (`021`);
+* [x] validação de tamanho (`021`, 5MB default via `MEDIA_MAX_UPLOAD_SIZE_BYTES`);
+* [x] validação de formato (`021`, jpeg/png/webp/gif);
+* [ ] compressão/otimização opcional — adiada, ver nota acima.
 
 ### Implementação sugerida
 
@@ -479,12 +481,15 @@ AWS S3
 MinIO local
 ```
 
+> **Nota (`021`, 2026-07-26):** armazenamento local implementado (`public/uploads/`, volume Docker pra persistir entre restarts). O gateway `mediaStorage` (`ADR-0015`) é pluggável — trocar por Cloudinary/S3/R2 depois é só uma implementação nova, sem tocar domain/procedure.
+
 ### Modelo
 
 ```ts
 Media {
   id
   url
+  storageKey
   filename
   mimeType
   size
@@ -494,9 +499,11 @@ Media {
 }
 ```
 
+> **Nota (`021`, 2026-07-26):** `storageKey` foi adicionado ao esboço original — identificador opaco de storage (caminho local hoje, `public_id` num CDN de imagem depois), distinto da `url` pública. Decisão registrada em `ADR-0015`.
+
 ### Critério de conclusão
 
-Essa fase está pronta quando posts conseguem usar imagens gerenciadas pelo próprio sistema.
+Essa fase está pronta quando posts conseguem usar imagens gerenciadas pelo próprio sistema. **Satisfeito** — upload, biblioteca, remoção e uso como capa (`021`); compressão/otimização fica pra quando houver demanda real ou o storage final resolver isso nativamente.
 
 ## Fase 9 — Qualidade de produção 🟡 Parcial
 
