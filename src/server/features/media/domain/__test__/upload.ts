@@ -19,7 +19,7 @@ describe("domain_uploadMedia", () => {
 		expect(media.mimeType).toBe("image/jpeg");
 		expect(media.altText).toBe("a nice cover");
 		expect(media.uploadedById).toBe(user.id);
-		expect(media.url).toMatch(/^\/uploads\//);
+		expect(media.url).toMatch(/^https?:\/\/.+\/uploads\//);
 	});
 
 	test("defaults altText to null when not provided", async () => {

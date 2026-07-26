@@ -17,7 +17,7 @@ describe("LocalMediaStorage", () => {
 	});
 
 	test("saves the file to disk and returns a public url + storage key", async () => {
-		const storage = new LocalMediaStorage(uploadDir);
+		const storage = new LocalMediaStorage(uploadDir, "http://localhost:3000");
 		const buffer = Buffer.from("fake-image-bytes");
 
 		const saved = await storage.save({
@@ -27,7 +27,7 @@ describe("LocalMediaStorage", () => {
 		});
 
 		expect(saved.storageKey).toMatch(/my_photo\.jpg$/);
-		expect(saved.url).toBe(`/uploads/${saved.storageKey}`);
+		expect(saved.url).toBe(`http://localhost:3000/uploads/${saved.storageKey}`);
 		expect(existsSync(path.join(uploadDir, saved.storageKey))).toBe(true);
 		expect(await readFile(path.join(uploadDir, saved.storageKey))).toEqual(
 			buffer,
@@ -35,7 +35,7 @@ describe("LocalMediaStorage", () => {
 	});
 
 	test("two uploads with the same filename get distinct storage keys", async () => {
-		const storage = new LocalMediaStorage(uploadDir);
+		const storage = new LocalMediaStorage(uploadDir, "http://localhost:3000");
 		const buffer = Buffer.from("fake-image-bytes");
 
 		const first = await storage.save({
@@ -53,7 +53,7 @@ describe("LocalMediaStorage", () => {
 	});
 
 	test("delete removes the file from disk", async () => {
-		const storage = new LocalMediaStorage(uploadDir);
+		const storage = new LocalMediaStorage(uploadDir, "http://localhost:3000");
 		const saved = await storage.save({
 			buffer: Buffer.from("bytes"),
 			filename: "gone.gif",
@@ -66,7 +66,7 @@ describe("LocalMediaStorage", () => {
 	});
 
 	test("delete is a no-op when the file does not exist", async () => {
-		const storage = new LocalMediaStorage(uploadDir);
+		const storage = new LocalMediaStorage(uploadDir, "http://localhost:3000");
 
 		await expect(storage.delete("never-existed.jpg")).resolves.toBeUndefined();
 	});

@@ -13,7 +13,7 @@ class FakeMediaStorageGateway implements IMediaStorageGatewayAdapter {
 		const storageKey = `fake-${this.sequence}-${filename}`;
 		this.files.set(storageKey, buffer);
 
-		return { url: `/uploads/${storageKey}`, storageKey };
+		return { url: `http://localhost:3000/uploads/${storageKey}`, storageKey };
 	}
 
 	async delete(storageKey: string): Promise<void> {

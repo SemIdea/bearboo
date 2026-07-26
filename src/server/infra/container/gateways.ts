@@ -28,7 +28,7 @@ const resolveViewCounterGateway = (): IViewCounterGatewayAdapter =>
 		: new RedisViewCounterGateway(env.redisUrl);
 
 const resolveMediaStorageGateway = (): IMediaStorageGatewayAdapter =>
-	new LocalMediaStorage(env.media.uploadDir);
+	new LocalMediaStorage(env.media.uploadDir, env.siteUrl);
 
 const gateways: IGateways = {
 	mail: resolveMailGateway(),

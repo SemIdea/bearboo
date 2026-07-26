@@ -11,7 +11,10 @@ const sanitizeFilename = (filename: string) =>
 	filename.replace(/[^a-zA-Z0-9.\-_]/g, "_");
 
 class LocalMediaStorage implements IMediaStorageGatewayAdapter {
-	constructor(private readonly uploadDir: string) {}
+	constructor(
+		private readonly uploadDir: string,
+		private readonly siteUrl: string,
+	) {}
 
 	async save({ buffer, filename }: ISaveMediaFileReq): Promise<ISavedMedia> {
 		await mkdir(this.uploadDir, { recursive: true });
@@ -19,7 +22,7 @@ class LocalMediaStorage implements IMediaStorageGatewayAdapter {
 		const storageKey = `${randomUUID()}-${sanitizeFilename(filename)}`;
 		await writeFile(path.join(this.uploadDir, storageKey), buffer);
 
-		return { url: `/uploads/${storageKey}`, storageKey };
+		return { url: `${this.siteUrl}/uploads/${storageKey}`, storageKey };
 	}
 
 	async delete(storageKey: string): Promise<void> {
