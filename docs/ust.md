@@ -31,6 +31,8 @@
 | US-013 | Busca posts por título ou conteúdo | Posts | RF-11 | done |
 | US-014 | Analytics de visualizações por post | Analytics | RF-12 | done |
 | US-015 | Autor/Editor customiza SEO e URL amigável do post | Posts | RF-10 | done |
+| US-016 | Usuário autenticado envia e gerencia mídia | Mídia | RF-13 | done |
+| US-017 | Dev resolve erro de domínio sem código duplicado por procedure | Qualidade de Sistema | RF-14 | done |
 
 ## Pendências Técnicas
 
@@ -668,6 +670,41 @@ Scenario: Mídia enviada vira capa do post
 ```
 
 **Metadata:** RF-13. *Spec:* `docs/features/021-media-upload/spec.md`.
+
+---
+
+## Épico Qualidade de Sistema
+
+### US-017 — Dev resolve erro de domínio sem código duplicado por procedure
+
+- **Persona:** Dev mantenedor do projeto (item de qualidade interna, não de produto — `docs/roadmap.md` Fase 9).
+- **Story:** Como dev mantendo o backend, quero que todo erro de domínio já carregue seu próprio código HTTP e mensagem (via `ErrorRegistry`, `ADR-0017`), pra escrever/ler qualquer procedure sem precisar de switch/if-chain repetido traduzindo `DomainError` em `TRPCError`, e sem perder a granularidade que o frontend (`getErrorMessage`) já depende pra mostrar a mensagem certa.
+
+**Critérios de aceitação:**
+
+```gherkin
+Scenario: Domain lança erro namespaced e a procedure traduz sem switch
+  Given uma função domain_* que detecta uma violação de regra de negócio
+  When ela lança `new DomainError("auth.invalid_credentials")`
+  Then a procedure captura o erro e relança um TRPCError com httpCode e message resolvidos automaticamente pelo DomainError, sem nenhum switch/if-chain local
+
+Scenario: Dois domínios não podem reivindicar o mesmo namespace
+  Given dois arquivos de erro diferentes chamando defineDomainErrors com o mesmo nome de domínio
+  When o segundo módulo é carregado
+  Then o ErrorRegistry lança um erro de duplicação, falhando o boot em vez de sobrescrever silenciosamente
+
+Scenario: Typo no código de erro quebra o build, não o runtime
+  Given um domain_* referenciando um DomainError com um code inexistente no registry
+  When o projeto roda tsc --noEmit
+  Then o build falha, porque ErrorCode é o union literal derivado de keyof typeof Errors
+
+Scenario: Frontend continua resolvendo a mensagem certa por código granular
+  Given múltiplos erros de domínio que mapeiam pro mesmo httpCode (ex: vários BAD_REQUEST em auth)
+  When cada um ocorre
+  Then o frontend exibe a mensagem específica correta, não uma mensagem genérica de status
+```
+
+**Metadata:** RF-14. *Spec:* `docs/features/022-error-registry/spec.md`.
 
 ---
 

@@ -159,8 +159,8 @@ Toda regra abaixo tem **gatilho executável** que o agente roda no teclado — p
 12. *(princípio — vive em § 1.3. Sem componente Task-like no projeto hoje — nenhum job/queue/scheduler detectado no scan A.1. Se um for introduzido, promove pra regra dura com gatilho de idempotência.)*
 13. **Tokens e segredos não vazam.** Nunca logar token em claro. Redact em erros. Nunca commitar `.env`.
     *Verificação:* `git diff --staged | grep -nE "(token|secret|api[_-]?key|password|bearer)\s*[:=]\s*['\"][^'\"]+"` retorna 0; `git diff --staged --name-only | grep -E "(^|/)\.env"` vazio.
-15. **Classificação de erros — Domain ≠ Transport.** Domain/Model não importa `TRPCError` (`@trpc/server`). Procedure mapeia erro de domínio → `TRPCError` no boundary.
-    *Verificação:* `rg -l "TRPCError" src/server/features/*/domain/*.ts`. **Violação hoje: 17 de 30 arquivos `domain/*.ts`** importam e lançam `TRPCError` diretamente — ver `ach.md` § 3.2 e § 3.1 forward-only abaixo.
+15. **Classificação de erros — Domain ≠ Transport.** Domain/Model não importa `TRPCError` (`@trpc/server`). Procedure mapeia erro de domínio → `TRPCError` no boundary, via `DomainError`/`ErrorRegistry` (`ADR-0017`).
+    *Verificação:* `rg -l "TRPCError" src/server/features/*/domain/*.ts`. **Compliant hoje** — migração coordenada fechada em `022-error-registry` (2026-07-27). Ver `ach.md` § 3.2.
 16. **Validação no boundary — schema só em input/output de procedure.** Zod valida em (a) `.input()`/`.output()` de procedure (`src/server/features/<feature>/schema.ts`), (b) payload externo. Domain/Model recebe shape já validado.
     *Verificação:* `rg -n "z\.|zod" src/server/models src/server/features/*/domain/*.ts` retorna 0. **Compliant hoje.**
 17. **Edit em `/docs/` não colapsa o doc.** Rewrite que apaga mais da metade das linhas num só edit pára e exige revisão explícita.
@@ -194,9 +194,10 @@ Adoção retroativa via `/afm:refactor` em **2026-06-30**. As regras abaixo se a
 | 2 — zero `any`/`unknown` | Volume pequeno, mas ainda existente em helpers/componentes legados; não bloqueia PRs em andamento até o boy-scout alcançar. | 5 ocorrências | `[A DEFINIR]` |
 | 5 — naming vago | 2 arquivos sem prefixo de domínio (`src/lib/utils.ts`, `src/server/infra/container/helpers.ts`). Renomear/particionar exige revisão de todos os imports. | `src/lib/utils.ts`, `src/server/infra/container/helpers.ts` | `[A DEFINIR]` |
 | 6 — arquivo ≤300 linhas | Resolvido pela migração `entities/` → `models/` (ADR-0007); manter como regra forward-only para código novo. | 0 arquivos produtivos >300 linhas | — |
-| 15 — Domain ≠ Transport | Violação difundida (17/30 arquivos de `domain/`) — corrigir exige mover mapeamento de erro pra procedure/boundary em cada função. Schemas Zod de output já existem, mas a remediação de erro ainda não aterrissou. | 17/30 arquivos `domain/*.ts` | ADR-0010 (`docs/adr/0010-dto-substituido-por-zod-no-boundary.md`) |
 
-**Critério de boy-scout:** ao editar arquivo legado que viola regra forward-only, traz pra conformidade no mesmo PR se o escopo justifica. Senão, abre issue separada e linka. Regra 15 é exceção — dado o volume (17 arquivos), a remediação deve ser feita como migração coordenada, não boy-scout arquivo-a-arquivo, pra evitar migração pela metade.
+**Critério de boy-scout:** ao editar arquivo legado que viola regra forward-only, traz pra conformidade no mesmo PR se o escopo justifica. Senão, abre issue separada e linka.
+
+**Regra 15 removida desta tabela em 2026-07-27** — migração coordenada fechada em `022-error-registry`/`ADR-0017` (era exceção nesta tabela justamente por exigir migração coordenada, não boy-scout arquivo-a-arquivo; a migração aconteceu e a regra 15 voltou a ser universal em § 3).
 
 ---
 
