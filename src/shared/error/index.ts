@@ -2,6 +2,7 @@ import { AuthErrors } from "./auth";
 import { MediaErrors } from "./media";
 import { ResetTokenErrors } from "./resetToken";
 import { SessionErrors } from "./session";
+import { UserErrors } from "./user";
 import { VerifyTokenErrors } from "./verifyToken";
 
 const Errors = {
@@ -9,6 +10,7 @@ const Errors = {
 	...MediaErrors,
 	...ResetTokenErrors,
 	...SessionErrors,
+	...UserErrors,
 	...VerifyTokenErrors,
 } as const;
 

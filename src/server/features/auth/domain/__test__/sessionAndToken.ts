@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
 import { DomainError } from "@/shared/error/domainError";
-import { UserErrorCode } from "@/shared/error/user";
 import { createAuthenticatedContext, createTestContext } from "@/test/context";
 import { domain_createAuthSession } from "../createAuthSession";
 import { domain_createResetToken } from "../createResetToken";
@@ -31,10 +30,7 @@ describe("auth session and token domains", () => {
 
 		await expect(
 			domain_createAuthSession({ ctx, input: { userId: "missing-user" } }),
-		).rejects.toMatchObject({
-			code: "NOT_FOUND",
-			message: UserErrorCode.USER_NOT_FOUND,
-		});
+		).rejects.toMatchObject(new DomainError("user.not_found"));
 	});
 
 	test("creates verification tokens with a future expiration", async () => {

@@ -1,14 +1,12 @@
 import { AuthErrorMessages } from "@/shared/error/auth";
 import { CommentErrorMessages } from "@/shared/error/comment";
 import { PostErrorMessages } from "@/shared/error/post";
-import { UserErrorMessages } from "@/shared/error/user";
 import { ValidationErrorMessages } from "@/shared/error/validation";
 
 type AppErrorCode =
 	| keyof typeof AuthErrorMessages
 	| keyof typeof CommentErrorMessages
 	| keyof typeof PostErrorMessages
-	| keyof typeof UserErrorMessages
 	| keyof typeof ValidationErrorMessages;
 
 // Two eras of error.message coexist during the ErrorRegistry migration
@@ -20,7 +18,6 @@ const getErrorMessage = (code: string | AppErrorCode): string => {
 		...AuthErrorMessages,
 		...CommentErrorMessages,
 		...PostErrorMessages,
-		...UserErrorMessages,
 		...ValidationErrorMessages,
 	};
 

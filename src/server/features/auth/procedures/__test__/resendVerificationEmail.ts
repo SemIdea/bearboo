@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { UserErrorCode } from "@/shared/error/user";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -61,11 +59,9 @@ describe("Resend Verification Email Controller Unitary Testing", () => {
 			AuthRouter.createCaller(ctx).resendVerificationEmail({
 				email: "nonexistent@example.com",
 			}),
-		).rejects.toThrow(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: UserErrorCode.USER_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "User not found. Please check the email.",
+		});
 	});
 });

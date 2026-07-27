@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
+import { DomainError } from "@/shared/error/domainError";
 
 const domain_getUserByEmailOrThrow = async ({
 	ctx,
@@ -9,10 +8,7 @@ const domain_getUserByEmailOrThrow = async ({
 	const user = await ctx.repositories.user.readByEmail(input.email);
 
 	if (!user) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: UserErrorCode.USER_NOT_FOUND,
-		});
+		throw new DomainError("user.not_found");
 	}
 
 	return user;

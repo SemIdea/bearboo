@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
 import { AuthErrorCode } from "@/shared/error/auth";
-import { UserErrorCode } from "@/shared/error/user";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -32,12 +31,10 @@ describe("Update User Role Controller Unitary Testing", () => {
 				userId: "non-existent-id",
 				role: "EDITOR",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: UserErrorCode.USER_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "User not found. Please check the email.",
+		});
 	});
 
 	test("Should reject an editor trying to change another user's role", async () => {
