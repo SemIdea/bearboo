@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { SessionErrorCode } from "@/shared/error/session";
+import { SessionErrorCode, SessionErrorMessages } from "@/shared/error/session";
 import { UserErrorCode } from "@/shared/error/user";
 import {
 	createAuthenticatedContext,
@@ -57,11 +57,9 @@ describe("Logout Session Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).session.logout(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: SessionErrorCode.SESSION_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: SessionErrorMessages[SessionErrorCode.SESSION_NOT_FOUND],
+		});
 	});
 });

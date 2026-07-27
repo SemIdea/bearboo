@@ -1,3 +1,5 @@
+import { defineDomainErrors } from "./registry";
+
 enum SessionErrorCode {
 	MISSING_TOKEN = "MISSING_TOKEN",
 	INVALID_TOKEN = "INVALID_TOKEN",
@@ -22,4 +24,30 @@ const SessionErrorMessages = {
 		"You are not authorized to perform this action.",
 } as const;
 
-export { SessionErrorCode, SessionErrorMessages };
+const SessionErrors = defineDomainErrors("session", {
+	session_create_error: {
+		httpCode: "INTERNAL_SERVER_ERROR",
+		message: SessionErrorMessages[SessionErrorCode.SESSION_CREATE_ERROR],
+	},
+	session_not_found: {
+		httpCode: "NOT_FOUND",
+		message: SessionErrorMessages[SessionErrorCode.SESSION_NOT_FOUND],
+	},
+	// Historically both thrown with the same message (SessionErrorCode.INVALID_TOKEN)
+	// but different httpCode depending on which lookup failed — kept as distinct
+	// namespaced codes so each preserves its own httpCode exactly.
+	refresh_token_invalid: {
+		httpCode: "NOT_FOUND",
+		message: SessionErrorMessages[SessionErrorCode.INVALID_TOKEN],
+	},
+	access_token_invalid: {
+		httpCode: "UNAUTHORIZED",
+		message: SessionErrorMessages[SessionErrorCode.INVALID_TOKEN],
+	},
+	session_update_error: {
+		httpCode: "INTERNAL_SERVER_ERROR",
+		message: SessionErrorMessages[SessionErrorCode.SESSION_UPDATE_ERROR],
+	},
+});
+
+export { SessionErrorCode, SessionErrorMessages, SessionErrors };

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
 import { ISessionEntity } from "@/server/models/session";
-import { SessionErrorCode } from "@/shared/error/session";
+import { SessionErrorCode, SessionErrorMessages } from "@/shared/error/session";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -60,12 +60,10 @@ describe("Refresh Session Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).refreshSession(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: SessionErrorCode.INVALID_TOKEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: SessionErrorMessages[SessionErrorCode.INVALID_TOKEN],
+		});
 	});
 
 	test("Should clear accessToken/refreshToken cookies when the refresh token is invalid or reused, so the client stops resending a dead cookie", async () => {

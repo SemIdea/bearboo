@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
 import { IUserWithSession } from "@/server/models/user";
-import { SessionErrorCode } from "@/shared/error/session";
+import { DomainError } from "@/shared/error/domainError";
 
 const domain_readUserAndSessionByAccessToken = async ({
 	ctx,
@@ -12,19 +11,13 @@ const domain_readUserAndSessionByAccessToken = async ({
 	);
 
 	if (!session || !session.userId) {
-		throw new TRPCError({
-			code: "UNAUTHORIZED",
-			message: SessionErrorCode.INVALID_TOKEN,
-		});
+		throw new DomainError("session.access_token_invalid");
 	}
 
 	const user = await ctx.repositories.user.read(session.userId);
 
 	if (!user) {
-		throw new TRPCError({
-			code: "UNAUTHORIZED",
-			message: SessionErrorCode.INVALID_TOKEN,
-		});
+		throw new DomainError("session.access_token_invalid");
 	}
 
 	return {

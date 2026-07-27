@@ -46,7 +46,7 @@ const sessionRefreshLink: TRPCLink<AppRouter> = () => {
 
 						if (
 							code === "UNAUTHORIZED" &&
-							message === SessionErrorCode.INVALID_TOKEN
+							err.data?.domainCode === "session.access_token_invalid"
 						) {
 							redirectTo("/auth/login");
 						}

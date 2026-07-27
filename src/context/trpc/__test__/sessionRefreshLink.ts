@@ -24,9 +24,9 @@ const fakeObservable = (emit: (observer: IFakeObserver) => void) => ({
 	},
 });
 
-const errorWith = (code: string, message: string) =>
+const errorWith = (code: string, message: string, domainCode?: string) =>
 	new TRPCClientError(message, {
-		result: { error: { data: { code }, message } },
+		result: { error: { data: { code, domainCode }, message } },
 	});
 
 const flushMicrotasks = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -121,7 +121,8 @@ describe("sessionRefreshLink", () => {
 	test("redirects to login on INVALID_TOKEN", () => {
 		const invalidTokenError = errorWith(
 			"UNAUTHORIZED",
-			SessionErrorCode.INVALID_TOKEN,
+			"Authentication token is invalid.",
+			"session.access_token_invalid",
 		);
 		const next = vi
 			.fn()
@@ -162,7 +163,8 @@ describe("sessionRefreshLink", () => {
 		});
 		const invalidTokenError = errorWith(
 			"UNAUTHORIZED",
-			SessionErrorCode.INVALID_TOKEN,
+			"Authentication token is invalid.",
+			"session.access_token_invalid",
 		);
 		const next = vi
 			.fn()

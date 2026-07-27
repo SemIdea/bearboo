@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { SessionErrorCode } from "@/shared/error/session";
+import { DomainError } from "@/shared/error/domainError";
 
 const domain_refreshSession = async ({
 	ctx,
@@ -16,10 +15,7 @@ const domain_refreshSession = async ({
 	});
 
 	if (!newSession) {
-		throw new TRPCError({
-			code: "INTERNAL_SERVER_ERROR",
-			message: SessionErrorCode.SESSION_UPDATE_ERROR,
-		});
+		throw new DomainError("session.session_update_error");
 	}
 
 	return newSession;

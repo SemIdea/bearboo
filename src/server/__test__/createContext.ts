@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { SessionErrorCode } from "@/shared/error/session";
+import { DomainError } from "@/shared/error/domainError";
 import { createTRPCContext } from "../createContext";
 
 const readUserAndSessionByAccessTokenMock = vi.hoisted(() => vi.fn());
@@ -76,10 +76,7 @@ describe("createTRPCContext", () => {
 
 	test("degrades to an anonymous context and clears stale cookies when the access token is invalid, instead of throwing", async () => {
 		readUserAndSessionByAccessTokenMock.mockRejectedValue(
-			new TRPCError({
-				code: "UNAUTHORIZED",
-				message: SessionErrorCode.INVALID_TOKEN,
-			}),
+			new DomainError("session.access_token_invalid"),
 		);
 
 		const ctx = await createTRPCContext({

@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
 import { LOGIN_RATE_LIMIT } from "@/server/features/auth/constants";
-import { AuthErrorCode } from "@/shared/error/auth";
+import { AuthErrorCode, AuthErrorMessages } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -44,24 +43,24 @@ describe("Login User Controller Unitary Testing", () => {
 
 	test("Should throw the same error for a missing email as for a wrong password", async () => {
 		const uuid = ctx.helpers.uid.generate();
-		const expectedError = new TRPCError({
+		const expectedError = {
 			code: "UNAUTHORIZED",
-			message: AuthErrorCode.INVALID_CREDENTIALS,
-		});
+			message: AuthErrorMessages[AuthErrorCode.INVALID_CREDENTIALS],
+		};
 
 		await expect(
 			UserRouter.createCaller(ctx).login({
 				email: `${uuid}@example.com`,
 				password: "password123",
 			}),
-		).rejects.toThrowError(expectedError);
+		).rejects.toMatchObject(expectedError);
 
 		await expect(
 			UserRouter.createCaller(ctx).login({
 				email: ctx.user.email,
 				password: "wrong-password",
 			}),
-		).rejects.toThrowError(expectedError);
+		).rejects.toMatchObject(expectedError);
 	});
 
 	test("Should enforce the login rate limit", async () => {

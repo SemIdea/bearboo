@@ -1,3 +1,5 @@
+import { defineDomainErrors } from "./registry";
+
 enum AuthErrorCode {
 	INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
 	USER_NOT_VERIFIED = "USER_NOT_VERIFIED",
@@ -32,4 +34,11 @@ const AuthErrorMessages = {
 		"You do not have permission to perform this action.",
 };
 
-export { AuthErrorCode, AuthErrorMessages };
+const AuthErrors = defineDomainErrors("auth", {
+	invalid_credentials: {
+		httpCode: "UNAUTHORIZED",
+		message: AuthErrorMessages[AuthErrorCode.INVALID_CREDENTIALS],
+	},
+});
+
+export { AuthErrorCode, AuthErrorMessages, AuthErrors };
