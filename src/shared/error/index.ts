@@ -1,4 +1,5 @@
 import { AuthErrors } from "./auth";
+import { CommentErrors } from "./comment";
 import { MediaErrors } from "./media";
 import { ResetTokenErrors } from "./resetToken";
 import { SessionErrors } from "./session";
@@ -7,6 +8,7 @@ import { VerifyTokenErrors } from "./verifyToken";
 
 const Errors = {
 	...AuthErrors,
+	...CommentErrors,
 	...MediaErrors,
 	...ResetTokenErrors,
 	...SessionErrors,

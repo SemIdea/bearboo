@@ -1,11 +1,9 @@
 import { AuthErrorMessages } from "@/shared/error/auth";
-import { CommentErrorMessages } from "@/shared/error/comment";
 import { PostErrorMessages } from "@/shared/error/post";
 import { ValidationErrorMessages } from "@/shared/error/validation";
 
 type AppErrorCode =
 	| keyof typeof AuthErrorMessages
-	| keyof typeof CommentErrorMessages
 	| keyof typeof PostErrorMessages
 	| keyof typeof ValidationErrorMessages;
 
@@ -16,7 +14,6 @@ type AppErrorCode =
 const getErrorMessage = (code: string | AppErrorCode): string => {
 	const allErrorMessages = {
 		...AuthErrorMessages,
-		...CommentErrorMessages,
 		...PostErrorMessages,
 		...ValidationErrorMessages,
 	};

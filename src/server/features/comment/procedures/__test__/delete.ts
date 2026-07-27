@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { CommentErrorCode } from "@/shared/error/comment";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -31,12 +29,10 @@ describe("Delete Comment Controller Unitary Testing", () => {
 
 		await expect(
 			CommentRouter.createCaller(ctx).delete(input),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: CommentErrorCode.COMMENT_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Comment not found. Please check the ID.",
+		});
 	});
 
 	test("Should throw an error when trying to delete a comment that belongs to another user", async () => {
@@ -45,11 +41,9 @@ describe("Delete Comment Controller Unitary Testing", () => {
 
 		await expect(
 			CommentRouter.createCaller(ctx).delete({ id: comment.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: CommentErrorCode.COMMENT_DELETE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You are not allowed to delete this comment.",
+		});
 	});
 });

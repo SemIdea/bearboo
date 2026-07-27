@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { CommentErrorCode } from "@/shared/error/comment";
+import { DomainError } from "@/shared/error/domainError";
 import { UpdateCommentInput } from "../schema";
 
 const domain_updateComment = async ({
@@ -10,17 +9,11 @@ const domain_updateComment = async ({
 	const comment = await ctx.repositories.comment.read(input.id);
 
 	if (!comment) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: CommentErrorCode.COMMENT_NOT_FOUND,
-		});
+		throw new DomainError("comment.not_found");
 	}
 
 	if (comment.userId !== input.userId) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: CommentErrorCode.COMMENT_UPDATE_FORBIDDEN,
-		});
+		throw new DomainError("comment.update_forbidden");
 	}
 
 	return ctx.repositories.comment.update(input.id, {
