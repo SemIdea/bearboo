@@ -95,12 +95,12 @@ describe("backend support helpers", () => {
 		);
 	});
 
-	test("resolves known and fallback error messages", () => {
+	test("resolves a legacy code, and passes already-final text through unchanged", () => {
 		expect(getErrorMessage(AuthErrorCode.INVALID_CREDENTIALS)).toBe(
 			AuthErrorMessages.INVALID_CREDENTIALS,
 		);
-		expect(getErrorMessage("UNKNOWN_ERROR_CODE")).toBe(
-			"An unexpected error occurred. Please try again.",
+		expect(getErrorMessage("Reset token not found. Please check the ID.")).toBe(
+			"Reset token not found. Please check the ID.",
 		);
 	});
 

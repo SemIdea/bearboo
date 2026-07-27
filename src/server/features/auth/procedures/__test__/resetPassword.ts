@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -42,12 +40,10 @@ describe("Reset Token Controller Unitary Testing", () => {
 				password: "NewPassword1234",
 				confirmPassword: "NewPassword1234",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: ResetTokenErrorCodes.TOKEN_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Reset token not found. Please check the ID.",
+		});
 	});
 
 	test("Should throw an error if token is already used", async () => {
@@ -67,12 +63,10 @@ describe("Reset Token Controller Unitary Testing", () => {
 				password: "NewPassword1234",
 				confirmPassword: "NewPassword1234",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: ResetTokenErrorCodes.TOKEN_ALREADY_USED,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "This reset token has already been used.",
+		});
 	});
 
 	test("Should throw an error if token is expired", async () => {
@@ -92,12 +86,10 @@ describe("Reset Token Controller Unitary Testing", () => {
 				password: "NewPassword1234",
 				confirmPassword: "NewPassword1234",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: ResetTokenErrorCodes.TOKEN_EXPIRED,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "This reset token has expired.",
+		});
 	});
 
 	test("Should throw an error if passwords do not match", async () => {

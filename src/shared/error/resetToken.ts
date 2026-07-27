@@ -1,15 +1,18 @@
-enum ResetTokenErrorCodes {
-	TOKEN_NOT_FOUND = "TOKEN_NOT_FOUND",
-	TOKEN_ALREADY_USED = "TOKEN_ALREADY_USED",
-	TOKEN_EXPIRED = "TOKEN_EXPIRED",
-}
+import { defineDomainErrors } from "./registry";
 
-const ResetTokenErrorMessages = {
-	[ResetTokenErrorCodes.TOKEN_NOT_FOUND]:
-		"Reset token not found. Please check the ID.",
-	[ResetTokenErrorCodes.TOKEN_ALREADY_USED]:
-		"This reset token has already been used.",
-	[ResetTokenErrorCodes.TOKEN_EXPIRED]: "This reset token has expired.",
-} as const;
+const ResetTokenErrors = defineDomainErrors("resetToken", {
+	not_found: {
+		httpCode: "NOT_FOUND",
+		message: "Reset token not found. Please check the ID.",
+	},
+	already_used: {
+		httpCode: "FORBIDDEN",
+		message: "This reset token has already been used.",
+	},
+	expired: {
+		httpCode: "FORBIDDEN",
+		message: "This reset token has expired.",
+	},
+});
 
-export { ResetTokenErrorCodes, ResetTokenErrorMessages };
+export { ResetTokenErrors };

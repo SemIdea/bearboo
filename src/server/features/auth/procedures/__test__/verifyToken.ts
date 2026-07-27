@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -38,7 +37,7 @@ describe("Verify Token Controller Unitary Testing", () => {
 	test("Should throw error if token is not found", async () => {
 		await expect(
 			AuthRouter.createCaller(ctx).verify({ token: "nonexistent-token" }),
-		).rejects.toThrow(VerifyTokenErrorCodes.TOKEN_NOT_FOUND);
+		).rejects.toThrow("Token not found. Please check the ID.");
 	});
 
 	test("Should throw error if token is already used", async () => {
@@ -54,7 +53,7 @@ describe("Verify Token Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).verify({ token: verifyToken.token }),
-		).rejects.toThrow(VerifyTokenErrorCodes.TOKEN_ALREADY_USED);
+		).rejects.toThrow("This token has already been used.");
 	});
 
 	test("Should throw error if token is expired", async () => {
@@ -70,6 +69,6 @@ describe("Verify Token Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).verify({ token: expiredToken.token }),
-		).rejects.toThrow(VerifyTokenErrorCodes.TOKEN_EXPIRED);
+		).rejects.toThrow("This token has expired.");
 	});
 });
