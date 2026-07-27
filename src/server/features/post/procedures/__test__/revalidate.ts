@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { revalidateTag } from "next/cache";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
+import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -36,12 +35,10 @@ describe("Revalidate Post Controller Unitary Testing", () => {
 	test("Should throw an error if post does not exist", async () => {
 		await expect(
 			PostRouter.createCaller(ctx).revalidate({ id: "non-existent-post-id" }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+		});
 	});
 
 	test("Should throw an error if user is not the owner of the post", async () => {
@@ -50,11 +47,9 @@ describe("Revalidate Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).revalidate({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: PostErrorMessages[PostErrorCode.POST_UPDATE_FORBIDDEN],
+		});
 	});
 });

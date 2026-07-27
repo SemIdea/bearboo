@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
+import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -77,12 +76,10 @@ describe("Publish Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(authorCtx).publish({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: PostErrorMessages[PostErrorCode.POST_UPDATE_FORBIDDEN],
+		});
 	});
 
 	test("Should throw an error if the post is already published", async () => {
@@ -90,11 +87,9 @@ describe("Publish Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(adminCtx).publish({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "BAD_REQUEST",
-				message: PostErrorCode.POST_INVALID_STATUS_TRANSITION,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+			message: PostErrorMessages[PostErrorCode.POST_INVALID_STATUS_TRANSITION],
+		});
 	});
 });

@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { revalidateTag } from "next/cache";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
+import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -43,12 +42,10 @@ describe("Delete Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).delete({ id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+		});
 	});
 
 	test("Should throw an error if post does not belong to user", async () => {
@@ -57,12 +54,10 @@ describe("Delete Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).delete({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: PostErrorCode.POST_DELETE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: PostErrorMessages[PostErrorCode.POST_DELETE_FORBIDDEN],
+		});
 	});
 
 	test("Should allow an admin to delete a post they do not own", async () => {

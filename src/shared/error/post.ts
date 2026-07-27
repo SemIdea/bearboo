@@ -1,3 +1,5 @@
+import { defineDomainErrors } from "./registry";
+
 enum PostErrorCode {
 	POST_NOT_FOUND = "POST_NOT_FOUND",
 	POST_UPDATE_FORBIDDEN = "POST_UPDATE_FORBIDDEN",
@@ -18,4 +20,23 @@ const PostErrorMessages = {
 		"This action is not valid for the post's current status.",
 } as const;
 
-export { PostErrorCode, PostErrorMessages };
+const PostErrors = defineDomainErrors("post", {
+	not_found: {
+		httpCode: "NOT_FOUND",
+		message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+	},
+	update_forbidden: {
+		httpCode: "FORBIDDEN",
+		message: PostErrorMessages[PostErrorCode.POST_UPDATE_FORBIDDEN],
+	},
+	delete_forbidden: {
+		httpCode: "FORBIDDEN",
+		message: PostErrorMessages[PostErrorCode.POST_DELETE_FORBIDDEN],
+	},
+	invalid_status_transition: {
+		httpCode: "BAD_REQUEST",
+		message: PostErrorMessages[PostErrorCode.POST_INVALID_STATUS_TRANSITION],
+	},
+});
+
+export { PostErrorCode, PostErrorMessages, PostErrors };

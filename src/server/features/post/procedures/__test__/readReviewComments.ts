@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
+import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -53,12 +52,10 @@ describe("Read Review Comments Controller Unitary Testing", () => {
 			PostRouter.createCaller(otherAuthorCtx).readReviewComments({
 				postId: post.id,
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: PostErrorMessages[PostErrorCode.POST_UPDATE_FORBIDDEN],
+		});
 	});
 
 	test("Should throw an error if the post does not exist", async () => {
@@ -66,11 +63,9 @@ describe("Read Review Comments Controller Unitary Testing", () => {
 			PostRouter.createCaller(authorCtx).readReviewComments({
 				postId: "non-existent-id",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+		});
 	});
 });

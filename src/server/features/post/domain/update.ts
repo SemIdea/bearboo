@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
-import { PostErrorCode } from "@/shared/error/post";
+import { DomainError } from "@/shared/error/domainError";
 import { UpdatePostInput } from "../schema";
 import { domain_resolveAvailableSlug } from "./resolveAvailableSlug";
 
@@ -17,20 +16,14 @@ const domain_updatePost = async ({
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: PostErrorCode.POST_NOT_FOUND,
-		});
+		throw new DomainError("post.not_found");
 	}
 
 	const isOwner = post.userId === input.userId;
 	const canEditAny = ctx.helpers.permissions.can(input.role, "post:editAny");
 
 	if (!isOwner && !canEditAny) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-		});
+		throw new DomainError("post.update_forbidden");
 	}
 
 	let slug: string | undefined;
