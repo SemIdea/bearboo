@@ -1,4 +1,4 @@
-import { Errors, type ErrorCode } from "./index";
+import { type ErrorCode, Errors } from "./index";
 
 class DomainError extends Error {
 	public readonly httpCode: (typeof Errors)[ErrorCode]["httpCode"];

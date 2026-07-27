@@ -20,4 +20,4 @@ const Errors = {
 
 type ErrorCode = keyof typeof Errors;
 
-export { Errors, type ErrorCode };
+export { type ErrorCode, Errors };
