@@ -1,12 +1,11 @@
-enum MediaErrorCode {
-	MEDIA_NOT_FOUND = "MEDIA_NOT_FOUND",
-	MEDIA_DELETE_FORBIDDEN = "MEDIA_DELETE_FORBIDDEN",
-}
+import { defineDomainErrors } from "./registry";
 
-const MediaErrorMessages = {
-	[MediaErrorCode.MEDIA_NOT_FOUND]: "Media not found.",
-	[MediaErrorCode.MEDIA_DELETE_FORBIDDEN]:
-		"You are not allowed to delete this media.",
-} as const;
+const MediaErrors = defineDomainErrors("media", {
+	not_found: { httpCode: "NOT_FOUND", message: "Media not found." },
+	delete_forbidden: {
+		httpCode: "FORBIDDEN",
+		message: "You are not allowed to delete this media.",
+	},
+});
 
-export { MediaErrorCode, MediaErrorMessages };
+export { MediaErrors };

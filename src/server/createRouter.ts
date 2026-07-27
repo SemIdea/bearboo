@@ -3,6 +3,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 import { IRole } from "@/server/models/user";
 import { AuthErrorCode } from "@/shared/error/auth";
+import { DomainError } from "@/shared/error/domainError";
 import { SessionErrorCode } from "@/shared/error/session";
 import { Context } from "./createContext";
 import {
@@ -22,6 +23,8 @@ const t = initTRPC.context<Context>().create({
 					error.code === "BAD_REQUEST" && error.cause instanceof ZodError
 						? error.cause.flatten()
 						: null,
+				domainCode:
+					error.cause instanceof DomainError ? error.cause.code : null,
 			},
 		};
 	},

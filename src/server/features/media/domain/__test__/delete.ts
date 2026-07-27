@@ -1,6 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
 import { DomainError } from "@/shared/error/domainError";
-import { MediaErrorCode } from "@/shared/error/media";
 import { createTestContext, TestContext } from "@/test/context";
 import { createFakeGateways } from "@/test/gateways";
 import { FakeMediaStorageGateway } from "@/test/gateways/mediaStorage";
@@ -50,9 +49,7 @@ describe("domain_deleteMedia", () => {
 				ctx,
 				input: { id: media.id, userId: other.id, role: "AUTHOR" },
 			}),
-		).rejects.toMatchObject(
-			new DomainError(MediaErrorCode.MEDIA_DELETE_FORBIDDEN),
-		);
+		).rejects.toMatchObject(new DomainError("media.delete_forbidden"));
 	});
 
 	test("an editor can delete another user's media via bypass", async () => {
@@ -85,7 +82,7 @@ describe("domain_deleteMedia", () => {
 				ctx,
 				input: { id: "does-not-exist", userId: user.id, role: "AUTHOR" },
 			}),
-		).rejects.toMatchObject(new DomainError(MediaErrorCode.MEDIA_NOT_FOUND));
+		).rejects.toMatchObject(new DomainError("media.not_found"));
 	});
 
 	test("keeps the DB record when the storage delete fails", async () => {
