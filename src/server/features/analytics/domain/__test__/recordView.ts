@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { DomainError } from "@/shared/error/domainError";
 import { createTestContext } from "@/test/context";
 import { domain_recordView } from "../recordView";
 
@@ -21,12 +22,12 @@ describe("domain_recordView", () => {
 		const user = await ctx.createNewUser();
 		const post = await ctx.createPost({ userId: user.id, status: "DRAFT" });
 
-		const result = await domain_recordView({
-			ctx,
-			input: { postId: post.id, visitorId: "visitor-1" },
-		});
-
-		expect(result).toBeNull();
+		await expect(
+			domain_recordView({
+				ctx,
+				input: { postId: post.id, visitorId: "visitor-1" },
+			}),
+		).rejects.toMatchObject(new DomainError("post.not_found"));
 	});
 
 	test("does not record a view for an ARCHIVED post", async () => {
@@ -34,12 +35,12 @@ describe("domain_recordView", () => {
 		const user = await ctx.createNewUser();
 		const post = await ctx.createPost({ userId: user.id, status: "ARCHIVED" });
 
-		const result = await domain_recordView({
-			ctx,
-			input: { postId: post.id, visitorId: "visitor-1" },
-		});
-
-		expect(result).toBeNull();
+		await expect(
+			domain_recordView({
+				ctx,
+				input: { postId: post.id, visitorId: "visitor-1" },
+			}),
+		).rejects.toMatchObject(new DomainError("post.not_found"));
 	});
 
 	test("does not recount the same visitor on a second call", async () => {

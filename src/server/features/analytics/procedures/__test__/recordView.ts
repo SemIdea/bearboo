@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { describe, expect, test } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
 import { createTestContext } from "@/test/context";
 import { AnalyticsRouter } from "../../index";
 
@@ -36,12 +34,7 @@ describe("Analytics recordView Controller Unitary Testing", () => {
 
 		await expect(
 			AnalyticsRouter.createCaller(ctx).recordView({ postId: "missing-post" }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({ code: "NOT_FOUND", message: "Post not found." });
 	});
 
 	test("Should classify the Referer/User-Agent headers and forward them to the domain layer", async () => {
