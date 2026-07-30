@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -50,7 +49,7 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).readBySlug({ slug: "does-not-exist" }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 
@@ -65,7 +64,7 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 
@@ -80,7 +79,7 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 
@@ -131,7 +130,7 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 			PostRouter.createCaller(otherAuthorCtx).readBySlug({ slug: post.slug }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 
@@ -161,7 +160,7 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 });

@@ -1,24 +1,8 @@
-import { AuthErrorMessages } from "@/shared/error/auth";
-import { PostErrorMessages } from "@/shared/error/post";
 import { ValidationErrorMessages } from "@/shared/error/validation";
 
-type AppErrorCode =
-	| keyof typeof AuthErrorMessages
-	| keyof typeof PostErrorMessages
-	| keyof typeof ValidationErrorMessages;
+type AppErrorCode = keyof typeof ValidationErrorMessages;
 
-// Two eras of error.message coexist during the ErrorRegistry migration
-// (ADR-0017): domains not yet migrated still send the bare legacy code
-// (looked up below); migrated domains send the final human text directly
-// (already correct, nothing to look up — returned as-is).
-const getErrorMessage = (code: string | AppErrorCode): string => {
-	const allErrorMessages = {
-		...AuthErrorMessages,
-		...PostErrorMessages,
-		...ValidationErrorMessages,
-	};
-
-	return allErrorMessages[code as keyof typeof allErrorMessages] ?? code;
-};
+const getErrorMessage = (code: string | AppErrorCode): string =>
+	ValidationErrorMessages[code as keyof typeof ValidationErrorMessages] ?? code;
 
 export { getErrorMessage };

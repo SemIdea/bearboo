@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -30,7 +29,7 @@ describe("Submit For Review Post Controller Unitary Testing", () => {
 			}),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 
@@ -45,7 +44,7 @@ describe("Submit For Review Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).submitForReview({ id: post.id }),
 		).rejects.toMatchObject({
 			code: "FORBIDDEN",
-			message: PostErrorMessages[PostErrorCode.POST_UPDATE_FORBIDDEN],
+			message: "You are not allowed to update this post.",
 		});
 	});
 
@@ -56,7 +55,7 @@ describe("Submit For Review Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).submitForReview({ id: post.id }),
 		).rejects.toMatchObject({
 			code: "BAD_REQUEST",
-			message: PostErrorMessages[PostErrorCode.POST_INVALID_STATUS_TRANSITION],
+			message: "This action is not valid for the post's current status.",
 		});
 	});
 });

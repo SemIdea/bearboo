@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { assertRateLimit, t } from "@/server/createRouter";
 import { DomainError } from "@/shared/error/domainError";
-import { SessionErrorCode } from "@/shared/error/session";
 import { REFRESH_RATE_LIMIT, SESSION_MAX_LIFETIME_MS } from "../constants";
 import { domain_readSessionByRefreshToken } from "../domain/readSessionByRefreshToken";
 import { domain_refreshSession } from "../domain/refreshSession";
@@ -13,9 +12,11 @@ const procedure_refreshSession = t.procedure
 		const refreshToken = ctx.refreshToken;
 
 		if (!refreshToken) {
+			const error = new DomainError("session.missing_token");
 			throw new TRPCError({
-				code: "UNAUTHORIZED",
-				message: SessionErrorCode.MISSING_TOKEN,
+				code: error.httpCode,
+				message: error.message,
+				cause: error,
 			});
 		}
 

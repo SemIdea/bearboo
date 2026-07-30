@@ -1,6 +1,5 @@
 import { revalidateTag } from "next/cache";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -44,7 +43,7 @@ describe("Delete Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).delete({ id }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 
@@ -56,7 +55,7 @@ describe("Delete Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).delete({ id: post.id }),
 		).rejects.toMatchObject({
 			code: "FORBIDDEN",
-			message: PostErrorMessages[PostErrorCode.POST_DELETE_FORBIDDEN],
+			message: "You are not allowed to delete this post.",
 		});
 	});
 

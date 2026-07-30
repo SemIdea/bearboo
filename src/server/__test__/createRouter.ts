@@ -1,6 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { AuthErrorCode } from "@/shared/error/auth";
-import { SessionErrorCode } from "@/shared/error/session";
 import { createAuthenticatedContext, createTestContext } from "@/test/context";
 import {
 	protectedProcedure,
@@ -37,7 +35,7 @@ describe("TRPC procedure guards", () => {
 			testRouter.createCaller(ctx).protectedValue(),
 		).rejects.toMatchObject({
 			code: "UNAUTHORIZED",
-			message: AuthErrorCode.USER_NOT_LOGGED_IN,
+			message: "You are not logged in. Please log in to continue.",
 		});
 	});
 
@@ -51,7 +49,7 @@ describe("TRPC procedure guards", () => {
 			testRouter.createCaller(ctx).publicValue(),
 		).rejects.toMatchObject({
 			code: "UNAUTHORIZED",
-			message: SessionErrorCode.SESSION_EXPIRED,
+			message: "Your session has expired. Please log in again.",
 		});
 	});
 
@@ -66,7 +64,7 @@ describe("TRPC procedure guards", () => {
 			testRouter.createCaller(ctx).publicValue(),
 		).rejects.toMatchObject({
 			code: "UNAUTHORIZED",
-			message: SessionErrorCode.SESSION_EXPIRED,
+			message: "Your session has expired. Please log in again.",
 		});
 	});
 
@@ -86,7 +84,7 @@ describe("TRPC procedure guards", () => {
 			testRouter.createCaller(ctx).verifiedValue(),
 		).rejects.toMatchObject({
 			code: "FORBIDDEN",
-			message: AuthErrorCode.USER_NOT_VERIFIED,
+			message: "Your account is not verified. Please check your email.",
 		});
 	});
 
@@ -105,7 +103,7 @@ describe("TRPC procedure guards", () => {
 			testRouter.createCaller(ctx).adminValue(),
 		).rejects.toMatchObject({
 			code: "FORBIDDEN",
-			message: AuthErrorCode.INSUFFICIENT_ROLE,
+			message: "You do not have permission to perform this action.",
 		});
 	});
 

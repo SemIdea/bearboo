@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { describe, expect, test } from "vitest";
-import { AuthErrorCode } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	createTestContext,
@@ -63,11 +61,9 @@ describe("Delete Media Controller Unitary Testing", () => {
 
 		await expect(
 			MediaRouter.createCaller(anonymousCtx).delete({ id: "any" }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "UNAUTHORIZED",
-				message: AuthErrorCode.USER_NOT_LOGGED_IN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: "You are not logged in. Please log in to continue.",
+		});
 	});
 });

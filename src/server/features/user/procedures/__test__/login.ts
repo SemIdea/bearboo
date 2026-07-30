@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { LOGIN_RATE_LIMIT } from "@/server/features/auth/constants";
-import { AuthErrorCode, AuthErrorMessages } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -45,7 +44,7 @@ describe("Login User Controller Unitary Testing", () => {
 		const uuid = ctx.helpers.uid.generate();
 		const expectedError = {
 			code: "UNAUTHORIZED",
-			message: AuthErrorMessages[AuthErrorCode.INVALID_CREDENTIALS],
+			message: "Invalid email or password. Please try again.",
 		};
 
 		await expect(

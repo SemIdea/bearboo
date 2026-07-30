@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { AuthErrorCode } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -46,12 +44,10 @@ describe("Update User Role Controller Unitary Testing", () => {
 				userId: otherUser.id,
 				role: "ADMIN",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: AuthErrorCode.INSUFFICIENT_ROLE,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You do not have permission to perform this action.",
+		});
 	});
 
 	test("Should reject an author trying to change another user's role", async () => {
@@ -63,11 +59,9 @@ describe("Update User Role Controller Unitary Testing", () => {
 				userId: otherUser.id,
 				role: "ADMIN",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: AuthErrorCode.INSUFFICIENT_ROLE,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You do not have permission to perform this action.",
+		});
 	});
 });

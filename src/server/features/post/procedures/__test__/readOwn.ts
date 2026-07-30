@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { AuthErrorCode } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	createTestContext,
@@ -100,11 +98,9 @@ describe("Read Own Posts Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(anonymousCtx).readOwn({}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "UNAUTHORIZED",
-				message: AuthErrorCode.USER_NOT_LOGGED_IN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: "You are not logged in. Please log in to continue.",
+		});
 	});
 });

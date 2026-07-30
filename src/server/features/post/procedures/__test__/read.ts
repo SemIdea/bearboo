@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -32,7 +31,7 @@ describe("Read Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).read({ id }),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 });

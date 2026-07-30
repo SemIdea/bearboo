@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -78,7 +77,7 @@ describe("Publish Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(authorCtx).publish({ id: post.id }),
 		).rejects.toMatchObject({
 			code: "FORBIDDEN",
-			message: PostErrorMessages[PostErrorCode.POST_UPDATE_FORBIDDEN],
+			message: "You are not allowed to update this post.",
 		});
 	});
 
@@ -89,7 +88,7 @@ describe("Publish Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(adminCtx).publish({ id: post.id }),
 		).rejects.toMatchObject({
 			code: "BAD_REQUEST",
-			message: PostErrorMessages[PostErrorCode.POST_INVALID_STATUS_TRANSITION],
+			message: "This action is not valid for the post's current status.",
 		});
 	});
 });

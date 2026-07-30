@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { featureFlags } from "@/config/featureFlags";
-import { AuthErrorCode, AuthErrorMessages } from "@/shared/error/auth";
+import { ValidationErrorCode } from "@/shared/error/validation";
 import { getBoolEnv } from "../env/getBoolEnv";
 import { getIntEnv } from "../env/getIntEnv";
 import { getStrEnv } from "../env/getStrEnv";
@@ -95,9 +95,9 @@ describe("backend support helpers", () => {
 		);
 	});
 
-	test("resolves a legacy code, and passes already-final text through unchanged", () => {
-		expect(getErrorMessage(AuthErrorCode.INVALID_CREDENTIALS)).toBe(
-			AuthErrorMessages.INVALID_CREDENTIALS,
+	test("resolves a validation code, and passes already-final text through unchanged", () => {
+		expect(getErrorMessage(ValidationErrorCode.FIELD_REQUIRED)).toBe(
+			"This field is required.",
 		);
 		expect(getErrorMessage("Reset token not found. Please check the ID.")).toBe(
 			"Reset token not found. Please check the ID.",

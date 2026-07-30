@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode, PostErrorMessages } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -123,7 +122,7 @@ describe("Update Post Controller Unitary Testing", () => {
 			}),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: PostErrorMessages[PostErrorCode.POST_NOT_FOUND],
+			message: "Post not found.",
 		});
 	});
 
@@ -139,7 +138,7 @@ describe("Update Post Controller Unitary Testing", () => {
 			}),
 		).rejects.toMatchObject({
 			code: "FORBIDDEN",
-			message: PostErrorMessages[PostErrorCode.POST_UPDATE_FORBIDDEN],
+			message: "You are not allowed to update this post.",
 		});
 	});
 

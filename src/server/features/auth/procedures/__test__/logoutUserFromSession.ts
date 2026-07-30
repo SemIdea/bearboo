@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { SessionErrorCode, SessionErrorMessages } from "@/shared/error/session";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -55,7 +54,7 @@ describe("Logout Session Controller Unitary Testing", () => {
 			AuthRouter.createCaller(ctx).session.logout(),
 		).rejects.toMatchObject({
 			code: "NOT_FOUND",
-			message: SessionErrorMessages[SessionErrorCode.SESSION_NOT_FOUND],
+			message: "Session not found.",
 		});
 	});
 });

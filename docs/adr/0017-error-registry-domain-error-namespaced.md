@@ -108,7 +108,7 @@ Este ADR **não resolve** a violação da regra dura 15 nos ~23-24 arquivos `dom
 
 **Fica difícil / gotcha:** dois domínios reivindicando o mesmo namespace só é pego em runtime, na primeira vez que ambos os arquivos forem importados (module load, não compile-time) — se um domínio nunca for importado por engano, a checagem de duplicação não dispara pra ele (mitigado: `index.ts` importa todos os domínios sempre, então isso só ocorreria se um arquivo de feature novo esquecesse de ser adicionado no agregador — nesse caso o erro dessa feature simplesmente não aparece no `ErrorCode` union, um sintoma visível na hora de tentar usá-lo).
 
-**Débito aceito:** os ~23-24 arquivos `domain/` que já lançam `TRPCError` direto continuam violando a regra 15 até tocados individualmente — fora do escopo desta migração.
+**Débito aceito (fechado):** os ~23-24 arquivos `domain/` que lançavam `TRPCError` direto migraram em `022-error-registry` (2026-07-27). O resto do débito — `auth`/`session`/`post` mantendo o enum legado lado a lado por terem consumidor fora da camada de domínio (`createRouter.ts`, `caller.ts`, `sessionRefreshLink.ts`, `recordView.ts`) — fechou em 2026-07-30: todos os pontos migraram pra sintetizar `DomainError` no boundary, e os 3 catálogos fizeram cutover total do enum antigo. Não há mais débito rastreado desta ADR.
 
 ## Referências
 
