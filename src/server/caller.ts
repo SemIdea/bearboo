@@ -1,5 +1,6 @@
 import { cookies, headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
+import { logBoundaryError } from "@/shared/error/boundaryLog";
 import { DomainError } from "@/shared/error/domainError";
 import { createTRPCContext, IProtectedAPIContextDTO } from "./createContext";
 import { appRouter } from "./routers/app.routes";
@@ -28,6 +29,8 @@ const createDynamicCaller = async () => {
 
 	const caller = appRouter.createCaller(callerCtx, {
 		onError: ({ error }) => {
+			logBoundaryError(error, { path: pathName });
+
 			if (error.cause instanceof DomainError) {
 				switch (error.cause.code) {
 					case "auth.user_not_logged_in":
@@ -37,7 +40,6 @@ const createDynamicCaller = async () => {
 						redirect(`/auth/refresh?redirect=${pathName}`);
 						break;
 					default:
-						console.error("Unexpected error:", error);
 						throw error;
 				}
 			}

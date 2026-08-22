@@ -4,6 +4,7 @@ const CommentErrors = defineDomainErrors("comment", {
 	not_found: {
 		httpCode: "NOT_FOUND",
 		message: "Comment not found. Please check the ID.",
+		level: "info",
 	},
 	delete_forbidden: {
 		httpCode: "FORBIDDEN",

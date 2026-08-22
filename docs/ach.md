@@ -253,6 +253,8 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 
 `src/lib/error.ts` (`getErrorMessage`) ficou só com o lookup de `ValidationErrorMessages` (códigos de validação client-only, de `utils/validation.ts` — nunca tocam o server) com pass-through pro resto (`?? code`). Não sobra mais nenhum catálogo de domínio (`Auth`/`Post`/`Session`) nessa função — todo `error.message` vindo do server já é texto final, sempre.
 
+**Metadata + convenção bug/recuperável (feature 023, ADR-0018):** o `ErrorEntry` do catálogo carrega, além de `httpCode`/`message`, os opcionais `retryable?: boolean` e `level?: ErrorLevel` (`fatal|error|warn|info`); o `DomainError` os resolve com defaults `retryable=false`/`level=warn`. O boundary distingue **recuperável** (é/tem-causa `DomainError`) de **bug** (qualquer outro throw): `src/shared/error/boundaryLog.ts` (`classifyBoundaryError` puro + `logBoundaryError`) é o ponto único; ativado no `onError` do fetch adapter (`app/api/trpc/[trpc]/route.ts`) e no `src/server/caller.ts`. Bug loga `error` com stack; recuperável loga no seu `level`. O `errorFormatter` continua puro (só shaping — `domainCode`/`zodError`); logging vive no `onError`. Formalizado na regra dura 33. `retryable`/`level` são **server-side only** hoje (não expostos ao cliente — YAGNI, sem consumidor). `Result<T,E>` foi avaliado e rejeitado (ADR-0018 § alternativas).
+
 #### UI primitives
 
 `src/components/ui/` — componentes Radix + `class-variance-authority` (estilo shadcn). Sem fetch direto; dados via tRPC + React Query (`src/context/trpc/`).
