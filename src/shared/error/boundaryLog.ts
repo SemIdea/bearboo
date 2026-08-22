@@ -70,4 +70,9 @@ const logBoundaryError = (
 	}
 };
 
-export { type BoundaryClassification, classifyBoundaryError, logBoundaryError };
+export {
+	type BoundaryClassification,
+	classifyBoundaryError,
+	findDomainError,
+	logBoundaryError,
+};
