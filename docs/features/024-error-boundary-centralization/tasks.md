@@ -17,8 +17,8 @@
 - [X] T006 — GREEN: `src/server/http/withDomainErrors.ts` (inspeciona `result.ok`, remapeia via tabela + `resolveErrorEntry`) + `baseProcedure` em `src/server/createRouter.ts`; exporta `findDomainError` de `boundaryLog.ts` (US-017)
 - [X] T007 — Os 6 guards de `createRouter.ts` passam a `throw new DomainError(...)` direto (session_expired, rate limit, not_logged_in, not_verified, insufficient_role) (US-017)
 - [X] T008 — `refreshSession.ts` migra de `t.procedure` pra `baseProcedure` (mantendo o bypass intencional do guard de sessão) (US-017)
-- [ ] T009 [P] — Remove o try/catch de tradução das 26 procedures (US-017)
-- [ ] T010 — `classifyBoundaryError` resolve metadata via `resolveErrorEntry` em vez de ler campos da instância; assinatura pública inalterada (US-017)
+- [X] T009 [P] — Remove o try/catch de tradução das 26 procedures (US-017)
+- [X] T010 — `classifyBoundaryError` resolve metadata via `resolveErrorEntry` em vez de ler campos da instância; assinatura pública inalterada (US-017)
 
 ## Phase 3 — Inversão (transporte sai do domínio)
 
