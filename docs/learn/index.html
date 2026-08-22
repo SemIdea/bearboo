@@ -88,7 +88,7 @@
 </head>
 <body>
 <l-doc>
-<l-head badge="Acervo · 10 resumos" title="Error models — do ErrorRegistry ao error tracer" authors="Digests moldados ao bearboo (pilar 5-a: cadeia causal in-request)" src="Gerados via /learn:digest — cada um conferido contra a fonte"></l-head>
+<l-head badge="Acervo · 19 resumos" title="Error models &amp; boundary design — o acervo do bearboo" authors="Digests moldados ao bearboo (pilar 5-a: cadeia causal · e a decisão DSL vs. helper de boundary)" src="Gerados via /learn:digest — cada um conferido contra a fonte"></l-head>
 
 <l-note kind="info" title="Como ler">Cada resumo tem: Conceito → Como funciona → Dados concretos → 🎯 Aplicar no bearboo → Cuidado → Recall (cards com resposta colapsável pra você se testar) → TL;DR. Ordem sugerida de leitura abaixo — mas cada um se sustenta sozinho.</l-note>
 
@@ -112,10 +112,32 @@
 <p>Se ler os 10 e quiser guardar <strong>uma</strong> linha: seu <code>ErrorRegistry</code> já resolveu "erro é dado tipado no boundary" (docs 1-3, 5, 8). O <strong>error tracer (5-a)</strong> que você quer é adicionar ao <code>DomainError</code> a <em>cadeia</em> — o campo <code>cause</code> tipado, preservado no boundary e navegável (docs 2, 9) — mais dois campos de metadata, <code>severity</code> e <code>retryable</code> (docs 2, 6). E a boa notícia dos docs 9-10: num monólito, "root cause" é o <code>cause</code> mais profundo — de graça, sem o ML que o mundo distribuído precisa.</p>
 </l-sec>
 
+<l-sec n="C" title="Coleção 2 — DSL vs. helper de boundary (a decisão do recordView)">
+<p>Batch motivado pela pergunta: "o <code>try/catch (DomainError → TRPCError)</code> repetido em 32 lugares deveria virar uma DSL?". Os 9 resumos respondem por três eixos. Veredito costurado: <strong>não é DSL — é um helper de boundary (um adapter/anti-corruption layer in-process), e a Rule of Three já gritou pela extração da tradução (não de um framework).</strong></p>
+<p><em>Eixo DSL — o que é / quando criar:</em></p>
+<ol>
+<li><strong><a href="resumo-11-mernik-when-how-dsl.html">When and How to Develop DSLs</a></strong> (Mernik et al.) — o survey da decisão; biblioteca já é DSL fraca, e o seu caso passa 0 dos 3 testes. <em>Comece aqui.</em></li>
+<li><strong><a href="resumo-12-hudak-embedded-dsl.html">Modular DSLs (embedding)</a></strong> (Hudak) — o teste da álgebra ausente: sem composição, é só uma função de ordem superior.</li>
+<li><strong><a href="resumo-13-fowler-dsl-qa.html">DSL Q&amp;A</a></strong> (Fowler) — interna vs. externa; fluent interface. <code>runDomain(fn)</code> não é DSL, é API.</li>
+</ol>
+<p><em>Eixo Boundary — o que é / por que a tradução mora nele:</em></p>
+<ol start="4">
+<li><strong><a href="resumo-14-cockburn-hexagonal.html">Hexagonal Architecture</a></strong> (Cockburn) — o boundary tRPC é um adapter; a tradução é a responsabilidade dele.</li>
+<li><strong><a href="resumo-15-evans-anti-corruption-layer.html">Anti-Corruption Layer</a></strong> (Evans/DDD) — o nome exato do seu boundary de erro; só tradução, nada de regra de negócio.</li>
+<li><strong><a href="resumo-16-bernhardt-boundaries.html">Boundaries (Functional Core, Imperative Shell)</a></strong> (Bernhardt) — o erro é o valor na fronteira; log/tradução são shell.</li>
+<li><strong><a href="resumo-17-king-parse-dont-validate.html">Parse, Don't Validate</a></strong> (King) — <code>classifyBoundaryError</code> é um parser; as 32 cópias são shotgun parsing.</li>
+</ol>
+<p><em>Eixo Abstração — helper vs. camada (o discriminador):</em></p>
+<ol start="8">
+<li><strong><a href="resumo-18-metz-wrong-abstraction.html">The Wrong Abstraction</a></strong> (Metz) — o teste que aprova <code>runDomain</code> e reprova o framework <code>layers()</code>.</li>
+<li><strong><a href="resumo-19-dodds-aha-programming.html">AHA Programming</a></strong> (Dodds) — optimize for change first: extrair a tradução muda 32→1; o framework é YAGNI.</li>
+</ol>
+</l-sec>
+
 <l-tldr>
-<li>10 resumos, ordem de leitura acima. Cada um conecta a fonte ao bearboo na seção 🎯.</li>
-<li>Arco 1-5: o debate de error handling e onde seu desenho cai. Docs 6-8: taxonomia + o futuro (effects). Docs 9-10: o tracer.</li>
-<li>Próximo passo concreto que emerge: <code>DomainError</code> com <code>cause</code> tipado + <code>severity</code>/<code>retryable</code>, cadeia serializada no boundary com um <code>requestId</code> do <code>ctx</code>.</li>
+<li><strong>Coleção 1 (docs 1-10):</strong> error models — o debate throw vs. Result, onde o ErrorRegistry cai, e o blueprint do error tracer (5-a).</li>
+<li><strong>Coleção 2 (docs 11-19):</strong> DSL vs. helper de boundary — veredito: é um <em>adapter/anti-corruption layer in-process</em>, não uma DSL; extraia a tradução (32→1), não um framework.</li>
+<li>Cada resumo conecta a fonte ao bearboo na seção 🎯 e tem cards de recall pra auto-teste.</li>
 </l-tldr>
 </l-doc>
 </body>
