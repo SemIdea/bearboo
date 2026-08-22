@@ -6,30 +6,18 @@
 
 **Quem joga:** funções `domain_*` (regra de negócio pura).
 
-**Como representa:**
+**Como representa:** `throw new DomainError("<domain>.<code>")` — código namespaced do `ErrorRegistry`.
 
 ```ts
-// Opção A: Result<T, E> (preferido pra controle de fluxo limpo)
-type Result<T, E> =
-  | { ok: true; value: T }
-  | { ok: false; code: E };
-
-const result = await domain_createUserAuth({ ctx, input });
-if (!result.ok) {
-  switch (result.code) {
-    case "EMAIL_TAKEN": ...
-    case "WEAK_PASSWORD": ...
-  }
-}
-
-// Opção B: throw DomainError quando o caller raramente trata cada caso
-class DomainError<C extends string> extends Error {
-  constructor(public readonly code: C, message?: string) { super(message); }
-}
-throw new DomainError("MAGIC_LINK_INVALID");
+// O domain nomeia o que aconteceu. Nada mais.
+throw new DomainError("post.not_found");
 ```
 
-**Code é literal `as const`** — exhaustive switch garante cobertura no caller. Sem code literal, refactor quebra silenciosamente.
+O `DomainError` carrega **só o código** (ADR-0019). Mensagem, `retryable` e `level` são resolvidos por quem consome, via `resolveErrorEntry(code)`; o código de transporte, via `domainErrorTransport` — que vive em `src/server/`, não no catálogo.
+
+**Code é literal derivado do registry** (`ErrorCode = keyof typeof Errors`) — typo quebra `tsc`, não o runtime.
+
+> **`Result<T, E>` foi avaliado e rejeitado** (ADR-0017 § alternativas, reafirmado em ADR-0018): o call depth do projeto é raso (domain → 1 procedure) e as procedures são pipelines lineares, então `throw` + tradução única no boundary já é o ótimo; `Result` só adicionaria cerimônia sem operador `?` nem do-notation. Esta rubrica apresentava `Result` como opção preferida até 2026-08-22 — não é mais.
 
 ### Procedure error — boundary de transport
 
@@ -37,20 +25,18 @@ throw new DomainError("MAGIC_LINK_INVALID");
 
 **Como representa:** `TRPCError` (ou equivalente do framework — `HTTPException` no FastAPI, `BadRequestException` no Nest).
 
-**Boundary é unidirecional:** procedure CONHECE Domain, mapeia code → status HTTP. Domain NÃO importa `TRPCError` (regra dura 15).
+**Boundary é unidirecional:** o transporte CONHECE o domínio e mapeia código → código de transporte. O domínio não importa `TRPCError` (regra 15) e não declara código de transporte (regra 35).
+
+**A procedure não escreve tradução nenhuma.** Ela vive num middleware montado no `baseProcedure` (ADR-0019):
 
 ```ts
-// procedure faz a tradução
-const result = await domain_createUserAuth({ ctx, input });
-if (!result.ok) {
-  if (result.code === "EMAIL_TAKEN") {
-    throw new TRPCError({ code: "CONFLICT", message: "Email já cadastrado" });
-  }
-  if (result.code === "WEAK_PASSWORD") {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Senha fraca" });
-  }
-}
+// a procedure inteira — sem try/catch, sem switch
+.mutation(async ({ input, ctx }) =>
+  domain_createComment({ ctx, input: { ...input, userId: ctx.user.id } }),
+);
 ```
+
+Se você está escrevendo `if (error instanceof DomainError) throw new TRPCError(...)` numa procedure, pare: isso é a duplicação que a feature 024 removeu de 32 lugares.
 
 ### Infra error — falha de recurso externo
 
@@ -72,8 +58,9 @@ if (!result.ok) {
 
 ```
 Onde estou?
-├── domain function → Result<T, E> com code literal as const
-├── procedure        → mapeia code Domain → TRPCError; deixa Infra subir
+├── domain function → throw new DomainError("<domain>.<code>"); nada de transporte
+├── procedure        → não traduz nada; deixa subir (o middleware traduz)
+├── boundary novo    → resolve via resolveErrorEntry + sua própria tabela de transporte
 ├── task             → leva idempotência; deixa Infra subir (retry resolve)
-└── lib pura         → Result<T, E> ou DomainError com code discriminante
+└── lib pura         → DomainError com code do registry
 ```

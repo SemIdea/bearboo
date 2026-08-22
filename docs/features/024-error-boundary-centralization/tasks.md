@@ -28,9 +28,9 @@
 
 ## Phase 4 — Reconciliação (8.5)
 
-- [ ] T014 — `docs/adr/0019-*.md`: centralização no middleware (substitui ADR-0016, estende 0017/0018), inversão da dependência de transporte, `errorFormatter` rejeitado com a evidência do `createCaller` (RF-14)
-- [ ] T015 — Reescreve o gatilho da regra dura 33 (`afm.md § 3`) — ficaria vacuous com zero `TRPCError` nas procedures; adiciona regra dura nova proibindo `@trpc/*` em `src/shared/**` (RF-14)
-- [ ] T016 — `docs/ach.md § 3.2` (contrato de erro), US-017 em `ust.md` (critério menciona procedure traduzindo — atualizar), `docs/rubrics/error-classification.md` (ainda apresenta `Result<T,E>` como preferido, contradiz ADR-0018), `spec.md` status → done (RF-14)
+- [X] T014 — `docs/adr/0019-*.md`: centralização no middleware (substitui ADR-0016, estende 0017/0018), inversão da dependência de transporte, `errorFormatter` rejeitado com a evidência do `createCaller` (RF-14)
+- [X] T015 — Reescreve o gatilho da regra dura 33 (`afm.md § 3`) — ficaria vacuous com zero `TRPCError` nas procedures; adiciona regra dura nova proibindo `@trpc/*` em `src/shared/**` (RF-14)
+- [X] T016 — `docs/ach.md § 3.2` (contrato de erro), US-017 em `ust.md` (critério menciona procedure traduzindo — atualizar), `docs/rubrics/error-classification.md` (ainda apresenta `Result<T,E>` como preferido, contradiz ADR-0018), `spec.md` status → done (RF-14)
 
 ---
 
