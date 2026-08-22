@@ -43,3 +43,5 @@ public/uploads/*
 !public/uploads/.gitkeep
 
 todo.md
+.env*
+!.env.example
