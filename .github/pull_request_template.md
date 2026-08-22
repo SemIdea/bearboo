@@ -1,31 +1,34 @@
-## Contexto
+<!-- Write the PR in English, title included (docs/afm.md rule 34).
+     The title follows Conventional Commits: type(scope): short description
+     (e.g. feat(error): add retryable metadata). -->
 
-<!-- Qual fase do roadmap / RF / US isso atende, e por que essa mudança existe.
-     Se existe docs/features/NNN-slug/, linka aqui (spec.md tem o problema, plan.md tem as decisões). -->
+## What changed and why
 
-## O que mudou
+<!-- The goal of the change, and why it is needed. Link docs/features/NNN-slug/
+     if it exists (spec.md has the problem, plan.md has the decisions). -->
 
-<!-- Lista objetiva do que foi adicionado/alterado/removido. Área por área, não arquivo por arquivo
-     (o diff já mostra os arquivos) — o que muda de comportamento observável. -->
+## How it works
 
-## Decisões de design
+<!-- What a reviewer needs to follow the diff: approach, trade-offs, anything
+     non-obvious. Area by area, not file by file — the diff already shows files. -->
 
-<!-- Só o que NÃO é óbvio olhando o diff: trade-offs, alternativas rejeitadas e por quê,
-     desvios de padrão existente. Se não houve decisão não-trivial, escreva "nenhuma". -->
+## What to review closely
 
-## Como testar
+<!-- The feedback you want and where. Deviations from the rules in docs/afm.md
+     go here — name them, do not bury them. -->
 
-<!-- Passos pra revisar rodando localmente: comandos, URLs, dados/fixtures necessários,
-     o que observar pra confirmar que funciona. -->
+## Verification
 
-## Checklist
+<!-- What you checked that a reviewer cannot see from the diff: manual steps,
+     edge cases, screenshots for UI changes. The DoD ritual (docs/afm.md § 6)
+     is `npx tsc --noEmit` + `yarn test` (+ `yarn build` if it touches routes).
+     Also confirm no secret leaked:
+     git diff develop... | grep -nE "(token|secret|api[_-]?key|password|bearer)\s*[:=]\s*['\"][^'\"]+"  # empty -->
 
-- [ ] `npx tsc --noEmit` limpo
-- [ ] `yarn test` verde
-- [ ] `yarn build` verde (se a mudança toca rota/build)
-- [ ] `/docs` atualizado se a mudança é load-bearing (regra dura, ADR, gotcha, spec/plan/tasks)
-- [ ] Sem segredo no diff (`git diff main... | grep -nE "(token|secret|api[_-]?key|password|bearer)\s*[:=]\s*['\"][^'\"]+"` vazio)
+## Out of scope / known debt
 
-## Fora de escopo / débito conhecido
+<!-- What was deliberately left out this round, and why. -->
 
-<!-- O que foi deliberadamente deixado de fora nesta rodada, e por quê. -->
+## Refs
+
+<!-- Closes #N — plus US-NNN, RF-NN, docs/features/NNN-slug/ -->
