@@ -1,6 +1,13 @@
 import type { TRPC_ERROR_CODE_KEY } from "@trpc/server";
 
-type ErrorEntry = { httpCode: TRPC_ERROR_CODE_KEY; message: string };
+type ErrorLevel = "fatal" | "error" | "warn" | "info";
+
+type ErrorEntry = {
+	httpCode: TRPC_ERROR_CODE_KEY;
+	message: string;
+	retryable?: boolean;
+	level?: ErrorLevel;
+};
 
 const registeredDomains = new Set<string>();
 
@@ -15,7 +22,10 @@ function defineDomainErrors<
 
 	return Object.fromEntries(
 		Object.entries(errors).map(([code, entry]) => [`${domain}.${code}`, entry]),
-	) as { [K in keyof E as `${D}.${string & K}`]: E[K] };
+	) as {
+		[K in keyof E as `${D}.${string & K}`]: E[K] &
+			Partial<Pick<ErrorEntry, "retryable" | "level">>;
+	};
 }
 
-export { defineDomainErrors, type ErrorEntry };
+export { defineDomainErrors, type ErrorEntry, type ErrorLevel };
