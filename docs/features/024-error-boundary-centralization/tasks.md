@@ -6,10 +6,10 @@
 
 ## Phase 1 — Foundation (tabela de transporte + lookup do registry)
 
-- [ ] T001 — RED: teste de paridade `src/server/http/__test__/domainErrorTransport.ts` — a tabela cobre exatamente `ErrorCode` e cada entrada bate com o `httpCode` do catálogo atual (rede de transcrição, deletado em T012) (US-017)
-- [ ] T002 — GREEN: `src/server/http/domainErrorTransport.ts` — `Record<ErrorCode, TRPC_ERROR_CODE_KEY>` com as 29 entradas transcritas do catálogo (US-017)
-- [ ] T003 — RED: teste `src/shared/error/__test__/registry.ts` — `resolveErrorEntry(code)` devolve `message`/`retryable`/`level` já normalizados (defaults `false`/`"warn"` aplicados no lookup, não no consumidor) (US-017)
-- [ ] T004 — GREEN: `src/shared/error/registry.ts` — `resolveErrorEntry` + tipo de saída com campos obrigatórios (US-017)
+- [X] T001 — RED: teste de paridade `src/server/http/__test__/domainErrorTransport.ts` — a tabela cobre exatamente `ErrorCode` e cada entrada bate com o `httpCode` do catálogo atual (rede de transcrição, deletado em T012) (US-017)
+- [X] T002 — GREEN: `src/server/http/domainErrorTransport.ts` — `Record<ErrorCode, TRPC_ERROR_CODE_KEY>` com as 29 entradas transcritas do catálogo (US-017)
+- [X] T003 — RED: teste `src/shared/error/__test__/registry.ts` — `resolveErrorEntry(code)` devolve `message`/`retryable`/`level` já normalizados (defaults `false`/`"warn"` aplicados no lookup, não no consumidor) (US-017)
+- [X] T004 — GREEN: `src/shared/error/registry.ts` — `resolveErrorEntry` + tipo de saída com campos obrigatórios (US-017)
 
 ## Phase 2 — Boundary (centralização da tradução)
 

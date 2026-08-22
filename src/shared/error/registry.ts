@@ -9,6 +9,15 @@ type ErrorEntry = {
 	level?: ErrorLevel;
 };
 
+// Metadata as every consumer needs it: optional fields already collapsed onto
+// their defaults. Resolving here is what keeps `?? false` / `?? "warn"` from
+// reappearing at each call site.
+type ResolvedErrorEntry = {
+	message: string;
+	retryable: boolean;
+	level: ErrorLevel;
+};
+
 const registeredDomains = new Set<string>();
 
 function defineDomainErrors<
@@ -28,4 +37,9 @@ function defineDomainErrors<
 	};
 }
 
-export { defineDomainErrors, type ErrorEntry, type ErrorLevel };
+export {
+	defineDomainErrors,
+	type ErrorEntry,
+	type ErrorLevel,
+	type ResolvedErrorEntry,
+};
