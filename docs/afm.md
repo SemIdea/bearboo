@@ -265,10 +265,13 @@ Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na en
 
 **Atualizado em 2026-07-06 (ADR-0011)**: os repositórios fake escritos à mão (`src/test/repositories/`) foram substituídos por **`prisma-mock`** — client fake gerado do `schema.prisma`, plugado no seam do driver via `vi.mock` em `src/test/setup.ts` (`setupFiles` do vitest). Os models de produção rodam intactos nos testes; só os gateways continuam com fake manual (`src/test/gateways/`). Isolamento por teste: `resetPrismaMock()` de `src/test/prisma/` (o `$clear()` da lib é bugado — ver comentário no seam). Racional e alternativas em `docs/research/001-teste-prisma-sem-banco-real.md`.
 
+**Atualizado em 2026-08-20**: CI formal chegou (`.github/workflows/ci.yml`), gatilho `pull_request`/`push` em `develop`/`main`. Quatro jobs paralelos: `typecheck` (`npx tsc --noEmit`), `lint` (`npx biome check .` — sem `--write`, diferente do hook local, porque CI precisa falhar em vez de corrigir silenciosamente), `test` (`npm test`, `DISABLE_REDIS=true` pra não poluir log com retry de conexão — testes não dependem de Postgres/Redis real, ver nota 2026-07-04), `build` (`npm run build` contra um serviço `postgres:16` real, porque `prisma migrate deploy` — parte do script `build` desde #206 — exige um banco alcançável). O DoD abaixo deixa de ser "o agente roda manualmente" e passa a ser **verificado automaticamente em todo PR**; a checagem manual continua valendo como sinal antecipado antes do push.
+
 - [ ] Testes novos cobrem o comportamento adicionado/modificado, e rodam verde.
-- [ ] Suíte inteira roda verde (`yarn test`).
-- [ ] Type-check passa (`npx tsc --noEmit`).
-- [ ] Lint passa sem warnings novos (`yarn lint`) — já gateado por `.husky/pre-commit`.
+- [ ] Suíte inteira roda verde (`yarn test`) — gateado por CI (job `test`).
+- [ ] Type-check passa (`npx tsc --noEmit`) — gateado por CI (job `typecheck`).
+- [ ] Lint passa sem warnings novos (`yarn lint`) — gateado por `.husky/pre-commit` localmente e por CI (job `lint`) no PR.
+- [ ] Build de produção passa (`npm run build`) — gateado por CI (job `build`).
 - [ ] Nenhum `any`/`unknown`/`@ts-ignore` novo sem justificativa.
 - [ ] Nenhum arquivo tocado passou de 300 linhas (ou exceção documentada).
 - [ ] Commit referencia US/RF e explica o *porquê*, segue Conventional Commits.
@@ -279,7 +282,7 @@ Descoberto no scan A.7 (hooks locais — sem CI no repo hoje) e confirmado na en
 
 1. `yarn test` (vitest, sem dependência de Docker/Postgres — ver nota de 2026-07-04 acima).
 
-Confirmado na entrevista: mantém só o test runner no pre-push (não adicionar type-check/build nesse hook — ficam no DoD de merge, § 6).
+Confirmado na entrevista: mantém só o test runner no pre-push (não adicionar type-check/build nesse hook — ficam no DoD de merge, § 6). Type-check/lint/build continuam fora do pre-push por serem mais lentos; a partir de 2026-08-20 rodam em paralelo no CI a cada PR, então o hook local segue leve de propósito — CI é a rede de segurança, não o hook.
 
 ---
 
