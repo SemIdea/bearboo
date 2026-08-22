@@ -43,8 +43,10 @@ describe("logBoundaryError", () => {
 	afterEach(() => vi.restoreAllMocks());
 
 	test("routes a recoverable info error to console.info, not console.error", () => {
-		const info = vi.spyOn(console, "info").mockImplementation(() => {});
-		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+		const error = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
 
 		logBoundaryError(new DomainError("post.not_found"));
 
@@ -53,7 +55,9 @@ describe("logBoundaryError", () => {
 	});
 
 	test("routes a bug to console.error", () => {
-		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		const error = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
 
 		logBoundaryError(new Error("boom"));
 
