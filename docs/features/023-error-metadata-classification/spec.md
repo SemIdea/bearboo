@@ -2,7 +2,7 @@
 
 > **Spec:** o quê e o porquê. Sem decisão de tecnologia.
 > **US relacionada(s):** US-017 (Dev resolve erro de domínio sem código duplicado por procedure) — estende.
-> **Status:** in-progress
+> **Status:** done
 > **Data de abertura:** 2026-08-22
 
 ## 1. Problema (do PRD/UST)
