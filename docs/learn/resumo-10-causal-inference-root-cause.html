@@ -1,0 +1,149 @@
+<!doctype html>
+<!-- learn · template de output (web components). Vocabulário e fluxo de geração: ver SKILL.md do plugin learn. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Causal Inference in Distributed Tracing (RCA) — resumo</title>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  l-doc{display:block;max-width:820px;margin:0 auto;padding:32px 20px 80px}
+  l-head{display:block;border-bottom:1px solid #2b3340;padding-bottom:24px;margin-bottom:32px}
+  l-sec,l-steps,l-tldr,l-fig{display:block}
+  l-fig{margin:22px 0}
+  l-apply{display:block;background:linear-gradient(180deg,#16221b,#13191c);
+    border:1px solid #2b6e3a;border-left:5px solid #3fb950;border-radius:10px;padding:4px 22px 16px;margin:22px 0}
+  l-note{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #f0883e;
+    border-radius:8px;padding:10px 16px;margin:18px 0}
+  l-note[kind=info]{border-left-color:#58a6ff}
+  l-card{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #a371f7;
+    border-radius:8px;padding:8px 16px 4px;margin:14px 0}
+  l-data{display:grid;grid-template-columns:max-content 1fr;margin:14px 0;
+    border:1px solid #2b3340;border-radius:8px;overflow:hidden}
+  l-row{display:contents}
+  /* conteúdo de autoria (light DOM) */
+  p{margin:0 0 14px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:0 0 9px}
+  strong{color:#fff}
+  a{color:#58a6ff}
+  code{background:#1c2330;border:1px solid #2b3340;border-radius:5px;padding:1px 6px;
+    font:13px/1.5 ui-monospace,"SFMono-Regular",Consolas,monospace;color:#ffa657}
+  table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}
+  th,td{padding:8px 11px;text-align:left;border-bottom:1px solid #2b3340}
+  th{background:#1c2330;color:#58a6ff;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td.num,th.num,.num{color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+  td.num,th.num{text-align:right}
+</style>
+<script>
+  const CSS = `:host{display:block}
+    a{color:#58a6ff;text-decoration:none} a:hover{text-decoration:underline}
+    h1{font-size:28px;line-height:1.25;margin:0 0 12px}
+    .b{display:inline-block;background:linear-gradient(90deg,#58a6ff,#7ee787);color:#0d1117;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:14px}
+    .au{color:#9aa7b4;font-size:14px;margin:0 0 8px}
+    .me{color:#9aa7b4;font-size:13px;margin:0}
+    h2.s{font-size:21px;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid #2b3340}
+    h2.s i{font-style:normal;color:#58a6ff;font-variant-numeric:tabular-nums;margin-right:8px}
+    h2.a{font-size:20px;margin:10px 0 8px;color:#7ee787}
+    b.nt{display:block;color:#fff;margin:0 0 6px}
+    ol{margin:0;padding-left:20px} ul.td{list-style:none;margin:0;padding:0}
+    figure{margin:0;background:#161b22;border:1px solid #2b3340;border-radius:10px;padding:12px}
+    img{display:block;max-width:100%;border-radius:6px;margin:0 auto}
+    figcaption{color:#9aa7b4;font-size:13px;margin-top:8px}
+    .k{padding:8px 12px;border-bottom:1px solid #2b3340;color:#cbd5e1}
+    .v{padding:8px 12px;border-bottom:1px solid #2b3340;text-align:right;color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+    .q{color:#fff;font-weight:600;margin:0}
+    summary{cursor:pointer;color:#58a6ff;font-size:13px;margin-top:4px;list-style:none}
+    .ans{margin:8px 0 0}
+    .cite{color:#9aa7b4;font-size:12px;margin:6px 0 0}`;
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const def = (tag, render) => customElements.define(tag, class extends HTMLElement{
+    connectedCallback(){
+      if(this._r) return; this._r = 1;
+      const a = n => this.getAttribute(n) || '';
+      this.attachShadow({mode:'open'}).innerHTML = '<style>'+CSS+'</style>' + render(a);
+    }
+  });
+  def('l-head', a => (a('badge')?`<span class="b">${esc(a('badge'))}</span>`:'')
+    + `<h1>${esc(a('title'))}</h1>`
+    + (a('authors')?`<p class="au">${esc(a('authors'))}</p>`:'')
+    + (a('src')?`<p class="me">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src'))}</a>`:esc(a('src'))}</p>`:''));
+  def('l-sec',  a => `<h2 class="s"><i>${esc(a('n'))}</i>${esc(a('title'))}</h2><slot></slot>`);
+  def('l-apply',a => `<h2 class="a">\u{1F3AF} ${esc(a('title')||'Aplicar no contexto')}</h2><slot></slot>`);
+  def('l-note', a => `<b class="nt">${esc(a('title')||'Cuidado')}</b><slot></slot>`);
+  def('l-steps',() => `<ol><slot></slot></ol>`);
+  def('l-tldr', () => `<ul class="td"><slot></slot></ul>`);
+  def('l-data', () => `<slot></slot>`);
+  def('l-row',  a => `<span class="k">${esc(a('k'))}</span><span class="v">${esc(a('v'))}</span>`);
+  def('l-fig',  a => `<figure><img src="${esc(a('src'))}" loading="lazy" alt="${esc(a('cap'))}">`
+    + ((a('cap')||a('href'))?`<figcaption>${esc(a('cap'))} ${a('href')?`<a href="${esc(a('href'))}">fonte</a>`:''}</figcaption>`:'')
+    + `</figure>`);
+  def('l-card', a => `<p class="q">${esc(a('q'))}</p>`
+    + `<details><summary>Mostrar resposta</summary><div class="ans"><slot></slot></div>`
+    + ((a('src')||a('href'))?`<p class="cite">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src')||'fonte')}</a>`:esc(a('src'))}</p>`:'')
+    + `</details>`);
+</script>
+</head>
+<body>
+<l-doc>
+<l-head badge="Pilar 5 · root cause (a ponta)" title="Causal Inference in Distributed Tracing: Automating Root Cause Analysis" authors="IJETCSIT (2024/25) — framework 'TraceCausalNet'" src="Abstract via busca; texto completo bloqueado (HTTP 400 no OJS)" href="https://www.ijetcsit.org/index.php/ijetcsit/article/view/676"></l-head>
+
+<l-note kind="warn" title="Nota de fidelidade (leia antes)">Diferente dos outros 9, <strong>não consegui abrir o texto completo</strong> deste (o servidor retornou 400). O resumo abaixo é baseado no <em>abstract</em> e em fontes que descrevem o mesmo trabalho/linha. Os números (§3) vêm do abstract conforme indexado — trate como "reportado pelo abstract", não como leitura da metodologia completa. Alternativa aberta pra aprofundar: <a href="https://arxiv.org/pdf/2408.13729">arXiv 2408.13729</a> (mesma linha, RCA por causal inference, PDF livre).</l-note>
+
+<l-note kind="info" title="Método deste resumo">Fecho da série. Se o Dapper (doc 9) te dá a <em>cadeia</em>, este te dá o salto final: de muitas cadeias correlacionadas, <strong>inferir a raiz</strong>. É o teto do espectro — aspiracional pra um monólito, mas define pra onde a linha inteira aponta.</l-note>
+
+<l-sec n="1" title="O problema — correlação não é causa">
+<p>Distributed tracing (doc 9) te mostra <em>o que aconteceu junto</em>: quando o request falhou, os serviços A, B e C também mostraram erro/latência. Mas <strong>correlação não é causa</strong> — qual dos três <em>originou</em> a falha e quais só <em>propagaram</em>? Em microserviços com dependências densas, um humano gasta (segundo o abstract) <strong>~47 minutos</strong> vasculhando isso manualmente por incidente. O gap: tracing convencional dá o grafo de quem-tocou-quem, não o veredito de quem-causou.</p>
+</l-sec>
+
+<l-sec n="2" title="O método — grafo causal + ranking por intervenção">
+<p>A abordagem (TraceCausalNet) constrói um <strong>grafo causal</strong> a partir dos dados de trace e ranqueia candidatos a raiz:</p>
+<ul>
+<li><strong>Granger causality</strong>: X "Granger-causa" Y se o passado de X <em>melhora a previsão</em> de Y além do que o passado de Y sozinho consegue. Aplicado às séries temporais dos serviços, revela <strong>direção</strong> de propagação — não só que A e B se mexem juntos, mas que A ajuda a prever B (logo A → B, não B → A). É o mecanismo que separa causa de efeito.</li>
+<li><strong>Interventional impact score</strong>: ranqueia cada candidato a raiz por quanto uma <em>intervenção</em> nele mudaria o resultado (raciocínio contrafactual: "se este serviço estivesse são, o incidente sumiria?"). O topo do ranking é a raiz mais provável.</li>
+<li>Reconstrói <strong>caminhos de propagação de erro</strong> ao longo do grafo, do sintoma (onde você viu) até a origem (onde nasceu).</li>
+</ul>
+</l-sec>
+
+<l-sec n="3" title="Resultados reportados (pelo abstract)">
+<l-data>
+<l-row k="Tempo de diagnóstico manual (baseline)" v="~47 min/incidente"></l-row>
+<l-row k="Tempo médio com o framework" v="~8 min"></l-row>
+<l-row k="Redução" v="83%"></l-row>
+<l-row k="Acurácia top-3 da raiz" v="91%"></l-row>
+<l-row k="Validação" v="6 apps bancárias, ~4 anos, ambiente regulado"></l-row>
+</l-data>
+<p>A leitura: com o grafo causal certo, "top-3 candidatos" acerta a raiz 91% das vezes — ou seja, você não precisa de certeza absoluta, precisa <strong>estreitar de 50 serviços pra 3</strong>. Isso é o suficiente pra colapsar 47 min em 8.</p>
+</l-sec>
+
+<l-apply title="Aplicar no bearboo — o teto, e o que já vale hoje">
+<p><strong>Realismo primeiro:</strong> Granger causality e grafos causais são feitos pra <em>muitos serviços com séries temporais</em>. O bearboo é um monólito — você não tem N serviços pra inferir direção entre eles. <strong>Este paper NÃO é próximo passo de código.</strong> Ele fecha a série mostrando o horizonte.</p>
+<p><strong>Mas há uma transferência conceitual real, em duas escalas:</strong></p>
+<ol>
+<li><strong>Dentro do request (seu 5-a), a causa é de graça — e é a vantagem do monólito.</strong> A dificuldade inteira deste paper é <em>inferir</em> causa a partir de correlação, porque em sistemas distribuídos a direção se perde. No seu tracer 5-a você <strong>não precisa inferir nada</strong>: a cadeia <code>error.cause.cause…</code> <em>já é</em> o grafo causal, com a direção conhecida (o <code>cause</code> aponta pra origem por construção). O que o Google gasta ML pra reconstruir, você tem de graça porque está num processo só. A raiz da cadeia é literalmente o último <code>cause</code>. <strong>Isso reforça que o 5-a bem-feito te dá "root cause" trivial que o mundo 5-b luta pra ter.</strong></li>
+<li><strong>Entre muitos requests (o cruzamento com o doc 6, ODC), aí sim aparece inferência.</strong> Se você agregar as cadeias de muitos erros e perguntar "erros de <code>post.update_forbidden</code> quase sempre têm <code>session.session_expired</code> na raiz?", você está fazendo a versão leve disto — achar o padrão de raiz na distribuição. Não precisa de Granger; um <code>GROUP BY raiz_da_cadeia</code> nos seus logs estruturados já entrega 80% do valor.</li>
+</ol>
+<p><strong>Takeaway acionável:</strong> quando construir o tracer, <strong>marque explicitamente qual elo é a raiz</strong> (o <code>cause</code> mais profundo) em cada cadeia logada. Isso transforma "log de erro" em "log de root cause" sem nenhum ML — e te dá, na escala de um monólito, o que este paper persegue na escala de bancos inteiros.</p>
+</l-apply>
+
+<l-note kind="warn" title="Cuidado (metodológico e de fidelidade)">Dois avisos: (1) não tentei validar a metodologia completa — os números são do abstract; se for citar em algo sério, leia o texto completo ou o arXiv 2408.13729. (2) Granger causality prova <em>precedência preditiva</em>, não causa mecanística — é uma heurística de direção, sujeita a confounders. Num monólito você nem precisa dela (tem a causa por construção); só a mencione se um dia o bearboo virar multi-serviço.</l-note>
+
+<l-sec n="Recall" title="Recall">
+<l-card q="Por que tracing convencional não dá root cause?" src="abstract §problema" href="https://www.ijetcsit.org/index.php/ijetcsit/article/view/676">Mostra correlação (quem falhou junto), não causa (quem originou).</l-card>
+<l-card q="O que Granger causality captura?" src="abstract §método">Direção: X Granger-causa Y se o passado de X melhora a previsão de Y.</l-card>
+<l-card q="O que o interventional impact score ranqueia?" src="abstract §método">Candidatos a raiz por impacto contrafactual de intervir neles.</l-card>
+<l-card q="Por que 'top-3' já resolve?" src="abstract §resultados">91% de acerto na top-3 estreita de dezenas pra 3 candidatos.</l-card>
+<l-card q="Por que o 5-a do bearboo tem root cause de graça?" src="Aplicar no contexto">A cadeia de cause já é o grafo causal com direção conhecida (monólito).</l-card>
+</l-sec>
+
+<l-tldr>
+<li>Tracing dá correlação; este trabalho infere <strong>causa</strong> — grafo causal via <strong>Granger causality</strong> + ranking por <strong>impacto interventional/contrafactual</strong>.</li>
+<li>Reportado: diagnóstico de ~47 min → ~8 min (83% ↓), 91% de acerto top-3, em 6 apps bancárias/4 anos. (Números do abstract; texto completo não acessado.)</li>
+<li><strong>A grande sacada pro seu 5-a:</strong> o que sistemas distribuídos gastam ML pra reconstruir, seu monólito tem de graça — a cadeia <code>error.cause</code> <em>é</em> o grafo causal, com direção conhecida. Root cause = o <code>cause</code> mais profundo.</li>
+<li>Ação: marque a raiz de cada cadeia no log. "Log de erro" vira "log de root cause" sem ML. NÃO é motivo pra puxar Granger/OTel num monólito.</li>
+</l-tldr>
+</l-doc>
+</body>
+</html>
