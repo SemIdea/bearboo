@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { AuthErrorCode } from "@/shared/error/auth";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -50,11 +48,9 @@ describe("Create Category Controller Unitary Testing", () => {
 
 		await expect(
 			CategoryRouter.createCaller(authorCtx).create({ name: "Frontend" }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: AuthErrorCode.INSUFFICIENT_ROLE,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You do not have permission to perform this action.",
+		});
 	});
 });

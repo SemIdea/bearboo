@@ -1,7 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
 import { ISessionEntity } from "@/server/models/session";
-import { SessionErrorCode } from "@/shared/error/session";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -47,12 +45,10 @@ describe("Refresh Session Controller Unitary Testing", () => {
 	test("Should throw MISSING_TOKEN when there is no refreshToken cookie", async () => {
 		await expect(
 			AuthRouter.createCaller(ctx).refreshSession(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "UNAUTHORIZED",
-				message: SessionErrorCode.MISSING_TOKEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: "Authentication token is missing.",
+		});
 	});
 
 	test("Should throw an error if token is invalid", async () => {
@@ -60,12 +56,10 @@ describe("Refresh Session Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).refreshSession(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: SessionErrorCode.INVALID_TOKEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Authentication token is invalid.",
+		});
 	});
 
 	test("Should clear accessToken/refreshToken cookies when the refresh token is invalid or reused, so the client stops resending a dead cookie", async () => {

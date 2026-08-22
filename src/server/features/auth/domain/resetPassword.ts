@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
 import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
-import { ResetTokenErrorCodes } from "@/shared/error/resetToken";
+import { DomainError } from "@/shared/error/domainError";
 
 const domain_resetPassword = async ({
 	ctx,
@@ -13,24 +12,15 @@ const domain_resetPassword = async ({
 	const resetToken = await ctx.repositories.resetToken.readByToken(input.token);
 
 	if (!resetToken) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: ResetTokenErrorCodes.TOKEN_NOT_FOUND,
-		});
+		throw new DomainError("resetToken.not_found");
 	}
 
 	if (resetToken.used) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: ResetTokenErrorCodes.TOKEN_ALREADY_USED,
-		});
+		throw new DomainError("resetToken.already_used");
 	}
 
 	if (resetToken.expiresAt < new Date()) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: ResetTokenErrorCodes.TOKEN_EXPIRED,
-		});
+		throw new DomainError("resetToken.expired");
 	}
 
 	const user = await domain_getUserOrThrow({

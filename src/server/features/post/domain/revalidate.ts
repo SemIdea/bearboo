@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { revalidateTag } from "next/cache";
 import { DomainInput } from "@/server/createDomain";
-import { PostErrorCode } from "@/shared/error/post";
+import { DomainError } from "@/shared/error/domainError";
 import { RevalidatePostInput } from "../schema";
 
 const domain_revalidatePost = async ({
@@ -11,17 +10,11 @@ const domain_revalidatePost = async ({
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: PostErrorCode.POST_NOT_FOUND,
-		});
+		throw new DomainError("post.not_found");
 	}
 
 	if (post.userId !== input.userId) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-		});
+		throw new DomainError("post.update_forbidden");
 	}
 
 	revalidateTag("posts", "hours");

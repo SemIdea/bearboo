@@ -1,8 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { cookies, headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
-import { AuthErrorCode } from "@/shared/error/auth";
-import { SessionErrorCode } from "@/shared/error/session";
+import { DomainError } from "@/shared/error/domainError";
 import { createTRPCContext, IProtectedAPIContextDTO } from "./createContext";
 import { appRouter } from "./routers/app.routes";
 
@@ -30,12 +28,12 @@ const createDynamicCaller = async () => {
 
 	const caller = appRouter.createCaller(callerCtx, {
 		onError: ({ error }) => {
-			if (error instanceof TRPCError) {
-				switch (error.message) {
-					case AuthErrorCode.USER_NOT_LOGGED_IN:
+			if (error.cause instanceof DomainError) {
+				switch (error.cause.code) {
+					case "auth.user_not_logged_in":
 						redirect(`/auth/login?redirect=${pathName}`);
 						break;
-					case SessionErrorCode.SESSION_EXPIRED:
+					case "session.session_expired":
 						redirect(`/auth/refresh?redirect=${pathName}`);
 						break;
 					default:

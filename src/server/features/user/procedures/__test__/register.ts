@@ -1,7 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { describe, expect, test, vi } from "vitest";
 import { REGISTER_RATE_LIMIT } from "@/server/features/auth/constants";
-import { UserErrorCode } from "@/shared/error/user";
 import { createTestContext } from "@/test/context";
 import { UserRouter } from "../../index";
 
@@ -78,12 +76,10 @@ describe("Register User Controller Unitary Testing", () => {
 
 		await expect(
 			UserRouter.createCaller(ctx).register(input),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "CONFLICT",
-				message: UserErrorCode.USER_ALREADY_EXISTS,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "CONFLICT",
+			message: "A user with this email already exists.",
+		});
 	});
 
 	test("Should enforce the register rate limit", async () => {

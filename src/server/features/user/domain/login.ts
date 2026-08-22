@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { AuthErrorCode } from "@/shared/error/auth";
+import { DomainError } from "@/shared/error/domainError";
 import { LoginUserInput } from "../schema";
 
 // Bcrypt hash of a fixed placeholder password (cost 10, same as real hashes) —
@@ -9,10 +8,7 @@ import { LoginUserInput } from "../schema";
 const DUMMY_PASSWORD_HASH =
 	"$2b$10$AySv8oQBUMv5OOodr543Z.9Q6WKQWso237RtvWEyWweL2dao05rzS";
 
-const invalidCredentialsError = new TRPCError({
-	code: "UNAUTHORIZED",
-	message: AuthErrorCode.INVALID_CREDENTIALS,
-});
+const invalidCredentialsError = new DomainError("auth.invalid_credentials");
 
 const domain_loginUser = async ({
 	ctx,

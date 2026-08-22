@@ -1,25 +1,37 @@
-enum SessionErrorCode {
-	MISSING_TOKEN = "MISSING_TOKEN",
-	INVALID_TOKEN = "INVALID_TOKEN",
-	SESSION_EXPIRED = "SESSION_EXPIRED",
-	SESSION_CREATE_ERROR = "SESSION_CREATE_ERROR",
-	SESSION_UPDATE_ERROR = "SESSION_UPDATE_ERROR",
-	SESSION_NOT_FOUND = "SESSION_NOT_FOUND",
-	SESSION_NOT_AUTHORIZED = "SESSION_NOT_AUTHORIZED",
-}
+import { defineDomainErrors } from "./registry";
 
-const SessionErrorMessages = {
-	[SessionErrorCode.MISSING_TOKEN]: "Authentication token is missing.",
-	[SessionErrorCode.INVALID_TOKEN]: "Authentication token is invalid.",
-	[SessionErrorCode.SESSION_EXPIRED]:
-		"Your session has expired. Please log in again.",
-	[SessionErrorCode.SESSION_CREATE_ERROR]:
-		"Failed to create session. Please try again.",
-	[SessionErrorCode.SESSION_UPDATE_ERROR]:
-		"Failed to update session. Please try again.",
-	[SessionErrorCode.SESSION_NOT_FOUND]: "Session not found.",
-	[SessionErrorCode.SESSION_NOT_AUTHORIZED]:
-		"You are not authorized to perform this action.",
-} as const;
+const SessionErrors = defineDomainErrors("session", {
+	session_create_error: {
+		httpCode: "INTERNAL_SERVER_ERROR",
+		message: "Failed to create session. Please try again.",
+	},
+	session_not_found: {
+		httpCode: "NOT_FOUND",
+		message: "Session not found.",
+	},
+	// Historically both thrown with the same message ("Authentication token is
+	// invalid.") but different httpCode depending on which lookup failed — kept
+	// as distinct namespaced codes so each preserves its own httpCode exactly.
+	refresh_token_invalid: {
+		httpCode: "NOT_FOUND",
+		message: "Authentication token is invalid.",
+	},
+	access_token_invalid: {
+		httpCode: "UNAUTHORIZED",
+		message: "Authentication token is invalid.",
+	},
+	session_update_error: {
+		httpCode: "INTERNAL_SERVER_ERROR",
+		message: "Failed to update session. Please try again.",
+	},
+	session_expired: {
+		httpCode: "UNAUTHORIZED",
+		message: "Your session has expired. Please log in again.",
+	},
+	missing_token: {
+		httpCode: "UNAUTHORIZED",
+		message: "Authentication token is missing.",
+	},
+});
 
-export { SessionErrorCode, SessionErrorMessages };
+export { SessionErrors };

@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure } from "@/server/createRouter";
 import { DomainError } from "@/shared/error/domainError";
-import { MediaErrorCode, MediaErrorMessages } from "@/shared/error/media";
 import { domain_deleteMedia } from "../domain/delete";
 import { deleteMediaOutputSchema, deleteMediaSchema } from "../schema";
 
@@ -18,19 +17,11 @@ const procedure_deleteMedia = protectedProcedure
 			return { success };
 		} catch (error) {
 			if (error instanceof DomainError) {
-				if (error.code === MediaErrorCode.MEDIA_NOT_FOUND) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message: MediaErrorMessages[MediaErrorCode.MEDIA_NOT_FOUND],
-					});
-				}
-
-				if (error.code === MediaErrorCode.MEDIA_DELETE_FORBIDDEN) {
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: MediaErrorMessages[MediaErrorCode.MEDIA_DELETE_FORBIDDEN],
-					});
-				}
+				throw new TRPCError({
+					code: error.httpCode,
+					message: error.message,
+					cause: error,
+				});
 			}
 
 			throw error;

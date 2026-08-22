@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { describe, expect, test } from "vitest";
-import { AuthErrorCode } from "@/shared/error/auth";
 import { createAuthenticatedContext } from "@/test/context";
 import { AnalyticsRouter } from "../../index";
 
@@ -10,12 +8,10 @@ describe("Analytics readDashboard Controller Unitary Testing", () => {
 
 		await expect(
 			AnalyticsRouter.createCaller(authorCtx).readDashboard(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: AuthErrorCode.INSUFFICIENT_ROLE,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You do not have permission to perform this action.",
+		});
 	});
 
 	test("Should let an editor read the dashboard", async () => {

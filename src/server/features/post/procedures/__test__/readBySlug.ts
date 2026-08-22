@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -49,12 +47,10 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 	test("Should throw an error if slug does not exist", async () => {
 		await expect(
 			PostRouter.createCaller(ctx).readBySlug({ slug: "does-not-exist" }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 
 	test("Should throw not found for a draft post owned by someone else", async () => {
@@ -66,12 +62,10 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 
 	test("Should throw not found for an archived post owned by someone else", async () => {
@@ -83,12 +77,10 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 
 	test("Should let the owner read their own draft post by slug", async () => {
@@ -136,12 +128,10 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(otherAuthorCtx).readBySlug({ slug: post.slug }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 
 	test("Should read a scheduled post whose date has already passed", async () => {
@@ -168,11 +158,9 @@ describe("Read Post By Slug Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).readBySlug({ slug: post.slug }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 });

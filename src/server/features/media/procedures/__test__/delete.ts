@@ -1,7 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { describe, expect, test } from "vitest";
-import { AuthErrorCode } from "@/shared/error/auth";
-import { MediaErrorCode, MediaErrorMessages } from "@/shared/error/media";
 import {
 	createAuthenticatedContext,
 	createTestContext,
@@ -42,12 +39,10 @@ describe("Delete Media Controller Unitary Testing", () => {
 
 		await expect(
 			MediaRouter.createCaller(ctx).delete({ id: theirs.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: MediaErrorMessages[MediaErrorCode.MEDIA_DELETE_FORBIDDEN],
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You are not allowed to delete this media.",
+		});
 	});
 
 	test("Should throw NOT_FOUND for a nonexistent media", async () => {
@@ -55,12 +50,10 @@ describe("Delete Media Controller Unitary Testing", () => {
 
 		await expect(
 			MediaRouter.createCaller(ctx).delete({ id: "does-not-exist" }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: MediaErrorMessages[MediaErrorCode.MEDIA_NOT_FOUND],
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Media not found.",
+		});
 	});
 
 	test("Should throw an error when called without a session", async () => {
@@ -68,11 +61,9 @@ describe("Delete Media Controller Unitary Testing", () => {
 
 		await expect(
 			MediaRouter.createCaller(anonymousCtx).delete({ id: "any" }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "UNAUTHORIZED",
-				message: AuthErrorCode.USER_NOT_LOGGED_IN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: "You are not logged in. Please log in to continue.",
+		});
 	});
 });

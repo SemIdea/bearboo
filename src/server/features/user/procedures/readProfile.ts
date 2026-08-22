@@ -1,4 +1,6 @@
+import { TRPCError } from "@trpc/server";
 import { publicProcedure } from "@/server/createRouter";
+import { DomainError } from "@/shared/error/domainError";
 import { domain_readUserProfile } from "../domain/readProfile";
 import { readUserProfileOutputSchema, readUserProfileSchema } from "../schema";
 
@@ -19,7 +21,19 @@ const procedure_readUserProfile = publicProcedure
 			};
 		}
 
-		return domain_readUserProfile({ ctx, input });
+		try {
+			return await domain_readUserProfile({ ctx, input });
+		} catch (error) {
+			if (error instanceof DomainError) {
+				throw new TRPCError({
+					code: error.httpCode,
+					message: error.message,
+					cause: error,
+				});
+			}
+
+			throw error;
+		}
 	});
 
 export { procedure_readUserProfile };

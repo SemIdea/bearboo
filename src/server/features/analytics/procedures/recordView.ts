@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { publicProcedure } from "@/server/createRouter";
-import { PostErrorCode } from "@/shared/error/post";
+import { DomainError } from "@/shared/error/domainError";
 import { VISITOR_ID_COOKIE_MAX_AGE_SECONDS } from "../constants";
 import { domain_recordView } from "../domain/recordView";
 import { recordViewOutputSchema, recordViewSchema } from "../schema";
@@ -17,24 +17,27 @@ const procedure_recordView = publicProcedure
 			});
 		}
 
-		const result = await domain_recordView({
-			ctx,
-			input: {
-				postId: input.postId,
-				visitorId,
-				referer: ctx.headers.get("referer"),
-				userAgent: ctx.headers.get("user-agent"),
-			},
-		});
-
-		if (!result) {
-			throw new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
+		try {
+			return await domain_recordView({
+				ctx,
+				input: {
+					postId: input.postId,
+					visitorId,
+					referer: ctx.headers.get("referer"),
+					userAgent: ctx.headers.get("user-agent"),
+				},
 			});
-		}
+		} catch (error) {
+			if (error instanceof DomainError) {
+				throw new TRPCError({
+					code: error.httpCode,
+					message: error.message,
+					cause: error,
+				});
+			}
 
-		return result;
+			throw error;
+		}
 	});
 
 export { procedure_recordView };

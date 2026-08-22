@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -29,12 +27,10 @@ describe("Submit For Review Post Controller Unitary Testing", () => {
 			PostRouter.createCaller(ctx).submitForReview({
 				id: "non-existent-id",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 
 	test("Should throw an error if the caller does not own the post", async () => {
@@ -46,12 +42,10 @@ describe("Submit For Review Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).submitForReview({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You are not allowed to update this post.",
+		});
 	});
 
 	test("Should throw an error if the post is not a draft", async () => {
@@ -59,11 +53,9 @@ describe("Submit For Review Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(ctx).submitForReview({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "BAD_REQUEST",
-				message: PostErrorCode.POST_INVALID_STATUS_TRANSITION,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+			message: "This action is not valid for the post's current status.",
+		});
 	});
 });

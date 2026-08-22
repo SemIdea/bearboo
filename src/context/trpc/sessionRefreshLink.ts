@@ -1,8 +1,6 @@
 import { TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
 import { AppRouter } from "@/server/routers/app.routes";
-import { AuthErrorCode } from "@/shared/error/auth";
-import { SessionErrorCode } from "@/shared/error/session";
 import { refreshTokens } from "./session";
 
 const redirectTo = (path: string): void => {
@@ -25,11 +23,10 @@ const sessionRefreshLink: TRPCLink<AppRouter> = () => {
 					complete: () => observer.complete(),
 					error: (err) => {
 						const code = err.data?.code;
-						const message = err.message;
 
 						if (
 							code === "UNAUTHORIZED" &&
-							message === SessionErrorCode.SESSION_EXPIRED &&
+							err.data?.domainCode === "session.session_expired" &&
 							!hasRetried
 						) {
 							hasRetried = true;
@@ -46,14 +43,14 @@ const sessionRefreshLink: TRPCLink<AppRouter> = () => {
 
 						if (
 							code === "UNAUTHORIZED" &&
-							message === SessionErrorCode.INVALID_TOKEN
+							err.data?.domainCode === "session.access_token_invalid"
 						) {
 							redirectTo("/auth/login");
 						}
 
 						if (
 							code === "FORBIDDEN" &&
-							message === AuthErrorCode.USER_NOT_VERIFIED
+							err.data?.domainCode === "auth.user_not_verified"
 						) {
 							redirectTo("/auth/verify");
 						}

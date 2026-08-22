@@ -1,11 +1,7 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { SessionErrorCode } from "@/shared/error/session";
+import { DomainError } from "@/shared/error/domainError";
 
-const invalidTokenError = new TRPCError({
-	code: "NOT_FOUND",
-	message: SessionErrorCode.INVALID_TOKEN,
-});
+const invalidTokenError = new DomainError("session.refresh_token_invalid");
 
 const domain_readSessionByRefreshToken = async ({
 	ctx,

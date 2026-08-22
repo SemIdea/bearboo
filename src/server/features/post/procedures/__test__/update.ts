@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -122,12 +120,10 @@ describe("Update Post Controller Unitary Testing", () => {
 				content: "Updated Content",
 				title: "Updated Title",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: PostErrorCode.POST_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 
 	test("Should throw error if user tries to update a post they do not own", async () => {
@@ -140,12 +136,10 @@ describe("Update Post Controller Unitary Testing", () => {
 				content: "Updated Content",
 				title: "Updated Title",
 			}),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You are not allowed to update this post.",
+		});
 	});
 
 	test("Should allow an admin to update a post they do not own", async () => {

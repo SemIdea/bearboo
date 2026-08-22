@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { UserErrorCode } from "@/shared/error/user";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -28,11 +26,9 @@ describe("Read Profile User Controller Unitary Testing", () => {
 
 		await expect(
 			UserRouter.createCaller(ctx).read({ id: uuid }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: UserErrorCode.USER_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "User not found. Please check the email.",
+		});
 	});
 });

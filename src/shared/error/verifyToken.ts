@@ -1,15 +1,18 @@
-enum VerifyTokenErrorCodes {
-	TOKEN_NOT_FOUND = "TOKEN_NOT_FOUND",
-	TOKEN_ALREADY_USED = "TOKEN_ALREADY_USED",
-	TOKEN_EXPIRED = "TOKEN_EXPIRED",
-}
+import { defineDomainErrors } from "./registry";
 
-const VeriifyTokenErrorMessages = {
-	[VerifyTokenErrorCodes.TOKEN_NOT_FOUND]:
-		"Token not found. Please check the ID.",
-	[VerifyTokenErrorCodes.TOKEN_ALREADY_USED]:
-		"This token has already been used.",
-	[VerifyTokenErrorCodes.TOKEN_EXPIRED]: "This token has expired.",
-} as const;
+const VerifyTokenErrors = defineDomainErrors("verifyToken", {
+	not_found: {
+		httpCode: "NOT_FOUND",
+		message: "Token not found. Please check the ID.",
+	},
+	already_used: {
+		httpCode: "BAD_REQUEST",
+		message: "This token has already been used.",
+	},
+	expired: {
+		httpCode: "BAD_REQUEST",
+		message: "This token has expired.",
+	},
+});
 
-export { VerifyTokenErrorCodes, VeriifyTokenErrorMessages };
+export { VerifyTokenErrors };

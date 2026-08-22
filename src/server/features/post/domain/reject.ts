@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
-import { PostErrorCode } from "@/shared/error/post";
+import { DomainError } from "@/shared/error/domainError";
 import { RejectPostInput } from "../schema";
 
 const domain_rejectPost = async ({
@@ -11,24 +10,15 @@ const domain_rejectPost = async ({
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: PostErrorCode.POST_NOT_FOUND,
-		});
+		throw new DomainError("post.not_found");
 	}
 
 	if (!ctx.helpers.permissions.can(input.role, "post:publish")) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-		});
+		throw new DomainError("post.update_forbidden");
 	}
 
 	if (post.status !== "IN_REVIEW") {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: PostErrorCode.POST_INVALID_STATUS_TRANSITION,
-		});
+		throw new DomainError("post.invalid_status_transition");
 	}
 
 	const updated = await ctx.repositories.post.update(input.id, {

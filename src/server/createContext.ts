@@ -1,6 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { env } from "@/lib/env";
+import { DomainError } from "@/shared/error/domainError";
 import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
 import { CookieJar } from "./http/cookieJar";
 import { gateways, IGateways } from "./infra/container/gateways";
@@ -63,7 +63,7 @@ const createTRPCContext = async ({
 			input: { accessToken },
 		});
 	} catch (error) {
-		if (error instanceof TRPCError && error.code === "UNAUTHORIZED") {
+		if (error instanceof DomainError && error.httpCode === "UNAUTHORIZED") {
 			ctx.resCookies.clear("accessToken");
 			ctx.resCookies.clear("refreshToken");
 			return ctx;

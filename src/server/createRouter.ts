@@ -2,8 +2,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { IRole } from "@/server/models/user";
-import { AuthErrorCode } from "@/shared/error/auth";
-import { SessionErrorCode } from "@/shared/error/session";
+import { DomainError } from "@/shared/error/domainError";
 import { Context } from "./createContext";
 import {
 	SESSION_IDLE_TIMEOUT_MS,
@@ -22,6 +21,8 @@ const t = initTRPC.context<Context>().create({
 					error.code === "BAD_REQUEST" && error.cause instanceof ZodError
 						? error.cause.flatten()
 						: null,
+				domainCode:
+					error.cause instanceof DomainError ? error.cause.code : null,
 			},
 		};
 	},
@@ -42,9 +43,11 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
 		now - sessionCreatedDate.getTime() > SESSION_MAX_LIFETIME_MS;
 
 	if (isIdle || isPastMaxLifetime) {
+		const error = new DomainError("session.session_expired");
 		throw new TRPCError({
-			code: "UNAUTHORIZED",
-			message: SessionErrorCode.SESSION_EXPIRED,
+			code: error.httpCode,
+			message: error.message,
+			cause: error,
 		});
 	}
 
@@ -63,18 +66,22 @@ const assertRateLimit = async (
 	const { allowed } = await ctx.helpers.rateLimit.consume(key, limit);
 
 	if (!allowed) {
+		const error = new DomainError("auth.too_many_attempts");
 		throw new TRPCError({
-			code: "TOO_MANY_REQUESTS",
-			message: AuthErrorCode.TOO_MANY_ATTEMPTS,
+			code: error.httpCode,
+			message: error.message,
+			cause: error,
 		});
 	}
 };
 
 const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 	if (!ctx.user) {
+		const error = new DomainError("auth.user_not_logged_in");
 		throw new TRPCError({
-			code: "UNAUTHORIZED",
-			message: AuthErrorCode.USER_NOT_LOGGED_IN,
+			code: error.httpCode,
+			message: error.message,
+			cause: error,
 		});
 	}
 
@@ -87,9 +94,11 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 
 const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 	if (!ctx.user.verified) {
+		const error = new DomainError("auth.user_not_verified");
 		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: AuthErrorCode.USER_NOT_VERIFIED,
+			code: error.httpCode,
+			message: error.message,
+			cause: error,
 		});
 	}
 
@@ -103,9 +112,11 @@ const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 const roleProcedure = (allowed: IRole[]) =>
 	verifiedProcedure.use(async ({ ctx, next }) => {
 		if (!allowed.includes(ctx.user.role)) {
+			const error = new DomainError("auth.insufficient_role");
 			throw new TRPCError({
-				code: "FORBIDDEN",
-				message: AuthErrorCode.INSUFFICIENT_ROLE,
+				code: error.httpCode,
+				message: error.message,
+				cause: error,
 			});
 		}
 

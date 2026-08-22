@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import { formatDistance } from "date-fns";
 import { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
@@ -11,8 +10,13 @@ import { ViewTracker } from "@/components/viewTracker";
 import { env } from "@/lib/env";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
-import { PostErrorCode } from "@/shared/error/post";
+import { DomainError } from "@/shared/error/domainError";
 import { CommentArea, RelatedPosts } from "./page.client";
+
+const isPostNotFound = (error: unknown): boolean =>
+	error instanceof Error &&
+	error.cause instanceof DomainError &&
+	error.cause.code === "post.not_found";
 
 type PageProps = {
 	params: Promise<{
@@ -68,10 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			},
 		};
 	} catch (error) {
-		if (
-			error instanceof TRPCError &&
-			error.message === PostErrorCode.POST_NOT_FOUND
-		) {
+		if (isPostNotFound(error)) {
 			return {
 				title: "Post Not Found",
 			};
@@ -111,10 +112,7 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 	try {
 		post = await caller.post.readBySlug({ slug });
 	} catch (error) {
-		if (
-			error instanceof TRPCError &&
-			error.message === PostErrorCode.POST_NOT_FOUND
-		) {
+		if (isPostNotFound(error)) {
 			const redirectTarget = await caller.post.readRedirectSlug({ slug });
 
 			if (redirectTarget) {
@@ -144,10 +142,7 @@ const OwnerPreview = async ({ slug }: { slug: string }) => {
 	try {
 		post = await caller.post.readBySlug({ slug });
 	} catch (error) {
-		if (
-			error instanceof TRPCError &&
-			error.message === PostErrorCode.POST_NOT_FOUND
-		) {
+		if (isPostNotFound(error)) {
 			notFound();
 		}
 

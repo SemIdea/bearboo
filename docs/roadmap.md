@@ -514,7 +514,7 @@ Adicionar práticas que empresas esperam de um projeto sério.
 ### Tarefas
 
 * [ ] logs estruturados (hoje é `console.log` pontual, sem lib estruturada);
-* [~] tratamento de erro padronizado — existe classificação por domínio em `src/shared/error/*` mas violada em 18/19 `service.ts` (ver `docs/afm.md` § 3.1);
+* [x] tratamento de erro padronizado — `ErrorRegistry` (`ADR-0017`, `022-error-registry`, RF-14): `DomainError` namespaced resolve `httpCode`/`message` sozinho, regra dura 15 fechada (`docs/afm.md` § 3);
 * [x] página de erro (`src/app/error.tsx`, `src/app/not-found.tsx`);
 * [ ] loading states (sem `loading.tsx` do App Router; não auditado como convenção sistemática);
 * [~] empty states — confirmado em `src/components/postFeed.tsx` ("No posts found."), não auditado em todos os componentes;
