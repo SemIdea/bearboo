@@ -22,9 +22,9 @@
 
 ## Phase 3 — Inversão (transporte sai do domínio)
 
-- [ ] T011 — `DomainError` reduz a `code` (`super(code)`), sem `httpCode`/`retryable`/`level`; atualiza `src/shared/error/__test__/domainError.ts` (US-017)
-- [ ] T012 — Remove `httpCode` dos 8 catálogos e de `ErrorEntry`; remove `import type { TRPC_ERROR_CODE_KEY } from "@trpc/server"` de `registry.ts`; **deleta o teste de paridade** do T001 (US-017)
-- [ ] T013 — `createContext.ts` decide limpar cookie por `code === "session.access_token_invalid"` + teste de regressão cobrindo que outro código UNAUTHORIZED **não** limpa (US-017)
+- [X] T011 — `DomainError` reduz a `code` (`super(code)`), sem `httpCode`/`retryable`/`level`; atualiza `src/shared/error/__test__/domainError.ts` (US-017)
+- [X] T012 — Remove `httpCode` dos 8 catálogos e de `ErrorEntry`; remove `import type { TRPC_ERROR_CODE_KEY } from "@trpc/server"` de `registry.ts`; **deleta o teste de paridade** do T001 (US-017)
+- [X] T013 — `createContext.ts` decide limpar cookie por `code === "session.access_token_invalid"` + teste de regressão cobrindo que outro código UNAUTHORIZED **não** limpa (US-017)
 
 ## Phase 4 — Reconciliação (8.5)
 

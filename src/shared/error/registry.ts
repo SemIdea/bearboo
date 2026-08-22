@@ -1,9 +1,10 @@
-import type { TRPC_ERROR_CODE_KEY } from "@trpc/server";
-
 type ErrorLevel = "fatal" | "error" | "warn" | "info";
 
+// What a domain declares about its own failure. Deliberately says nothing
+// about transport: how this becomes an HTTP or tRPC code is one consumer's
+// opinion and lives with that consumer (`src/server/http/domainErrorTransport.ts`),
+// which is why nothing under `src/shared/` imports from `@trpc/*`.
 type ErrorEntry = {
-	httpCode: TRPC_ERROR_CODE_KEY;
 	message: string;
 	retryable?: boolean;
 	level?: ErrorLevel;

@@ -1,27 +1,40 @@
 import { describe, expect, test } from "vitest";
 import { DomainError } from "../domainError";
+import { resolveErrorEntry } from "../index";
 
 describe("DomainError", () => {
-	test("resolves httpCode and message from the registered code", () => {
+	test("carries the code and nothing else", () => {
 		const error = new DomainError("media.not_found");
 
 		expect(error.code).toBe("media.not_found");
-		expect(error.httpCode).toBe("NOT_FOUND");
-		expect(error.message).toBe("Media not found.");
 		expect(error).toBeInstanceOf(Error);
+		expect(error.name).toBe("DomainError");
 	});
 
-	test("falls back to the metadata defaults when the catalog entry omits them", () => {
-		const error = new DomainError("media.delete_forbidden");
-
-		expect(error.retryable).toBe(false);
-		expect(error.level).toBe("warn");
+	test("uses the code as the Error message", () => {
+		// The human-readable text is resolved at the boundary, not carried here,
+		// so a stack trace shows which error it was rather than its wording.
+		expect(new DomainError("media.not_found").message).toBe("media.not_found");
 	});
 
-	test("resolves declared retryable/level from the catalog entry", () => {
-		expect(new DomainError("auth.too_many_attempts").retryable).toBe(true);
-		expect(new DomainError("session.session_create_error").level).toBe("error");
-		expect(new DomainError("post.not_found").level).toBe("info");
-		expect(new DomainError("session.session_expired").retryable).toBe(true);
+	test("does not expose transport or policy metadata on the instance", () => {
+		const error = new DomainError("media.not_found") as unknown as Record<
+			string,
+			unknown
+		>;
+
+		// These moved to the registry and the transport table. Reading them off
+		// the instance is what let createContext branch on a tRPC code.
+		expect(error.httpCode).toBeUndefined();
+		expect(error.retryable).toBeUndefined();
+		expect(error.level).toBeUndefined();
+	});
+
+	test("its code resolves the metadata the catalog declares", () => {
+		expect(resolveErrorEntry(new DomainError("post.not_found").code)).toEqual({
+			message: "Post not found.",
+			retryable: false,
+			level: "info",
+		});
 	});
 });

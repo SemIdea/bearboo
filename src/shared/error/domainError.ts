@@ -1,17 +1,19 @@
-import { type ErrorCode, Errors } from "./index";
-import type { ErrorLevel } from "./registry";
+import type { ErrorCode } from "./index";
 
+// Carries identity, nothing else.
+//
+// It used to copy `httpCode`/`message`/`retryable`/`level` off the catalog onto
+// itself, which meant a domain error knew its own transport code — and the
+// domain then started branching on it. Everything but the code is a static
+// function of the code, so consumers resolve what they need from the registry
+// (`resolveErrorEntry`) or, for transport, from `domainErrorTransport`.
+//
+// `super(code)` makes the code the Error message: stack traces stay readable
+// and the human-readable text is resolved at the boundary, which is where i18n
+// would eventually belong.
 class DomainError extends Error {
-	public readonly httpCode: (typeof Errors)[ErrorCode]["httpCode"];
-	public readonly retryable: boolean;
-	public readonly level: ErrorLevel;
-
 	constructor(public readonly code: ErrorCode) {
-		const entry = Errors[code];
-		super(entry.message);
-		this.httpCode = entry.httpCode;
-		this.retryable = entry.retryable ?? false;
-		this.level = entry.level ?? "warn";
+		super(code);
 		this.name = "DomainError";
 	}
 }

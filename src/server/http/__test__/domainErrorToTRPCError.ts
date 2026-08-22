@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { baseProcedure, t } from "@/server/createRouter";
-import { createTestContext, ITestContextDTO } from "@/test/context";
 import { DomainError } from "@/shared/error/domainError";
+import { createTestContext, ITestContextDTO } from "@/test/context";
 
 // The whole point of the middleware is that a procedure needs no try/catch to
 // report the right transport code. So every procedure below is written the way

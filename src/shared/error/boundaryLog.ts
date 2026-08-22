@@ -1,4 +1,5 @@
 import { DomainError } from "./domainError";
+import { resolveErrorEntry } from "./index";
 import type { ErrorLevel } from "./registry";
 
 type BoundaryErrorKind = "recoverable" | "bug";
@@ -32,12 +33,11 @@ const classifyBoundaryError = (error: unknown): BoundaryClassification => {
 	const domain = findDomainError(error);
 
 	if (domain) {
-		return {
-			kind: "recoverable",
-			level: domain.level,
-			retryable: domain.retryable,
-			code: domain.code,
-		};
+		// Resolved from the catalog rather than read off the instance: the
+		// DomainError carries identity, the registry carries policy.
+		const { level, retryable } = resolveErrorEntry(domain.code);
+
+		return { kind: "recoverable", level, retryable, code: domain.code };
 	}
 
 	return { kind: "bug", level: "error", retryable: false, code: null };
