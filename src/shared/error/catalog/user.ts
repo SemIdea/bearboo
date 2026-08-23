@@ -1,4 +1,4 @@
-import { defineDomainErrors } from "./registry";
+import { defineDomainErrors } from "../registry";
 
 const UserErrors = defineDomainErrors("user", {
 	not_found: {

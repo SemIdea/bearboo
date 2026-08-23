@@ -1,12 +1,12 @@
-import { AuthErrors } from "./auth";
-import { CommentErrors } from "./comment";
-import { MediaErrors } from "./media";
-import { PostErrors } from "./post";
+import { AuthErrors } from "./catalog/auth";
+import { CommentErrors } from "./catalog/comment";
+import { MediaErrors } from "./catalog/media";
+import { PostErrors } from "./catalog/post";
+import { ResetTokenErrors } from "./catalog/resetToken";
+import { SessionErrors } from "./catalog/session";
+import { UserErrors } from "./catalog/user";
+import { VerifyTokenErrors } from "./catalog/verifyToken";
 import type { ResolvedErrorEntry } from "./registry";
-import { ResetTokenErrors } from "./resetToken";
-import { SessionErrors } from "./session";
-import { UserErrors } from "./user";
-import { VerifyTokenErrors } from "./verifyToken";
 
 const Errors = {
 	...AuthErrors,

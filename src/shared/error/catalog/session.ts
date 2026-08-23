@@ -1,4 +1,4 @@
-import { defineDomainErrors } from "./registry";
+import { defineDomainErrors } from "../registry";
 
 const SessionErrors = defineDomainErrors("session", {
 	session_create_error: {
