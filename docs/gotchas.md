@@ -30,7 +30,7 @@
 
 **Solução:** retorna sinal pro client que dispara `queryClient.invalidateQueries(...)`. Ou usa cliente do stack que já integra (ex: `@trpc/tanstack-react-query` invalida automático em `onSuccess`).
 
-**Ref:** confirmado pelo time na adoção retroativa (`/afm:refactor`, 2026-06-30) como já mordido. Ver `src/server/features/post/revalidate/` (feature dedicada a revalidar ISR).
+**Ref:** confirmado pelo time na adoção retroativa (`/afm:refactor`, 2026-06-30) como já mordido. Ver `src/server/features/post/procedures/revalidate.ts` + `src/server/features/post/domain/revalidate.ts` (revalidação de ISR, estrutura por-feature do ADR-0006).
 
 ---
 
@@ -90,7 +90,7 @@ SEED candidato adicional de módulo detectado no scan (Next.js App Router), aind
 
 **Gatilho:** se você está fazendo push e quer entender por que o pre-push não rodou seu teste favorito.
 
-**Comportamento:** `.husky/pre-push` (desde 2026-07-16) roda `lint-staged --diff "origin/main...HEAD"` em vez de `yarn test` (suite completa). `lint-staged` usa a configuração `.lintstagedrc.json` que chama `vitest related <files>` — ou seja, **só roda testes ligados aos arquivos alterados**. Benefício: pre-push fica rápido (segundos em vez de minutos). Risco: não detecta quebras em arquivos não diretamente relacionados — especialmente relevante em projeto com **mocks compartilhados em estado serial** (`src/test/setup.ts` seam, ADR-0011). Exemplo: teste de `src/server/features/user/procedures/login.ts` é alterado; o pre-push **não roda** testes de `src/server/features/auth/procedures/verify.ts` se não há importação direta.
+**Comportamento:** `.husky/pre-push` (desde 2026-07-16) roda `lint-staged --diff "origin/main...HEAD"` em vez de `yarn test` (suite completa). `lint-staged` usa a configuração `.lintstagedrc.json` que chama `vitest related <files>` — ou seja, **só roda testes ligados aos arquivos alterados**. Benefício: pre-push fica rápido (segundos em vez de minutos). Risco: não detecta quebras em arquivos não diretamente relacionados — especialmente relevante em projeto com **mocks compartilhados em estado serial** (`src/test/setup.ts` seam, ADR-0011). Exemplo: teste de `src/server/features/user/procedures/login.ts` é alterado; o pre-push **não roda** testes de `src/server/features/auth/procedures/verifyToken.ts` se não há importação direta.
 
 **Solução:** **Pre-push é gate rápido local, e hoje é o único gate automatizado que existe** — `docs/roadmap.md` Fase 10 (CI/CD) ainda não começou (sem `.github/workflows/`), então não há um gate de suite completa rodando em merge pra pegar quebras cross-módulo depois. Mitigação até a Fase 10 existir:
 - Roda localmente `yarn test` (full suite) antes de push quando a mudança toca múltiplos módulos ou mexe em algo usado pelos mocks compartilhados (`src/test/setup.ts`, ADR-0011).
@@ -129,3 +129,15 @@ SEED candidato adicional de módulo detectado no scan (Next.js App Router), aind
 **Não achou no scan de 2026-07-18** (só documentado como referência preventiva, YAGNI de fix — regra de entrada de gotcha satisfeita por ser "comportamento documentado de SDK externo conhecido por surpreender", não por já ter mordido 2×): `nativeEnum`, `.merge()`, `.format()`/`.flatten()`, `email`/`uuid`/`cuid`/`datetime`/`ip`. Só `z.string().url()` foi achado e corrigido (`post/schema.ts`).
 
 **Ref:** confirmado pelo dono (2026-07-18) revisando `018-seo-overrides-slug-redirect`; motivo de virar gotcha em vez de fix silencioso é exatamente não ter dado erro de tipo — sem essa entrada, o padrão antigo volta a vazar em schema novo sem ninguém notar.
+
+---
+
+## tRPC — `t.procedure` direto pula o middleware de tradução de erro
+
+**Gatilho:** se você está criando uma procedure com `t.procedure` direto (em vez de `baseProcedure`/`publicProcedure`/`protectedProcedure`/`verifiedProcedure`/`roleProcedure`).
+
+**Comportamento:** a tradução `DomainError` → `TRPCError` vive num middleware (`withDomainErrors`) montado no `baseProcedure` (ADR-0019). Uma procedure construída fora dessa cadeia não passa pelo middleware — um `DomainError` que escape do resolver vira `INTERNAL_SERVER_ERROR` (500) com o `httpCode` correto perdido, **sem erro visível** em type-check nem em runtime local. Mordeu no `refreshSession` em `024-error-boundary-centralization` (um `TOO_MANY_REQUESTS` virou 500; pego pela suíte, não pelo compilador).
+
+**Solução:** derive de `baseProcedure`, não de `t.procedure` — mesmo quando precisa pular os guards de sessão (foi o motivo de o `baseProcedure` existir separado do `publicProcedure`: ele carrega só a tradução, sem o guard de sessão expirada). `t.procedure` cru só pra caso que comprovadamente não lança `DomainError` nenhum.
+
+**Ref:** ADR-0019 (§ Consequência, gotcha b). Choke point da tradução: `src/server/http/domainErrorToTRPCError.ts`.
