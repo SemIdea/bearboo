@@ -1,5 +1,5 @@
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
 const domain_recordView = async ({
 	ctx,
@@ -13,7 +13,7 @@ const domain_recordView = async ({
 	const post = await ctx.repositories.post.readIfPubliclyVisible(input.postId);
 
 	if (!post) {
-		throw new DomainError("post.not_found");
+		throw new AppError("post.not_found");
 	}
 
 	const referrerBucket = ctx.helpers.referrerClassifier.classify(input.referer);

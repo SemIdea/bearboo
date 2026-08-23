@@ -1,5 +1,5 @@
 import { assertRateLimit, baseProcedure } from "@/server/createRouter";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { REFRESH_RATE_LIMIT, SESSION_MAX_LIFETIME_MS } from "../constants";
 import { domain_readSessionByRefreshToken } from "../domain/readSessionByRefreshToken";
 import { domain_refreshSession } from "../domain/refreshSession";
@@ -14,7 +14,7 @@ const procedure_refreshSession = baseProcedure
 		const refreshToken = ctx.refreshToken;
 
 		if (!refreshToken) {
-			throw new DomainError("session.missing_token");
+			throw new AppError("session.missing_token");
 		}
 
 		await assertRateLimit(ctx, `refresh:${refreshToken}`, REFRESH_RATE_LIMIT);

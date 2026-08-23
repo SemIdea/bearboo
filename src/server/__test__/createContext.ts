@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { createTRPCContext } from "../createContext";
 
 const readUserAndSessionByAccessTokenMock = vi.hoisted(() => vi.fn());
@@ -76,7 +76,7 @@ describe("createTRPCContext", () => {
 
 	test("degrades to an anonymous context and clears stale cookies when the access token is invalid, instead of throwing", async () => {
 		readUserAndSessionByAccessTokenMock.mockRejectedValue(
-			new DomainError("session.access_token_invalid"),
+			new AppError("session.access_token_invalid"),
 		);
 
 		const ctx = await createTRPCContext({
@@ -99,14 +99,14 @@ describe("createTRPCContext", () => {
 		// codes satisfy. Keying on the domain code keeps session teardown tied
 		// to the one failure that means the access token is bad.
 		readUserAndSessionByAccessTokenMock.mockRejectedValue(
-			new DomainError("session.session_expired"),
+			new AppError("session.session_expired"),
 		);
 
 		await expect(
 			createTRPCContext({
 				headers: new Headers({ cookie: "accessToken=some-token" }),
 			}),
-		).rejects.toBeInstanceOf(DomainError);
+		).rejects.toBeInstanceOf(AppError);
 	});
 
 	test("does not swallow errors unrelated to an invalid token", async () => {

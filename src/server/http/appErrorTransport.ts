@@ -1,7 +1,7 @@
 import type { TRPC_ERROR_CODE_KEY } from "@trpc/server";
 import type { ErrorCode } from "@/shared/error";
 
-// How a domain error is projected onto the tRPC transport.
+// How an app error is projected onto the tRPC transport.
 //
 // This lives on the server side, not in the catalog, because the projection is
 // one consumer's opinion — not a property of the error. The domain names what
@@ -11,7 +11,7 @@ import type { ErrorCode } from "@/shared/error";
 //
 // `Record<ErrorCode, ...>` makes the mapping total: a new error code without an
 // entry here fails `tsc --noEmit` rather than falling through to a 500.
-const domainErrorTransport: Record<ErrorCode, TRPC_ERROR_CODE_KEY> = {
+const appErrorTransport: Record<ErrorCode, TRPC_ERROR_CODE_KEY> = {
 	"auth.invalid_credentials": "UNAUTHORIZED",
 	"auth.user_not_verified": "FORBIDDEN",
 	"auth.user_not_logged_in": "UNAUTHORIZED",
@@ -53,4 +53,4 @@ const domainErrorTransport: Record<ErrorCode, TRPC_ERROR_CODE_KEY> = {
 	"verifyToken.expired": "BAD_REQUEST",
 };
 
-export { domainErrorTransport };
+export { appErrorTransport };

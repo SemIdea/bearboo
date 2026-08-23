@@ -1,5 +1,5 @@
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
 const domain_refreshSession = async ({
 	ctx,
@@ -15,7 +15,7 @@ const domain_refreshSession = async ({
 	});
 
 	if (!newSession) {
-		throw new DomainError("session.session_update_error");
+		throw new AppError("session.session_update_error");
 	}
 
 	return newSession;

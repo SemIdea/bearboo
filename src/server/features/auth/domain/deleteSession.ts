@@ -1,6 +1,6 @@
 import { DomainInput } from "@/server/createDomain";
 import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
 const domain_deleteSession = async ({
 	ctx,
@@ -11,7 +11,7 @@ const domain_deleteSession = async ({
 	const session = await ctx.repositories.session.read(input.id);
 
 	if (!session) {
-		throw new DomainError("session.session_not_found");
+		throw new AppError("session.session_not_found");
 	}
 
 	await ctx.repositories.session.delete(session.id);

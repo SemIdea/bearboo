@@ -6,14 +6,14 @@
 
 **Quem joga:** funções `domain_*` (regra de negócio pura).
 
-**Como representa:** `throw new DomainError("<domain>.<code>")` — código namespaced do `ErrorRegistry`.
+**Como representa:** `throw new AppError("<domain>.<code>")` — código namespaced do `ErrorRegistry`.
 
 ```ts
 // O domain nomeia o que aconteceu. Nada mais.
-throw new DomainError("post.not_found");
+throw new AppError("post.not_found");
 ```
 
-O `DomainError` carrega **só o código** (ADR-0019). Mensagem, `retryable` e `level` são resolvidos por quem consome, via `resolveErrorEntry(code)`; o código de transporte, via `domainErrorTransport` — que vive em `src/server/`, não no catálogo.
+O `AppError` carrega **só o código** (ADR-0019). Mensagem, `retryable` e `level` são resolvidos por quem consome, via `resolveErrorEntry(code)`; o código de transporte, via `appErrorTransport` — que vive em `src/server/`, não no catálogo.
 
 **Code é literal derivado do registry** (`ErrorCode = keyof typeof Errors`) — typo quebra `tsc`, não o runtime.
 
@@ -36,7 +36,7 @@ O `DomainError` carrega **só o código** (ADR-0019). Mensagem, `retryable` e `l
 );
 ```
 
-Se você está escrevendo `if (error instanceof DomainError) throw new TRPCError(...)` numa procedure, pare: isso é a duplicação que a feature 024 removeu de 32 lugares.
+Se você está escrevendo `if (error instanceof AppError) throw new TRPCError(...)` numa procedure, pare: isso é a duplicação que a feature 024 removeu de 32 lugares.
 
 ### Infra error — falha de recurso externo
 
@@ -49,7 +49,7 @@ Se você está escrevendo `if (error instanceof DomainError) throw new TRPCError
 ## Anti-patterns
 
 - ❌ **Domain importando `TRPCError`.** Domain vira acoplado ao transport. Regra dura 15: `grep -rn "TRPCError" src/server/modules/**/domain/` retorna 0.
-- ❌ **`throw new Error("string genérica")` em domain.** Sem code literal, caller não consegue tratar specificamente. Use `DomainError({ code: "..." as const })`.
+- ❌ **`throw new Error("string genérica")` em domain.** Sem code literal, caller não consegue tratar specificamente. Use `AppError({ code: "..." as const })`.
 - ❌ **Try/catch genérico em todo await.** Erros tipados > catch genérico. Catch só se você vai tratar (mapear, logar specificamente, fazer fallback consciente). Senão deixa subir.
 - ❌ **Procedure que retorna `{ error: "..." }` em vez de jogar.** Quebra contrato do framework, força client a checar `data.error` em vez do mecanismo padrão.
 - ❌ **Misturar Domain error e Infra error no mesmo switch.** Domain code é fechado (sei todos os casos); Infra é aberto (rede pode falhar de N formas). Trate separado.
@@ -58,9 +58,9 @@ Se você está escrevendo `if (error instanceof DomainError) throw new TRPCError
 
 ```
 Onde estou?
-├── domain function → throw new DomainError("<domain>.<code>"); nada de transporte
+├── domain function → throw new AppError("<domain>.<code>"); nada de transporte
 ├── procedure        → não traduz nada; deixa subir (o middleware traduz)
 ├── boundary novo    → resolve via resolveErrorEntry + sua própria tabela de transporte
 ├── task             → leva idempotência; deixa Infra subir (retry resolve)
-└── lib pura         → DomainError com code do registry
+└── lib pura         → AppError com code do registry
 ```

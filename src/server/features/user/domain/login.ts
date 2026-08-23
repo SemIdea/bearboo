@@ -1,5 +1,5 @@
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { LoginUserInput } from "../schema";
 
 // Bcrypt hash of a fixed placeholder password (cost 10, same as real hashes) —
@@ -8,7 +8,7 @@ import { LoginUserInput } from "../schema";
 const DUMMY_PASSWORD_HASH =
 	"$2b$10$AySv8oQBUMv5OOodr543Z.9Q6WKQWso237RtvWEyWweL2dao05rzS";
 
-const invalidCredentialsError = new DomainError("auth.invalid_credentials");
+const invalidCredentialsError = new AppError("auth.invalid_credentials");
 
 const domain_loginUser = async ({
 	ctx,

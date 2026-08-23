@@ -1,6 +1,6 @@
 import { DomainInput } from "@/server/createDomain";
 import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
 const domain_createAuthSession = async ({
 	ctx,
@@ -22,7 +22,7 @@ const domain_createAuthSession = async ({
 	});
 
 	if (!session) {
-		throw new DomainError("session.session_create_error");
+		throw new AppError("session.session_create_error");
 	}
 
 	return session;

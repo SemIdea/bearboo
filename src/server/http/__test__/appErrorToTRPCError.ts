@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { baseProcedure, t } from "@/server/createRouter";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { createTestContext, ITestContextDTO } from "@/test/context";
 
 // The whole point of the middleware is that a procedure needs no try/catch to
@@ -8,10 +8,10 @@ import { createTestContext, ITestContextDTO } from "@/test/context";
 // a procedure should now look: it just calls through and lets the error rise.
 const router = t.router({
 	recoverable: baseProcedure.query(() => {
-		throw new DomainError("post.not_found");
+		throw new AppError("post.not_found");
 	}),
 	forbidden: baseProcedure.query(() => {
-		throw new DomainError("comment.update_forbidden");
+		throw new AppError("comment.update_forbidden");
 	}),
 	bug: baseProcedure.query(() => {
 		throw new TypeError("cannot read properties of undefined");
@@ -19,14 +19,14 @@ const router = t.router({
 	fine: baseProcedure.query(() => "ok"),
 });
 
-describe("withDomainErrors", () => {
+describe("withAppErrors", () => {
 	let ctx: ITestContextDTO;
 
 	beforeEach(async () => {
 		ctx = await createTestContext();
 	});
 
-	test("translates a DomainError into its mapped transport code", async () => {
+	test("translates a AppError into its mapped transport code", async () => {
 		await expect(router.createCaller(ctx).recoverable()).rejects.toMatchObject({
 			code: "NOT_FOUND",
 			message: "Post not found.",
@@ -40,7 +40,7 @@ describe("withDomainErrors", () => {
 		});
 	});
 
-	test("keeps the DomainError as cause", async () => {
+	test("keeps the AppError as cause", async () => {
 		// errorFormatter (domainCode), logBoundaryError and caller.ts all read
 		// `error.cause` — dropping it would silently break the redirect on an
 		// expired session.
@@ -49,8 +49,8 @@ describe("withDomainErrors", () => {
 			.recoverable()
 			.catch((thrown: unknown) => thrown);
 
-		expect((error as { cause: unknown }).cause).toBeInstanceOf(DomainError);
-		expect((error as { cause: DomainError }).cause.code).toBe("post.not_found");
+		expect((error as { cause: unknown }).cause).toBeInstanceOf(AppError);
+		expect((error as { cause: AppError }).cause.code).toBe("post.not_found");
 	});
 
 	test("leaves an unexpected throw as an internal error", async () => {

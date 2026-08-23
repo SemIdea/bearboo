@@ -1,5 +1,5 @@
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { CreateUserInput } from "../schema";
 
 const domain_registerUser = async ({
@@ -9,7 +9,7 @@ const domain_registerUser = async ({
 	const existingUser = await ctx.repositories.user.readByEmail(input.email);
 
 	if (existingUser) {
-		throw new DomainError("user.already_exists");
+		throw new AppError("user.already_exists");
 	}
 
 	const userId = ctx.helpers.uid.generate();

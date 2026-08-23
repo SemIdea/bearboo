@@ -1,7 +1,7 @@
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
-const invalidTokenError = new DomainError("session.refresh_token_invalid");
+const invalidTokenError = new AppError("session.refresh_token_invalid");
 
 const domain_readSessionByRefreshToken = async ({
 	ctx,

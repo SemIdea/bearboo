@@ -2,7 +2,7 @@ type ErrorLevel = "fatal" | "error" | "warn" | "info";
 
 // What a domain declares about its own failure. Deliberately says nothing
 // about transport: how this becomes an HTTP or tRPC code is one consumer's
-// opinion and lives with that consumer (`src/server/http/domainErrorTransport.ts`),
+// opinion and lives with that consumer (`src/server/http/appErrorTransport.ts`),
 // which is why nothing under `src/shared/` imports from `@trpc/*`.
 type ErrorEntry = {
 	message: string;

@@ -1,6 +1,6 @@
 import { DomainInput } from "@/server/createDomain";
 import { IUserWithSession } from "@/server/models/user";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
 const domain_readUserAndSessionByAccessToken = async ({
 	ctx,
@@ -11,13 +11,13 @@ const domain_readUserAndSessionByAccessToken = async ({
 	);
 
 	if (!session || !session.userId) {
-		throw new DomainError("session.access_token_invalid");
+		throw new AppError("session.access_token_invalid");
 	}
 
 	const user = await ctx.repositories.user.read(session.userId);
 
 	if (!user) {
-		throw new DomainError("session.access_token_invalid");
+		throw new AppError("session.access_token_invalid");
 	}
 
 	return {

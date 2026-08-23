@@ -678,16 +678,16 @@ Scenario: Mídia enviada vira capa do post
 ### US-017 — Dev resolve erro de domínio sem código duplicado por procedure
 
 - **Persona:** Dev mantenedor do projeto (item de qualidade interna, não de produto — `docs/roadmap.md` Fase 9).
-- **Story:** Como dev mantendo o backend, quero que todo erro de domínio já carregue seu próprio código HTTP e mensagem (via `ErrorRegistry`, `ADR-0017`), pra escrever/ler qualquer procedure sem precisar de switch/if-chain repetido traduzindo `DomainError` em `TRPCError`, e sem perder a granularidade que o frontend (`getErrorMessage`) já depende pra mostrar a mensagem certa.
+- **Story:** Como dev mantendo o backend, quero que todo erro de domínio já carregue seu próprio código HTTP e mensagem (via `ErrorRegistry`, `ADR-0017`), pra escrever/ler qualquer procedure sem precisar de switch/if-chain repetido traduzindo `AppError` em `TRPCError`, e sem perder a granularidade que o frontend (`getErrorMessage`) já depende pra mostrar a mensagem certa.
 
 **Critérios de aceitação:**
 
 ```gherkin
 Scenario: Domain lança erro namespaced e a procedure não traduz nada
   Given uma função domain_* que detecta uma violação de regra de negócio
-  When ela lança `new DomainError("auth.invalid_credentials")`
+  When ela lança `new AppError("auth.invalid_credentials")`
   Then a procedure não carrega bloco de tradução nenhum — nem switch, nem if-chain, nem try/catch
-  And o middleware do baseProcedure relança um TRPCError com o código de transporte (domainErrorTransport) e a mensagem (resolveErrorEntry) resolvidos fora do domínio
+  And o middleware do baseProcedure relança um TRPCError com o código de transporte (appErrorTransport) e a mensagem (resolveErrorEntry) resolvidos fora do domínio
 
 Scenario: Dois domínios não podem reivindicar o mesmo namespace
   Given dois arquivos de erro diferentes chamando defineDomainErrors com o mesmo nome de domínio
@@ -695,7 +695,7 @@ Scenario: Dois domínios não podem reivindicar o mesmo namespace
   Then o ErrorRegistry lança um erro de duplicação, falhando o boot em vez de sobrescrever silenciosamente
 
 Scenario: Typo no código de erro quebra o build, não o runtime
-  Given um domain_* referenciando um DomainError com um code inexistente no registry
+  Given um domain_* referenciando um AppError com um code inexistente no registry
   When o projeto roda tsc --noEmit
   Then o build falha, porque ErrorCode é o union literal derivado de keyof typeof Errors
 

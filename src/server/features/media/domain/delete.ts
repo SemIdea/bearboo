@@ -1,6 +1,6 @@
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
 const domain_deleteMedia = async ({
 	ctx,
@@ -9,7 +9,7 @@ const domain_deleteMedia = async ({
 	const media = await ctx.repositories.media.read(input.id);
 
 	if (!media) {
-		throw new DomainError("media.not_found");
+		throw new AppError("media.not_found");
 	}
 
 	const isOwner = media.uploadedById === input.userId;
@@ -19,7 +19,7 @@ const domain_deleteMedia = async ({
 	);
 
 	if (!isOwner && !canDeleteAny) {
-		throw new DomainError("media.delete_forbidden");
+		throw new AppError("media.delete_forbidden");
 	}
 
 	await ctx.gateways.mediaStorage.delete(media.storageKey);

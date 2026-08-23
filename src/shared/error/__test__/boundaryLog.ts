@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { AppError } from "../appError";
 import { classifyBoundaryError, logBoundaryError } from "../boundaryLog";
-import { DomainError } from "../domainError";
 
 describe("classifyBoundaryError", () => {
-	test("classifies a DomainError as recoverable with its own metadata", () => {
-		const result = classifyBoundaryError(new DomainError("post.not_found"));
+	test("classifies a AppError as recoverable with its own metadata", () => {
+		const result = classifyBoundaryError(new AppError("post.not_found"));
 
 		expect(result).toEqual({
 			kind: "recoverable",
@@ -14,8 +14,8 @@ describe("classifyBoundaryError", () => {
 		});
 	});
 
-	test("unwraps a DomainError carried as the cause (the boundary TRPCError case)", () => {
-		const wrapped = { cause: new DomainError("session.session_expired") };
+	test("unwraps a AppError carried as the cause (the boundary TRPCError case)", () => {
+		const wrapped = { cause: new AppError("session.session_expired") };
 
 		const result = classifyBoundaryError(wrapped);
 
@@ -48,7 +48,7 @@ describe("logBoundaryError", () => {
 			.spyOn(console, "error")
 			.mockImplementation(() => undefined);
 
-		logBoundaryError(new DomainError("post.not_found"));
+		logBoundaryError(new AppError("post.not_found"));
 
 		expect(info).toHaveBeenCalledTimes(1);
 		expect(error).not.toHaveBeenCalled();

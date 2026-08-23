@@ -1,6 +1,6 @@
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { ReadPostBySlugInput } from "../schema";
 
 const isPubliclyVisible = (post: {
@@ -19,7 +19,7 @@ const domain_readPostBySlug = async ({
 	const post = await ctx.repositories.post.readBySlug(input.slug);
 
 	if (!post) {
-		throw new DomainError("post.not_found");
+		throw new AppError("post.not_found");
 	}
 
 	const isOwner = post.userId === input.callerId;
@@ -27,7 +27,7 @@ const domain_readPostBySlug = async ({
 		!!input.role && ctx.helpers.permissions.can(input.role, "post:publish");
 
 	if (!isPubliclyVisible(post) && !isOwner && !canReview) {
-		throw new DomainError("post.not_found");
+		throw new AppError("post.not_found");
 	}
 
 	return post;
