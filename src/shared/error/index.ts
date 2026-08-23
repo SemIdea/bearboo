@@ -21,10 +21,8 @@ const Errors = {
 
 type ErrorCode = keyof typeof Errors;
 
-// The lookup the registry was missing: until now the catalogs were only ever
-// written to, never read from — `DomainError` copied the fields onto itself
-// and everyone read the copy. Resolving here keeps the metadata in one place
-// and applies the defaults once, instead of at each call site.
+// Resolves an error code to its metadata, applying the defaults once here
+// rather than at each call site.
 //
 // It lives in the aggregate rather than in `registry.ts` because `Errors` is
 // the complete, static table: the lookup is total over `ErrorCode` and cannot

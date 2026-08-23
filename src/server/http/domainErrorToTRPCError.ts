@@ -3,7 +3,8 @@ import { resolveErrorEntry } from "@/shared/error";
 import { findDomainError } from "@/shared/error/boundaryLog";
 import { domainErrorTransport } from "./domainErrorTransport";
 
-// The translation the boundary used to repeat in every procedure, in one place.
+// The domain-error → transport translation, centralized: every procedure
+// inherits it through the `withDomainErrors` middleware instead of repeating it.
 //
 // Returns `null` when the error is not a domain error, so the caller can leave
 // it alone: an unexpected throw is a bug and must keep reporting as one rather
