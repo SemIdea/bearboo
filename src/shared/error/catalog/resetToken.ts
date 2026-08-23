@@ -1,4 +1,4 @@
-import { defineDomainErrors } from "./registry";
+import { defineDomainErrors } from "../registry";
 
 const ResetTokenErrors = defineDomainErrors("resetToken", {
 	not_found: {
