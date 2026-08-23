@@ -63,7 +63,14 @@ const createTRPCContext = async ({
 			input: { accessToken },
 		});
 	} catch (error) {
-		if (error instanceof DomainError && error.httpCode === "UNAUTHORIZED") {
+		// Keyed on the specific domain code, not on a transport code: keying on
+		// `httpCode === "UNAUTHORIZED"` would let any of the five codes mapped to
+		// it clear the user's session cookies. Only an invalid access token
+		// should, and it's the only code this lookup throws.
+		if (
+			error instanceof DomainError &&
+			error.code === "session.access_token_invalid"
+		) {
 			ctx.resCookies.clear("accessToken");
 			ctx.resCookies.clear("refreshToken");
 			return ctx;

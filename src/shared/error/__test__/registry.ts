@@ -1,43 +1,39 @@
 import { describe, expect, test } from "vitest";
-import { defineDomainErrors } from "../registry";
+import { resolveErrorEntry } from "../index";
 
-describe("defineDomainErrors", () => {
-	test("namespaces every key with the domain prefix", () => {
-		const errors = defineDomainErrors("registry_test_auth", {
-			invalid_credentials: {
-				httpCode: "UNAUTHORIZED",
-				message: "Invalid email or password.",
-			},
-			user_not_verified: {
-				httpCode: "FORBIDDEN",
-				message: "Account not verified.",
-			},
-		});
-
-		expect(errors).toEqual({
-			"registry_test_auth.invalid_credentials": {
-				httpCode: "UNAUTHORIZED",
-				message: "Invalid email or password.",
-			},
-			"registry_test_auth.user_not_verified": {
-				httpCode: "FORBIDDEN",
-				message: "Account not verified.",
-			},
+// The registry is where the defaults live, not the consumer. If each caller
+// had to write `entry.retryable ?? false`, the boilerplate this feature is
+// removing would just grow back somewhere else.
+describe("resolveErrorEntry", () => {
+	test("returns the metadata a catalog entry declares", () => {
+		expect(resolveErrorEntry("session.session_create_error")).toEqual({
+			message: "Failed to create session. Please try again.",
+			retryable: true,
+			level: "error",
 		});
 	});
 
-	test("throws when the same domain is registered twice", () => {
-		defineDomainErrors("registry_test_media", {
-			not_found: { httpCode: "NOT_FOUND", message: "Media not found." },
+	test("normalizes the optional fields to their defaults when omitted", () => {
+		expect(resolveErrorEntry("media.delete_forbidden")).toEqual({
+			message: "You are not allowed to delete this media.",
+			retryable: false,
+			level: "warn",
+		});
+	});
+
+	test("applies each default independently", () => {
+		// Declares `level` but not `retryable`.
+		expect(resolveErrorEntry("post.not_found")).toEqual({
+			message: "Post not found.",
+			retryable: false,
+			level: "info",
 		});
 
-		expect(() =>
-			defineDomainErrors("registry_test_media", {
-				delete_forbidden: {
-					httpCode: "FORBIDDEN",
-					message: "Not allowed.",
-				},
-			}),
-		).toThrow(/registry_test_media/);
+		// Declares `retryable` but not `level`.
+		expect(resolveErrorEntry("auth.too_many_attempts")).toEqual({
+			message: "Too many attempts. Please try again later.",
+			retryable: true,
+			level: "warn",
+		});
 	});
 });

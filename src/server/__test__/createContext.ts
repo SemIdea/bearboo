@@ -94,6 +94,21 @@ describe("createTRPCContext", () => {
 		);
 	});
 
+	test("does not clear cookies for a different domain error that also maps to UNAUTHORIZED", async () => {
+		// The condition used to be `httpCode === "UNAUTHORIZED"`, which five
+		// codes satisfy. Keying on the domain code keeps session teardown tied
+		// to the one failure that means the access token is bad.
+		readUserAndSessionByAccessTokenMock.mockRejectedValue(
+			new DomainError("session.session_expired"),
+		);
+
+		await expect(
+			createTRPCContext({
+				headers: new Headers({ cookie: "accessToken=some-token" }),
+			}),
+		).rejects.toBeInstanceOf(DomainError);
+	});
+
 	test("does not swallow errors unrelated to an invalid token", async () => {
 		readUserAndSessionByAccessTokenMock.mockRejectedValue(
 			new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "db down" }),

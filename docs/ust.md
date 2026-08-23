@@ -683,10 +683,11 @@ Scenario: Mídia enviada vira capa do post
 **Critérios de aceitação:**
 
 ```gherkin
-Scenario: Domain lança erro namespaced e a procedure traduz sem switch
+Scenario: Domain lança erro namespaced e a procedure não traduz nada
   Given uma função domain_* que detecta uma violação de regra de negócio
   When ela lança `new DomainError("auth.invalid_credentials")`
-  Then a procedure captura o erro e relança um TRPCError com httpCode e message resolvidos automaticamente pelo DomainError, sem nenhum switch/if-chain local
+  Then a procedure não carrega bloco de tradução nenhum — nem switch, nem if-chain, nem try/catch
+  And o middleware do baseProcedure relança um TRPCError com o código de transporte (domainErrorTransport) e a mensagem (resolveErrorEntry) resolvidos fora do domínio
 
 Scenario: Dois domínios não podem reivindicar o mesmo namespace
   Given dois arquivos de erro diferentes chamando defineDomainErrors com o mesmo nome de domínio
@@ -704,7 +705,7 @@ Scenario: Frontend continua resolvendo a mensagem certa por código granular
   Then o frontend exibe a mensagem específica correta, não uma mensagem genérica de status
 ```
 
-**Metadata:** RF-14. *Spec:* `docs/features/022-error-registry/spec.md`.
+**Metadata:** RF-14. *Spec:* `docs/features/022-error-registry/spec.md`; estendida por `023-error-metadata-classification` e **fechada de fato** por `024-error-boundary-centralization` (2026-08-22) — a 022 entregou o registry, mas a duplicação que a story cita ("sem switch/if-chain repetido") só saiu do código na 024, quando a tradução virou middleware. Ver ADR-0019.
 
 ---
 
