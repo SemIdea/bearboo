@@ -10,12 +10,12 @@ import { ViewTracker } from "@/components/viewTracker";
 import { env } from "@/lib/env";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { CommentArea, RelatedPosts } from "./page.client";
 
 const isPostNotFound = (error: unknown): boolean =>
 	error instanceof Error &&
-	error.cause instanceof DomainError &&
+	error.cause instanceof AppError &&
 	error.cause.code === "post.not_found";
 
 type PageProps = {

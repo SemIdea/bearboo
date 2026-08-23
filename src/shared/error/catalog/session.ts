@@ -13,7 +13,7 @@ const SessionErrors = defineDomainErrors("session", {
 	// `refresh_token_invalid` and `access_token_invalid` share this message but
 	// not their transport code — the refresh lookup reports NOT_FOUND, the
 	// access lookup UNAUTHORIZED. Kept as distinct codes so each keeps its own
-	// projection; see `src/server/http/domainErrorTransport.ts`.
+	// projection; see `src/server/http/appErrorTransport.ts`.
 	refresh_token_invalid: {
 		message: "Authentication token is invalid.",
 		level: "info",

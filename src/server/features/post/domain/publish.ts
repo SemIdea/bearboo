@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { PublishPostInput } from "../schema";
 
 const VALID_SOURCE_STATUSES = ["DRAFT", "IN_REVIEW"];
@@ -13,15 +13,15 @@ const domain_publishPost = async ({
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new DomainError("post.not_found");
+		throw new AppError("post.not_found");
 	}
 
 	if (!ctx.helpers.permissions.can(input.role, "post:publish")) {
-		throw new DomainError("post.update_forbidden");
+		throw new AppError("post.update_forbidden");
 	}
 
 	if (!VALID_SOURCE_STATUSES.includes(post.status)) {
-		throw new DomainError("post.invalid_status_transition");
+		throw new AppError("post.invalid_status_transition");
 	}
 
 	const isScheduledForFuture =

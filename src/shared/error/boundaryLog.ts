@@ -1,4 +1,4 @@
-import { DomainError } from "./domainError";
+import { AppError } from "./appError";
 import { resolveErrorEntry } from "./index";
 import type { ErrorLevel } from "./registry";
 
@@ -11,17 +11,17 @@ type BoundaryClassification = {
 	code: string | null;
 };
 
-// A recoverable error is (or wraps, as a TRPCError's cause) a DomainError; the
-// boundary throws `new TRPCError({ ..., cause: domainError })`, so we look one
+// A recoverable error is (or wraps, as a TRPCError's cause) a AppError; the
+// boundary throws `new TRPCError({ ..., cause: appError })`, so we look one
 // level down. Anything else is an unexpected throw — a bug.
-const findDomainError = (error: unknown): DomainError | null => {
-	if (error instanceof DomainError) return error;
+const findAppError = (error: unknown): AppError | null => {
+	if (error instanceof AppError) return error;
 
 	if (
 		typeof error === "object" &&
 		error !== null &&
 		"cause" in error &&
-		error.cause instanceof DomainError
+		error.cause instanceof AppError
 	) {
 		return error.cause;
 	}
@@ -30,14 +30,14 @@ const findDomainError = (error: unknown): DomainError | null => {
 };
 
 const classifyBoundaryError = (error: unknown): BoundaryClassification => {
-	const domain = findDomainError(error);
+	const appError = findAppError(error);
 
-	if (domain) {
+	if (appError) {
 		// Resolved from the catalog rather than read off the instance: the
-		// DomainError carries identity, the registry carries policy.
-		const { level, retryable } = resolveErrorEntry(domain.code);
+		// AppError carries identity, the registry carries policy.
+		const { level, retryable } = resolveErrorEntry(appError.code);
 
-		return { kind: "recoverable", level, retryable, code: domain.code };
+		return { kind: "recoverable", level, retryable, code: appError.code };
 	}
 
 	return { kind: "bug", level: "error", retryable: false, code: null };
@@ -73,6 +73,6 @@ const logBoundaryError = (
 export {
 	type BoundaryClassification,
 	classifyBoundaryError,
-	findDomainError,
+	findAppError,
 	logBoundaryError,
 };

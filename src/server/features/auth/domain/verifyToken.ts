@@ -1,5 +1,5 @@
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { VerifyTokenInput } from "../schema";
 
 const domain_verifyToken = async ({
@@ -11,15 +11,15 @@ const domain_verifyToken = async ({
 	);
 
 	if (!verifyToken) {
-		throw new DomainError("verifyToken.not_found");
+		throw new AppError("verifyToken.not_found");
 	}
 
 	if (verifyToken.used) {
-		throw new DomainError("verifyToken.already_used");
+		throw new AppError("verifyToken.already_used");
 	}
 
 	if (verifyToken.expiresAt < new Date()) {
-		throw new DomainError("verifyToken.expired");
+		throw new AppError("verifyToken.expired");
 	}
 
 	await ctx.repositories.user.update(verifyToken.userId, {

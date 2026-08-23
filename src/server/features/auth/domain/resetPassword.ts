@@ -1,6 +1,6 @@
 import { DomainInput } from "@/server/createDomain";
 import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 
 const domain_resetPassword = async ({
 	ctx,
@@ -12,15 +12,15 @@ const domain_resetPassword = async ({
 	const resetToken = await ctx.repositories.resetToken.readByToken(input.token);
 
 	if (!resetToken) {
-		throw new DomainError("resetToken.not_found");
+		throw new AppError("resetToken.not_found");
 	}
 
 	if (resetToken.used) {
-		throw new DomainError("resetToken.already_used");
+		throw new AppError("resetToken.already_used");
 	}
 
 	if (resetToken.expiresAt < new Date()) {
-		throw new DomainError("resetToken.expired");
+		throw new AppError("resetToken.expired");
 	}
 
 	const user = await domain_getUserOrThrow({

@@ -2,13 +2,13 @@ import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { IRole } from "@/server/models/user";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { Context } from "./createContext";
 import {
 	SESSION_IDLE_TIMEOUT_MS,
 	SESSION_MAX_LIFETIME_MS,
 } from "./features/auth/constants";
-import { domainErrorToTRPCError } from "./http/domainErrorToTRPCError";
+import { appErrorToTRPCError } from "./http/appErrorToTRPCError";
 
 const t = initTRPC.context<Context>().create({
 	transformer: superjson,
@@ -22,14 +22,13 @@ const t = initTRPC.context<Context>().create({
 					error.code === "BAD_REQUEST" && error.cause instanceof ZodError
 						? error.cause.flatten()
 						: null,
-				domainCode:
-					error.cause instanceof DomainError ? error.cause.code : null,
+				domainCode: error.cause instanceof AppError ? error.cause.code : null,
 			},
 		};
 	},
 });
 
-// Translates domain errors into transport errors for every procedure at once.
+// Translates app errors into transport errors for every procedure at once.
 //
 // Note this inspects the result instead of wrapping `next()` in a try/catch:
 // tRPC catches whatever the resolver throws and hands it back as
@@ -38,12 +37,12 @@ const t = initTRPC.context<Context>().create({
 // result to re-map.
 //
 // Mounted first so it wraps everything downstream, guards included.
-const withDomainErrors = t.middleware(async ({ next }) => {
+const withAppErrors = t.middleware(async ({ next }) => {
 	const result = await next();
 
 	if (result.ok) return result;
 
-	const translated = domainErrorToTRPCError(result.error);
+	const translated = appErrorToTRPCError(result.error);
 
 	if (translated) throw translated;
 
@@ -53,7 +52,7 @@ const withDomainErrors = t.middleware(async ({ next }) => {
 // The root every procedure derives from. `publicProcedure` adds the session
 // check on top; procedures that must run without it (refreshSession) build
 // straight from here and still get the error translation.
-const baseProcedure = t.procedure.use(withDomainErrors);
+const baseProcedure = t.procedure.use(withAppErrors);
 
 const publicProcedure = baseProcedure.use(async ({ ctx, next }) => {
 	const user = ctx.user;
@@ -70,7 +69,7 @@ const publicProcedure = baseProcedure.use(async ({ ctx, next }) => {
 		now - sessionCreatedDate.getTime() > SESSION_MAX_LIFETIME_MS;
 
 	if (isIdle || isPastMaxLifetime) {
-		throw new DomainError("session.session_expired");
+		throw new AppError("session.session_expired");
 	}
 
 	return next({
@@ -88,13 +87,13 @@ const assertRateLimit = async (
 	const { allowed } = await ctx.helpers.rateLimit.consume(key, limit);
 
 	if (!allowed) {
-		throw new DomainError("auth.too_many_attempts");
+		throw new AppError("auth.too_many_attempts");
 	}
 };
 
 const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 	if (!ctx.user) {
-		throw new DomainError("auth.user_not_logged_in");
+		throw new AppError("auth.user_not_logged_in");
 	}
 
 	return next({
@@ -106,7 +105,7 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 
 const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 	if (!ctx.user.verified) {
-		throw new DomainError("auth.user_not_verified");
+		throw new AppError("auth.user_not_verified");
 	}
 
 	return next({
@@ -119,7 +118,7 @@ const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 const roleProcedure = (allowed: IRole[]) =>
 	verifiedProcedure.use(async ({ ctx, next }) => {
 		if (!allowed.includes(ctx.user.role)) {
-			throw new DomainError("auth.insufficient_role");
+			throw new AppError("auth.insufficient_role");
 		}
 
 		return next({

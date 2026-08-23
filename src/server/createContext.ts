@@ -1,6 +1,6 @@
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { env } from "@/lib/env";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
 import { CookieJar } from "./http/cookieJar";
 import { gateways, IGateways } from "./infra/container/gateways";
@@ -68,7 +68,7 @@ const createTRPCContext = async ({
 		// it clear the user's session cookies. Only an invalid access token
 		// should, and it's the only code this lookup throws.
 		if (
-			error instanceof DomainError &&
+			error instanceof AppError &&
 			error.code === "session.access_token_invalid"
 		) {
 			ctx.resCookies.clear("accessToken");

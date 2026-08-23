@@ -1,6 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { RevalidatePostInput } from "../schema";
 
 const domain_revalidatePost = async ({
@@ -10,11 +10,11 @@ const domain_revalidatePost = async ({
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new DomainError("post.not_found");
+		throw new AppError("post.not_found");
 	}
 
 	if (post.userId !== input.userId) {
-		throw new DomainError("post.update_forbidden");
+		throw new AppError("post.update_forbidden");
 	}
 
 	revalidateTag("posts", "hours");

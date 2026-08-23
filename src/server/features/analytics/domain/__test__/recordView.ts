@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { createTestContext } from "@/test/context";
 import { domain_recordView } from "../recordView";
 
@@ -27,7 +27,7 @@ describe("domain_recordView", () => {
 				ctx,
 				input: { postId: post.id, visitorId: "visitor-1" },
 			}),
-		).rejects.toMatchObject(new DomainError("post.not_found"));
+		).rejects.toMatchObject(new AppError("post.not_found"));
 	});
 
 	test("does not record a view for an ARCHIVED post", async () => {
@@ -40,7 +40,7 @@ describe("domain_recordView", () => {
 				ctx,
 				input: { postId: post.id, visitorId: "visitor-1" },
 			}),
-		).rejects.toMatchObject(new DomainError("post.not_found"));
+		).rejects.toMatchObject(new AppError("post.not_found"));
 	});
 
 	test("does not recount the same visitor on a second call", async () => {

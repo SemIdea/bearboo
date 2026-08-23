@@ -1,5 +1,5 @@
 import { DomainInput } from "@/server/createDomain";
-import { DomainError } from "@/shared/error/domainError";
+import { AppError } from "@/shared/error/appError";
 import { UpdateCommentInput } from "../schema";
 
 const domain_updateComment = async ({
@@ -9,11 +9,11 @@ const domain_updateComment = async ({
 	const comment = await ctx.repositories.comment.read(input.id);
 
 	if (!comment) {
-		throw new DomainError("comment.not_found");
+		throw new AppError("comment.not_found");
 	}
 
 	if (comment.userId !== input.userId) {
-		throw new DomainError("comment.update_forbidden");
+		throw new AppError("comment.update_forbidden");
 	}
 
 	return ctx.repositories.comment.update(input.id, {

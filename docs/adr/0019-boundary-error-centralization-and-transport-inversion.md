@@ -4,6 +4,8 @@
 > **Data:** 2026-08-22
 > **Decidido por:** SemIdea
 > **Substitui:** ADR-0016 · **Estende:** ADR-0017, ADR-0018
+>
+> **Nota (2026-08-23):** o tipo `DomainError` citado abaixo foi renomeado para `AppError` na ADR-0020 (e os derivados `domainErrorTransport` → `appErrorTransport`, `domainErrorToTRPCError` → `appErrorToTRPCError`). Este corpo preserva o nome de época; leia `DomainError` = hoje-`AppError`.
 
 ## Contexto
 
