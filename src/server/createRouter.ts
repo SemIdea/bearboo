@@ -1,4 +1,4 @@
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { IRole } from "@/server/models/user";
@@ -8,6 +8,7 @@ import {
 	SESSION_IDLE_TIMEOUT_MS,
 	SESSION_MAX_LIFETIME_MS,
 } from "./features/auth/constants";
+import { domainErrorToTRPCError } from "./http/domainErrorToTRPCError";
 
 const t = initTRPC.context<Context>().create({
 	transformer: superjson,
@@ -28,7 +29,33 @@ const t = initTRPC.context<Context>().create({
 	},
 });
 
-const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
+// Translates domain errors into transport errors for every procedure at once.
+//
+// Note this inspects the result instead of wrapping `next()` in a try/catch:
+// tRPC catches whatever the resolver throws and hands it back as
+// `{ ok: false, error }`, already wrapped as an INTERNAL_SERVER_ERROR with the
+// original throw as `cause`. So there is nothing to catch here — there is a
+// result to re-map.
+//
+// Mounted first so it wraps everything downstream, guards included.
+const withDomainErrors = t.middleware(async ({ next }) => {
+	const result = await next();
+
+	if (result.ok) return result;
+
+	const translated = domainErrorToTRPCError(result.error);
+
+	if (translated) throw translated;
+
+	return result;
+});
+
+// The root every procedure derives from. `publicProcedure` adds the session
+// check on top; procedures that must run without it (refreshSession) build
+// straight from here and still get the error translation.
+const baseProcedure = t.procedure.use(withDomainErrors);
+
+const publicProcedure = baseProcedure.use(async ({ ctx, next }) => {
 	const user = ctx.user;
 
 	if (!user) return next();
@@ -43,12 +70,7 @@ const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
 		now - sessionCreatedDate.getTime() > SESSION_MAX_LIFETIME_MS;
 
 	if (isIdle || isPastMaxLifetime) {
-		const error = new DomainError("session.session_expired");
-		throw new TRPCError({
-			code: error.httpCode,
-			message: error.message,
-			cause: error,
-		});
+		throw new DomainError("session.session_expired");
 	}
 
 	return next({
@@ -66,23 +88,13 @@ const assertRateLimit = async (
 	const { allowed } = await ctx.helpers.rateLimit.consume(key, limit);
 
 	if (!allowed) {
-		const error = new DomainError("auth.too_many_attempts");
-		throw new TRPCError({
-			code: error.httpCode,
-			message: error.message,
-			cause: error,
-		});
+		throw new DomainError("auth.too_many_attempts");
 	}
 };
 
 const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 	if (!ctx.user) {
-		const error = new DomainError("auth.user_not_logged_in");
-		throw new TRPCError({
-			code: error.httpCode,
-			message: error.message,
-			cause: error,
-		});
+		throw new DomainError("auth.user_not_logged_in");
 	}
 
 	return next({
@@ -94,12 +106,7 @@ const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 
 const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 	if (!ctx.user.verified) {
-		const error = new DomainError("auth.user_not_verified");
-		throw new TRPCError({
-			code: error.httpCode,
-			message: error.message,
-			cause: error,
-		});
+		throw new DomainError("auth.user_not_verified");
 	}
 
 	return next({
@@ -112,12 +119,7 @@ const verifiedProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 const roleProcedure = (allowed: IRole[]) =>
 	verifiedProcedure.use(async ({ ctx, next }) => {
 		if (!allowed.includes(ctx.user.role)) {
-			const error = new DomainError("auth.insufficient_role");
-			throw new TRPCError({
-				code: error.httpCode,
-				message: error.message,
-				cause: error,
-			});
+			throw new DomainError("auth.insufficient_role");
 		}
 
 		return next({
@@ -129,6 +131,7 @@ const roleProcedure = (allowed: IRole[]) =>
 
 export {
 	assertRateLimit,
+	baseProcedure,
 	protectedProcedure,
 	publicProcedure,
 	roleProcedure,

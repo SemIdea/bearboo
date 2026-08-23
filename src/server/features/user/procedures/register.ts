@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { assertRateLimit, publicProcedure } from "@/server/createRouter";
-import { DomainError } from "@/shared/error/domainError";
 import { REGISTER_RATE_LIMIT } from "../../auth/constants";
 import { domain_createToken } from "../../auth/domain/createToken";
 import { domain_sendMail } from "../../mail/domain/sendMail";
@@ -13,21 +11,7 @@ const procedure_registerUser = publicProcedure
 	.mutation(async ({ input, ctx }) => {
 		await assertRateLimit(ctx, `register:${input.email}`, REGISTER_RATE_LIMIT);
 
-		let user: Awaited<ReturnType<typeof domain_registerUser>>;
-
-		try {
-			user = await domain_registerUser({ ctx, input });
-		} catch (error) {
-			if (error instanceof DomainError) {
-				throw new TRPCError({
-					code: error.httpCode,
-					message: error.message,
-					cause: error,
-				});
-			}
-
-			throw error;
-		}
+		const user = await domain_registerUser({ ctx, input });
 
 		const verifyToken = await domain_createToken({
 			ctx,

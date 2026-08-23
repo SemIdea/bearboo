@@ -1,12 +1,22 @@
-import type { TRPC_ERROR_CODE_KEY } from "@trpc/server";
-
 type ErrorLevel = "fatal" | "error" | "warn" | "info";
 
+// What a domain declares about its own failure. Deliberately says nothing
+// about transport: how this becomes an HTTP or tRPC code is one consumer's
+// opinion and lives with that consumer (`src/server/http/domainErrorTransport.ts`),
+// which is why nothing under `src/shared/` imports from `@trpc/*`.
 type ErrorEntry = {
-	httpCode: TRPC_ERROR_CODE_KEY;
 	message: string;
 	retryable?: boolean;
 	level?: ErrorLevel;
+};
+
+// Metadata as every consumer needs it: optional fields already collapsed onto
+// their defaults. Resolving here is what keeps `?? false` / `?? "warn"` from
+// reappearing at each call site.
+type ResolvedErrorEntry = {
+	message: string;
+	retryable: boolean;
+	level: ErrorLevel;
 };
 
 const registeredDomains = new Set<string>();
@@ -28,4 +38,9 @@ function defineDomainErrors<
 	};
 }
 
-export { defineDomainErrors, type ErrorEntry, type ErrorLevel };
+export {
+	defineDomainErrors,
+	type ErrorEntry,
+	type ErrorLevel,
+	type ResolvedErrorEntry,
+};

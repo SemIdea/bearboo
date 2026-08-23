@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { publicProcedure } from "@/server/createRouter";
-import { DomainError } from "@/shared/error/domainError";
 import { domain_sendMail } from "../../mail/domain/sendMail";
 import { domain_reCreateToken } from "../domain/reCreateToken";
 import {
@@ -12,24 +10,10 @@ const procedure_resendVerificationEmail = publicProcedure
 	.input(resendVerificationEmailSchema)
 	.output(resendVerificationEmailOutputSchema)
 	.mutation(async ({ input, ctx }) => {
-		let token: Awaited<ReturnType<typeof domain_reCreateToken>>;
-
-		try {
-			token = await domain_reCreateToken({
-				ctx,
-				input: { userEmail: input.email },
-			});
-		} catch (error) {
-			if (error instanceof DomainError) {
-				throw new TRPCError({
-					code: error.httpCode,
-					message: error.message,
-					cause: error,
-				});
-			}
-
-			throw error;
-		}
+		const token = await domain_reCreateToken({
+			ctx,
+			input: { userEmail: input.email },
+		});
 
 		await domain_sendMail({
 			ctx,
