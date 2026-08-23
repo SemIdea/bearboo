@@ -99,7 +99,8 @@ src/
 │   ├── integrations/
 │   │   └── gateway/<name>/      # adapter.ts + implementations/  (mailer)
 │   └── createContext.ts, createRouter.ts, caller.ts
-├── shared/error/<domínio>.ts   # ErrorCode enum + mensagens, por domínio (auth/post/comment/user/session/resetToken/verifyToken/validation)
+├── shared/error/               # maquinaria na raiz (registry, domainError, index, boundaryLog, validation)
+│   └── catalog/<domínio>.ts    # os 8 catálogos por domínio (auth/comment/media/post/resetToken/session/user/verifyToken)
 ├── test/
 │   ├── context/                 # TestContext — helper de setup pra testes de procedure
 │   ├── gateways/                # gateways fake in-memory
@@ -243,7 +244,7 @@ integrations/**/implementations/* → implementa a porta; pode receber config/en
 
 #### Shared error — ErrorRegistry (`ADR-0017`, migração fechada em `022-error-registry`; centralizado e invertido em `ADR-0019`/`024`)
 
-`src/shared/error/registry.ts` — `defineDomainErrors(domain, errors)` namespaces cada catálogo por domínio (`"auth.invalid_credentials"` etc.) e valida contra domínio duplicado em runtime (`Set`). `src/shared/error/index.ts` agrega os 8 catálogos (`auth`, `comment`, `media`, `post`, `resetToken`, `session`, `user`, `verifyToken`) num `Errors`/`ErrorCode` central **e expõe `resolveErrorEntry(code)`** — o lookup que o registry não tinha: até a feature 024 os catálogos só eram escritos, nunca lidos, porque o `DomainError` copiava os campos pra si e todo mundo lia a cópia. O lookup devolve `message`/`retryable`/`level` já com os defaults aplicados (uma vez, no lookup — não `?? false` em cada consumidor).
+`src/shared/error/registry.ts` — `defineDomainErrors(domain, errors)` namespaces cada catálogo por domínio (`"auth.invalid_credentials"` etc.) e valida contra domínio duplicado em runtime (`Set`). `src/shared/error/index.ts` agrega os 8 catálogos de `src/shared/error/catalog/` (`auth`, `comment`, `media`, `post`, `resetToken`, `session`, `user`, `verifyToken`) num `Errors`/`ErrorCode` central **e expõe `resolveErrorEntry(code)`** — o lookup que o registry não tinha: até a feature 024 os catálogos só eram escritos, nunca lidos, porque o `DomainError` copiava os campos pra si e todo mundo lia a cópia. O lookup devolve `message`/`retryable`/`level` já com os defaults aplicados (uma vez, no lookup — não `?? false` em cada consumidor).
 
 **`DomainError` carrega só o `code`** (`ADR-0019`). `httpCode`/`message`/`retryable`/`level` eram cópias de uma função estática do código; consumidores resolvem via `resolveErrorEntry` (política) ou `domainErrorTransport` (transporte). `super(code)` faz o código ser a mensagem do `Error` — o texto humano é resolvido no boundary, que é onde i18n vai morar.
 
