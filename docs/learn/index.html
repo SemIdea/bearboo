@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Error models — acervo de leitura (bearboo)</title>
+<title>Error models &amp; observabilidade — acervo de leitura (bearboo)</title>
 <style>
   body{margin:0;background:#0d1117;color:#e6edf3;
     font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -88,7 +88,7 @@
 </head>
 <body>
 <l-doc>
-<l-head badge="Acervo · 19 resumos" title="Error models &amp; boundary design — o acervo do bearboo" authors="Digests moldados ao bearboo (pilar 5-a: cadeia causal · e a decisão DSL vs. helper de boundary)" src="Gerados via /learn:digest — cada um conferido contra a fonte"></l-head>
+<l-head badge="Acervo · 24 resumos" title="Error models, boundary design &amp; observabilidade — o acervo do bearboo" authors="Digests moldados ao bearboo (pilar 5-a: cadeia causal · DSL vs. helper de boundary · structured logging)" src="Gerados via /learn:digest — cada um conferido contra a fonte"></l-head>
 
 <l-note kind="info" title="Como ler">Cada resumo tem: Conceito → Como funciona → Dados concretos → 🎯 Aplicar no bearboo → Cuidado → Recall (cards com resposta colapsável pra você se testar) → TL;DR. Ordem sugerida de leitura abaixo — mas cada um se sustenta sozinho.</l-note>
 
@@ -134,9 +134,28 @@
 </ol>
 </l-sec>
 
+<l-sec n="D" title="Coleção 3 — structured logging (a decisão do boundaryLog)">
+<p>Batch motivado pela Fase 9 do roadmap ("logs estruturados") e pela pergunta: "o <code>logBoundaryError</code> hoje achata <code>level/kind/code/path</code> numa string do <code>console</code> — como parar de achatar?". Os 5 resumos respondem por três eixos: <strong>o padrão</strong> (canonical line / evento largo), <strong>os níveis</strong> (quantos merecem existir) e <strong>o transporte/como</strong> (stdout + JSON + context binding). Fio costurado: <strong>emitir 1 evento estruturado por request no <code>withAppErrors</code>, com <code>requestId</code> ligado no <code>ctx</code> — que vira o <code>trace_id</code> da Fase 11.</strong></p>
+<p><em>Eixo Padrão — a forma do evento:</em></p>
+<ol>
+<li><strong><a href="resumo-20-brandur-canonical-log-lines.html">Canonical Log Lines</a></strong> (Brandur/Stripe) — 1 linha larga por request, emitida no fim; o <code>withAppErrors</code> já é o ensure block. <em>Comece aqui.</em></li>
+<li><strong><a href="resumo-21-majors-structured-events.html">Logs vs Structured Events</a></strong> (Majors) — pare de pensar "log", pense "evento"; blob no início do request = o <code>ctx</code> do tRPC.</li>
+</ol>
+<p><em>Eixo Níveis — quantos merecem existir:</em></p>
+<ol start="3">
+<li><strong><a href="resumo-22-cheney-log-levels.html">Let's talk about logging</a></strong> (Cheney) — só info+debug; o teu <code>kind: bug|recoverable</code> já encarna o argumento. Provoca o <code>ErrorLevel</code> de 4 valores.</li>
+</ol>
+<p><em>Eixo Transporte/how-to — o onde e o como:</em></p>
+<ol start="4">
+<li><strong><a href="resumo-23-twelve-factor-logs.html">Factor XI — Logs</a></strong> (12-Factor) — stdout unbuffered, o app não gerencia arquivo; valida o <code>console.*</code> no "onde", Docker/Vercel roteiam.</li>
+<li><strong><a href="resumo-24-structlog-best-practices.html">Logging Best Practices</a></strong> (structlog) — JSON em prod / pretty em dev + context binding; a spec do logger gateway, espelhando o mailer transport.</li>
+</ol>
+</l-sec>
+
 <l-tldr>
 <li><strong>Coleção 1 (docs 1-10):</strong> error models — o debate throw vs. Result, onde o ErrorRegistry cai, e o blueprint do error tracer (5-a).</li>
 <li><strong>Coleção 2 (docs 11-19):</strong> DSL vs. helper de boundary — veredito: é um <em>adapter/anti-corruption layer in-process</em>, não uma DSL; extraia a tradução (32→1), não um framework.</li>
+<li><strong>Coleção 3 (docs 20-24):</strong> structured logging — pare de achatar o <code>boundaryLog</code> em string; emita 1 evento estruturado por request no <code>withAppErrors</code>, stdout+JSON, <code>requestId</code> no <code>ctx</code> (ponte pro trace da Fase 11).</li>
 <li>Cada resumo conecta a fonte ao bearboo na seção 🎯 e tem cards de recall pra auto-teste.</li>
 </l-tldr>
 </l-doc>
