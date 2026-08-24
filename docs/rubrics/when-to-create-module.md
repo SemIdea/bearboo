@@ -1,30 +1,30 @@
-# Rubrica — quando criar módulo top-level em `server/modules/`
+# Rubric — when to create a top-level module in `server/modules/`
 
-## Decisão binária
+## Binary decision
 
-**Cria módulo novo quando TODOS forem verdade:**
+**Create a new module when ALL are true:**
 
-- ✅ Tem **entidade própria** (model novo, não campo num model existente).
-- ✅ Já tem **≥ 2 procedures** previstas (não 1 isolada).
-- ✅ Tem **estado próprio com lifecycle** (não é só lookup table estática).
+- ✅ It has its **own entity** (a new model, not a field on an existing model).
+- ✅ It already has **≥ 2 procedures** foreseen (not 1 isolated one).
+- ✅ It has **its own state with a lifecycle** (not just a static lookup table).
 
-**Senão é sub-feature de módulo existente.** Ex: `notifications` que só serve `auth` mora como `src/server/modules/auth/notifications/`, não como módulo top-level.
+**Otherwise it is a sub-feature of an existing module.** E.g.: `notifications` that only serves `auth` lives as `src/server/modules/auth/notifications/`, not as a top-level module.
 
-## Por que essas regras
+## Why these rules
 
-- **Entidade própria** define a fronteira natural do módulo. Sem entidade, é só feature de outro módulo (campo, comportamento extra).
-- **≥ 2 procedures** garante que o módulo tem superfície de uso suficiente. Procedure isolada não justifica diretório próprio + router próprio + domain próprio.
-- **Lifecycle** distingue "domínio com estado" de "configuração estática". Plano (FREE/PRO) é enum + lookup table → não é módulo `plans/`, é parte de `billings/`.
+- **Its own entity** defines the module's natural boundary. Without an entity, it is just another module's feature (a field, extra behavior).
+- **≥ 2 procedures** ensures the module has enough usage surface. An isolated procedure does not justify its own directory + its own router + its own domain.
+- **Lifecycle** distinguishes "a domain with state" from "static configuration". A plan (FREE/PRO) is an enum + a lookup table → it is not a `plans/` module, it is part of `billings/`.
 
-## Antes de criar — pergunta de revisão
+## Before creating — a review question
 
-1. Esse conceito existe em algum módulo atual? Se sim, é sub-feature.
-2. Vai compartilhar `domain/`, `infra/`, ou tipos com outro módulo? Se sim, considera `src/domain/shared/` em vez de módulo novo.
-3. Vai durar > 6 meses sem ser tocado? Se sim e não cresce, talvez seja só helper, não módulo.
+1. Does this concept exist in a current module? If yes, it is a sub-feature.
+2. Will it share `domain/`, `infra/`, or types with another module? If yes, consider `src/domain/shared/` instead of a new module.
+3. Will it last > 6 months untouched? If yes and it does not grow, maybe it is just a helper, not a module.
 
-## Antiexemplos
+## Anti-examples
 
-- ❌ Criar `modules/notifications/` quando só auth dispara notification — fica em `modules/auth/notifications/`.
-- ❌ Criar `modules/plans/` pra hospedar `PLAN_CONFIG` constante — fica em `modules/billings/plan-config.ts`.
-- ❌ Criar `modules/utils/` pra agregar helpers cross-module — não existe módulo `utils`, helpers vão pra `lib/` ou inline.
-- ❌ Criar `modules/admin/` cedo "porque vai ter painel admin depois" — YAGNI. Espera primeira procedure admin aparecer.
+- ❌ Creating `modules/notifications/` when only auth triggers a notification — it stays in `modules/auth/notifications/`.
+- ❌ Creating `modules/plans/` to host the `PLAN_CONFIG` constant — it stays in `modules/billings/plan-config.ts`.
+- ❌ Creating `modules/utils/` to aggregate cross-module helpers — there is no `utils` module, helpers go to `lib/` or inline.
+- ❌ Creating `modules/admin/` early "because there will be an admin panel later" — YAGNI. Wait for the first admin procedure to appear.

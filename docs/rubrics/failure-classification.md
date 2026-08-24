@@ -1,52 +1,52 @@
-# Rubrica — classificação de falha (mecânica → procedure | conceitual → learning | transiente → nada)
+# Rubric — failure classification (mechanical → procedure | conceptual → learning | transient → nothing)
 
-> Usada pelo loop CRITIC (`ops/remediate.md`) ao remediar uma falha reconhecida e registrada em `docs/.afm-log-failures/`. O discriminador é **executável**, não "sensação". Ancestral: CRITIC (arXiv 2305.11738) — reconhecimento de falha SÓ por sinal externo; auto-crítica sem ferramenta degrada (PRINCIPLES #3).
+> Used by the CRITIC loop (`ops/remediate.md`) when remediating a recognized failure recorded in `docs/.afm-log-failures/`. The discriminator is **executable**, not a "feeling". Ancestor: CRITIC (arXiv 2305.11738) — failure recognition ONLY by an external signal; self-critique without a tool degrades (PRINCIPLES #3).
 
-## Pré-requisito (gate de entrada — comum aos três)
+## Prerequisite (entry gate — common to all three)
 
-A falha **só existe** se foi reconhecida por **sinal externo**: teste vermelho persistente (cap §5.1 esgotado), `tsc`/type-check ≠0, comando de passo ≠0, regra dura violada pós-fato (gatilho no lado errado), OU **correção explícita do user**. "Eu acho que errei" **não** é falha (CRITIC). Toda falha vira **uma linha-arquivo** em `docs/.afm-log-failures/YYYY-MM-DD-<slug>.md` com `sig=<assinatura>` (chave de recorrência).
+The failure **only exists** if it was recognized by an **external signal**: a persistent red test (§5.1 cap spent), `tsc`/type-check ≠0, a step command ≠0, a hard rule violated after the fact (a trigger on the wrong side), OR **an explicit user correction**. "I think I got it wrong" is **not** a failure (CRITIC). Every failure becomes **a one-line file** in `docs/.afm-log-failures/YYYY-MM-DD-<slug>.md` with `sig=<signature>` (the recurrence key).
 
-## Os três destinos
+## The three destinations
 
-### Mecânica → `docs/procedures/<slug>.md`
+### Mechanical → `docs/procedures/<slug>.md`
 
-**Sse os três:** (1) é uma **sequência de passos repetível** com gates 0/1 por passo; (2) reincidiu — `grep -lc "sig=<hash>" docs/.afm-log-failures/*.md` ≥ 2 (**OU** correção explícita do user, que vale por 1 — o user é o oráculo); (3) tem **gatilho mecânico de início** ("quando X, rode este runbook").
-*Exemplo:* "build quebra com `type:module` no tsdown" reincidiu → runbook "ao mexer no emit, faça A→B→C, verifica 0/1".
+**Iff all three:** (1) it is a **repeatable step sequence** with 0/1 gates per step; (2) it recurred — `grep -lc "sig=<hash>" docs/.afm-log-failures/*.md` ≥ 2 (**OR** an explicit user correction, which counts as 1 — the user is the oracle); (3) it has a **mechanical start trigger** ("when X, run this runbook").
+*Example:* "the build breaks with `type:module` in tsdown" recurred → a runbook "when you touch the emit, do A→B→C, verify 0/1".
 
-### Conceitual → `docs/learnings/<slug>.md`
+### Conceptual → `docs/learnings/<slug>.md`
 
-**Sse:** o valor está na **causa** (uma lição contraintuitiva), não numa sequência mecânica de passos. Mesmo gate de promoção (1 correção do user OU ≥2× mecânica). Carrega `**Gatilho:**` por path → o `afm-pre-edit.sh` injeta em quem editar a área.
-*Exemplo:* "assumi que o webhook chega 1×; chega 2× — sempre trate idempotente" → learning com gatilho `webhook`.
+**Iff:** the value is in the **cause** (a counterintuitive lesson), not in a mechanical step sequence. The same promotion gate (1 user correction OR ≥2× mechanical). Carries a `**Gatilho:**` by path → `afm-pre-edit.sh` injects it into whoever edits the area.
+*Example:* "I assumed the webhook arrives 1×; it arrives 2× — always handle it idempotently" → a learning with a `webhook` trigger.
 
-### Transiente → nada (fica só evidência no log)
+### Transient → nothing (stays only as evidence in the log)
 
-**Sse:** resolvida no retry §5.1 (não cruzou o terminal), OU sem antídoto durável, OU o claim **não sobrevive ao conserto da causa** ("tool X está quebrada" endurece em recusa futura depois que a tool é consertada — negative-filter). Fica como linha em `.afm-log-failures/`, **não** vira artefato. É o #5 (não inventar constraint sem caso durável) e o negative-filter da Fase 4.
+**Iff:** resolved on the §5.1 retry (did not cross the terminal), OR with no durable antidote, OR the claim **does not survive the fix of the cause** ("tool X is broken" hardens into a future refusal once the tool is fixed — negative-filter). It stays as a line in `.afm-log-failures/`, does **not** become an artifact. It is #5 (do not invent a constraint without a durable case) and the Phase 4 negative-filter.
 
 ## Decision flow
 
 ```
-Falha reconhecida por sinal externo? ── não → NÃO é falha (CRITIC). Para.
-   │ sim
+Failure recognized by an external signal? ── no → NOT a failure (CRITIC). Stop.
+   │ yes
    ▼
-Registra em docs/.afm-log-failures/ (sig=).
+Record in docs/.afm-log-failures/ (sig=).
    │
-Resolvida no retry §5.1 / sem antídoto durável / claim morre ao consertar a causa?
-   ├── sim → TRANSIENTE: fica evidência, não promove.
-   └── não
+Resolved on the §5.1 retry / no durable antidote / claim dies when the cause is fixed?
+   ├── yes → TRANSIENT: stays evidence, does not promote.
+   └── no
         │
-   1 correção do user OU sig= reincidiu ≥2×?
-        ├── não → ainda só evidência (aguarda recorrência).
-        └── sim
+   1 user correction OR sig= recurred ≥2×?
+        ├── no → still just evidence (awaits recurrence).
+        └── yes
              │
-        Sequência de passos repetível com gates 0/1 + gatilho de início?
-             ├── sim → PROCEDURE (docs/procedures/)
-             └── não → LEARNING  (docs/learnings/)
+        A repeatable step sequence with 0/1 gates + a start trigger?
+             ├── yes → PROCEDURE (docs/procedures/)
+             └── no → LEARNING  (docs/learnings/)
 ```
 
-## Anti-padrões
+## Anti-patterns
 
-- ❌ **Reconhecer falha por auto-julgamento** (sem sinal externo). CRITIC: degrada.
-- ❌ **Promover falha única mecânica** a artefato (vira ruído/constraint morta). Só ≥2× — exceto correção do user (1 basta).
-- ❌ **Promover falha transiente** resolvida no §5.1. Ela nunca chega ao terminal; não é registrada como falha.
-- ❌ **Jogar tudo em `procedures/`** (procedure é *sequência mecânica*; lição conceitual é `learning`) ou **tudo em `learnings/`** (runbook repetível é `procedure`).
-- ❌ **Procedure/learning sem citar a `sig=` de origem** (rastreabilidade — regra dura 19 / R3).
+- ❌ **Recognizing a failure by self-judgment** (no external signal). CRITIC: it degrades.
+- ❌ **Promoting a single mechanical failure** to an artifact (becomes noise/a dead constraint). Only ≥2× — except a user correction (1 is enough).
+- ❌ **Promoting a transient failure** resolved on §5.1. It never reaches the terminal; it is not recorded as a failure.
+- ❌ **Throwing everything into `procedures/`** (a procedure is a *mechanical sequence*; a conceptual lesson is a `learning`) or **everything into `learnings/`** (a repeatable runbook is a `procedure`).
+- ❌ **A procedure/learning that does not cite the origin `sig=`** (traceability — hard rule 19 / R3).
