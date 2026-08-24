@@ -1,23 +1,23 @@
-# Rubrica — onde Zod (ou parser) entra
+# Rubric — where Zod (or a parser) enters
 
-## Regra única
+## The single rule
 
-Schema parser (Zod ou equivalente do stack) **valida em exatamente 2 lugares**:
+A schema parser (Zod or the stack equivalent) **validates in exactly 2 places**:
 
-1. **Input de procedure / handler de transport** — request → tipo validado.
-2. **Parsing de payload externo** — webhook, fonte crawled, env var, fila message, JSON do DB com forma desconhecida.
+1. **A procedure / transport handler input** — request → validated type.
+2. **Parsing an external payload** — a webhook, a crawled source, an env var, a queue message, DB JSON with an unknown shape.
 
-**Domain recebe shape já validado e tipado.** Lib pura idem. Re-validar dentro do domain "por garantia" duplica fonte de verdade do schema.
+**The domain receives an already-validated, typed shape.** A pure lib idem. Re-validating inside the domain "just in case" duplicates the schema's source of truth.
 
-## Por que essa regra
+## Why this rule
 
-- **Validar 2× é desperdício** (CPU + manutenção do schema em 2 lugares).
-- **Domain testa lógica, não parsing.** Mock de input com tipo errado não compila — TS já é a barreira.
-- **Schema vive perto da fronteira** onde dados externos chegam — onde ele é necessário, não onde "podia ser bom".
+- **Validating 2× is waste** (CPU + maintaining the schema in 2 places).
+- **The domain tests logic, not parsing.** A mock input with the wrong type does not compile — TS is already the barrier.
+- **The schema lives near the boundary** where external data arrives — where it is needed, not where "it could be nice".
 
-## Exemplos
+## Examples
 
-### ✅ Procedure valida input antes de chamar domain
+### ✅ A procedure validates the input before calling the domain
 
 ```ts
 const router_apps = router({
@@ -27,29 +27,29 @@ const router_apps = router({
       schemaUrl: z.string().url(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // input já é { packageName: string; schemaUrl: string }
+      // input is already { packageName: string; schemaUrl: string }
       const result = await domain_createApps({ ctx, input });
       // ...
     }),
 });
 ```
 
-### ✅ Webhook handler valida payload externo
+### ✅ A webhook handler validates the external payload
 
 ```ts
 export async function POST(req: Request) {
   const raw = await req.text();
-  const event = stripe_verifyWebhook(raw, signature);  // valida assinatura
-  const payload = zStripeEvent.parse(event);            // valida shape
+  const event = stripe_verifyWebhook(raw, signature);  // validates the signature
+  const payload = zStripeEvent.parse(event);            // validates the shape
   await domain_handleStripeEventBillings({ ctx, input: payload });
 }
 ```
 
-### ❌ Domain re-validando "por garantia"
+### ❌ The domain re-validating "just in case"
 
 ```ts
 async function domain_createApps({ ctx, input }: DomainInput<{ packageName: string; schemaUrl: string }>) {
-  // ❌ procedure já validou; isso é ruído + duplicação de schema
+  // ❌ the procedure already validated; this is noise + schema duplication
   const validated = z.object({
     packageName: z.string().min(1),
     schemaUrl: z.string().url(),
@@ -57,28 +57,28 @@ async function domain_createApps({ ctx, input }: DomainInput<{ packageName: stri
 }
 ```
 
-### ✅ Lib pura recebe shape, não valida
+### ✅ A pure lib receives a shape, does not validate
 
 ```ts
 // lib/sdk-generator/index.ts
 export function generateSdk({ schema, options }: { schema: OpenApiV3; options: GenOpts }): SdkFiles {
-  // não chama z.parse — schema chega validado de quem chamou
-  // se quem chamou passou shape errado, é bug do caller, não defesa da lib
+  // does not call z.parse — the schema arrives validated from the caller
+  // if the caller passed the wrong shape, it is the caller's bug, not the lib's defense
 }
 ```
 
-## Quando "valida no boundary" cresce
+## When "validate at the boundary" grows
 
-Se procedure tem 6 procedures parecidas todas validando o mesmo `apps` shape:
+If a procedure has 6 similar procedures all validating the same `apps` shape:
 
-- Extrai schema pra `src/server/modules/apps/schemas.ts`.
-- Cada procedure importa: `.input(zCreateAppsInput)`.
-- Schema continua sendo declarado **uma vez**, mas reutilizado.
-- Ainda é boundary — só não-duplicado.
+- Extract the schema to `src/server/modules/apps/schemas.ts`.
+- Each procedure imports it: `.input(zCreateAppsInput)`.
+- The schema is still declared **once**, but reused.
+- It is still the boundary — just not duplicated.
 
-## Anti-patterns adicionais
+## Additional anti-patterns
 
-- ❌ Validar input dentro de função domain "por DI / por defesa profunda" — TS + schema no boundary já cobrem.
-- ❌ Schema declarado dentro do arquivo de domain — sai pro `schemas.ts` ou `*.types.ts` no módulo (regra dura 7).
-- ❌ `z.unknown().parse(...)` pra escapar tipo — não valida nada, falsa segurança. Use `z.object({...})` real ou aceite o tipo upstream.
-- ❌ Validar env via `process.env.X || throw` espalhado — centraliza em `src/server/env.ts` com Zod, valida 1× no boot.
+- ❌ Validating an input inside a domain function "for DI / defense in depth" — TS + the schema at the boundary already cover it.
+- ❌ A schema declared inside the domain file — it goes to `schemas.ts` or `*.types.ts` in the module (hard rule 7).
+- ❌ `z.unknown().parse(...)` to escape a type — it validates nothing, false safety. Use a real `z.object({...})` or accept the upstream type.
+- ❌ Validating env via `process.env.X || throw` scattered around — centralize it in `src/server/env.ts` with Zod, validate 1× at boot.

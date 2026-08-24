@@ -1,38 +1,38 @@
-# Rubrica — quando criar `src/lib/<x>/`
+# Rubric — when to create `src/lib/<x>/`
 
-## Decisão binária
+## Binary decision
 
-**Cria lib quando QUALQUER um for verdade:**
+**Create a lib when ANY is true:**
 
-- ✅ Já tem **3 callers** do mesmo helper inline (Rule of Three confirmada).
-- ✅ É **integração externa nomeável** (Stripe, S3, Resend, Slack, GitHub) — vira `lib/<provider>/`.
-- ✅ **> ~150 linhas** de lógica pura acoplada a um consumidor único — extrai pra reduzir carga de leitura.
+- ✅ There are already **3 callers** of the same inline helper (Rule of Three confirmed).
+- ✅ It is a **nameable external integration** (Stripe, S3, Resend, Slack, GitHub) — becomes `lib/<provider>/`.
+- ✅ **> ~150 lines** of pure logic coupled to a single consumer — extract it to reduce reading load.
 
-**NÃO cria lib quando:**
+**Do NOT create a lib when:**
 
-- ❌ Tem 1 caller — inline. Espera o segundo aparecer.
-- ❌ Mistura I/O com ORM — vai pra `infra/` ou inline na procedure.
-- ❌ Helper com < 10 linhas e 2 callers — duplicação simples vence (KISS > DRY).
-- ❌ "Vou precisar mais tarde" — YAGNI. Inline até precisar.
+- ❌ There is 1 caller — inline. Wait for the second to appear.
+- ❌ It mixes I/O with the ORM — goes to `infra/` or inline in the procedure.
+- ❌ A helper with < 10 lines and 2 callers — simple duplication wins (KISS > DRY).
+- ❌ "I will need it later" — YAGNI. Inline until you need it.
 
-## Por que essas regras
+## Why these rules
 
-- **3 callers = padrão real, não coincidência.** Dois pode ser convergência espúria.
-- **Integração externa merece nome próprio** (`stripe_createCustomer` em vez de `createCustomer`) porque o leitor sabe instantaneamente que é chamada de rede. Reduz custo cognitivo no scan.
-- **150 linhas é o ponto onde "vou ler o arquivo inteiro" custa mais que "vou seguir a chamada pro helper".** Antes disso, inline é mais barato pro leitor.
+- **3 callers = a real pattern, not coincidence.** Two can be spurious convergence.
+- **An external integration deserves its own name** (`stripe_createCustomer` instead of `createCustomer`) because the reader instantly knows it is a network call. It reduces cognitive cost in the scan.
+- **150 lines is the point where "I will read the whole file" costs more than "I will follow the call to the helper".** Before that, inline is cheaper for the reader.
 
-## Onde colocar quando criar
+## Where to put it when you create it
 
-Decisão em ordem:
+Decide in order:
 
-1. **Lib pura, sem dependência de framework do app?** → `src/lib/<x>/` (publishable; zero ORM/web framework/orchestrator).
-2. **Tem regra de negócio do módulo X?** → `src/server/modules/<X>/domain/`.
-3. **Vale pra 3+ módulos?** → `src/domain/shared/`.
-4. **É wrapper de cliente externo (singleton com config)?** → `src/server/infra/`.
+1. **A pure lib, with no app-framework dependency?** → `src/lib/<x>/` (publishable; zero ORM/web framework/orchestrator).
+2. **Does it have module X's business rule?** → `src/server/modules/<X>/domain/`.
+3. **Is it worth it for 3+ modules?** → `src/domain/shared/`.
+4. **Is it an external-client wrapper (a singleton with config)?** → `src/server/infra/`.
 
-## Antiexemplos
+## Anti-examples
 
-- ❌ `src/lib/utils/format-date.ts` com 1 caller — inline na page que precisa.
-- ❌ `src/lib/auth/get-user.ts` que importa o ORM — vai pra `src/server/modules/auth/`, não é lib pura.
-- ❌ `src/lib/email-and-notifications/` — mistura responsabilidade. Divide em `src/lib/email/` e `src/lib/slack/`.
-- ❌ `src/lib/stripe/` com `class StripeManager { 12 métodos }` — vira `src/lib/stripe/checkout.ts`, `src/lib/stripe/portal.ts`, etc, com funções nomeadas (`stripe_createCheckoutSession`).
+- ❌ `src/lib/utils/format-date.ts` with 1 caller — inline in the page that needs it.
+- ❌ `src/lib/auth/get-user.ts` that imports the ORM — goes to `src/server/modules/auth/`, it is not a pure lib.
+- ❌ `src/lib/email-and-notifications/` — mixes responsibility. Split into `src/lib/email/` and `src/lib/slack/`.
+- ❌ `src/lib/stripe/` with `class StripeManager { 12 methods }` — becomes `src/lib/stripe/checkout.ts`, `src/lib/stripe/portal.ts`, etc, with named functions (`stripe_createCheckoutSession`).
