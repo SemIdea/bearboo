@@ -29,6 +29,17 @@ describe("renderPretty", () => {
 
 		expect(line).toBe("[info] user.login 5ms ok=true step=one");
 	});
+
+	test("keeps the head on one line and prints a stack below it", () => {
+		const line = renderPretty(meta, {
+			"error.code": "boom",
+			"error.stack": "Error: boom\n    at a\n    at b",
+		});
+		const [head, ...stackLines] = line.split("\n");
+
+		expect(head).toBe("[info] user.login 5ms ok=true error.code=boom");
+		expect(stackLines.join("\n")).toBe("Error: boom\n    at a\n    at b");
+	});
 });
 
 describe("pickRenderer", () => {
