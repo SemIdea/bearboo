@@ -52,12 +52,15 @@ injects it via `next({ ctx: { log } })` (structlog bind, `resumo-24`).
 (pre-middleware code and the type). Rejected: one shared accumulator — cross-call
 field leakage.
 
-**D4 — Allowlist by type + key scrub, not a blocklist.** `LogFields = Record<
-string, string | number | boolean | null>` — the type forbids adding an object
-(`input`/`ctx` cannot be dumped). `redact.ts` drops any key matching
-`/token|password|secret|authorization|cookie/i` as defense-in-depth. Rejected:
-blocklist alone — it forgets the next sensitive field (fragile). This is the
-rule-13 crux and has its own test.
+**D4 — Three redaction layers, allowlist first.** `LogFields = Record<string,
+string | number | boolean | null>` — the type forbids adding an object
+(`input`/`ctx`/`user` cannot be dumped, which also covers PII, since PII lives on
+those objects). On emit, `redact.ts` drops a field whose key matches
+`/token|password|secret|authorization|cookie/i`, and masks a known credential
+shape in a value (the rule-13 prefixes: OpenAI/GitHub/Google/Slack/JWT) that
+slipped in under an innocent key. Rejected: a blocklist alone (forgets the next
+sensitive field) and PII value-scanning (high false positives — the allowlist is
+the right layer for PII). This is the rule-13 crux and has its own tests.
 
 **D5 — One stdout stream, level as a field.** Every line goes to stdout via one
 sink; `level` is a field (`info` on ok, the error's `level` on failure; a bug

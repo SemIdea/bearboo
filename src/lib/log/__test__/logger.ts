@@ -33,16 +33,16 @@ describe("emit", () => {
 		expect(spy).toHaveBeenCalledTimes(1);
 	});
 
-	test("a sensitive key never reaches the sink", () => {
+	test("a credential in a value never reaches the sink, even under an innocent key", () => {
 		const spy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 		const log = createLogger();
 
-		log.add({ accessToken: "sk-secret-value" });
+		log.add({ detail: "ghp_0123456789abcdefghij authenticated" });
 		emit(log, meta, "production");
 
 		const line = spy.mock.calls[0]?.[0] as string;
 
-		expect(line).not.toContain("accessToken");
-		expect(line).not.toContain("sk-secret-value");
+		expect(line).not.toContain("ghp_0123456789abcdefghij");
+		expect(line).toContain("[redacted]");
 	});
 });

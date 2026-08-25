@@ -34,11 +34,15 @@ not manage log files or routing — the environment does.
 
 **(3) Allowlist, not blocklist (rule 13 — the crux).** The line emits only
 fields added explicitly, plus a fixed safe base set (`path`, `durationMs`, `ok`,
-`userId`, `visitorId`, `error.*`). `LogFields` accepts scalars only
-(`string | number | boolean | null`), so code cannot add a raw `input` or `ctx`
-object. A sensitive-key scrub (`token`, `password`, `secret`, `authorization`,
-`cookie`) drops such keys as defense-in-depth. A token, password, or secret does
-not leak, because it is never added and is scrubbed if it ever is.
+`userId`, `visitorId`, `error.*`). Three layers, each catching a different vector: (i) `LogFields`
+accepts scalars only (`string | number | boolean | null`), so code cannot add a
+raw `input`/`ctx`/`user` object — this also covers PII, which lives on those
+objects; (ii) a sensitive-key scrub drops a field whose key names a secret
+(`token`/`password`/`secret`/`authorization`/`cookie`); (iii) a credential-value
+scrub masks a known secret shape (OpenAI/GitHub/Google/Slack/JWT — the same
+prefixes rule 13 checks in `docs/sessions/`) that slips into a value under an
+innocent key. A token, password, or secret does not leak: it is never added,
+dropped if named, and masked if its shape appears in a value.
 
 **(4) Levels stay where they live.** The canonical line's own level is `info` on
 success, or the error's `level` on failure. The 4-level `ErrorLevel` and the
@@ -61,6 +65,12 @@ calling `console`; it deposits the error fields (`code`, `kind`, `level`,
 - **Blocklist as the primary mechanism** — **rejected.** A blocklist forgets the
   next sensitive field added. The allowlist (scalar-only, explicit) fails safe;
   the key scrub is only a backstop.
+- **Value-scanning for PII (emails, names, cards, IPs)** — **rejected.** PII value
+  detection has a high false-positive rate (a legit `authorEmail` you meant to log
+  gets masked; a name is just a string) and gives false security. PII lives on the
+  `user`/`input` objects, which the allowlist already blocks by type — that is the
+  right layer for it. Value-scanning is reserved for credential *shapes*, which are
+  distinctive enough to match with near-zero false positives.
 - **A full logging library (pino/winston/structlog port)** — **rejected (YAGNI).**
   A small pure lib covers JSON + pretty + the allowlist. Revisit if the field
   pipeline grows (sampling, sinks, async transport).
