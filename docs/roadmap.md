@@ -15,7 +15,7 @@
 | 6 — Search and discovery | ✅ Done | `docs/features/016-search-content/`: search by title/content via `contains`/`insensitive` (not native `tsvector` — ADR-0011), header autocomplete; filter by tag/category and related posts already existed from earlier phases. `docs/features/019-search-sort-by-views/`: sort by most viewed (`sortBy: "mostViewed"`), unlocked by `Post.viewCount` from Phase 7 — the item that had left this phase partial |
 | 7 — Internal analytics | ✅ Done | `docs/features/017-post-view-analytics/`: record view (dedup per visitor for 24h via Redis/cookie, ADR-0013), count total, most-viewed posts, Admin/Editor dashboard. `docs/features/020-view-analytics-breakdown/`: counts by period (7/30 days), traffic source, and browser/OS — items that had left the phase partial, closed with 30-day retention (lazy deletion) and no IP persisted |
 | 8 — Media upload and management | ✅ Done (with 1 item deferred) | `docs/features/021-media-upload/`: real image upload (FormData via tRPC, `ADR-0015`), media library, delete (owner or `media:deleteAny`), alt text, format/size validation, post cover image from uploaded media. Item deferred: image compression/optimization (explicitly optional in the roadmap; goes away on its own if the final storage is an image CDN) |
-| 9 — Production quality | 🟡 Partial | Zod, migrations, seed, some tests/error pages already exist; in-memory rate limiting covers login/register/reset/refresh (`docs/features/001-auth-hardening/`) — not general rate limiting for the whole API; missing: structured logs, test coverage (~8.6% today) |
+| 9 — Production quality | 🟡 Partial | Zod, migrations, seed, some tests/error pages already exist; **structured logs done** (`docs/features/025-structured-logging/`, ADR-0022 — canonical log line per call, JSON prod / pretty dev); in-memory rate limiting covers login/register/reset/refresh (`docs/features/001-auth-hardening/`) — not general rate limiting for the whole API; missing: test coverage (~8.6% today), general API rate limiting |
 | 10 — CI/CD and deploy | ⬜ Not started | no `.github/workflows/`, no deploy configured |
 | 11 — Observability | ⬜ Not started | no `/api/health`, no tracing/metrics |
 
@@ -513,7 +513,7 @@ Add practices companies expect from a serious project.
 
 ### Tasks
 
-* [ ] structured logs (today it is ad hoc `console.log`, no structured library);
+* [x] structured logs — canonical log line per procedure call, JSON prod / pretty dev by `env.nodeEnv`, allowlist redaction (`docs/features/025-structured-logging/`, `ADR-0022`, RF-14);
 * [x] standardized error handling — `ErrorRegistry` (`ADR-0017`, `022-error-registry`, RF-14): namespaced `DomainError` resolves `httpCode`/`message` on its own, closing hard rule 15 (`docs/afm.md` § 3);
 * [x] error page (`src/app/error.tsx`, `src/app/not-found.tsx`);
 * [ ] loading states (no App Router `loading.tsx`; not audited as a systematic convention);
@@ -605,9 +605,9 @@ Show technical maturity.
 
 ### Features
 
-* [ ] structured logs;
+* [x] structured logs — delivered early in Phase 9 (`docs/features/025-structured-logging/`, `ADR-0022`);
 * [ ] request ID;
-* [ ] route response time;
+* [x] route response time — the canonical line carries `durationMs` per call (`ADR-0022`);
 * [ ] basic tracing with OpenTelemetry;
 * [ ] simple metrics;
 * [ ] health check;
