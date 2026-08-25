@@ -10,6 +10,7 @@ config({
 });
 
 const env = {
+	nodeEnv: getStrEnv("NODE_ENV", "development"),
 	databaseUrl: getStrEnv(
 		"DATABASE_URL",
 		"postgresql://postgres:postgres@localhost:5432/postgres?schema=public",

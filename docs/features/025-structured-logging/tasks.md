@@ -6,7 +6,7 @@
 
 ## Setup
 
-- [ ] **T001** Add `nodeEnv` to `src/lib/env/index.ts` — `getStrEnv("NODE_ENV", "development")`. It selects the renderer. (US-018)
+- [X] **T001** Add `nodeEnv` to `src/lib/env/index.ts` — `getStrEnv("NODE_ENV", "development")`. It selects the renderer. (US-018)
 
 ## Foundation — the log lib (`src/lib/log/`)
 
