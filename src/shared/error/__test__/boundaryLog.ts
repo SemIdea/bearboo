@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
+import { createLogger } from "@/lib/log";
 import { AppError } from "../appError";
-import { classifyBoundaryError, logBoundaryError } from "../boundaryLog";
+import { classifyBoundaryError, depositBoundaryError } from "../boundaryLog";
 
 describe("classifyBoundaryError", () => {
 	test("classifies a AppError as recoverable with its own metadata", () => {
@@ -39,28 +40,28 @@ describe("classifyBoundaryError", () => {
 	});
 });
 
-describe("logBoundaryError", () => {
-	afterEach(() => vi.restoreAllMocks());
+describe("depositBoundaryError", () => {
+	test("deposits the classification fields for a recoverable error", () => {
+		const log = createLogger();
 
-	test("routes a recoverable info error to console.info, not console.error", () => {
-		const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
-		const error = vi
-			.spyOn(console, "error")
-			.mockImplementation(() => undefined);
+		depositBoundaryError(log, new AppError("post.not_found"));
 
-		logBoundaryError(new AppError("post.not_found"));
-
-		expect(info).toHaveBeenCalledTimes(1);
-		expect(error).not.toHaveBeenCalled();
+		expect(log.fields).toMatchObject({
+			"error.kind": "recoverable",
+			"error.level": "info",
+			"error.retryable": false,
+			"error.code": "post.not_found",
+		});
 	});
 
-	test("routes a bug to console.error", () => {
-		const error = vi
-			.spyOn(console, "error")
-			.mockImplementation(() => undefined);
+	test("deposits kind=bug and a stack for an unexpected throw", () => {
+		const log = createLogger();
 
-		logBoundaryError(new Error("boom"));
+		depositBoundaryError(log, new Error("boom"));
 
-		expect(error).toHaveBeenCalledTimes(1);
+		expect(log.fields["error.kind"]).toBe("bug");
+		expect(log.fields["error.level"]).toBe("error");
+		expect(log.fields["error.code"]).toBeNull();
+		expect(typeof log.fields["error.stack"]).toBe("string");
 	});
 });

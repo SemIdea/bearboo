@@ -24,6 +24,13 @@ describe("createTRPCContext", () => {
 		expect(readUserAndSessionByAccessTokenMock).not.toHaveBeenCalled();
 	});
 
+	test("exposes a per-request logger", async () => {
+		const ctx = await createTRPCContext({ headers: new Headers() });
+
+		expect(ctx.log).toBeDefined();
+		expect(typeof ctx.log.add).toBe("function");
+	});
+
 	test("does not authenticate when accessToken cookie is missing", async () => {
 		const ctx = await createTRPCContext({
 			headers: new Headers({ cookie: "theme=dark" }),

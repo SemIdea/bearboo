@@ -1,8 +1,13 @@
 import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { createLogger, emit } from "@/lib/log";
 import { IRole } from "@/server/models/user";
 import { AppError } from "@/shared/error/appError";
+import {
+	classifyBoundaryError,
+	depositBoundaryError,
+} from "@/shared/error/boundaryLog";
 import { Context } from "./createContext";
 import {
 	SESSION_IDLE_TIMEOUT_MS,
@@ -49,10 +54,40 @@ const withAppErrors = t.middleware(async ({ next }) => {
 	return result;
 });
 
+// Emits one canonical log line per procedure call (ADR-0022). It binds a fresh
+// per-call logger (so batched calls do not share fields), times the call, and on
+// failure deposits the boundary classification. Mounted outermost, so it sees the
+// final transport error and the whole chain's duration.
+const withCanonicalLog = t.middleware(async ({ ctx, next, path }) => {
+	const log = createLogger();
+	const start = Date.now();
+
+	const result = await next({ ctx: { log } });
+
+	const durationMs = Date.now() - start;
+	const base = {
+		ok: result.ok,
+		path,
+		durationMs,
+		userId: ctx.user?.id,
+		visitorId: ctx.visitorId,
+	};
+
+	if (result.ok) {
+		emit(log, { level: "info", ...base }, ctx.env.nodeEnv);
+	} else {
+		depositBoundaryError(log, result.error);
+		const { level } = classifyBoundaryError(result.error);
+		emit(log, { level, ...base }, ctx.env.nodeEnv);
+	}
+
+	return result;
+});
+
 // The root every procedure derives from. `publicProcedure` adds the session
 // check on top; procedures that must run without it (refreshSession) build
 // straight from here and still get the error translation.
-const baseProcedure = t.procedure.use(withAppErrors);
+const baseProcedure = t.procedure.use(withCanonicalLog).use(withAppErrors);
 
 const publicProcedure = baseProcedure.use(async ({ ctx, next }) => {
 	const user = ctx.user;

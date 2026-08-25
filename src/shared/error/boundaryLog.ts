@@ -1,3 +1,4 @@
+import type { Logger } from "@/lib/log";
 import { AppError } from "./appError";
 import { resolveErrorEntry } from "./index";
 import type { ErrorLevel } from "./registry";
@@ -43,36 +44,28 @@ const classifyBoundaryError = (error: unknown): BoundaryClassification => {
 	return { kind: "bug", level: "error", retryable: false, code: null };
 };
 
-const logBoundaryError = (
-	error: unknown,
-	context?: { path?: string | null },
-): void => {
-	const classification = classifyBoundaryError(error);
-	const where = context?.path ? ` on ${context.path}` : "";
-	const detail =
-		classification.code ??
-		(error instanceof Error ? error.message : "unknown error");
-	const line = `[${classification.kind}${where}] ${detail}`;
+// Deposits the boundary classification onto the per-call logger, so the canonical
+// line carries the error fields (ADR-0022). The logging middleware owns emission;
+// this only enriches. A bug also carries its stack, the way the old console path
+// did, so it stands out for debugging.
+const depositBoundaryError = (log: Logger, error: unknown): void => {
+	const { kind, level, retryable, code } = classifyBoundaryError(error);
 
-	switch (classification.level) {
-		case "fatal":
-		case "error":
-			// Bugs carry the full error (stack) so they stand out for debugging.
-			if (classification.kind === "bug") console.error(line, error);
-			else console.error(line);
-			break;
-		case "warn":
-			console.warn(line);
-			break;
-		case "info":
-			console.info(line);
-			break;
+	log.add({
+		"error.kind": kind,
+		"error.level": level,
+		"error.retryable": retryable,
+		"error.code": code,
+	});
+
+	if (kind === "bug" && error instanceof Error && error.stack) {
+		log.add({ "error.stack": error.stack });
 	}
 };
 
 export {
 	type BoundaryClassification,
 	classifyBoundaryError,
+	depositBoundaryError,
 	findAppError,
-	logBoundaryError,
 };

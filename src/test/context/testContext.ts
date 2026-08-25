@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { createLogger } from "@/lib/log";
 import { CookieJar } from "@/server/http/cookieJar";
 import { gateways, IGateways } from "@/server/infra/container/gateways";
 import { helpers } from "@/server/infra/container/helpers";
@@ -20,6 +21,7 @@ class TestContext {
 	gateways: IGateways;
 	env = env;
 	resCookies = new CookieJar();
+	log = createLogger();
 	refreshToken?: string;
 	visitorId?: string;
 	user?: IAuthenticatedUserDTO;
