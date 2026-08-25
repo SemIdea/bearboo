@@ -1,6 +1,6 @@
 import { scrub } from "./redact";
 import { pickRenderer } from "./render";
-import type { EmitMeta, Logger, LogFields } from "./types";
+import type { EmitMeta, LogFields, Logger } from "./types";
 
 // A per-call accumulator (ADR-0022 D3). `base` seeds request-scoped fields; `add`
 // merges more as the call runs. The `fields` getter exposes the accumulator

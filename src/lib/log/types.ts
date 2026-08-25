@@ -27,4 +27,4 @@ type EmitMeta = {
 	visitorId?: string;
 };
 
-export type { EmitMeta, Logger, LogFields, LogLevel };
+export type { EmitMeta, LogFields, Logger, LogLevel };

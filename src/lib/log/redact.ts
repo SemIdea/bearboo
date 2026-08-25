@@ -5,9 +5,7 @@ import type { LogFields } from "./types";
 // is that LogFields accepts scalars only, so an object cannot be dumped.
 const SENSITIVE_KEY = /token|password|secret|authorization|cookie/i;
 
-const isScalar = (
-	value: unknown,
-): value is string | number | boolean | null =>
+const isScalar = (value: unknown): value is string | number | boolean | null =>
 	value === null ||
 	typeof value === "string" ||
 	typeof value === "number" ||
