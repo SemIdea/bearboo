@@ -12,6 +12,8 @@ const UA = {
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0",
 	chromeAndroid:
 		"Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36",
+	safariMac:
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15",
 };
 
 describe("RegexUserAgentClassifier Unitary Testing", () => {
@@ -49,6 +51,13 @@ describe("RegexUserAgentClassifier Unitary Testing", () => {
 		expect(classifier.classify(UA.chromeAndroid)).toEqual({
 			browser: "Chrome",
 			os: "Android",
+		});
+	});
+
+	test("Should classify Safari on macOS", () => {
+		expect(classifier.classify(UA.safariMac)).toEqual({
+			browser: "Safari",
+			os: "macOS",
 		});
 	});
 

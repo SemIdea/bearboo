@@ -62,4 +62,16 @@ describe("Reject Post Controller Unitary Testing", () => {
 			message: "This action is not valid for the post's current status.",
 		});
 	});
+
+	test("Should throw NOT_FOUND when the post does not exist", async () => {
+		await expect(
+			PostRouter.createCaller(editorCtx).reject({
+				id: "does-not-exist",
+				comment: "Ghost post.",
+			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
+	});
 });

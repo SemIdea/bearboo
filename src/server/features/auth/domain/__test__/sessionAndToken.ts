@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppError } from "@/shared/error/appError";
 import { createAuthenticatedContext, createTestContext } from "@/test/context";
 import { domain_createAuthSession } from "../createAuthSession";
@@ -11,6 +11,10 @@ import { domain_reCreateToken } from "../reCreateToken";
 import { domain_refreshSession } from "../refreshSession";
 
 describe("auth session and token domains", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	test("creates auth sessions for existing users", async () => {
 		const ctx = await createAuthenticatedContext();
 
@@ -31,6 +35,17 @@ describe("auth session and token domains", () => {
 		await expect(
 			domain_createAuthSession({ ctx, input: { userId: "missing-user" } }),
 		).rejects.toMatchObject(new AppError("user.not_found"));
+	});
+
+	test("surfaces session_create_error when the store returns no session", async () => {
+		const ctx = await createAuthenticatedContext();
+		vi.spyOn(ctx.repositories.session, "create").mockResolvedValueOnce(
+			null as never,
+		);
+
+		await expect(
+			domain_createAuthSession({ ctx, input: { userId: ctx.user.id } }),
+		).rejects.toMatchObject(new AppError("session.session_create_error"));
 	});
 
 	test("creates verification tokens with a future expiration", async () => {
@@ -192,6 +207,23 @@ describe("auth session and token domains", () => {
 		expect(refreshedSession.accessToken).not.toBe(ctx.user.session.accessToken);
 		expect(refreshedSession.refreshToken).not.toBe(originalRefreshToken);
 		expect(refreshedSession.previousRefreshToken).toBe(originalRefreshToken);
+	});
+
+	test("surfaces session_update_error when the store returns no session", async () => {
+		const ctx = await createAuthenticatedContext();
+		vi.spyOn(ctx.repositories.session, "update").mockResolvedValueOnce(
+			null as never,
+		);
+
+		await expect(
+			domain_refreshSession({
+				ctx,
+				input: {
+					id: ctx.user.session.id,
+					currentRefreshToken: ctx.user.session.refreshToken,
+				},
+			}),
+		).rejects.toMatchObject(new AppError("session.session_update_error"));
 	});
 
 	test("rejects reuse of a rotated-out refresh token and revokes the session", async () => {

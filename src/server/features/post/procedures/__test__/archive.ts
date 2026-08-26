@@ -49,4 +49,13 @@ describe("Archive Post Controller Unitary Testing", () => {
 			message: "This action is not valid for the post's current status.",
 		});
 	});
+
+	test("Should throw NOT_FOUND when the post does not exist", async () => {
+		await expect(
+			PostRouter.createCaller(adminCtx).archive({ id: "does-not-exist" }),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
+	});
 });
