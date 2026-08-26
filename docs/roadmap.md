@@ -16,8 +16,8 @@
 | 7 — Internal analytics | ✅ Done | `docs/features/017-post-view-analytics/`: record view (dedup per visitor for 24h via Redis/cookie, ADR-0013), count total, most-viewed posts, Admin/Editor dashboard. `docs/features/020-view-analytics-breakdown/`: counts by period (7/30 days), traffic source, and browser/OS — items that had left the phase partial, closed with 30-day retention (lazy deletion) and no IP persisted |
 | 8 — Media upload and management | ✅ Done (with 1 item deferred) | `docs/features/021-media-upload/`: real image upload (FormData via tRPC, `ADR-0015`), media library, delete (owner or `media:deleteAny`), alt text, format/size validation, post cover image from uploaded media. Item deferred: image compression/optimization (explicitly optional in the roadmap; goes away on its own if the final storage is an image CDN) |
 | 9 — Production quality | 🟡 Partial | Zod, migrations, seed, some tests/error pages already exist; **structured logs done** (`docs/features/025-structured-logging/`, ADR-0022 — canonical log line per call, JSON prod / pretty dev); in-memory rate limiting covers login/register/reset/refresh (`docs/features/001-auth-hardening/`) — not general rate limiting for the whole API; missing: test coverage (~8.6% today), general API rate limiting |
-| 10 — CI/CD and deploy | ⬜ Not started | no `.github/workflows/`, no deploy configured |
-| 11 — Observability | ⬜ Not started | no `/api/health`, no tracing/metrics |
+| 10 — CI/CD and deploy | 🟡 Partial | CI pipeline exists (`.github/workflows/ci.yml`: `typecheck`/`lint`/`test`/`build` on Node 20, on PR + push to `develop`/`main`) and PRs deploy via Vercel; missing: infra hardening (the `docker-compose.yml` hardcoded credentials / exposed Postgres port inherited from `001-auth-hardening`), README run instructions, a confirmed stable production environment |
+| 11 — Observability | 🟡 Partial | structured logs done (`docs/features/025-structured-logging/`, ADR-0022) and the canonical line carries `durationMs` per call; missing: request ID, `/api/health`, tracing/metrics |
 
 **Outside the numbered roadmap, done (2026-07-12):** `docs/features/001-auth-hardening/` — security hardening of the current session/auth (prerequisite for Phase 3, not a new phase). The application layer is closed; infra hardening (TLS/HTTPS via nginx+certificate, removing hardcoded credentials from `docker-compose.yml`, the Postgres port exposed to the host without need) was scoped out of this round — different operational nature (depends on a domain/certificate, not testable with `vitest`), owner decision on 2026-07-12 (`docs/features/001-auth-hardening/spec.md` § 7). Natural candidate: Phase 10 (CI/CD and deploy) when that phase starts.
 
@@ -542,11 +542,11 @@ Add practices companies expect from a serious project.
 
 This phase is done when the project has minimal coverage of the most important rules and does not depend on manual testing for everything.
 
-## Phase 10 — CI/CD and deploy ⬜ Not started
+## Phase 10 — CI/CD and deploy 🟡 Partial
 
 ### Objective
 
-Get the project live with an at-least-minimally professional pipeline. Today there is no `.github/workflows/` and no deploy configured — validation is only via local `.husky/` (see `docs/afm.md` § 6).
+Get the project live with an at-least-minimally professional pipeline. **Update (2026-08-25):** the CI pipeline now exists — `.github/workflows/ci.yml` runs `typecheck` (`tsc --noEmit`), `lint` (`biome check`), `test` (`npm test`), and `build` (`npm run build` against a Postgres service) on every PR and push to `develop`/`main`, on Node 20; PRs also deploy via Vercel. Local `.husky/` validation still runs as the pre-commit layer (see `docs/afm.md` § 6). What is still missing to close the phase: the infra-hardening item below, README run instructions, and a confirmed stable production environment.
 
 ### Suggested pipeline
 
@@ -597,7 +597,7 @@ This phase is done when:
 * the database has migrations;
 * a minimally stable production environment exists.
 
-## Phase 11 — Observability ⬜ Not started
+## Phase 11 — Observability 🟡 Partial
 
 ### Objective
 
