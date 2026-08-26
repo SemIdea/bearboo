@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { resolveErrorEntry } from "../index";
+import { defineDomainErrors } from "../registry";
 
 // The registry is where the defaults live, not the consumer. If each caller
 // had to write `entry.retryable ?? false`, the boilerplate this feature is
@@ -35,5 +36,21 @@ describe("resolveErrorEntry", () => {
 			retryable: true,
 			level: "warn",
 		});
+	});
+});
+
+// The Set guard is what makes a duplicated `defineDomainErrors("post", ...)`
+// fail loudly at import time instead of silently shadowing a live catalog.
+describe("defineDomainErrors", () => {
+	test("rejects registering the same domain twice", () => {
+		defineDomainErrors("registry_dup_probe", {
+			boom: { message: "First registration." },
+		});
+
+		expect(() =>
+			defineDomainErrors("registry_dup_probe", {
+				boom: { message: "Second registration." },
+			}),
+		).toThrow('domain "registry_dup_probe" already registered');
 	});
 });

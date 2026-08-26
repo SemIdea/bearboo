@@ -1,9 +1,13 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppError } from "@/shared/error/appError";
 import { createTestContext } from "@/test/context";
 import { domain_recordView } from "../recordView";
 
 describe("domain_recordView", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	test("records a view for a PUBLISHED post", async () => {
 		const ctx = createTestContext();
 		const user = await ctx.createNewUser();
@@ -98,5 +102,22 @@ describe("domain_recordView", () => {
 		expect(events[post.id]).toEqual([
 			{ referrerBucket: "DIRECT", userAgent: "" },
 		]);
+	});
+
+	test("degrades to counted:false when the view counter backend fails", async () => {
+		const ctx = createTestContext();
+		const user = await ctx.createNewUser();
+		const post = await ctx.createPost({ userId: user.id, status: "PUBLISHED" });
+
+		vi.spyOn(ctx.gateways.viewCounter, "recordView").mockRejectedValue(
+			new Error("counter backend unreachable"),
+		);
+
+		const result = await domain_recordView({
+			ctx,
+			input: { postId: post.id, visitorId: "visitor-1" },
+		});
+
+		expect(result).toEqual({ counted: false });
 	});
 });
