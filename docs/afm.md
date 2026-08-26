@@ -204,7 +204,7 @@ Retroactive adoption via `/afm:refactor` on **2026-06-30**. The rules below appl
 
 | Rule | Reason for forward-only | Violation found | Tech debt tracked in |
 | --- | --- | --- | --- |
-| 1 — TDD/coverage | Current coverage is low: 23 test files / 205 `src/` files (~11.2%). A retroactive sweep would be weeks of work. | 23/205 (~11.2%) | `[A DEFINIR — open issue]` |
+| 1 — TDD/coverage | Backend coverage grew to ~90% by applying this rule to new code over time — no retroactive sweep needed (measured 2026-08-25, v8: `src/server`+`lib`+`shared` ~90.5% lines, `server/features` domain+procedures 98.9%, 85 test files / 411 tests). The remaining uncovered surface is frontend (`src/app`/`src/components` ~0%), deliberately deferred with the frontend refactor (`roadmap.md` Sequencing note) — testing pre-refactor components would be throwaway work. | frontend `app`/`components` ~0% (whole-repo ~52%) | `[A DEFINIR — closes with the frontend refactor]` |
 | 2 — zero `any`/`unknown` | Small volume, but still present in legacy helpers/components; does not block in-flight PRs until the boy-scout reaches it. | 5 occurrences | `[A DEFINIR]` |
 | 5 — vague naming | 2 files without a domain prefix (`src/lib/utils.ts`, `src/server/infra/container/helpers.ts`). Renaming/splitting needs a review of every import. | `src/lib/utils.ts`, `src/server/infra/container/helpers.ts` | `[A DEFINIR]` |
 | 6 — file ≤300 lines | Resolved by the `entities/` → `models/` migration (ADR-0007); kept as a forward-only rule for new code. | 0 production files >300 lines | — |
