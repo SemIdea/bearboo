@@ -1,5 +1,6 @@
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { env } from "@/lib/env";
+import { createLogger, Logger } from "@/lib/log";
 import { AppError } from "@/shared/error/appError";
 import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
 import { CookieJar } from "./http/cookieJar";
@@ -19,6 +20,9 @@ type IBaseContextDTO = IInputAPIContextDTO & {
 	gateways: IGateways;
 	env: typeof env;
 	resCookies: CookieJar;
+	// Per-request base logger. The logging middleware forks a fresh per-call
+	// logger from here and emits the canonical line at the boundary (ADR-0022).
+	log: Logger;
 	refreshToken?: string;
 	visitorId?: string;
 };
@@ -41,6 +45,7 @@ const createTRPCContext = async ({
 		gateways,
 		env,
 		resCookies: new CookieJar(),
+		log: createLogger(),
 	};
 
 	const cookies = headers.get("cookie");

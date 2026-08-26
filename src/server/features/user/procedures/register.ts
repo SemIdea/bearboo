@@ -37,7 +37,9 @@ const procedure_registerUser = publicProcedure
       `,
 			},
 		}).catch((error) => {
-			console.error("Error sending verification email:", error);
+			// The canonical-line middleware logs the throw below as a bug with
+			// its stack (ADR-0022); this only tags what failed on the line.
+			ctx.log.add({ mail_send_failed: true });
 			throw new Error("Failed to send verification email");
 		});
 

@@ -80,8 +80,9 @@ src/
 ├── components/                 # Reusable React components + components/ui (shadcn-style)
 ├── config/                     # site.ts, fonts.ts, featureFlags.ts
 ├── context/                    # React providers (auth, trpc client)
-├── lib/                        # pure libs with no ORM/framework: env, error, featureFlags, utils, validation, helpers
+├── lib/                        # pure libs with no ORM/framework: env, error, featureFlags, utils, validation, helpers, log
 │   ├── env/                    # typed env var reading via dotenv
+│   ├── log/                    # structured logging: scalar-only LogFields, JSON/pretty renderers, per-call logger (ADR-0022)
 │   ├── passwordHashing/        # adapter + bcrypt implementation
 │   └── uidGenerator/           # adapter + uuid implementation
 ├── server/                     # Backend layer
@@ -98,7 +99,7 @@ src/
 │   │   └── drivers/             # Singleton clients (prisma.ts)
 │   ├── integrations/
 │   │   └── gateway/<name>/      # adapter.ts + implementations/  (mailer)
-│   └── createContext.ts, createRouter.ts, caller.ts
+│   └── createContext.ts, createRouter.ts, caller.ts   # createRouter mounts withCanonicalLog — one wide log line per call (ADR-0022)
 ├── shared/error/               # machinery at the root (registry, domainError, index, boundaryLog, validation)
 │   └── catalog/<domain>.ts     # the 8 per-domain catalogs (auth/comment/media/post/resetToken/session/user/verifyToken)
 ├── test/

@@ -4,7 +4,6 @@ import { NextRequest } from "next/server";
 import { Context, createTRPCContext } from "@/server/createContext";
 import { serializeCookie } from "@/server/http/serializeCookie";
 import { appRouter } from "@/server/routers/app.routes";
-import { logBoundaryError } from "@/shared/error/boundaryLog";
 
 const createContext = async (req: NextRequest) => {
 	return createTRPCContext({
@@ -35,12 +34,6 @@ const handler = (req: NextRequest) => {
 			}
 
 			return { headers };
-		},
-		onError: ({ error, path }) => {
-			// Single choke point for the bug-vs-recoverable convention:
-			// recoverable AppErrors log at their own level; unexpected
-			// throws (bugs) log at error with the full stack.
-			logBoundaryError(error, { path });
 		},
 	});
 };

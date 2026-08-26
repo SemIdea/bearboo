@@ -1,7 +1,6 @@
 import { cookies, headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppError } from "@/shared/error/appError";
-import { logBoundaryError } from "@/shared/error/boundaryLog";
 import { createTRPCContext, IProtectedAPIContextDTO } from "./createContext";
 import { appRouter } from "./routers/app.routes";
 
@@ -29,8 +28,8 @@ const createDynamicCaller = async () => {
 
 	const caller = appRouter.createCaller(callerCtx, {
 		onError: ({ error }) => {
-			logBoundaryError(error, { path: pathName });
-
+			// Logging is owned by the canonical-line middleware (ADR-0022); this
+			// hook stays only for the session redirect.
 			if (error.cause instanceof AppError) {
 				switch (error.cause.code) {
 					case "auth.user_not_logged_in":
