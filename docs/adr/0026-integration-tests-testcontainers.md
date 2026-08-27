@@ -35,6 +35,7 @@ Adopt **Testcontainers** (`testcontainers` + `@testcontainers/postgresql`, devDe
 - **Easy now:** raw SQL / migration / real-engine behavior is testable; native full-text search (feature 027) is unblocked — a `to_tsvector`/`plainto_tsquery` smoke already runs green here.
 - **Harder / watch out:**
   - Needs a **Docker daemon** (local dev and CI). No Docker → the integration suite cannot run; the unit suite is unaffected.
+  - Needs **Node ≥ 22.19**: `testcontainers@12` pulls `undici@8` (`engines: node >=22.19`), which crashes on Node 20 (`webidl.util.markAsUncloneable is not a function`). The integration CI job runs Node 22; the other jobs stay on Node 20 (prod parity). Run it locally on Node ≥ 22 too.
   - `DATABASE_URL` must reach the worker: the config uses `pool: forks` for that (globalSetup sets it before workers fork).
   - Integration tests use the `*.integration.ts` suffix and live **outside** `__test__/` so the unit glob never picks them up.
 - **Load-bearing:** rule 30 gains `src/test/integration/` and the `*.integration.ts` files as a data-layer exception (they may import the real `prisma` driver), alongside the `src/test/prisma/` exception from ADR-0011.
