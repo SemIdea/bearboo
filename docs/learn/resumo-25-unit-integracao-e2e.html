@@ -1,0 +1,264 @@
+<!doctype html>
+<!-- learn · template de output (web components). Vocabulário e fluxo de geração: ver SKILL.md do plugin learn. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unit vs Integração vs E2E — o modelo mental (resumo)</title>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  l-doc{display:block;max-width:820px;margin:0 auto;padding:32px 20px 80px}
+  l-head{display:block;border-bottom:1px solid #2b3340;padding-bottom:24px;margin-bottom:32px}
+  l-sec,l-steps,l-tldr,l-fig{display:block}
+  l-fig{margin:22px 0}
+  l-apply{display:block;background:linear-gradient(180deg,#16221b,#13191c);
+    border:1px solid #2b6e3a;border-left:5px solid #3fb950;border-radius:10px;padding:4px 22px 16px;margin:22px 0}
+  l-note{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #f0883e;
+    border-radius:8px;padding:10px 16px;margin:18px 0}
+  l-note[kind=info]{border-left-color:#58a6ff}
+  l-card{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #a371f7;
+    border-radius:8px;padding:8px 16px 4px;margin:14px 0}
+  l-data{display:grid;grid-template-columns:max-content 1fr;margin:14px 0;
+    border:1px solid #2b3340;border-radius:8px;overflow:hidden}
+  l-row{display:contents}
+  /* conteúdo de autoria (light DOM) */
+  p{margin:0 0 14px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:0 0 9px}
+  strong{color:#fff}
+  a{color:#58a6ff}
+  code{background:#1c2330;border:1px solid #2b3340;border-radius:5px;padding:1px 6px;
+    font:13px/1.5 ui-monospace,"SFMono-Regular",Consolas,monospace;color:#ffa657}
+  table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}
+  th,td{padding:8px 11px;text-align:left;border-bottom:1px solid #2b3340}
+  th{background:#1c2330;color:#58a6ff;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td.num,th.num,.num{color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+  td.num,th.num{text-align:right}
+</style>
+<script>
+  const CSS = `:host{display:block}
+    a{color:#58a6ff;text-decoration:none} a:hover{text-decoration:underline}
+    h1{font-size:28px;line-height:1.25;margin:0 0 12px}
+    .b{display:inline-block;background:linear-gradient(90deg,#58a6ff,#7ee787);color:#0d1117;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:14px}
+    .au{color:#9aa7b4;font-size:14px;margin:0 0 8px}
+    .me{color:#9aa7b4;font-size:13px;margin:0}
+    h2.s{font-size:21px;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid #2b3340}
+    h2.s i{font-style:normal;color:#58a6ff;font-variant-numeric:tabular-nums;margin-right:8px}
+    h2.a{font-size:20px;margin:10px 0 8px;color:#7ee787}
+    b.nt{display:block;color:#fff;margin:0 0 6px}
+    ol{margin:0;padding-left:20px} ul.td{list-style:none;margin:0;padding:0}
+    figure{margin:0;background:#161b22;border:1px solid #2b3340;border-radius:10px;padding:12px}
+    img{display:block;max-width:100%;border-radius:6px;margin:0 auto}
+    figcaption{color:#9aa7b4;font-size:13px;margin-top:8px}
+    .k{padding:8px 12px;border-bottom:1px solid #2b3340;color:#cbd5e1}
+    .v{padding:8px 12px;border-bottom:1px solid #2b3340;text-align:right;color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+    .q{color:#fff;font-weight:600;margin:0}
+    summary{cursor:pointer;color:#58a6ff;font-size:13px;margin-top:4px;list-style:none}
+    .ans{margin:8px 0 0}
+    .cite{color:#9aa7b4;font-size:12px;margin:6px 0 0}`;
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const def = (tag, render) => customElements.define(tag, class extends HTMLElement{
+    connectedCallback(){
+      if(this._r) return; this._r = 1;
+      const a = n => this.getAttribute(n) || '';
+      this.attachShadow({mode:'open'}).innerHTML = '<style>'+CSS+'</style>' + render(a);
+    }
+  });
+  def('l-head', a => (a('badge')?`<span class="b">${esc(a('badge'))}</span>`:'')
+    + `<h1>${esc(a('title'))}</h1>`
+    + (a('authors')?`<p class="au">${esc(a('authors'))}</p>`:'')
+    + (a('src')?`<p class="me">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src'))}</a>`:esc(a('src'))}</p>`:''));
+  def('l-sec',  a => `<h2 class="s"><i>${esc(a('n'))}</i>${esc(a('title'))}</h2><slot></slot>`);
+  def('l-apply',a => `<h2 class="a">\u{1F3AF} ${esc(a('title')||'Aplicar no contexto')}</h2><slot></slot>`);
+  def('l-note', a => `<b class="nt">${esc(a('title')||'Cuidado')}</b><slot></slot>`);
+  def('l-steps',() => `<ol><slot></slot></ol>`);
+  def('l-tldr', () => `<ul class="td"><slot></slot></ul>`);
+  def('l-data', () => `<slot></slot>`);
+  def('l-row',  a => `<span class="k">${esc(a('k'))}</span><span class="v">${esc(a('v'))}</span>`);
+  def('l-fig',  a => `<figure><img src="${esc(a('src'))}" loading="lazy" alt="${esc(a('cap'))}">`
+    + ((a('cap')||a('href'))?`<figcaption>${esc(a('cap'))} ${a('href')?`<a href="${esc(a('href'))}">fonte</a>`:''}</figcaption>`:'')
+    + `</figure>`);
+  def('l-card', a => `<p class="q">${esc(a('q'))}</p>`
+    + `<details><summary>Mostrar resposta</summary><div class="ans"><slot></slot></div>`
+    + ((a('src')||a('href'))?`<p class="cite">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src')||'fonte')}</a>`:esc(a('src'))}</p>`:'')
+    + `</details>`);
+</script>
+</head>
+<body>
+<l-doc>
+<l-head
+  badge="Testes"
+  title="Unit vs Integração vs E2E — o modelo mental"
+  authors="Síntese de 5 fontes (2010–2020): M. Fowler, H. Vocke, K. C. Dodds, Software Engineering at Google"
+  src="martinfowler.com · kentcdodds.com · abseil.io/resources/swe-book"
+  href="https://martinfowler.com/articles/practical-test-pyramid.html"></l-head>
+
+<l-note kind="info" title="Método">
+  <p>Comparação conceitual + Q&amp;A de discriminação. O objetivo aqui não é decorar
+  definições — é você <strong>situar cada camada no espaço de design</strong> e nunca mais
+  confundir integração com e2e. Tudo abaixo é ancorado nas fontes citadas; onde uma fonte não
+  afirma algo, está marcado.</p>
+</l-note>
+
+<l-sec n="1" title="A resposta direta à sua pergunta">
+  <p>Você vê integração como "um e2e menos completo". A confusão some quando você troca o eixo:
+  <strong>a diferença não é "quão completo", é o que cada teste valida e até onde ele vai.</strong></p>
+  <ul>
+    <li><strong>Unit</strong> — a <strong>lógica de uma unidade</strong>, isolada. É o que você já entende.</li>
+    <li><strong>Integração</strong> — a <strong>costura entre o seu código e UMA dependência externa real</strong>
+      (o banco, sobretudo). Uma <strong>fatia</strong> do sistema, não o todo, e <strong>não pela UI</strong>.</li>
+    <li><strong>E2E</strong> — o <strong>sistema inteiro pelo ponto de entrada real</strong> (browser/HTTP),
+      como um usuário faria.</li>
+  </ul>
+  <p>Integração e e2e diferem em <strong>escopo</strong> (uma junção vs. o sistema todo), não em completude.
+  Um teste de integração pode ser tão pequeno em escopo quanto um unit — só que toca algo real.</p>
+  <p>A moldura é a <strong>pirâmide de testes</strong> (Fowler/Vocke), com duas regras: <em>"write tests with
+  different granularity"</em> e <em>"the more high-level you get the fewer tests you should have"</em>. Em uma
+  frase: <em>"Write lots of small and fast unit tests. Write some more coarse-grained tests and very few
+  high-level tests that test your application from end to end."</em></p>
+</l-sec>
+
+<l-sec n="2" title="As três camadas, definidas pelas fontes">
+  <p><strong>Unit.</strong> O que é uma "unidade"? Fowler: em linguagem funcional, <em>"a unit will most likely
+  be a single function"</em>; em OO, <em>"a unit can range from a single method to an entire class"</em>.
+  Duas variantes (termos cunhados por <strong>Jay Fields</strong>): <strong>solitary</strong> (troca todos os
+  colaboradores por test doubles, isolamento total) e <strong>sociable</strong> (usa colaboradores reais,
+  só stubando as partes lentas como banco/rede). Detalhe honesto: "unit" é mal-definido — Fowler cita um
+  especialista que <em>"cobre 24 definições diferentes de unit test"</em> num treino. Dodds resume:
+  <em>"Verify that individual, isolated parts work as expected."</em></p>
+
+  <p><strong>Integração.</strong> Dodds: <em>"Verify that several units work together in harmony."</em>
+  Aqui mora o nó que te confunde — Fowler diz que há <em>"(at least) two different notions of what
+  constitutes an integration test"</em>:</p>
+  <ul>
+    <li><strong>Narrow integration test</strong> — <em>"exercise only that portion of the code in my service
+      that talks to a separate service"</em>, usa test doubles, e é <em>"often no larger in scope than a unit
+      test"</em>. O exemplo de banco é literal: <em>"start a database, connect your application to the database,
+      trigger a function within your code that writes data to the database, check that the expected data has
+      been written."</em></li>
+    <li><strong>Broad integration test</strong> — <em>"require live versions of all services... exercise code
+      paths through all services, not just code responsible for interactions."</em> E o ponto que fecha a sua
+      dúvida, nas palavras do Fowler: <em>"If I talk about broad integration tests, I prefer to use 'system
+      test' or 'end-to-end test.'"</em></li>
+  </ul>
+  <p>Ou seja: o "e2e menos completo" que você imagina é, na verdade, o <strong>narrow</strong>. O broad
+  <strong>é</strong> e2e — o próprio Fowler prefere não chamar de integração.</p>
+
+  <p><strong>E2E.</strong> Dodds: <em>"A helper robot that behaves like a user to click around the app and
+  verify that it functions correctly."</em> Por que poucos? Fowler/Vocke: e2e são <em>"notoriously flaky and
+  often fail for unexpected and unforeseeable reasons"</em>, exigem muita manutenção e rodam devagar — daí
+  <em>"you should aim to reduce the number of end-to-end tests to a bare minimum"</em>.</p>
+</l-sec>
+
+<l-sec n="3" title="A lente do Google: tamanho, não escopo">
+  <p><strong>Software Engineering at Google</strong> (cap. 11) evita os nomes ambíguos e classifica por
+  <strong>tamanho</strong>, porque <em>"the most important qualities we want from our test suite are speed and
+  determinism, regardless of the scope of the test."</em></p>
+  <ul>
+    <li><strong>Small</strong> — <em>"must run in a single process"</em>; sem I/O, rede, disco ou sleep. (≈ unit)</li>
+    <li><strong>Medium</strong> — <em>"can span multiple processes, use threads, and can make blocking calls,
+      including network calls, to <code>localhost</code>"</em>, mas <em>"aren't allowed to make network calls to
+      any system other than localhost"</em>. (≈ integração — inclui um <strong>banco local</strong>)</li>
+    <li><strong>Large</strong> — <em>"remove the localhost restriction... allowing the test and the system being
+      tested to span across multiple machines."</em> (≈ e2e/sistema)</li>
+  </ul>
+  <p>É essa definição que dissolve de vez a sua dúvida: <strong>um teste de integração ≈ um Medium test = o seu
+  código + uma dependência real em <code>localhost</code></strong> (ex.: um container Postgres). O Google mira a
+  proporção <em>"80% narrow-scoped unit tests, 15% medium-scoped integration tests, 5% end-to-end tests"</em>.</p>
+</l-sec>
+
+<l-sec n="4" title="Quadro comparativo">
+  <table>
+    <thead>
+      <tr><th>Camada</th><th>O que valida</th><th>Até onde vai</th><th>Deps reais?</th><th>Quantidade</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Unit</strong></td><td>lógica de uma unidade</td><td>uma função/classe, isolada</td><td>não (doubles)</td><td>muitos</td></tr>
+      <tr><td><strong>Integração (narrow)</strong></td><td>a costura código ↔ 1 dependência</td><td>uma fatia (ex.: repo + banco)</td><td>sim, 1 (o banco)</td><td>alguns</td></tr>
+      <tr><td><strong>E2E (= broad)</strong></td><td>uma jornada do usuário</td><td>o sistema todo, pelo entrypoint real</td><td>sim, todas</td><td>pouquíssimos</td></tr>
+    </tbody>
+  </table>
+  <p class="me" style="color:#9aa7b4;font-size:13px">Escopo e "deps reais" são de Fowler (narrow/broad) e do Google
+  (small/medium/large); a coluna "quantidade" reflete a forma da pirâmide (Fowler/Vocke).</p>
+</l-sec>
+
+<l-apply title="Aplicar no bearboo">
+  <p><strong>Onde você está hoje.</strong> O suite roda a camada domain/procedure contra <code>prisma-mock</code>
+  (ADR-0011) — um <strong>fake JS sem engine SQL</strong>. Traduzindo pro vocabulário acima: os seus ~91% de
+  cobertura backend são testes <strong>small/solitary</strong> — validam a <strong>lógica</strong>, mas o mock
+  <strong>não é Postgres</strong>.</p>
+  <p><strong>O buraco exato.</strong> Tudo que depende de <strong>semântica SQL real</strong> está sem teste,
+  porque o mock não tem parser SQL — ele "mente":</p>
+  <ul>
+    <li>full-text search nativo (<code>to_tsvector</code>/<code>ts_rank</code>) — o item adiado da Fase 6;</li>
+    <li><code>$queryRaw</code> e qualquer query crua (o mock não tem parser SQL);</li>
+    <li>se as <strong>migrations</strong> aplicam limpo num Postgres real (o mock nunca migra).</li>
+  </ul>
+  <p><strong>O que é integração aqui.</strong> É o <em>narrow integration test</em> do Fowler / <em>Medium test</em>
+  do Google: subir um <strong>Postgres real</strong> (a CI já sobe um serviço <code>postgres:16</code> no job
+  <code>build</code>), conectar o <strong>repositório/domain</strong> nele, exercer a query e checar o resultado.
+  <strong>Não passa pelo browser, não sobe o app inteiro</strong> — é uma fatia <code>código ↔ Postgres</code>.
+  Por isso <strong>não é "um e2e menor"</strong>: é a validação dirigida de uma costura que o mock não alcança.</p>
+  <p><strong>Por que essa ordem (unit → integração → e2e).</strong> O e2e (o "robô-usuário" clicando no app
+  inteiro) vem por último e está <strong>adiado com o refactor de frontend</strong> — tocá-lo agora testaria uma
+  UI que vai ser reescrita. A integração é o próximo degrau porque fecha o buraco do <code>prisma-mock</code>
+  e <strong>desbloqueia o full-text nativo</strong> que a Fase 6 deixou pendente (o ADR-0011 já anteviu isto
+  como item de Fase 9/10).</p>
+</l-apply>
+
+<l-note kind="warn" title="Cuidados">
+  <ul>
+    <li>"Integração" é palavra <strong>ambígua</strong> (Fowler). Quando alguém disser, pergunte:
+      <strong>narrow ou broad?</strong> No bearboo queremos narrow (código + Postgres), não broad (= e2e).</li>
+    <li>O inverso também pega: um unit <strong>sociable</strong> que fala com o banco real <strong>já é</strong>,
+      na prática, um teste de integração (mais lento, menos determinístico) — o Google o classificaria como
+      <strong>Medium</strong>, não Small.</li>
+    <li>Não persiga a forma da pirâmide por si só. O critério útil é <strong>"o que o mock não consegue
+      testar"</strong> — coerente com a decisão que já tomamos (coverage é métrica, não meta).</li>
+  </ul>
+</l-note>
+
+<l-sec n="5" title="TL;DR">
+  <l-tldr>
+    <li><strong>Unit</strong>: a lógica de uma unidade, isolada, rápida — muitos.</li>
+    <li><strong>Integração (narrow)</strong>: seu código + <strong>uma</strong> dependência real (o banco),
+      uma fatia — não o app todo, não pela UI.</li>
+    <li><strong>E2E (= broad integration)</strong>: o sistema inteiro pelo entrypoint real, como um usuário —
+      poucos, lentos, frágeis.</li>
+    <li>Integração vs e2e = <strong>escopo</strong> (uma costura vs. o sistema todo), não "quão completo".</li>
+    <li>No bearboo: integração = <strong>repositório/domain contra Postgres real</strong>, pra testar o SQL que
+      o <code>prisma-mock</code> não consegue.</li>
+  </l-tldr>
+</l-sec>
+
+<l-sec n="6" title="Recall">
+  <l-card q="Em uma frase: o que um teste de integração valida que um unit não valida?"
+    src="Fowler — Practical Test Pyramid" href="https://martinfowler.com/articles/practical-test-pyramid.html">
+    A costura com uma dependência externa real (o banco).</l-card>
+  <l-card q="Integração vs e2e — a diferença é 'quão completo'?"
+    src="Fowler — IntegrationTest" href="https://martinfowler.com/bliki/IntegrationTest.html">
+    Não: é escopo — uma fatia vs. o sistema todo.</l-card>
+  <l-card q="Como Fowler chama o teste que sobe todos os serviços vivos?"
+    src="Fowler — IntegrationTest" href="https://martinfowler.com/bliki/IntegrationTest.html">
+    Broad integration = system/end-to-end test.</l-card>
+  <l-card q="No modelo do Google, um teste que fala só com localhost + banco é de que tamanho?"
+    src="Software Engineering at Google, cap. 11" href="https://abseil.io/resources/swe-book/html/ch11.html">
+    Medium.</l-card>
+  <l-card q="Quem cunhou os termos 'solitary' e 'sociable'?"
+    src="Fowler — UnitTest" href="https://martinfowler.com/bliki/UnitTest.html">
+    Jay Fields.</l-card>
+  <l-card q="Por que o prisma-mock não cobre o full-text search do Postgres?"
+    src="bearboo — ADR-0011">
+    É um fake JS sem engine SQL.</l-card>
+  <l-card q="Proporção de testes que o SE@Google mira?"
+    src="Software Engineering at Google, cap. 11" href="https://abseil.io/resources/swe-book/html/ch11.html">
+    ~80% unit / 15% integração / 5% e2e.</l-card>
+  <l-card q="No bearboo, um teste de integração passa pelo browser?"
+    src="síntese — narrow integration">
+    Não: é a fatia repositório/domain ↔ Postgres.</l-card>
+</l-sec>
+</l-doc>
+</body>
+</html>
