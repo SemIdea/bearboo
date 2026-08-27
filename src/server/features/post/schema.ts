@@ -73,7 +73,7 @@ const searchPostsSchema = z.object({
 	limit: z.number().int().min(1).max(50).optional(),
 	categoryId: z.string().optional(),
 	tagId: z.string().optional(),
-	sortBy: z.enum(["recent", "mostViewed"]).optional(),
+	sortBy: z.enum(["recent", "mostViewed", "relevance"]).optional(),
 });
 
 const readOwnPostsSchema = z.object({

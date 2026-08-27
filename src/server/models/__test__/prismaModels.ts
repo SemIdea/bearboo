@@ -168,54 +168,9 @@ describe("Prisma-backed models", () => {
 		});
 	});
 
-	test("PostModel searches posts by title or content, case-insensitive, ordered by most recent by default", async () => {
-		const posts = [{ id: "post-1", postTags: [] }];
-		prismaMock.post.findMany.mockResolvedValue(posts);
-
-		await expect(
-			PostModel.search("prisma", 5, "cursor-1", "category-1", "tag-1"),
-		).resolves.toEqual([{ id: "post-1", tags: [] }]);
-
-		expect(prismaMock.post.findMany).toHaveBeenCalledWith({
-			take: 5,
-			cursor: { id: "cursor-1" },
-			skip: 1,
-			where: {
-				AND: [
-					{ OR: publicVisibilityOr },
-					{
-						OR: [
-							{ title: { contains: "prisma", mode: "insensitive" } },
-							{ content: { contains: "prisma", mode: "insensitive" } },
-						],
-					},
-					{ categoryId: "category-1" },
-					{ postTags: { some: { tagId: "tag-1" } } },
-				],
-			},
-			orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-			include: postIncludeShape,
-		});
-	});
-
-	test("PostModel searches posts ordered by most viewed when sortBy is mostViewed", async () => {
-		prismaMock.post.findMany.mockResolvedValue([]);
-
-		await PostModel.search(
-			"prisma",
-			5,
-			undefined,
-			undefined,
-			undefined,
-			"mostViewed",
-		);
-
-		expect(prismaMock.post.findMany).toHaveBeenCalledWith(
-			expect.objectContaining({
-				orderBy: [{ viewCount: "desc" }, { id: "asc" }],
-			}),
-		);
-	});
+	// Search moved to native full-text (ADR-0027): the tsvector query runs raw
+	// SQL prisma-mock cannot execute, so matching/ranking/filters/pagination are
+	// covered in src/server/features/post/__itest__/search.integration.ts.
 
 	test("PostModel reads posts by user", async () => {
 		prismaMock.post.findMany.mockResolvedValue([]);
