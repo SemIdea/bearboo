@@ -520,7 +520,7 @@ Add practices companies expect from a serious project.
 * [~] empty states — confirmed in `src/components/postFeed.tsx` ("No posts found."), not audited across all components;
 * [x] validation with Zod (`src/server/schema/*.schema.ts`);
 * [x] unit tests (18 `vitest` files — coverage ~8.6%, see `docs/afm.md` § 3.1);
-* [ ] integration tests;
+* [x] integration tests — harness via Testcontainers + real Postgres (`docs/features/026-integration-test-harness/`, ADR-0026): boots `postgres:16`, applies the real migrations, runs the domain/repository layer against a real engine (raw SQL / `to_tsvector` — what `prisma-mock` cannot). Unblocks native full-text search (Phase 6, feature 027);
 * [ ] basic e2e tests;
 * [x] development seed (`prisma/seed.ts` — 3 users, posts, comments, verify/reset tokens);
 * [x] organized migrations (`prisma/migrations/`);

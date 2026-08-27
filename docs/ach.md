@@ -276,9 +276,11 @@ integrations/**/implementations/* → implements the port; may receive config/en
 | **Integration** | [A DEFINIR — not found in the scan] | — | — |
 | **E2E** | [A DEFINIR — not found in the scan] | — | — |
 
-Current coverage (proxy `tests/src`): 23 test files / 205 `.ts`/`.tsx` files in `src/` (~11.2%). See `afm.md` § 3.1 forward-only.
+Current backend coverage ~90% (measured 2026-08-25, v8: `src/server`+`lib`+`shared` ~90.5% lines, `server/features` domain+procedures 98.9%; 85 test files / 411 tests). Whole-repo ~52% is dragged down by the untested frontend (`src/app`/`src/components` ~0%, deferred with the frontend refactor). See `afm.md` § 3.1 forward-only.
 
 Procedure tests run without Postgres/Redis: vitest mocks the Prisma driver globally (`src/test/setup.ts`) with a **`prisma-mock`** client generated from `schema.prisma` (`src/test/prisma/` — ADR-0011), so production models run intact against an in-memory database with unique constraints enforced; `createTestContext()` injects only the fake gateways (`src/test/gateways/`). Per-test isolation via `resetPrismaMock()` (do not use `$clear()` — see the comment in the seam). The pre-push hook runs `yarn test` directly.
+
+A complementary **integration** suite (`npm run test:integration`, ADR-0026, feature 026) runs the same domain/repository layer against a **real Postgres** via Testcontainers — covering what `prisma-mock` cannot (raw SQL, `to_tsvector`, the real migration set). It reuses the same driver seam (`DATABASE_URL` → the unmodified `src/server/infra/drivers/prisma.ts`, no mock), boots one `postgres:16` container in `src/test/integration/globalSetup.ts` (applies migrations), TRUNCATEs between tests (`setup.ts`), and lives in `*.integration.ts` files outside `__test__/` (own config `vitest.integration.config.ts`, own CI job). `prisma-mock` does correctly fake unique constraints and `mode: "insensitive"`, so the gap it fills is raw-SQL/migration fidelity, not constraints.
 
 ### 4.2 Hard TDD + types-as-test
 
