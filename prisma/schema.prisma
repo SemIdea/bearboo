@@ -72,6 +72,14 @@ model Post {
   postViews      PostView[]
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
+
+  // Native full-text search (feature 027, ADR-0027). Generated STORED column +
+  // GIN index, both created in the raw migration (Prisma cannot express a
+  // GENERATED ALWAYS AS expression). Declared here so Prisma tracks the column
+  // and does not drop it on drift.
+  searchVector   Unsupported("tsvector")?
+
+  @@index([searchVector], type: Gin)
 }
 
 enum ReferrerBucket {

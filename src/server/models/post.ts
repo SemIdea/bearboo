@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/infra/drivers/prisma";
 import { BaseModel } from "./base";
 
@@ -68,7 +69,7 @@ type IPostSitemapEntry = {
 	updatedAt: Date;
 };
 
-type IPostSearchSortBy = "recent" | "mostViewed";
+type IPostSearchSortBy = "recent" | "mostViewed" | "relevance";
 
 const flattenTags = (postTags: { tag: IPostTagSummary }[]): IPostTagSummary[] =>
 	postTags.map(({ tag }) => tag);
@@ -135,35 +136,67 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		cursor?: string,
 		categoryId?: string,
 		tagId?: string,
-		sortBy?: IPostSearchSortBy,
+		sortBy: IPostSearchSortBy = "relevance",
 	): Promise<IPostEntityWithRelations[]> {
+		// Native full-text (ADR-0027): match by tsvector `@@`, rank by ts_rank.
+		// Matching is consistent across sorts; only the ORDER differs. Raw SQL is
+		// confined to this data-layer model (rule 30). Cursor stays a post id —
+		// keyset compares against the cursor row's own sort key (subselect).
+		const categoryFilter = categoryId
+			? Prisma.sql`AND p."categoryId" = ${categoryId}`
+			: Prisma.empty;
+		const tagFilter = tagId
+			? Prisma.sql`AND EXISTS (SELECT 1 FROM "PostTag" pt WHERE pt."postId" = p.id AND pt."tagId" = ${tagId})`
+			: Prisma.empty;
+
+		const sortKey =
+			sortBy === "recent"
+				? Prisma.sql`created_at`
+				: sortBy === "mostViewed"
+					? Prisma.sql`view_count`
+					: Prisma.sql`rank`;
+		const orderBy = Prisma.sql`${sortKey} DESC, id DESC`;
+		const keyset = cursor
+			? Prisma.sql`WHERE (${sortKey}, id) < ((SELECT ${sortKey} FROM matched WHERE id = ${cursor}), ${cursor})`
+			: Prisma.empty;
+
+		const ranked = await prisma.$queryRaw<Array<{ id: string }>>`
+			WITH q AS (SELECT websearch_to_tsquery('english', ${query}) AS query),
+			matched AS (
+				SELECT p.id,
+				       ts_rank(p."searchVector", q.query) AS rank,
+				       p."createdAt" AS created_at,
+				       p."viewCount" AS view_count
+				FROM "Post" p, q
+				WHERE p."searchVector" @@ q.query
+				  AND (p.status = 'PUBLISHED' OR (p.status = 'SCHEDULED' AND p."scheduledAt" <= now()))
+				  ${categoryFilter}
+				  ${tagFilter}
+			)
+			SELECT id FROM matched
+			${keyset}
+			ORDER BY ${orderBy}
+			LIMIT ${count}
+		`;
+
+		const ids = ranked.map((row) => row.id);
+		if (ids.length === 0) return [];
+
+		// Hydrate with the relations the callers expect, then restore the ranked
+		// order (findMany does not preserve the `in` order).
 		const posts = await prisma.post.findMany({
-			take: count,
-			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-			where: {
-				AND: [
-					{ OR: publicVisibilityFilter() },
-					{
-						OR: [
-							{ title: { contains: query, mode: "insensitive" as const } },
-							{ content: { contains: query, mode: "insensitive" as const } },
-						],
-					},
-					...(categoryId ? [{ categoryId }] : []),
-					...(tagId ? [{ postTags: { some: { tagId } } }] : []),
-				],
-			},
-			orderBy:
-				sortBy === "mostViewed"
-					? [{ viewCount: "desc" as const }, { id: "asc" as const }]
-					: [{ createdAt: "desc" as const }, { id: "asc" as const }],
+			where: { id: { in: ids } },
 			include: postRelationsInclude,
 		});
+		const byId = new Map(posts.map((post) => [post.id, post]));
 
-		return posts.map(({ postTags, ...post }) => ({
-			...post,
-			tags: flattenTags(postTags),
-		}));
+		return ids
+			.map((id) => byId.get(id))
+			.filter((post): post is (typeof posts)[number] => post !== undefined)
+			.map(({ postTags, ...post }) => ({
+				...post,
+				tags: flattenTags(postTags),
+			}));
 	}
 
 	async readRelated(
