@@ -161,7 +161,7 @@ class PostModelClass extends BaseModel<IPostEntity> {
 			: Prisma.empty;
 
 		const ranked = await prisma.$queryRaw<Array<{ id: string }>>`
-			WITH q AS (SELECT websearch_to_tsquery('portuguese', ${query}) AS query),
+			WITH q AS (SELECT websearch_to_tsquery('english', ${query}) AS query),
 			matched AS (
 				SELECT p.id,
 				       ts_rank(p."searchVector", q.query) AS rank,

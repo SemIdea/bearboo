@@ -6,7 +6,7 @@
 ## Setup / migration
 
 - [X] **T001** `prisma/schema.prisma` — add `searchVector Unsupported("tsvector")?` + `@@index([searchVector], type: Gin)` to `Post`.
-- [X] **T002** `prisma/migrations/<ts>_add_post_search_vector/migration.sql` — hand-written: `ADD COLUMN "searchVector" tsvector GENERATED ALWAYS AS (to_tsvector('portuguese', coalesce(title,'') || ' ' || coalesce(content,''))) STORED;` + `CREATE INDEX ... USING GIN`. Verify it applies against a real container.
+- [X] **T002** `prisma/migrations/<ts>_add_post_search_vector/migration.sql` — hand-written: `ADD COLUMN "searchVector" tsvector GENERATED ALWAYS AS (to_tsvector('english', coalesce(title,'') || ' ' || coalesce(content,''))) STORED;` + `CREATE INDEX ... USING GIN`. Verify it applies against a real container.
 
 ## Boundary
 
@@ -14,11 +14,11 @@
 
 ## Core — the query rewrite
 
-- [X] **T004** `src/server/models/post.ts` — rewrite `search`: `$queryRaw` ranked ids (`@@ websearch_to_tsquery('portuguese', q)` + visibility + category/tag + keyset by cursor row's sort key), then hydrate via `findMany({ id: in }, include)` re-sorted to the ranked order. Default sort `relevance`.
+- [X] **T004** `src/server/models/post.ts` — rewrite `search`: `$queryRaw` ranked ids (`@@ websearch_to_tsquery('english', q)` + visibility + category/tag + keyset by cursor row's sort key), then hydrate via `findMany({ id: in }, include)` re-sorted to the ranked order. Default sort `relevance`.
 
 ## Tests (integration — the mock cannot run tsvector)
 
-- [X] **T005** `src/server/features/post/__itest__/search.integration.ts` — title-over-body ranking, pt stemming (`programação` ~ `programar`), category/tag/visibility filters, `recent`/`mostViewed` sorts, cursor pagination. RED→GREEN against the container.
+- [X] **T005** `src/server/features/post/__itest__/search.integration.ts` — title-over-body ranking (title weighted `'A'`), english stemming (`debugging` ~ `debug`), category/tag/visibility filters, `recent`/`mostViewed` sorts, cursor pagination. RED→GREEN against the container.
 - [X] **T006** Remove `src/server/features/post/procedures/__test__/search.ts` (coverage moved to T005). Confirm `npm test` green without it and `npm run test:integration` green.
 
 ## Reconciliation (§ 8.5)

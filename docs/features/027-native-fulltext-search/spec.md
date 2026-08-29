@@ -12,7 +12,7 @@ Phase 6 shipped search with Prisma `contains`/`insensitive` (substring, no stemm
 ## 2. Scope
 
 **In:**
-- A generated `tsvector` column on `Post` (over `title` + `content`, `portuguese` dictionary) + GIN index (custom migration).
+- A generated `tsvector` column on `Post` (over `title` weighted above `content`, `english` dictionary) + GIN index (custom migration).
 - Rewrite `PostModel.search` to match by `searchVector @@ websearch_to_tsquery` and order by `ts_rank` (relevance), `createdAt` (recent), or `viewCount` (mostViewed) — matching is now **consistent** across sorts. `$queryRaw` stays in the model (rule 30); rank-then-hydrate preserves relations and the return shape.
 - `sortBy` gains `"relevance"` (the default when a query is present).
 - Integration tests (026 harness) for ranking, stemming, filters, and pagination. The unit search tests move to integration (the mock cannot run `tsvector`).
@@ -29,4 +29,4 @@ Phase 6 shipped search with Prisma `contains`/`insensitive` (substring, no stemm
 ## 4. Notes
 
 - Migration is forward-compatible: an additive generated column + index, no destructive change (afm.md § 1.3).
-- The `portuguese` dictionary fits the blog's pt-BR content; English/code terms still match as tokens (no wrong English stemming).
+- The `english` dictionary matches the product content (en-US today; a future i18n system will add pt-BR — see `afm.md` § 1.3). Title is weighted `'A'` and content `'B'` so a title match outranks a body match.

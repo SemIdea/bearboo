@@ -3,7 +3,7 @@ import { domain_searchPosts } from "@/server/features/post/domain/search";
 import { createTestContext } from "@/test/context";
 
 // Native full-text search against real Postgres (ADR-0027). These exercise
-// tsvector matching, ts_rank ordering, and the `portuguese` stemming — none of
+// tsvector matching, ts_rank ordering, and the `english` stemming — none of
 // which prisma-mock can run, which is why the search tests live here (feature
 // 027 moved them from unit). See docs/features/027.
 describe("post.search — native full-text (integration, real Postgres)", () => {
@@ -31,16 +31,16 @@ describe("post.search — native full-text (integration, real Postgres)", () => 
 		expect(posts.map((post) => post.id)).toEqual([titleMatch.id, bodyOnly.id]);
 	});
 
-	test("stems Portuguese (programar matches programação)", async () => {
+	test("stems English (debug matches debugging)", async () => {
 		const ctx = createTestContext();
 		const user = await ctx.createNewUser();
 		const match = await ctx.createPost({
 			userId: user.id,
-			title: "Introdução à programação",
+			title: "Debugging strategies",
 		});
-		await ctx.createPost({ userId: user.id, title: "Receita de bolo" });
+		await ctx.createPost({ userId: user.id, title: "A cake recipe" });
 
-		const { posts } = await search(ctx, { query: "programar" });
+		const { posts } = await search(ctx, { query: "debug" });
 
 		expect(posts.map((post) => post.id)).toEqual([match.id]);
 	});

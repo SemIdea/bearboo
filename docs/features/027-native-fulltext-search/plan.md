@@ -19,7 +19,7 @@ Generated `tsvector` column + GIN index (custom migration; column declared `Unsu
 
 ## 3. Key decisions
 
-- **`portuguese` dictionary** — matches the blog's pt-BR content; the generated column and `websearch_to_tsquery` both use it (must agree).
+- **`english` dictionary** — the product content is en-US (future i18n adds pt-BR, `afm.md` § 1.3); the generated column and `websearch_to_tsquery` both use it (must agree). Title `setweight('A')` above content `'B'` so title matches rank higher.
 - **`websearch_to_tsquery`** — user-friendly query syntax (quotes, `or`, `-`); tolerant of arbitrary input.
 - **rank-then-hydrate** — `$queryRaw` returns ordered ids; `findMany(..., include)` hydrates; re-sort by id order. Keeps relations + `IPostEntityWithRelations` shape without hand-mapping every column in SQL.
 - **Cursor stays a post id** — the model does keyset pagination by looking up the cursor row's sort key in a subquery (`ts_rank`/`createdAt`/`viewCount` + id tiebreak), so `domain_searchPosts` (nextCursor = last id) is unchanged.
