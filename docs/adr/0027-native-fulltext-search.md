@@ -30,6 +30,6 @@ Adopt **native Postgres full-text search** on `Post`:
 
 - **Easy now:** relevance-ranked, stemmed search; a title match outranks a body match; filters and cursor pagination preserved. Native ranking primitives are exercised against real Postgres in CI.
 - **Harder / watch out:**
-  - The generated column and GIN index are managed in raw SQL, not fully in the Prisma schema — do not expect `prisma migrate dev` to reproduce the `GENERATED` expression from the schema (it only knows the `Unsupported` column exists).
+  - **Only `prisma migrate deploy` works on this schema.** The column is declared `Unsupported("tsvector")` (no generation info) but the real column is `GENERATED ALWAYS AS (...) STORED`, so Prisma reads a permanent drift: `prisma db push` fails outright, and `prisma migrate dev` fails **and leaves a failed phantom migration** that then blocks every later `migrate deploy` with P3009. Change the schema only via hand-written migrations + `migrate deploy`; recover from a phantom with `prisma migrate resolve --rolled-back <name>`. Bit twice on 2026-08-29 — see `docs/gotchas.md` (Prisma — `Unsupported` generated column).
   - Dictionary choice is baked into the stored column: changing `portuguese` later needs a migration to recompute the column.
   - Search behavior is now integration-tested (needs Docker), not unit-tested — by design (the mock cannot run tsvector).
