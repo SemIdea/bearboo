@@ -5,7 +5,7 @@ services:
       target: production
     hostname: app
     environment:
-      DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
+      DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-postgres}"
       REDIS_URL: "redis://cache:6379/0"
     expose:
       - "3000"
@@ -20,15 +20,15 @@ services:
     image: postgres:16
     command: postgres -c 'max_connections=450'
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    # No host port mapping in production: the app reaches Postgres over the Docker
+    # network (postgres:5432), so exposing it to the host is needless attack surface.
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -37,8 +37,8 @@ services:
     image: redis
     volumes:
       - redisdata:/data
-    ports:
-      - "6379:6379"
+    # No host port mapping in production: the app reaches Redis over the Docker
+    # network (cache:6379). Redis has no auth here, so exposing it is worse still.
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 5s
