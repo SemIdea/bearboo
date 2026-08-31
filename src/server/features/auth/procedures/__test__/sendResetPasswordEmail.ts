@@ -4,6 +4,7 @@ import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
 } from "@/test/context";
+import { FakeMailerGateway } from "@/test/gateways/mail";
 import { AuthRouter } from "../../index";
 
 describe("Send Reset Password Email Controller Unitary Testing", () => {
@@ -26,6 +27,24 @@ describe("Send Reset Password Email Controller Unitary Testing", () => {
 		expect(resetToken?.userId).toBe(ctx.user.id);
 		expect(result).toBeDefined();
 		expect(result.success).toBe(true);
+	});
+
+	test("Should build the reset link from the configured SITE_URL, not a hardcoded host", async () => {
+		ctx.env = { ...ctx.env, siteUrl: "https://bearboo.example" };
+
+		await AuthRouter.createCaller(ctx).sendResetPasswordEmail({
+			email: ctx.user.email,
+		});
+
+		const resetToken = await ctx.repositories.resetToken.readByUserId(
+			ctx.user.id,
+		);
+		const [sentMail] = (ctx.gateways.mail as FakeMailerGateway).sentMails;
+
+		expect(sentMail.body).toContain(
+			`https://bearboo.example/auth/recover/${resetToken?.token}`,
+		);
+		expect(sentMail.body).not.toContain("localhost");
 	});
 
 	test("Should always report success, even when the email doesn't exist", async () => {

@@ -54,6 +54,26 @@ describe("Resend Verification Email Controller Unitary Testing", () => {
 		expect(sentMail.body).not.toContain("/auth/verify?token=");
 	});
 
+	test("Should build the verify link from the configured SITE_URL, not a hardcoded host", async () => {
+		ctx.env = { ...ctx.env, siteUrl: "https://bearboo.example" };
+
+		await ctx.repositories.verifyToken.create(ctx.helpers.uid.generate(), {
+			expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+			token: ctx.helpers.uid.generate(),
+			userId: ctx.user.id,
+			used: false,
+		});
+
+		await AuthRouter.createCaller(ctx).resendVerificationEmail({
+			email: ctx.user.email,
+		});
+
+		const [sentMail] = (ctx.gateways.mail as FakeMailerGateway).sentMails;
+
+		expect(sentMail.body).toContain("https://bearboo.example/auth/verify/");
+		expect(sentMail.body).not.toContain("localhost");
+	});
+
 	test("Should throw error if user email is not found", async () => {
 		await expect(
 			AuthRouter.createCaller(ctx).resendVerificationEmail({
