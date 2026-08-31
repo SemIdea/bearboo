@@ -65,6 +65,26 @@ describe("Register User Controller Unitary Testing", () => {
 		expect(mailInput.body).not.toContain("/auth/verify?token=");
 	});
 
+	test("Should build the verify link from the configured SITE_URL, not a hardcoded host", async () => {
+		const { domain_sendMail } = await import("../../../mail/domain/sendMail");
+		vi.mocked(domain_sendMail).mockClear();
+
+		const localCtx = createTestContext();
+		localCtx.env = { ...localCtx.env, siteUrl: "https://bearboo.example" };
+
+		const uuid = localCtx.helpers.uid.generate();
+		await UserRouter.createCaller(localCtx).register({
+			email: `${uuid}@example.com`,
+			name: "Site URL User",
+			password: "password123",
+		});
+
+		const [{ input: mailInput }] = vi.mocked(domain_sendMail).mock.calls[0];
+
+		expect(mailInput.body).toContain("https://bearboo.example/auth/verify/");
+		expect(mailInput.body).not.toContain("localhost");
+	});
+
 	test("Should throw error if user already exists", async () => {
 		const otherUser = await ctx.createNewUser();
 
