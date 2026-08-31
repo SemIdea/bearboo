@@ -1,17 +1,22 @@
-import { TRPCError } from "@trpc/server";
 import { formatDistance } from "date-fns";
 import { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
+import { ViewTracker } from "@/components/viewTracker";
 import { env } from "@/lib/env";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
-import { PostErrorCode } from "@/shared/error/post";
+import { AppError } from "@/shared/error/appError";
 import { CommentArea, RelatedPosts } from "./page.client";
+
+const isPostNotFound = (error: unknown): boolean =>
+	error instanceof Error &&
+	error.cause instanceof AppError &&
+	error.cause.code === "post.not_found";
 
 type PageProps = {
 	params: Promise<{
@@ -41,34 +46,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			};
 		}
 
-		const description = post.content.substring(0, 160);
+		const title = post.seoTitle ?? post.title;
+		const description = post.seoDescription ?? post.content.substring(0, 160);
+		const canonical = post.canonicalUrl ?? `/post/${slug}`;
 		const images = post.coverImageUrl ? [post.coverImageUrl] : undefined;
 
 		return {
-			title: post.title,
+			title,
 			description,
 			alternates: {
-				canonical: `/post/${slug}`,
+				canonical,
 			},
 			openGraph: {
-				title: post.title,
+				title,
 				description,
 				type: "article",
-				url: `/post/${slug}`,
+				url: canonical,
 				images,
 			},
 			twitter: {
 				card: images ? "summary_large_image" : "summary",
-				title: post.title,
+				title,
 				description,
 				images,
 			},
 		};
 	} catch (error) {
-		if (
-			error instanceof TRPCError &&
-			error.message === PostErrorCode.POST_NOT_FOUND
-		) {
+		if (isPostNotFound(error)) {
 			return {
 				title: "Post Not Found",
 			};
@@ -108,10 +112,13 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 	try {
 		post = await caller.post.readBySlug({ slug });
 	} catch (error) {
-		if (
-			error instanceof TRPCError &&
-			error.message === PostErrorCode.POST_NOT_FOUND
-		) {
+		if (isPostNotFound(error)) {
+			const redirectTarget = await caller.post.readRedirectSlug({ slug });
+
+			if (redirectTarget) {
+				permanentRedirect(`/post/${redirectTarget.slug}`);
+			}
+
 			return (
 				<Suspense fallback={<p>Loading post...</p>}>
 					<OwnerPreview slug={slug} />
@@ -135,10 +142,7 @@ const OwnerPreview = async ({ slug }: { slug: string }) => {
 	try {
 		post = await caller.post.readBySlug({ slug });
 	} catch (error) {
-		if (
-			error instanceof TRPCError &&
-			error.message === PostErrorCode.POST_NOT_FOUND
-		) {
+		if (isPostNotFound(error)) {
 			notFound();
 		}
 
@@ -204,6 +208,7 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 					)}
 					<h2 className="text-4xl font-bold">{post.title}</h2>
 					<MdView source={post.content} />
+					<ViewTracker postId={post.id} />
 					<CommentArea postId={post.id} />
 					<RelatedPosts
 						postId={post.id}

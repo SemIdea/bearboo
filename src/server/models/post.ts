@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/infra/drivers/prisma";
 import { BaseModel } from "./base";
 
@@ -14,10 +15,15 @@ type IPostEntity = {
 	title: string;
 	content: string;
 	slug: string;
+	previousSlug: string | null;
+	seoTitle: string | null;
+	seoDescription: string | null;
+	canonicalUrl: string | null;
 	status: IPostStatus;
 	scheduledAt: Date | null;
 	categoryId: string | null;
 	coverImageUrl: string | null;
+	viewCount: number;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -51,10 +57,19 @@ type IPostEntityWithTaxonomy = IPostEntity & {
 	tags: IPostTagSummary[];
 };
 
+type IPostMostViewedEntry = {
+	id: string;
+	title: string;
+	slug: string;
+	viewCount: number;
+};
+
 type IPostSitemapEntry = {
 	slug: string;
 	updatedAt: Date;
 };
+
+type IPostSearchSortBy = "recent" | "mostViewed" | "relevance";
 
 const flattenTags = (postTags: { tag: IPostTagSummary }[]): IPostTagSummary[] =>
 	postTags.map(({ tag }) => tag);
@@ -113,6 +128,75 @@ class PostModelClass extends BaseModel<IPostEntity> {
 			...post,
 			tags: flattenTags(postTags),
 		}));
+	}
+
+	async search(
+		query: string,
+		count: number,
+		cursor?: string,
+		categoryId?: string,
+		tagId?: string,
+		sortBy: IPostSearchSortBy = "relevance",
+	): Promise<IPostEntityWithRelations[]> {
+		// Native full-text (ADR-0027): match by tsvector `@@`, rank by ts_rank.
+		// Matching is consistent across sorts; only the ORDER differs. Raw SQL is
+		// confined to this data-layer model (rule 30). Cursor stays a post id —
+		// keyset compares against the cursor row's own sort key (subselect).
+		const categoryFilter = categoryId
+			? Prisma.sql`AND p."categoryId" = ${categoryId}`
+			: Prisma.empty;
+		const tagFilter = tagId
+			? Prisma.sql`AND EXISTS (SELECT 1 FROM "PostTag" pt WHERE pt."postId" = p.id AND pt."tagId" = ${tagId})`
+			: Prisma.empty;
+
+		const sortKey =
+			sortBy === "recent"
+				? Prisma.sql`created_at`
+				: sortBy === "mostViewed"
+					? Prisma.sql`view_count`
+					: Prisma.sql`rank`;
+		const orderBy = Prisma.sql`${sortKey} DESC, id DESC`;
+		const keyset = cursor
+			? Prisma.sql`WHERE (${sortKey}, id) < ((SELECT ${sortKey} FROM matched WHERE id = ${cursor}), ${cursor})`
+			: Prisma.empty;
+
+		const ranked = await prisma.$queryRaw<Array<{ id: string }>>`
+			WITH q AS (SELECT websearch_to_tsquery('english', ${query}) AS query),
+			matched AS (
+				SELECT p.id,
+				       ts_rank(p."searchVector", q.query) AS rank,
+				       p."createdAt" AS created_at,
+				       p."viewCount" AS view_count
+				FROM "Post" p, q
+				WHERE p."searchVector" @@ q.query
+				  AND (p.status = 'PUBLISHED' OR (p.status = 'SCHEDULED' AND p."scheduledAt" <= now()))
+				  ${categoryFilter}
+				  ${tagFilter}
+			)
+			SELECT id FROM matched
+			${keyset}
+			ORDER BY ${orderBy}
+			LIMIT ${count}
+		`;
+
+		const ids = ranked.map((row) => row.id);
+		if (ids.length === 0) return [];
+
+		// Hydrate with the relations the callers expect, then restore the ranked
+		// order (findMany does not preserve the `in` order).
+		const posts = await prisma.post.findMany({
+			where: { id: { in: ids } },
+			include: postRelationsInclude,
+		});
+		const byId = new Map(posts.map((post) => [post.id, post]));
+
+		return ids
+			.map((id) => byId.get(id))
+			.filter((post): post is (typeof posts)[number] => post !== undefined)
+			.map(({ postTags, ...post }) => ({
+				...post,
+				tags: flattenTags(postTags),
+			}));
 	}
 
 	async readRelated(
@@ -207,6 +291,19 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		return { ...rest, tags: flattenTags(postTags) };
 	}
 
+	async readByPreviousSlug(slug: string): Promise<{ slug: string } | null> {
+		const post = await prisma.post.findUnique({
+			where: {
+				previousSlug: slug,
+			},
+			select: {
+				slug: true,
+			},
+		});
+
+		return post;
+	}
+
 	async readAllPublicSlugs(): Promise<IPostSitemapEntry[]> {
 		return prisma.post.findMany({
 			where: {
@@ -220,6 +317,49 @@ class PostModelClass extends BaseModel<IPostEntity> {
 				updatedAt: "desc",
 			},
 		});
+	}
+
+	async readIfPubliclyVisible(postId: string): Promise<IPostEntity | null> {
+		return prisma.post.findFirst({
+			where: {
+				id: postId,
+				OR: publicVisibilityFilter(),
+			},
+		});
+	}
+
+	async applyViewIncrements(deltas: Record<string, number>): Promise<void> {
+		await Promise.all(
+			Object.entries(deltas).map(([postId, delta]) =>
+				prisma.post.update({
+					where: { id: postId },
+					data: { viewCount: { increment: delta } },
+				}),
+			),
+		);
+	}
+
+	async readMostViewed(limit: number): Promise<IPostMostViewedEntry[]> {
+		return prisma.post.findMany({
+			orderBy: {
+				viewCount: "desc",
+			},
+			take: limit,
+			select: {
+				id: true,
+				title: true,
+				slug: true,
+				viewCount: true,
+			},
+		});
+	}
+
+	async readTotalViews(): Promise<number> {
+		const result = await prisma.post.aggregate({
+			_sum: { viewCount: true },
+		});
+
+		return result._sum.viewCount ?? 0;
 	}
 
 	async setTags(postId: string, tagIds: string[]): Promise<void> {
@@ -263,6 +403,14 @@ type IPostModel = BaseModel<IPostEntity> & {
 		categoryId?: string,
 		tagId?: string,
 	) => Promise<IPostEntityWithRelations[]>;
+	search: (
+		query: string,
+		count: number,
+		cursor?: string,
+		categoryId?: string,
+		tagId?: string,
+		sortBy?: IPostSearchSortBy,
+	) => Promise<IPostEntityWithRelations[]>;
 	readUserPosts: (userId: string) => Promise<IPostEntity[]>;
 	readOwnPosts: (
 		userId: string | null,
@@ -271,6 +419,7 @@ type IPostModel = BaseModel<IPostEntity> & {
 		tagId?: string,
 	) => Promise<IPostEntityWithRelations[]>;
 	readBySlug: (slug: string) => Promise<IPostEntityWithTaxonomy | null>;
+	readByPreviousSlug: (slug: string) => Promise<{ slug: string } | null>;
 	readAllPublicSlugs: () => Promise<IPostSitemapEntry[]>;
 	readRelated: (
 		postId: string,
@@ -279,6 +428,10 @@ type IPostModel = BaseModel<IPostEntity> & {
 		limit: number,
 	) => Promise<IPostEntityWithRelations[]>;
 	setTags: (postId: string, tagIds: string[]) => Promise<void>;
+	readIfPubliclyVisible: (postId: string) => Promise<IPostEntity | null>;
+	applyViewIncrements: (deltas: Record<string, number>) => Promise<void>;
+	readMostViewed: (limit: number) => Promise<IPostMostViewedEntry[]>;
+	readTotalViews: () => Promise<number>;
 };
 
 export type {
@@ -287,6 +440,8 @@ export type {
 	IPostEntityWithRelations,
 	IPostEntityWithTaxonomy,
 	IPostModel,
+	IPostMostViewedEntry,
+	IPostSearchSortBy,
 	IPostSitemapEntry,
 	IPostStatus,
 	IPostTagSummary,

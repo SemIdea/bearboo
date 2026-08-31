@@ -5,11 +5,11 @@ import { updatePostOutputSchema, updatePostSchema } from "../schema";
 const procedure_updatePost = verifiedProcedure
 	.input(updatePostSchema)
 	.output(updatePostOutputSchema)
-	.mutation(async ({ input, ctx }) =>
-		domain_updatePost({
+	.mutation(async ({ input, ctx }) => {
+		return domain_updatePost({
 			ctx,
 			input: { ...input, userId: ctx.user.id, role: ctx.user.role },
-		}),
-	);
+		});
+	});
 
 export { procedure_updatePost };

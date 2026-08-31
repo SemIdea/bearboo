@@ -1,16 +1,12 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { PostErrorCode } from "@/shared/error/post";
+import { AppError } from "@/shared/error/appError";
 import { ReadPostInput } from "../schema";
 
 const domain_readPost = async ({ ctx, input }: DomainInput<ReadPostInput>) => {
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: PostErrorCode.POST_NOT_FOUND,
-		});
+		throw new AppError("post.not_found");
 	}
 
 	return post;

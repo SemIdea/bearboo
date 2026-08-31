@@ -20,7 +20,7 @@ const createPostSchema = z.object({
 	status: postStatusSchema.optional(),
 	categoryId: z.string().optional(),
 	tagIds: z.array(z.string()).optional(),
-	coverImageUrl: z.string().url().optional(),
+	coverImageUrl: z.url().optional(),
 });
 
 const readPostSchema = z.object({
@@ -43,7 +43,11 @@ const updatePostSchema = z.object({
 		.optional(),
 	categoryId: z.string().optional(),
 	tagIds: z.array(z.string()).optional(),
-	coverImageUrl: z.string().url().optional(),
+	coverImageUrl: z.url().optional(),
+	slug: z.string().min(1, "Slug must not be empty.").optional(),
+	seoTitle: z.string().optional(),
+	seoDescription: z.string().optional(),
+	canonicalUrl: z.union([z.url(), z.literal("")]).optional(),
 });
 
 const deletePostSchema = z.object({
@@ -62,6 +66,15 @@ const readRecentPostsSchema = z
 		tagId: z.string().optional(),
 	})
 	.optional();
+
+const searchPostsSchema = z.object({
+	query: z.string().min(2, "Search query must be at least 2 characters long."),
+	cursor: z.string().optional(),
+	limit: z.number().int().min(1).max(50).optional(),
+	categoryId: z.string().optional(),
+	tagId: z.string().optional(),
+	sortBy: z.enum(["recent", "mostViewed", "relevance"]).optional(),
+});
 
 const readOwnPostsSchema = z.object({
 	status: postStatusSchema.optional(),
@@ -104,6 +117,16 @@ const sitemapEntrySchema = z.object({
 	updatedAt: z.date(),
 });
 
+const readRedirectSlugSchema = z.object({
+	slug: z.string(),
+});
+
+const readRedirectSlugOutputSchema = z
+	.object({
+		slug: z.string(),
+	})
+	.nullable();
+
 const READING_WORDS_PER_MINUTE = 200;
 
 const calculateReadingTimeMinutes = (content: string): number => {
@@ -124,10 +147,15 @@ const postFieldsSchema = z.object({
 	title: z.string(),
 	content: z.string(),
 	slug: z.string(),
+	previousSlug: z.string().nullable(),
 	status: postStatusSchema,
 	scheduledAt: z.date().nullable(),
 	categoryId: z.string().nullable(),
 	coverImageUrl: z.string().nullable(),
+	viewCount: z.number(),
+	seoTitle: z.string().nullable(),
+	seoDescription: z.string().nullable(),
+	canonicalUrl: z.string().nullable(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -183,6 +211,10 @@ const readRecentPostsOutputSchema = z.object({
 	posts: z.array(postEntityWithRelationsSchema),
 	nextCursor: z.string().nullable(),
 });
+const searchPostsOutputSchema = z.object({
+	posts: z.array(postEntityWithRelationsSchema),
+	nextCursor: z.string().nullable(),
+});
 const readRelatedPostsOutputSchema = z.array(postEntityWithRelationsSchema);
 const readOwnPostsOutputSchema = z.array(postEntityWithRelationsSchema);
 const submitForReviewPostOutputSchema = postEntitySchema;
@@ -213,6 +245,7 @@ type UpdatePostInput = z.TypeOf<typeof updatePostSchema>;
 type DeletePostInput = z.TypeOf<typeof deletePostSchema>;
 type RevalidatePostInput = z.TypeOf<typeof revalidatePostSchema>;
 type ReadRecentPostsInput = NonNullable<z.TypeOf<typeof readRecentPostsSchema>>;
+type SearchPostsInput = z.TypeOf<typeof searchPostsSchema>;
 type ReadRelatedPostsInput = z.TypeOf<typeof readRelatedPostsSchema>;
 type ReadOwnPostsInput = z.TypeOf<typeof readOwnPostsSchema>;
 type SubmitForReviewPostInput = z.TypeOf<typeof submitForReviewPostSchema>;
@@ -220,6 +253,7 @@ type PublishPostInput = z.TypeOf<typeof publishPostSchema>;
 type RejectPostInput = z.TypeOf<typeof rejectPostSchema>;
 type ArchivePostInput = z.TypeOf<typeof archivePostSchema>;
 type ReadReviewCommentsInput = z.TypeOf<typeof readReviewCommentsSchema>;
+type ReadRedirectSlugInput = z.TypeOf<typeof readRedirectSlugSchema>;
 
 export type {
 	ArchivePostInput,
@@ -230,10 +264,12 @@ export type {
 	ReadPostBySlugInput,
 	ReadPostInput,
 	ReadRecentPostsInput,
+	ReadRedirectSlugInput,
 	ReadRelatedPostsInput,
 	ReadReviewCommentsInput,
 	RejectPostInput,
 	RevalidatePostInput,
+	SearchPostsInput,
 	SubmitForReviewPostInput,
 	UpdatePostInput,
 };
@@ -258,6 +294,8 @@ export {
 	readPostSchema,
 	readRecentPostsOutputSchema,
 	readRecentPostsSchema,
+	readRedirectSlugOutputSchema,
+	readRedirectSlugSchema,
 	readRelatedPostsOutputSchema,
 	readRelatedPostsSchema,
 	readReviewCommentsSchema,
@@ -267,6 +305,8 @@ export {
 	revalidatePostOutputSchema,
 	revalidatePostSchema,
 	reviewCommentsOutputSchema,
+	searchPostsOutputSchema,
+	searchPostsSchema,
 	submitForReviewPostOutputSchema,
 	submitForReviewPostSchema,
 	updatePostOutputSchema,

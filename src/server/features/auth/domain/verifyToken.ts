@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { VerifyTokenErrorCodes } from "@/shared/error/verifyToken";
+import { AppError } from "@/shared/error/appError";
 import { VerifyTokenInput } from "../schema";
 
 const domain_verifyToken = async ({
@@ -12,24 +11,15 @@ const domain_verifyToken = async ({
 	);
 
 	if (!verifyToken) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: VerifyTokenErrorCodes.TOKEN_NOT_FOUND,
-		});
+		throw new AppError("verifyToken.not_found");
 	}
 
 	if (verifyToken.used) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: VerifyTokenErrorCodes.TOKEN_ALREADY_USED,
-		});
+		throw new AppError("verifyToken.already_used");
 	}
 
 	if (verifyToken.expiresAt < new Date()) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: VerifyTokenErrorCodes.TOKEN_EXPIRED,
-		});
+		throw new AppError("verifyToken.expired");
 	}
 
 	await ctx.repositories.user.update(verifyToken.userId, {

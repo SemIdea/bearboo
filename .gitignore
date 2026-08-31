@@ -39,4 +39,9 @@ data/redis/*
 !data/postgres/.gitkeep
 !data/redis/.gitkeep
 
+public/uploads/*
+!public/uploads/.gitkeep
+
 todo.md
+.env*
+!.env.example

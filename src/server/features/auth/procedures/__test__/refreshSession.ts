@@ -1,7 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
 import { ISessionEntity } from "@/server/models/session";
-import { SessionErrorCode } from "@/shared/error/session";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -47,12 +45,10 @@ describe("Refresh Session Controller Unitary Testing", () => {
 	test("Should throw MISSING_TOKEN when there is no refreshToken cookie", async () => {
 		await expect(
 			AuthRouter.createCaller(ctx).refreshSession(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "UNAUTHORIZED",
-				message: SessionErrorCode.MISSING_TOKEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+			message: "Authentication token is missing.",
+		});
 	});
 
 	test("Should throw an error if token is invalid", async () => {
@@ -60,12 +56,47 @@ describe("Refresh Session Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).refreshSession(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: SessionErrorCode.INVALID_TOKEN,
-			}),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Authentication token is invalid.",
+		});
+	});
+
+	test("Should clear accessToken/refreshToken cookies when the refresh token is invalid or reused, so the client stops resending a dead cookie", async () => {
+		ctx.refreshToken = "invalid-token";
+
+		await AuthRouter.createCaller(ctx)
+			.refreshSession()
+			.catch(() => undefined);
+
+		expect(ctx.resCookies.pending).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: "accessToken", value: "" }),
+				expect.objectContaining({ name: "refreshToken", value: "" }),
+			]),
 		);
+	});
+
+	test("Should clear cookies when a rotated-out refresh token is reused (e.g. a duplicate refresh call racing the first one)", async () => {
+		const originalRefreshToken = ctx.user.session.refreshToken;
+		ctx.refreshToken = originalRefreshToken;
+
+		await AuthRouter.createCaller(ctx).refreshSession();
+
+		ctx.refreshToken = originalRefreshToken;
+
+		await AuthRouter.createCaller(ctx)
+			.refreshSession()
+			.catch(() => undefined);
+
+		expect(ctx.resCookies.pending.at(-2)).toMatchObject({
+			name: "accessToken",
+			value: "",
+		});
+		expect(ctx.resCookies.pending.at(-1)).toMatchObject({
+			name: "refreshToken",
+			value: "",
+		});
 	});
 
 	test("Should enforce the refresh rate limit", async () => {

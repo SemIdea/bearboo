@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
+import { CoverImageMediaPicker } from "@/components/mediaPicker";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { MdEditor } from "@/components/ui/mdEditor";
-import { useAuth } from "@/context/auth";
+import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { getErrorMessage } from "@/lib/error";
 import {
 	CreatePostInput,
@@ -16,7 +17,7 @@ import {
 
 const useCreatePost = () => {
 	const router = useRouter();
-	const { session, isLoadingSession } = useAuth();
+	useRequireAuth();
 
 	const [errorMessage, setErrorMessage] = useState<null | string>(null);
 
@@ -31,12 +32,6 @@ const useCreatePost = () => {
 				setErrorMessage(errorMessage);
 			},
 		});
-
-	useEffect(() => {
-		if (!isLoadingSession && !session) {
-			router.push("/auth/login");
-		}
-	}, [isLoadingSession, session, router]);
 
 	const onSubmit = async (data: CreatePostInput) => {
 		setErrorMessage(null);
@@ -69,6 +64,7 @@ const CreatePostForm = () => {
 				label="Cover image URL"
 				placeholder="https://..."
 			/>
+			<CoverImageMediaPicker />
 			<InputField name="status" label="Status">
 				<select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring md:text-sm">
 					<option value="DRAFT">Draft</option>

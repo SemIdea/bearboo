@@ -1,0 +1,136 @@
+<!doctype html>
+<!-- learn · template de output (web components). Vocabulário e fluxo de geração: ver SKILL.md do plugin learn. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AHA Programming — Kent C. Dodds (resumo)</title>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  l-doc{display:block;max-width:820px;margin:0 auto;padding:32px 20px 80px}
+  l-head{display:block;border-bottom:1px solid #2b3340;padding-bottom:24px;margin-bottom:32px}
+  l-sec,l-steps,l-tldr,l-fig{display:block}
+  l-fig{margin:22px 0}
+  l-apply{display:block;background:linear-gradient(180deg,#16221b,#13191c);
+    border:1px solid #2b6e3a;border-left:5px solid #3fb950;border-radius:10px;padding:4px 22px 16px;margin:22px 0}
+  l-note{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #f0883e;
+    border-radius:8px;padding:10px 16px;margin:18px 0}
+  l-note[kind=info]{border-left-color:#58a6ff}
+  l-card{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #a371f7;
+    border-radius:8px;padding:8px 16px 4px;margin:14px 0}
+  l-data{display:grid;grid-template-columns:max-content 1fr;margin:14px 0;
+    border:1px solid #2b3340;border-radius:8px;overflow:hidden}
+  l-row{display:contents}
+  /* conteúdo de autoria (light DOM) */
+  p{margin:0 0 14px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:0 0 9px}
+  strong{color:#fff}
+  a{color:#58a6ff}
+  code{background:#1c2330;border:1px solid #2b3340;border-radius:5px;padding:1px 6px;
+    font:13px/1.5 ui-monospace,"SFMono-Regular",Consolas,monospace;color:#ffa657}
+  pre{background:#161b22;border:1px solid #2b3340;border-radius:8px;padding:14px 16px;overflow:auto;margin:0 0 16px;
+    font:13px/1.55 ui-monospace,"SFMono-Regular",Consolas,monospace;color:#cbd5e1}
+  table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}
+  th,td{padding:8px 11px;text-align:left;border-bottom:1px solid #2b3340}
+  th{background:#1c2330;color:#58a6ff;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td.num,th.num,.num{color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+  td.num,th.num{text-align:right}
+</style>
+<script>
+  const CSS = `:host{display:block}
+    a{color:#58a6ff;text-decoration:none} a:hover{text-decoration:underline}
+    h1{font-size:28px;line-height:1.25;margin:0 0 12px}
+    .b{display:inline-block;background:linear-gradient(90deg,#58a6ff,#7ee787);color:#0d1117;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:14px}
+    .au{color:#9aa7b4;font-size:14px;margin:0 0 8px}
+    .me{color:#9aa7b4;font-size:13px;margin:0}
+    h2.s{font-size:21px;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid #2b3340}
+    h2.s i{font-style:normal;color:#58a6ff;font-variant-numeric:tabular-nums;margin-right:8px}
+    h2.a{font-size:20px;margin:10px 0 8px;color:#7ee787}
+    b.nt{display:block;color:#fff;margin:0 0 6px}
+    ol{margin:0;padding-left:20px} ul.td{list-style:none;margin:0;padding:0}
+    figure{margin:0;background:#161b22;border:1px solid #2b3340;border-radius:10px;padding:12px}
+    img{display:block;max-width:100%;border-radius:6px;margin:0 auto}
+    figcaption{color:#9aa7b4;font-size:13px;margin-top:8px}
+    .k{padding:8px 12px;border-bottom:1px solid #2b3340;color:#cbd5e1}
+    .v{padding:8px 12px;border-bottom:1px solid #2b3340;text-align:right;color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+    .q{color:#fff;font-weight:600;margin:0}
+    summary{cursor:pointer;color:#58a6ff;font-size:13px;margin-top:4px;list-style:none}
+    .ans{margin:8px 0 0}
+    .cite{color:#9aa7b4;font-size:12px;margin:6px 0 0}`;
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const def = (tag, render) => customElements.define(tag, class extends HTMLElement{
+    connectedCallback(){
+      if(this._r) return; this._r = 1;
+      const a = n => this.getAttribute(n) || '';
+      this.attachShadow({mode:'open'}).innerHTML = '<style>'+CSS+'</style>' + render(a);
+    }
+  });
+  def('l-head', a => (a('badge')?`<span class="b">${esc(a('badge'))}</span>`:'')
+    + `<h1>${esc(a('title'))}</h1>`
+    + (a('authors')?`<p class="au">${esc(a('authors'))}</p>`:'')
+    + (a('src')?`<p class="me">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src'))}</a>`:esc(a('src'))}</p>`:''));
+  def('l-sec',  a => `<h2 class="s"><i>${esc(a('n'))}</i>${esc(a('title'))}</h2><slot></slot>`);
+  def('l-apply',a => `<h2 class="a">\u{1F3AF} ${esc(a('title')||'Aplicar no contexto')}</h2><slot></slot>`);
+  def('l-note', a => `<b class="nt">${esc(a('title')||'Cuidado')}</b><slot></slot>`);
+  def('l-steps',() => `<ol><slot></slot></ol>`);
+  def('l-tldr', () => `<ul class="td"><slot></slot></ul>`);
+  def('l-data', () => `<slot></slot>`);
+  def('l-row',  a => `<span class="k">${esc(a('k'))}</span><span class="v">${esc(a('v'))}</span>`);
+  def('l-fig',  a => `<figure><img src="${esc(a('src'))}" loading="lazy" alt="${esc(a('cap'))}">`
+    + ((a('cap')||a('href'))?`<figcaption>${esc(a('cap'))} ${a('href')?`<a href="${esc(a('href'))}">fonte</a>`:''}</figcaption>`:'')
+    + `</figure>`);
+  def('l-card', a => `<p class="q">${esc(a('q'))}</p>`
+    + `<details><summary>Mostrar resposta</summary><div class="ans"><slot></slot></div>`
+    + ((a('src')||a('href'))?`<p class="cite">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src')||'fonte')}</a>`:esc(a('src'))}</p>`:'')
+    + `</details>`);
+</script>
+</head>
+<body>
+<l-doc>
+<l-head badge="Abstração · timing" title="AHA Programming (Avoid Hasty Abstractions)" authors="Kent C. Dodds (2019)" src="kentcdodds.com/blog/aha-programming" href="https://kentcdodds.com/blog/aha-programming"></l-head>
+
+<l-note kind="info" title="Método deste resumo">Retenção-durável. Dodds fecha o eixo "helper vs. abstração" com o <em>timing</em>: quando abstrair não é prematuro. Lente: com 32 sites, a Rule of Three já gritou — mas o que exatamente extrair (e o que NÃO). Recall no fim.</l-note>
+
+<l-sec n="1" title="O conceito — evite abstrações apressadas, não abstrações">
+<p><strong>AHA = "Avoid Hasty Abstractions"</strong> (cunhado por Cher Scarlett). Constrói sobre a máxima de Sandi Metz — "<strong>prefer duplication over the wrong abstraction</strong>" — como contrapeso ao DRY dogmático. A régua-irmã é <strong>WET</strong> ("Write Everything Twice"), na formulação de Conlin Durbin: "<strong>você pode se perguntar 'já não escrevi isso antes?' duas vezes, mas nunca três</strong>."</p>
+</l-sec>
+
+<l-sec n="2" title="O princípio central — otimize pra mudança primeiro">
+<p>A frase de ouro de Dodds: "<strong>Optimize for change first.</strong>" O raciocínio: requisitos futuros são desconhecíveis, então abstração prematura cria código frágil "que dobra sob novos casos de uso, acabando inchado de lógica condicional" (o mesmo apodrecimento de Metz). Em vez de abstrair na 1ª ou 2ª ocorrência, <strong>espere até o padrão aparecer em vários lugares e as semelhanças "gritarem por abstração"</strong> (Rule of Three). O anti-exemplo concreto dele: controllers AngularJS super-abstraídos com monkey-patching, "SUPER confusing" e arriscados de mexer — queria que tivessem ficado duplicados.</p>
+</l-sec>
+
+<l-apply title="Aplicar no bearboo — a Rule of Three não só bateu, ela gritou">
+<p><strong>Dodds resolve a tensão dos outros dois docs de abstração a seu favor — com uma condição.</strong> A cautela dele é contra abstrair <em>cedo</em> (1–2 ocorrências). Seu caso tem <strong>32 ocorrências reais</strong> (26 procedures + 6 guards) da <em>mesma</em> tradução. Não é hasty; é o oposto — a semelhança já está gritando há tempo. Pela régua WET ("nunca a terceira vez"), você passou da terceira dezenas de vezes.</p>
+<p><strong>"Optimize for change first" dá o argumento positivo pela extração aqui.</strong> Pergunte: e se o formato do erro do transporte mudar (novo campo no <code>TRPCError</code>, novo mapeamento de <code>httpCode</code>)? Hoje: editar <strong>32 lugares</strong>. Com <code>toTRPCError</code>: editar <strong>1</strong>. A abstração <em>reduz</em> o custo de mudança em vez de aumentar — que é exatamente o teste de Dodds. Isso a distingue da "abstração hasty", que otimiza pra um futuro imaginário; aqui a mudança é concreta e o ganho é medível (1 vs 32).</p>
+<p><strong>A condição (o que AHA barra):</strong> extraia <em>só o que 32× provou</em> — a tradução. NÃO extraia especulativamente um framework <code>layers()</code> "pra qualquer necessidade futura de boundary" — isso seria o hasty que Dodds ataca: abstrair pra requisitos desconhecíveis. Regra prática que sai daqui:</p>
+<pre>// AHA aprova (mudança concreta, 32→1, sem especulação):
+export const toTRPCError = (e: DomainError) =&gt; new TRPCError({ ... });
+export const runDomain  = &lt;T&gt;(fn: () =&gt; Promise&lt;T&gt;) =&gt; { ... };
+
+// AHA barra (especulativo, otimiza pra futuro imaginário):
+const layers = () =&gt; ({ domain: ..., cache: ..., audit: ... }); // YAGNI</pre>
+</l-apply>
+
+<l-note kind="warn" title="O outro lado da mesma moeda">AHA e "Wrong Abstraction" (doc 18) dizem a mesma coisa por ângulos opostos: Metz olha pro passado (a abstração que apodreceu — volte pra duplicação), Dodds olha pro futuro (não abstraia cedo demais). Ambos convergem no seu caso: <strong>extraia a tradução (provada, reduz custo de mudança), não o framework (especulativo)</strong>.</l-note>
+
+<l-sec n="Recall" title="Recall">
+<l-card q="O que AHA significa?" src="Dodds §conceito">Avoid Hasty Abstractions.</l-card>
+<l-card q="A régua WET de Conlin Durbin?" src="Dodds §WET">Pergunte 'já escrevi isso?' duas vezes, nunca três.</l-card>
+<l-card q="O princípio central de Dodds?" src="Dodds §princípio">Optimize for change first.</l-card>
+<l-card q="Quando abstrair, pela Rule of Three?" src="Dodds §princípio">Quando as semelhanças 'gritarem' (vários sites).</l-card>
+<l-card q="Por que extrair toTRPCError otimiza pra mudança?" src="Aplicar no contexto">Muda em 1 lugar em vez de 32.</l-card>
+<l-card q="O que AHA barra no bearboo?" src="Aplicar no contexto">Um framework layers() especulativo (YAGNI).</l-card>
+</l-sec>
+
+<l-tldr>
+<li><strong>AHA = evite abstrações apressadas</strong>, não abstrações. WET: nunca escreva a mesma coisa a terceira vez.</li>
+<li>Teste-mestre: "<strong>optimize for change first</strong>". Extrair <code>toTRPCError</code> muda 32→1 no custo de mudança — aprovado.</li>
+<li>Com 32 sites, a Rule of Three <strong>gritou</strong>; a extração da tradução não é hasty — é atrasada.</li>
+<li>Extraia o <strong>provado</strong> (a tradução), não o <strong>especulativo</strong> (um framework de boundary genérico). Metz (passado) + Dodds (futuro) convergem nisso.</li>
+</l-tldr>
+</l-doc>
+</body>
+</html>

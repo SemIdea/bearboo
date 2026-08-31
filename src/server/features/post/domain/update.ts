@@ -1,8 +1,13 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
 import { IRole } from "@/server/models/user";
-import { PostErrorCode } from "@/shared/error/post";
+import { AppError } from "@/shared/error/appError";
 import { UpdatePostInput } from "../schema";
+import { domain_resolveAvailableSlug } from "./resolveAvailableSlug";
+
+const normalizeOverride = (
+	value: string | undefined,
+): string | null | undefined =>
+	value === undefined ? undefined : value === "" ? null : value;
 
 const domain_updatePost = async ({
 	ctx,
@@ -11,20 +16,25 @@ const domain_updatePost = async ({
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: PostErrorCode.POST_NOT_FOUND,
-		});
+		throw new AppError("post.not_found");
 	}
 
 	const isOwner = post.userId === input.userId;
 	const canEditAny = ctx.helpers.permissions.can(input.role, "post:editAny");
 
 	if (!isOwner && !canEditAny) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: PostErrorCode.POST_UPDATE_FORBIDDEN,
+		throw new AppError("post.update_forbidden");
+	}
+
+	let slug: string | undefined;
+	let previousSlug: string | undefined;
+
+	if (input.slug && input.slug !== post.slug) {
+		slug = await domain_resolveAvailableSlug({
+			ctx,
+			input: { baseSlug: input.slug, excludePostId: post.id },
 		});
+		previousSlug = post.slug;
 	}
 
 	const updated = await ctx.repositories.post.update(input.id, {
@@ -32,6 +42,11 @@ const domain_updatePost = async ({
 		content: input.content,
 		categoryId: input.categoryId,
 		coverImageUrl: input.coverImageUrl,
+		slug,
+		previousSlug,
+		seoTitle: normalizeOverride(input.seoTitle),
+		seoDescription: normalizeOverride(input.seoDescription),
+		canonicalUrl: normalizeOverride(input.canonicalUrl),
 	});
 
 	if (input.tagIds) {

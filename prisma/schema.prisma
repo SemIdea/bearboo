@@ -27,6 +27,7 @@ model User {
   updatedAt         DateTime            @updatedAt
   verified          Boolean             @default(false)
   reviewComments    PostReviewComment[]
+  media             Media[]
 }
 
 model Session {
@@ -55,16 +56,49 @@ model Post {
   title          String
   content        String
   slug           String              @unique
+  previousSlug   String?             @unique
+  seoTitle       String?
+  seoDescription String?
+  canonicalUrl   String?
   status         PostStatus          @default(PUBLISHED)
   scheduledAt    DateTime?
   categoryId     String?
   category       Category?           @relation(fields: [categoryId], references: [id])
   coverImageUrl  String?
+  viewCount      Int                 @default(0)
   postTags       PostTag[]
   comments       Comment[]
   reviewComments PostReviewComment[]
+  postViews      PostView[]
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
+
+  // Native full-text search (feature 027, ADR-0027). Generated STORED column +
+  // GIN index, both created in the raw migration (Prisma cannot express a
+  // GENERATED ALWAYS AS expression). Declared here so Prisma tracks the column
+  // and does not drop it on drift.
+  searchVector   Unsupported("tsvector")?
+
+  @@index([searchVector], type: Gin)
+}
+
+enum ReferrerBucket {
+  DIRECT
+  SEARCH
+  SOCIAL
+  OTHER
+}
+
+model PostView {
+  id             String         @id
+  postId         String
+  post           Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  referrerBucket ReferrerBucket
+  userAgent      String
+  createdAt      DateTime       @default(now())
+
+  @@index([postId, createdAt])
+  @@index([createdAt])
 }
 
 enum ReviewCommentType {
@@ -81,6 +115,21 @@ model PostReviewComment {
   type       ReviewCommentType
   content    String?
   createdAt  DateTime          @default(now())
+}
+
+model Media {
+  id           String   @id
+  url          String
+  storageKey   String
+  filename     String
+  mimeType     String
+  size         Int
+  altText      String?
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@index([uploadedById])
 }
 
 model Category {

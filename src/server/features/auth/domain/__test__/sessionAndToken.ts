@@ -1,6 +1,5 @@
-import { describe, expect, test } from "vitest";
-import { SessionErrorCode } from "@/shared/error/session";
-import { UserErrorCode } from "@/shared/error/user";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { AppError } from "@/shared/error/appError";
 import { createAuthenticatedContext, createTestContext } from "@/test/context";
 import { domain_createAuthSession } from "../createAuthSession";
 import { domain_createResetToken } from "../createResetToken";
@@ -12,6 +11,10 @@ import { domain_reCreateToken } from "../reCreateToken";
 import { domain_refreshSession } from "../refreshSession";
 
 describe("auth session and token domains", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	test("creates auth sessions for existing users", async () => {
 		const ctx = await createAuthenticatedContext();
 
@@ -31,10 +34,18 @@ describe("auth session and token domains", () => {
 
 		await expect(
 			domain_createAuthSession({ ctx, input: { userId: "missing-user" } }),
-		).rejects.toMatchObject({
-			code: "NOT_FOUND",
-			message: UserErrorCode.USER_NOT_FOUND,
-		});
+		).rejects.toMatchObject(new AppError("user.not_found"));
+	});
+
+	test("surfaces session_create_error when the store returns no session", async () => {
+		const ctx = await createAuthenticatedContext();
+		vi.spyOn(ctx.repositories.session, "create").mockResolvedValueOnce(
+			null as never,
+		);
+
+		await expect(
+			domain_createAuthSession({ ctx, input: { userId: ctx.user.id } }),
+		).rejects.toMatchObject(new AppError("session.session_create_error"));
 	});
 
 	test("creates verification tokens with a future expiration", async () => {
@@ -120,10 +131,7 @@ describe("auth session and token domains", () => {
 				ctx,
 				input: { refreshToken: "invalid-token" },
 			}),
-		).rejects.toMatchObject({
-			code: "NOT_FOUND",
-			message: SessionErrorCode.INVALID_TOKEN,
-		});
+		).rejects.toMatchObject(new AppError("session.refresh_token_invalid"));
 	});
 
 	test("reads user and session by access token without exposing password", async () => {
@@ -167,10 +175,7 @@ describe("auth session and token domains", () => {
 				ctx,
 				input: { accessToken: "missing-access-token" },
 			}),
-		).rejects.toMatchObject({
-			code: "UNAUTHORIZED",
-			message: SessionErrorCode.INVALID_TOKEN,
-		});
+		).rejects.toMatchObject(new AppError("session.access_token_invalid"));
 
 		const session = await ctx.repositories.session.create("session-1", {
 			userId: "missing-user",
@@ -183,10 +188,7 @@ describe("auth session and token domains", () => {
 				ctx,
 				input: { accessToken: session.accessToken },
 			}),
-		).rejects.toMatchObject({
-			code: "UNAUTHORIZED",
-			message: SessionErrorCode.INVALID_TOKEN,
-		});
+		).rejects.toMatchObject(new AppError("session.access_token_invalid"));
 	});
 
 	test("refreshes sessions by rotating tokens", async () => {
@@ -207,6 +209,23 @@ describe("auth session and token domains", () => {
 		expect(refreshedSession.previousRefreshToken).toBe(originalRefreshToken);
 	});
 
+	test("surfaces session_update_error when the store returns no session", async () => {
+		const ctx = await createAuthenticatedContext();
+		vi.spyOn(ctx.repositories.session, "update").mockResolvedValueOnce(
+			null as never,
+		);
+
+		await expect(
+			domain_refreshSession({
+				ctx,
+				input: {
+					id: ctx.user.session.id,
+					currentRefreshToken: ctx.user.session.refreshToken,
+				},
+			}),
+		).rejects.toMatchObject(new AppError("session.session_update_error"));
+	});
+
 	test("rejects reuse of a rotated-out refresh token and revokes the session", async () => {
 		const ctx = await createAuthenticatedContext();
 		const originalRefreshToken = ctx.user.session.refreshToken;
@@ -224,10 +243,7 @@ describe("auth session and token domains", () => {
 				ctx,
 				input: { refreshToken: originalRefreshToken },
 			}),
-		).rejects.toMatchObject({
-			code: "NOT_FOUND",
-			message: SessionErrorCode.INVALID_TOKEN,
-		});
+		).rejects.toMatchObject(new AppError("session.refresh_token_invalid"));
 
 		await expect(
 			ctx.repositories.session.read(ctx.user.session.id),
@@ -252,9 +268,6 @@ describe("auth session and token domains", () => {
 				ctx,
 				input: { id: "missing-session", userId: ctx.user.id },
 			}),
-		).rejects.toMatchObject({
-			code: "NOT_FOUND",
-			message: SessionErrorCode.SESSION_NOT_FOUND,
-		});
+		).rejects.toMatchObject(new AppError("session.session_not_found"));
 	});
 });

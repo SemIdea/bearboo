@@ -1,51 +1,51 @@
-# Rubrica — quando criar uma DSL (sugere, não constrói)
+# Rubric — when to create a DSL (suggests, does not build)
 
-> DSL aqui = qualquer mini-linguagem de domínio que colapsa boilerplate repetido de chamadas primitivas: builder fluente, pipeline de combinadores, objeto declarativo interpretado, ou linguagem parseada. **DSL-first é o complemento do Rule of Three, não o oposto do KISS:** não abstrai cedo — mas quando o boilerplate de primitivas escala E tem gramática, uma DSL paga o próprio custo. O agente **sugere** (propõe + esboça); **não constrói sozinho** (regra dura 11 — DSL é camada/abstração de 1ª classe → pára e pergunta).
+> A DSL here = any mini domain language that collapses repeated boilerplate of primitive calls: a fluent builder, a combinator pipeline, an interpreted declarative object, or a parsed language. **DSL-first is the complement of the Rule of Three, not the opposite of KISS:** it does not abstract early — but when the primitive boilerplate scales AND has a grammar, a DSL pays its own cost. The agent **suggests** (proposes + sketches); it **does not build alone** (hard rule 11 — a DSL is a first-class layer/abstraction → stop and ask).
 
-## Decisão binária
+## Binary decision
 
-**Sugere DSL quando os DOIS sinais forem verdade (ambos, não um):**
+**Suggest a DSL when BOTH signals are true (both, not one):**
 
-- ✅ **Repetição (Rule-of-Three de sequência):** ≥ 3 call-sites repetem a **mesma sequência de ≥ N chamadas primitivas em ordem fixa** (não 3 chamadas avulsas — a *sequência* que se repete). Varia só os parâmetros, não a estrutura.
-- ✅ **Boilerplate domina a intenção (ratio):** nesses sites, a maior parte das linhas é wiring/setup/glue mecânico, não a lógica de negócio real — o leitor não enxerga *o que* o código quer através do *como* ele liga as primitivas.
+- ✅ **Repetition (a Rule-of-Three of sequence):** ≥ 3 call sites repeat the **same sequence of ≥ N primitive calls in a fixed order** (not 3 loose calls — the *sequence* that repeats). Only the parameters vary, not the structure.
+- ✅ **Boilerplate dominates the intent (ratio):** at those sites, most of the lines are mechanical wiring/setup/glue, not the real business logic — the reader cannot see *what* the code wants through the *how* it wires the primitives.
 
-**E uma terceira condição que distingue DSL de "extrair função":**
+**And a third condition that distinguishes a DSL from "extract a function":**
 
-- ✅ **Há gramática reusável** — composição, ordenação obrigatória, ramificação, ou encadeamento que se repete. É isso que faz uma DSL pagar mais que um helper. Sem gramática (só "chamar 5 funções em sequência sempre igual"), **um helper nomeado vence** — não é DSL.
+- ✅ **There is a reusable grammar** — composition, mandatory ordering, branching, or chaining that repeats. That is what makes a DSL pay more than a helper. Without a grammar (just "call 5 functions in the same sequence every time"), **a named helper wins** — it is not a DSL.
 
-**NÃO sugere DSL quando:**
+**Do NOT suggest a DSL when:**
 
-- ❌ **< 3 sequências repetidas** — Rule of Three não bateu. Espera a terceira (YAGNI).
-- ❌ **Um helper/builder simples já colapsa o boilerplate** — KISS > DSL. Função nomeada (`stripe_createCheckoutSession`) ou builder de 1 nível vence a mini-linguagem. DSL só quando o helper não captura a gramática.
-- ❌ **O "boilerplate" é lógica per-site real** — variação genuína entre sites não é boilerplate; abstrair esconde diferença que importa.
-- ❌ **"Vai escalar / dá pra parametrizar tudo"** — YAGNI. Não constrói DSL especulativa pro caso geral antes dos 3 casos reais.
+- ❌ **< 3 repeated sequences** — the Rule of Three did not hit. Wait for the third (YAGNI).
+- ❌ **A simple helper/builder already collapses the boilerplate** — KISS > DSL. A named function (`stripe_createCheckoutSession`) or a 1-level builder beats the mini-language. A DSL is only when the helper does not capture the grammar.
+- ❌ **The "boilerplate" is real per-site logic** — genuine variation between sites is not boilerplate; abstracting hides a difference that matters.
+- ❌ **"It will scale / everything can be parameterized"** — YAGNI. Do not build a speculative DSL for the general case before the 3 real cases.
 
-## Por que essas regras
+## Why these rules
 
-- **Os dois sinais juntos, não um.** Repetição sem boilerplate dominante → helper resolve. Boilerplate alto sem repetição (1 site) → é só uma função grande, parte ou inline. DSL é cara (nova camada, indireção, curva de aprendizado, debugging através da abstração) — só vale no cruzamento dos dois.
-- **Gramática é o discriminador DSL-vs-helper.** Extrair função remove duplicação; DSL dá uma *linguagem* pra expressar a intenção. Se não há nada pra "compor", uma função basta — e é mais barata.
-- **Sugere, não constrói (regra 11 / autonomia #6 bright line d).** Criar DSL é introduzir camada/abstração de 1ª classe — decisão arquitetural load-bearing. O agente leva a proposta (com esboço da API + ADR candidato), o dono da arquitetura decide. Construir uma DSL autônomo seria cruzar a bright line.
+- **Both signals together, not one.** Repetition without dominant boilerplate → a helper solves it. High boilerplate without repetition (1 site) → it is just a big function, split or inline it. A DSL is expensive (a new layer, indirection, a learning curve, debugging through the abstraction) — it is only worth it at the crossing of the two.
+- **Grammar is the DSL-vs-helper discriminator.** Extracting a function removes duplication; a DSL gives a *language* to express the intent. If there is nothing to "compose", a function is enough — and cheaper.
+- **Suggests, does not build (rule 11 / autonomy #6 bright line d).** Creating a DSL is introducing a first-class layer/abstraction — a load-bearing architectural decision. The agent brings the proposal (with an API sketch + a candidate ADR), the architecture owner decides. Building a DSL autonomously would cross the bright line.
 
-## Forma — escolhe a mais leve que remove o boilerplate (KISS dentro da DSL)
+## Form — pick the lightest that removes the boilerplate (KISS inside the DSL)
 
-Em ordem crescente de custo — **pára na primeira que captura a gramática:**
+In increasing order of cost — **stop at the first that captures the grammar:**
 
-1. **Builder fluente / função de fábrica** — encadeamento simples (`q().where().limit()`). Mais barato; cobre a maioria dos casos.
-2. **Combinadores / pipeline** — funções pequenas que compõem (`pipe(parse, validate, persist)`). Quando a gramática é composição.
-3. **Objeto declarativo interpretado** — config data-driven que um runner percorre. Quando a "linguagem" é uma estrutura de dados.
-4. **Mini-linguagem parseada** (string → AST → exec) — **último recurso**, raramente justificado num app de produto. Exige parser, erros, testes do próprio parser — só quando os 3 acima genuinamente não expressam a gramática.
+1. **A fluent builder / factory function** — simple chaining (`q().where().limit()`). The cheapest; covers most cases.
+2. **Combinators / a pipeline** — small functions that compose (`pipe(parse, validate, persist)`). When the grammar is composition.
+3. **An interpreted declarative object** — data-driven config that a runner walks. When the "language" is a data structure.
+4. **A parsed mini-language** (string → AST → exec) — a **last resort**, rarely justified in a product app. It needs a parser, errors, tests of the parser itself — only when the 3 above genuinely do not express the grammar.
 
-## Antes de propor — auto-crítica (corolário de verificação #6)
+## Before proposing — self-critique (a corollary of verification #6)
 
-1. Os 3 sites repetem mesmo a *sequência*, ou só usam as mesmas primitivas em ordens diferentes? (ordens diferentes → não é uma DSL única)
-2. Um helper de 1 nível colapsaria 80% do boilerplate? Se sim, propõe o helper, não a DSL.
-3. A DSL proposta esconde diferença real entre os sites? (se sim, ela vai vazar — repensa a fronteira)
-4. Qual a forma mais leve (lista acima) que captura a gramática? Não proponha parser se um builder resolve.
+1. Do the 3 sites repeat the *sequence*, or just use the same primitives in different orders? (different orders → it is not one DSL)
+2. Would a 1-level helper collapse 80% of the boilerplate? If yes, propose the helper, not the DSL.
+3. Does the proposed DSL hide a real difference between the sites? (if yes, it will leak — rethink the boundary)
+4. What is the lightest form (the list above) that captures the grammar? Do not propose a parser if a builder solves it.
 
-## Antiexemplos
+## Anti-examples
 
-- ❌ Construir um query-DSL autônomo no 2º call-site — Rule of Three não bateu; espera o terceiro (ou usa helper).
-- ❌ Propor mini-linguagem parseada pra 3 sequências que um builder fluente de 20 linhas resolveria — forma cara demais (use o nível 1).
-- ❌ Chamar de "boilerplate" 3 handlers que validam coisas diferentes — é lógica per-site, não wiring repetido; DSL esconderia a diferença.
-- ❌ Materializar a DSL sozinho porque "é óbvio que precisa" — é regra 11: propõe + esboça a API + abre ADR candidato; o humano aprova a nova camada.
-- ❌ DSL pro caso geral ("suporta qualquer provider futuro") com 3 providers reais — YAGNI; modela os 3, generaliza quando o 4º divergir.
+- ❌ Building an autonomous query-DSL at the 2nd call site — the Rule of Three did not hit; wait for the third (or use a helper).
+- ❌ Proposing a parsed mini-language for 3 sequences that a 20-line fluent builder would solve — too expensive a form (use level 1).
+- ❌ Calling 3 handlers that validate different things "boilerplate" — it is per-site logic, not repeated wiring; a DSL would hide the difference.
+- ❌ Materializing the DSL alone because "it is obviously needed" — it is rule 11: propose + sketch the API + open a candidate ADR; the human approves the new layer.
+- ❌ A DSL for the general case ("supports any future provider") with 3 real providers — YAGNI; model the 3, generalize when the 4th diverges.

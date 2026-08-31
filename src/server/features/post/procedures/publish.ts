@@ -5,11 +5,11 @@ import { publishPostOutputSchema, publishPostSchema } from "../schema";
 const procedure_publishPost = verifiedProcedure
 	.input(publishPostSchema)
 	.output(publishPostOutputSchema)
-	.mutation(async ({ input, ctx }) =>
-		domain_publishPost({
+	.mutation(async ({ input, ctx }) => {
+		return domain_publishPost({
 			ctx,
 			input: { ...input, role: ctx.user.role, reviewerId: ctx.user.id },
-		}),
-	);
+		});
+	});
 
 export { procedure_publishPost };

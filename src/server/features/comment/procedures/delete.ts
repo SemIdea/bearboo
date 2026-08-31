@@ -5,8 +5,11 @@ import { deleteCommentOutputSchema, deleteCommentSchema } from "../schema";
 const procedure_deleteComment = verifiedProcedure
 	.input(deleteCommentSchema)
 	.output(deleteCommentOutputSchema)
-	.mutation(async ({ input, ctx }) =>
-		domain_deleteComment({ ctx, input: { ...input, userId: ctx.user.id } }),
-	);
+	.mutation(async ({ input, ctx }) => {
+		return domain_deleteComment({
+			ctx,
+			input: { ...input, userId: ctx.user.id },
+		});
+	});
 
 export { procedure_deleteComment };

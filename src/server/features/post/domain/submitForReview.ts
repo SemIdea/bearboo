@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { PostErrorCode } from "@/shared/error/post";
+import { AppError } from "@/shared/error/appError";
 import { SubmitForReviewPostInput } from "../schema";
 
 const domain_submitForReviewPost = async ({
@@ -10,24 +9,15 @@ const domain_submitForReviewPost = async ({
 	const post = await ctx.repositories.post.read(input.id);
 
 	if (!post) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: PostErrorCode.POST_NOT_FOUND,
-		});
+		throw new AppError("post.not_found");
 	}
 
 	if (post.userId !== input.userId) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-		});
+		throw new AppError("post.update_forbidden");
 	}
 
 	if (post.status !== "DRAFT") {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: PostErrorCode.POST_INVALID_STATUS_TRANSITION,
-		});
+		throw new AppError("post.invalid_status_transition");
 	}
 
 	return ctx.repositories.post.update(input.id, { status: "IN_REVIEW" });

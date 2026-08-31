@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { CommentErrorCode } from "@/shared/error/comment";
+import { AppError } from "@/shared/error/appError";
 import { DeleteCommentInput } from "../schema";
 
 const domain_deleteComment = async ({
@@ -10,17 +9,11 @@ const domain_deleteComment = async ({
 	const comment = await ctx.repositories.comment.read(input.id);
 
 	if (!comment) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: CommentErrorCode.COMMENT_NOT_FOUND,
-		});
+		throw new AppError("comment.not_found");
 	}
 
 	if (comment.userId !== input.userId) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: CommentErrorCode.COMMENT_DELETE_FORBIDDEN,
-		});
+		throw new AppError("comment.delete_forbidden");
 	}
 
 	return ctx.repositories.comment.delete(input.id);

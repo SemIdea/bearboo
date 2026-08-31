@@ -21,8 +21,12 @@ const procedure_loginUser = publicProcedure
 
 		const maxAgeSeconds = SESSION_MAX_LIFETIME_MS / 1000;
 
-		ctx.resCookies.set("accessToken", session.accessToken, { maxAgeSeconds });
-		ctx.resCookies.set("refreshToken", session.refreshToken, { maxAgeSeconds });
+		ctx.resCookies.set("accessToken", session.accessToken, {
+			maxAgeSeconds,
+		});
+		ctx.resCookies.set("refreshToken", session.refreshToken, {
+			maxAgeSeconds,
+		});
 
 		return { user };
 	});

@@ -1,21 +1,20 @@
-import { TRPCError } from "@trpc/server";
-import { assertRateLimit, t } from "@/server/createRouter";
-import { SessionErrorCode } from "@/shared/error/session";
+import { assertRateLimit, baseProcedure } from "@/server/createRouter";
+import { AppError } from "@/shared/error/appError";
 import { REFRESH_RATE_LIMIT, SESSION_MAX_LIFETIME_MS } from "../constants";
 import { domain_readSessionByRefreshToken } from "../domain/readSessionByRefreshToken";
 import { domain_refreshSession } from "../domain/refreshSession";
 import { refreshSessionOutputSchema } from "../schema";
 
-const procedure_refreshSession = t.procedure
+// Builds from `baseProcedure`, not `publicProcedure`: refreshing must work
+// precisely when the session has expired, so it has to skip that guard while
+// still getting the domain-error translation.
+const procedure_refreshSession = baseProcedure
 	.output(refreshSessionOutputSchema)
 	.mutation(async ({ ctx }) => {
 		const refreshToken = ctx.refreshToken;
 
 		if (!refreshToken) {
-			throw new TRPCError({
-				code: "UNAUTHORIZED",
-				message: SessionErrorCode.MISSING_TOKEN,
-			});
+			throw new AppError("session.missing_token");
 		}
 
 		await assertRateLimit(ctx, `refresh:${refreshToken}`, REFRESH_RATE_LIMIT);
@@ -23,6 +22,10 @@ const procedure_refreshSession = t.procedure
 		const session = await domain_readSessionByRefreshToken({
 			ctx,
 			input: { refreshToken },
+		}).catch((error) => {
+			ctx.resCookies.clear("accessToken");
+			ctx.resCookies.clear("refreshToken");
+			throw error;
 		});
 
 		const refreshedSession = await domain_refreshSession({

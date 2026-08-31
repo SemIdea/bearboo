@@ -1,6 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { PostErrorCode } from "@/shared/error/post";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -77,12 +75,10 @@ describe("Publish Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(authorCtx).publish({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "FORBIDDEN",
-				message: PostErrorCode.POST_UPDATE_FORBIDDEN,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "FORBIDDEN",
+			message: "You are not allowed to update this post.",
+		});
 	});
 
 	test("Should throw an error if the post is already published", async () => {
@@ -90,11 +86,18 @@ describe("Publish Post Controller Unitary Testing", () => {
 
 		await expect(
 			PostRouter.createCaller(adminCtx).publish({ id: post.id }),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "BAD_REQUEST",
-				message: PostErrorCode.POST_INVALID_STATUS_TRANSITION,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+			message: "This action is not valid for the post's current status.",
+		});
+	});
+
+	test("Should throw NOT_FOUND when the post does not exist", async () => {
+		await expect(
+			PostRouter.createCaller(adminCtx).publish({ id: "does-not-exist" }),
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Post not found.",
+		});
 	});
 });

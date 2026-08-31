@@ -1,0 +1,163 @@
+<!doctype html>
+<!-- learn · template de output (web components). Vocabulário e fluxo de geração: ver SKILL.md do plugin learn. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Error models &amp; observabilidade — acervo de leitura (bearboo)</title>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  l-doc{display:block;max-width:820px;margin:0 auto;padding:32px 20px 80px}
+  l-head{display:block;border-bottom:1px solid #2b3340;padding-bottom:24px;margin-bottom:32px}
+  l-sec,l-steps,l-tldr,l-fig{display:block}
+  l-fig{margin:22px 0}
+  l-apply{display:block;background:linear-gradient(180deg,#16221b,#13191c);
+    border:1px solid #2b6e3a;border-left:5px solid #3fb950;border-radius:10px;padding:4px 22px 16px;margin:22px 0}
+  l-note{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #f0883e;
+    border-radius:8px;padding:10px 16px;margin:18px 0}
+  l-note[kind=info]{border-left-color:#58a6ff}
+  l-card{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #a371f7;
+    border-radius:8px;padding:8px 16px 4px;margin:14px 0}
+  l-data{display:grid;grid-template-columns:max-content 1fr;margin:14px 0;
+    border:1px solid #2b3340;border-radius:8px;overflow:hidden}
+  l-row{display:contents}
+  /* conteúdo de autoria (light DOM) */
+  p{margin:0 0 14px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:0 0 9px}
+  strong{color:#fff}
+  a{color:#58a6ff}
+  code{background:#1c2330;border:1px solid #2b3340;border-radius:5px;padding:1px 6px;
+    font:13px/1.5 ui-monospace,"SFMono-Regular",Consolas,monospace;color:#ffa657}
+  table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}
+  th,td{padding:8px 11px;text-align:left;border-bottom:1px solid #2b3340}
+  th{background:#1c2330;color:#58a6ff;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td.num,th.num,.num{color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+  td.num,th.num{text-align:right}
+</style>
+<script>
+  const CSS = `:host{display:block}
+    a{color:#58a6ff;text-decoration:none} a:hover{text-decoration:underline}
+    h1{font-size:28px;line-height:1.25;margin:0 0 12px}
+    .b{display:inline-block;background:linear-gradient(90deg,#58a6ff,#7ee787);color:#0d1117;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:14px}
+    .au{color:#9aa7b4;font-size:14px;margin:0 0 8px}
+    .me{color:#9aa7b4;font-size:13px;margin:0}
+    h2.s{font-size:21px;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid #2b3340}
+    h2.s i{font-style:normal;color:#58a6ff;font-variant-numeric:tabular-nums;margin-right:8px}
+    h2.a{font-size:20px;margin:10px 0 8px;color:#7ee787}
+    b.nt{display:block;color:#fff;margin:0 0 6px}
+    ol{margin:0;padding-left:20px} ul.td{list-style:none;margin:0;padding:0}
+    figure{margin:0;background:#161b22;border:1px solid #2b3340;border-radius:10px;padding:12px}
+    img{display:block;max-width:100%;border-radius:6px;margin:0 auto}
+    figcaption{color:#9aa7b4;font-size:13px;margin-top:8px}
+    .k{padding:8px 12px;border-bottom:1px solid #2b3340;color:#cbd5e1}
+    .v{padding:8px 12px;border-bottom:1px solid #2b3340;text-align:right;color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+    .q{color:#fff;font-weight:600;margin:0}
+    summary{cursor:pointer;color:#58a6ff;font-size:13px;margin-top:4px;list-style:none}
+    .ans{margin:8px 0 0}
+    .cite{color:#9aa7b4;font-size:12px;margin:6px 0 0}`;
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const def = (tag, render) => customElements.define(tag, class extends HTMLElement{
+    connectedCallback(){
+      if(this._r) return; this._r = 1;
+      const a = n => this.getAttribute(n) || '';
+      this.attachShadow({mode:'open'}).innerHTML = '<style>'+CSS+'</style>' + render(a);
+    }
+  });
+  def('l-head', a => (a('badge')?`<span class="b">${esc(a('badge'))}</span>`:'')
+    + `<h1>${esc(a('title'))}</h1>`
+    + (a('authors')?`<p class="au">${esc(a('authors'))}</p>`:'')
+    + (a('src')?`<p class="me">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src'))}</a>`:esc(a('src'))}</p>`:''));
+  def('l-sec',  a => `<h2 class="s"><i>${esc(a('n'))}</i>${esc(a('title'))}</h2><slot></slot>`);
+  def('l-apply',a => `<h2 class="a">\u{1F3AF} ${esc(a('title')||'Aplicar no contexto')}</h2><slot></slot>`);
+  def('l-note', a => `<b class="nt">${esc(a('title')||'Cuidado')}</b><slot></slot>`);
+  def('l-steps',() => `<ol><slot></slot></ol>`);
+  def('l-tldr', () => `<ul class="td"><slot></slot></ul>`);
+  def('l-data', () => `<slot></slot>`);
+  def('l-row',  a => `<span class="k">${esc(a('k'))}</span><span class="v">${esc(a('v'))}</span>`);
+  def('l-fig',  a => `<figure><img src="${esc(a('src'))}" loading="lazy" alt="${esc(a('cap'))}">`
+    + ((a('cap')||a('href'))?`<figcaption>${esc(a('cap'))} ${a('href')?`<a href="${esc(a('href'))}">fonte</a>`:''}</figcaption>`:'')
+    + `</figure>`);
+  def('l-card', a => `<p class="q">${esc(a('q'))}</p>`
+    + `<details><summary>Mostrar resposta</summary><div class="ans"><slot></slot></div>`
+    + ((a('src')||a('href'))?`<p class="cite">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src')||'fonte')}</a>`:esc(a('src'))}</p>`:'')
+    + `</details>`);
+</script>
+</head>
+<body>
+<l-doc>
+<l-head badge="Acervo · 24 resumos" title="Error models, boundary design &amp; observabilidade — o acervo do bearboo" authors="Digests moldados ao bearboo (pilar 5-a: cadeia causal · DSL vs. helper de boundary · structured logging)" src="Gerados via /learn:digest — cada um conferido contra a fonte"></l-head>
+
+<l-note kind="info" title="Como ler">Cada resumo tem: Conceito → Como funciona → Dados concretos → 🎯 Aplicar no bearboo → Cuidado → Recall (cards com resposta colapsável pra você se testar) → TL;DR. Ordem sugerida de leitura abaixo — mas cada um se sustenta sozinho.</l-note>
+
+<l-sec n="A" title="Ordem sugerida — a genealogia da ideia">
+<p>Li nesta ordem, os quatro primeiros formam um arco fechado (o debate throw vs. Result), e os dois últimos apontam pro seu tracer:</p>
+<ol>
+<li><strong><a href="resumo-01-error-model-joe-duffy.html">The Error Model</a></strong> (Duffy) — bug vs. erro recuperável. A distinção-mãe. <em>Comece aqui.</em></li>
+<li><strong><a href="resumo-02-epic-treatise-error-models.html">An epic treatise on error models</a></strong> (Gandhi) — os 5 eixos + a "Thesis 3" (erro carrega filhos). <em>A planta do seu tracer.</em></li>
+<li><strong><a href="resumo-03-second-error-model-convergence.html">The Second Great Error Model Convergence</a></strong> (matklad) — enum vs. tipo universal; onde seu ErrorRegistry cai.</li>
+<li><strong><a href="resumo-04-railway-oriented-programming.html">Railway Oriented Programming</a></strong> (Wlaschin) — o Result que a ADR-0017 rejeitou, e por quê.</li>
+<li><strong><a href="resumo-05-wadler-monads-exception.html">Monads for FP — a exception monad</a></strong> (Wadler) — a teoria embaixo do ROP; <code>throw</code>/<code>catch</code> já é isso.</li>
+<li><strong><a href="resumo-06-orthogonal-defect-classification.html">Orthogonal Defect Classification</a></strong> (Chillarege) — erro como dado mensurável; distribuição = assinatura.</li>
+<li><strong><a href="resumo-07-handlers-algebraic-effects.html">Handlers of Algebraic Effects</a></strong> (Plotkin &amp; Pretnar) — exception é caso particular de effect; "resume".</li>
+<li><strong><a href="resumo-08-koka-algebraic-effects-types.html">Algebraic Effects (Koka)</a></strong> (Leijen) — efeito no tipo; <code>to-maybe</code> dissolve throw vs. Result.</li>
+<li><strong><a href="resumo-09-dapper-distributed-tracing.html">Dapper</a></strong> (Sigelman et al.) — <em>o blueprint do seu tracer 5-a, menos a rede.</em></li>
+<li><strong><a href="resumo-10-causal-inference-root-cause.html">Causal Inference / Root Cause</a></strong> (IJETCSIT) — o teto: inferir a raiz. E por que o monólito tem isso de graça.</li>
+</ol>
+</l-sec>
+
+<l-sec n="B" title="O fio que costura tudo (pro seu caso)">
+<p>Se ler os 10 e quiser guardar <strong>uma</strong> linha: seu <code>ErrorRegistry</code> já resolveu "erro é dado tipado no boundary" (docs 1-3, 5, 8). O <strong>error tracer (5-a)</strong> que você quer é adicionar ao <code>DomainError</code> a <em>cadeia</em> — o campo <code>cause</code> tipado, preservado no boundary e navegável (docs 2, 9) — mais dois campos de metadata, <code>severity</code> e <code>retryable</code> (docs 2, 6). E a boa notícia dos docs 9-10: num monólito, "root cause" é o <code>cause</code> mais profundo — de graça, sem o ML que o mundo distribuído precisa.</p>
+</l-sec>
+
+<l-sec n="C" title="Coleção 2 — DSL vs. helper de boundary (a decisão do recordView)">
+<p>Batch motivado pela pergunta: "o <code>try/catch (DomainError → TRPCError)</code> repetido em 32 lugares deveria virar uma DSL?". Os 9 resumos respondem por três eixos. Veredito costurado: <strong>não é DSL — é um helper de boundary (um adapter/anti-corruption layer in-process), e a Rule of Three já gritou pela extração da tradução (não de um framework).</strong></p>
+<p><em>Eixo DSL — o que é / quando criar:</em></p>
+<ol>
+<li><strong><a href="resumo-11-mernik-when-how-dsl.html">When and How to Develop DSLs</a></strong> (Mernik et al.) — o survey da decisão; biblioteca já é DSL fraca, e o seu caso passa 0 dos 3 testes. <em>Comece aqui.</em></li>
+<li><strong><a href="resumo-12-hudak-embedded-dsl.html">Modular DSLs (embedding)</a></strong> (Hudak) — o teste da álgebra ausente: sem composição, é só uma função de ordem superior.</li>
+<li><strong><a href="resumo-13-fowler-dsl-qa.html">DSL Q&amp;A</a></strong> (Fowler) — interna vs. externa; fluent interface. <code>runDomain(fn)</code> não é DSL, é API.</li>
+</ol>
+<p><em>Eixo Boundary — o que é / por que a tradução mora nele:</em></p>
+<ol start="4">
+<li><strong><a href="resumo-14-cockburn-hexagonal.html">Hexagonal Architecture</a></strong> (Cockburn) — o boundary tRPC é um adapter; a tradução é a responsabilidade dele.</li>
+<li><strong><a href="resumo-15-evans-anti-corruption-layer.html">Anti-Corruption Layer</a></strong> (Evans/DDD) — o nome exato do seu boundary de erro; só tradução, nada de regra de negócio.</li>
+<li><strong><a href="resumo-16-bernhardt-boundaries.html">Boundaries (Functional Core, Imperative Shell)</a></strong> (Bernhardt) — o erro é o valor na fronteira; log/tradução são shell.</li>
+<li><strong><a href="resumo-17-king-parse-dont-validate.html">Parse, Don't Validate</a></strong> (King) — <code>classifyBoundaryError</code> é um parser; as 32 cópias são shotgun parsing.</li>
+</ol>
+<p><em>Eixo Abstração — helper vs. camada (o discriminador):</em></p>
+<ol start="8">
+<li><strong><a href="resumo-18-metz-wrong-abstraction.html">The Wrong Abstraction</a></strong> (Metz) — o teste que aprova <code>runDomain</code> e reprova o framework <code>layers()</code>.</li>
+<li><strong><a href="resumo-19-dodds-aha-programming.html">AHA Programming</a></strong> (Dodds) — optimize for change first: extrair a tradução muda 32→1; o framework é YAGNI.</li>
+</ol>
+</l-sec>
+
+<l-sec n="D" title="Coleção 3 — structured logging (a decisão do boundaryLog)">
+<p>Batch motivado pela Fase 9 do roadmap ("logs estruturados") e pela pergunta: "o <code>logBoundaryError</code> hoje achata <code>level/kind/code/path</code> numa string do <code>console</code> — como parar de achatar?". Os 5 resumos respondem por três eixos: <strong>o padrão</strong> (canonical line / evento largo), <strong>os níveis</strong> (quantos merecem existir) e <strong>o transporte/como</strong> (stdout + JSON + context binding). Fio costurado: <strong>emitir 1 evento estruturado por request no <code>withAppErrors</code>, com <code>requestId</code> ligado no <code>ctx</code> — que vira o <code>trace_id</code> da Fase 11.</strong></p>
+<p><em>Eixo Padrão — a forma do evento:</em></p>
+<ol>
+<li><strong><a href="resumo-20-brandur-canonical-log-lines.html">Canonical Log Lines</a></strong> (Brandur/Stripe) — 1 linha larga por request, emitida no fim; o <code>withAppErrors</code> já é o ensure block. <em>Comece aqui.</em></li>
+<li><strong><a href="resumo-21-majors-structured-events.html">Logs vs Structured Events</a></strong> (Majors) — pare de pensar "log", pense "evento"; blob no início do request = o <code>ctx</code> do tRPC.</li>
+</ol>
+<p><em>Eixo Níveis — quantos merecem existir:</em></p>
+<ol start="3">
+<li><strong><a href="resumo-22-cheney-log-levels.html">Let's talk about logging</a></strong> (Cheney) — só info+debug; o teu <code>kind: bug|recoverable</code> já encarna o argumento. Provoca o <code>ErrorLevel</code> de 4 valores.</li>
+</ol>
+<p><em>Eixo Transporte/how-to — o onde e o como:</em></p>
+<ol start="4">
+<li><strong><a href="resumo-23-twelve-factor-logs.html">Factor XI — Logs</a></strong> (12-Factor) — stdout unbuffered, o app não gerencia arquivo; valida o <code>console.*</code> no "onde", Docker/Vercel roteiam.</li>
+<li><strong><a href="resumo-24-structlog-best-practices.html">Logging Best Practices</a></strong> (structlog) — JSON em prod / pretty em dev + context binding; a spec do logger gateway, espelhando o mailer transport.</li>
+</ol>
+</l-sec>
+
+<l-tldr>
+<li><strong>Coleção 1 (docs 1-10):</strong> error models — o debate throw vs. Result, onde o ErrorRegistry cai, e o blueprint do error tracer (5-a).</li>
+<li><strong>Coleção 2 (docs 11-19):</strong> DSL vs. helper de boundary — veredito: é um <em>adapter/anti-corruption layer in-process</em>, não uma DSL; extraia a tradução (32→1), não um framework.</li>
+<li><strong>Coleção 3 (docs 20-24):</strong> structured logging — pare de achatar o <code>boundaryLog</code> em string; emita 1 evento estruturado por request no <code>withAppErrors</code>, stdout+JSON, <code>requestId</code> no <code>ctx</code> (ponte pro trace da Fase 11).</li>
+<li>Cada resumo conecta a fonte ao bearboo na seção 🎯 e tem cards de recall pra auto-teste.</li>
+</l-tldr>
+</l-doc>
+</body>
+</html>

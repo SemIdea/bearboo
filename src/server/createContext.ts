@@ -1,5 +1,7 @@
 import { parseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { env } from "@/lib/env";
+import { createLogger, Logger } from "@/lib/log";
+import { AppError } from "@/shared/error/appError";
 import { domain_readUserAndSessionByAccessToken } from "./features/auth/domain/readUserAndSessionByAccessToken";
 import { CookieJar } from "./http/cookieJar";
 import { gateways, IGateways } from "./infra/container/gateways";
@@ -18,7 +20,11 @@ type IBaseContextDTO = IInputAPIContextDTO & {
 	gateways: IGateways;
 	env: typeof env;
 	resCookies: CookieJar;
+	// Per-request base logger. The logging middleware forks a fresh per-call
+	// logger from here and emits the canonical line at the boundary (ADR-0022).
+	log: Logger;
 	refreshToken?: string;
+	visitorId?: string;
 };
 
 type IAPIContextDTO = IBaseContextDTO & {
@@ -39,6 +45,7 @@ const createTRPCContext = async ({
 		gateways,
 		env,
 		resCookies: new CookieJar(),
+		log: createLogger(),
 	};
 
 	const cookies = headers.get("cookie");
@@ -47,14 +54,35 @@ const createTRPCContext = async ({
 	const cookieStore = parseCookie(cookies);
 	const accessToken = cookieStore.get("accessToken") || null;
 	const refreshToken = cookieStore.get("refreshToken") || null;
+	const visitorId = cookieStore.get("visitorId") || null;
 
 	if (refreshToken) ctx.refreshToken = refreshToken;
+	if (visitorId) ctx.visitorId = visitorId;
 	if (!accessToken) return ctx;
 
-	const user = await domain_readUserAndSessionByAccessToken({
-		ctx,
-		input: { accessToken },
-	});
+	let user: IUserWithSession | null;
+
+	try {
+		user = await domain_readUserAndSessionByAccessToken({
+			ctx,
+			input: { accessToken },
+		});
+	} catch (error) {
+		// Keyed on the specific domain code, not on a transport code: keying on
+		// `httpCode === "UNAUTHORIZED"` would let any of the five codes mapped to
+		// it clear the user's session cookies. Only an invalid access token
+		// should, and it's the only code this lookup throws.
+		if (
+			error instanceof AppError &&
+			error.code === "session.access_token_invalid"
+		) {
+			ctx.resCookies.clear("accessToken");
+			ctx.resCookies.clear("refreshToken");
+			return ctx;
+		}
+
+		throw error;
+	}
 
 	if (!user) return ctx;
 

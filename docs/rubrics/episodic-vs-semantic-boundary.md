@@ -1,25 +1,25 @@
-# Rubrica — fronteira episódico vs semântico (o que decai vs o que é permanente)
+# Rubric — the episodic vs semantic boundary (what decays vs what is permanent)
 
-> Materializa o princípio invariante #1 ("se outro agente sem minha memória precisa saber, é doc") na dimensão **temporal**: nem todo artefato de `/docs/` é conhecimento permanente. v3.1.0+ (Fase 3 da iniciativa v3.2). Ancestral: CoALA (arXiv 2309.02427) — memória **episódica** (o que aconteceu) ≠ **semântica** (o que se sabe) ≠ **procedural** (como se faz).
+> Materializes invariant principle #1 ("if another agent without my memory needs to know it, it is a doc") on the **temporal** dimension: not every `/docs/` artifact is permanent knowledge. v3.1.0+ (Phase 3 of the v3.2 initiative). Ancestor: CoALA (arXiv 2309.02427) — **episodic** memory (what happened) ≠ **semantic** (what is known) ≠ **procedural** (how it is done).
 
-## Os tiers no AFM
+## The tiers in AFM
 
-| Tier | O que é | Onde vive | Decai? | Entra nos eixos A1–A7 do diagnose? |
+| Tier | What it is | Where it lives | Decays? | Enters the diagnose axes A1–A7? |
 |---|---|---|---|---|
-| **Semântico** | conhecimento durável: regras, arquitetura, decisões, surpresas | `afm.md`, `ach.md`, `prd.md`, `ust.md`, `gotchas.md`, `adr/`, `learnings/`, `rubrics/` | **Não** — supersedeável (ADR Substituída, tombstone), nunca apaga | **Sim** |
-| **Procedural** | sequências repetíveis | `procedures/` | frequência/staleness (`restructure`) | Sim (cobertura herdada) |
-| **Episódico** | o que aconteceu numa sessão: estado de trabalho, handoff | `sessions/` (handoff), `_focus.md` (foco atual) | **Sim** — handoff `open` envelhecido decai (A2); `_focus` é OVERWRITE | **NÃO** (é estado, não conhecimento) |
-| **Telemetria** | log append-only de eventos/falhas | `.afm-log/`, `.afm-log-failures/` | só por rotação/retenção; auditoria = git | **NÃO** (append-only) |
+| **Semantic** | durable knowledge: rules, architecture, decisions, surprises | `afm.md`, `ach.md`, `prd.md`, `ust.md`, `gotchas.md`, `adr/`, `learnings/`, `rubrics/` | **No** — supersedable (a Superseded ADR, a tombstone), never deleted | **Yes** |
+| **Procedural** | repeatable sequences | `procedures/` | frequency/staleness (`restructure`) | Yes (inherited coverage) |
+| **Episodic** | what happened in a session: work state, handoff | `sessions/` (handoff), `_focus.md` (current focus) | **Yes** — an aged `open` handoff decays (A2); `_focus` is OVERWRITE | **NO** (it is state, not knowledge) |
+| **Telemetry** | an append-only log of events/failures | `.afm-log/`, `.afm-log-failures/` | only by rotation/retention; audit = git | **NO** (append-only) |
 
-## Critério (decisão)
+## Criterion (decision)
 
-- **É conhecimento que outro agente sem minha memória precisa pra não quebrar?** → **semântico** (permanente, entra no diagnose, nunca decai sozinho). É o #1.
-- **É "onde eu estava" / "o que aconteceu nesta sessão"?** → **episódico** (decai, fica fora do diagnose). Dar permanência a isso infla o diagnose com ruído.
-- **Promoção episódico → semântico** é o ponto do `reconcile`: quando um episódio revela uma decisão/regra/gotcha load-bearing, propõe materializar no tier semântico (gate humano, #6). O episódio é o **buffer** de onde a evolução pesca candidatos; não é a evolução.
+- **Is it knowledge that another agent without my memory needs to not break things?** → **semantic** (permanent, enters the diagnose, never decays on its own). It is #1.
+- **Is it "where I was" / "what happened in this session"?** → **episodic** (decays, stays out of the diagnose). Giving it permanence inflates the diagnose with noise.
+- **Episodic → semantic promotion** is the point of `reconcile`: when an episode reveals a load-bearing decision/rule/gotcha, propose materializing it in the semantic tier (a human gate, #6). The episode is the **buffer** from which evolution fishes candidates; it is not the evolution.
 
-## Anti-padrões
+## Anti-patterns
 
-- ❌ **Tratar handoff/`_focus` como doc normativo** — infla o diagnose (A1–A7) com estado volátil. São episódicos.
-- ❌ **Decair conhecimento semântico** — regra/decisão/gotcha não decai por idade; supersede (ADR) ou consolida (`generalize`), nunca apaga por tempo (#5: memória institucional).
-- ❌ **`_focus.md` que cresce** — é estado pequeno e sobrescrito (regra 20), não um log.
-- ❌ **Promover episódio a semântico sem cruzar o #1** — nem todo "o que aconteceu" é "o que outro precisa saber".
+- ❌ **Treating a handoff/`_focus` as a normative doc** — inflates the diagnose (A1–A7) with volatile state. They are episodic.
+- ❌ **Decaying semantic knowledge** — a rule/decision/gotcha does not decay by age; it is superseded (an ADR) or consolidated (`generalize`), never deleted by time (#5: institutional memory).
+- ❌ **A growing `_focus.md`** — it is small, overwritten state (rule 20), not a log.
+- ❌ **Promoting an episode to semantic without crossing #1** — not every "what happened" is "what another needs to know".

@@ -1,4 +1,6 @@
+import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { AppError } from "@/shared/error/appError";
 import { createTRPCContext } from "../createContext";
 
 const readUserAndSessionByAccessTokenMock = vi.hoisted(() => vi.fn());
@@ -20,6 +22,13 @@ describe("createTRPCContext", () => {
 		expect(ctx.helpers).toBeDefined();
 		expect(ctx.gateways).toBeDefined();
 		expect(readUserAndSessionByAccessTokenMock).not.toHaveBeenCalled();
+	});
+
+	test("exposes a per-request logger", async () => {
+		const ctx = await createTRPCContext({ headers: new Headers() });
+
+		expect(ctx.log).toBeDefined();
+		expect(typeof ctx.log.add).toBe("function");
 	});
 
 	test("does not authenticate when accessToken cookie is missing", async () => {
@@ -70,5 +79,52 @@ describe("createTRPCContext", () => {
 		});
 
 		expect(ctx.user).toBeUndefined();
+	});
+
+	test("degrades to an anonymous context and clears stale cookies when the access token is invalid, instead of throwing", async () => {
+		readUserAndSessionByAccessTokenMock.mockRejectedValue(
+			new AppError("session.access_token_invalid"),
+		);
+
+		const ctx = await createTRPCContext({
+			headers: new Headers({
+				cookie: "accessToken=stale-token; refreshToken=stale-refresh",
+			}),
+		});
+
+		expect(ctx.user).toBeUndefined();
+		expect(ctx.resCookies.pending).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: "accessToken", value: "" }),
+				expect.objectContaining({ name: "refreshToken", value: "" }),
+			]),
+		);
+	});
+
+	test("does not clear cookies for a different domain error that also maps to UNAUTHORIZED", async () => {
+		// The condition used to be `httpCode === "UNAUTHORIZED"`, which five
+		// codes satisfy. Keying on the domain code keeps session teardown tied
+		// to the one failure that means the access token is bad.
+		readUserAndSessionByAccessTokenMock.mockRejectedValue(
+			new AppError("session.session_expired"),
+		);
+
+		await expect(
+			createTRPCContext({
+				headers: new Headers({ cookie: "accessToken=some-token" }),
+			}),
+		).rejects.toBeInstanceOf(AppError);
+	});
+
+	test("does not swallow errors unrelated to an invalid token", async () => {
+		readUserAndSessionByAccessTokenMock.mockRejectedValue(
+			new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "db down" }),
+		);
+
+		await expect(
+			createTRPCContext({
+				headers: new Headers({ cookie: "accessToken=some-token" }),
+			}),
+		).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
 	});
 });

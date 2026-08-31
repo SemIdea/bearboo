@@ -1,6 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
-import { UserErrorCode } from "@/shared/error/user";
+import { AppError } from "@/shared/error/appError";
 import { CreateUserInput } from "../schema";
 
 const domain_registerUser = async ({
@@ -10,10 +9,7 @@ const domain_registerUser = async ({
 	const existingUser = await ctx.repositories.user.readByEmail(input.email);
 
 	if (existingUser) {
-		throw new TRPCError({
-			code: "CONFLICT",
-			message: UserErrorCode.USER_ALREADY_EXISTS,
-		});
+		throw new AppError("user.already_exists");
 	}
 
 	const userId = ctx.helpers.uid.generate();

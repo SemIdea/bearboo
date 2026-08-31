@@ -1,23 +1,23 @@
-# Rubrica — SOLID como gatilho concreto (não como folclore)
+# Rubric — SOLID as a concrete trigger (not as folklore)
 
-SOLID é vocabulário fácil de usar como argumento e difícil de usar como gatilho. Esta rubrica converte cada princípio em **gatilho mecânico** — quando aplicar, anti-pattern, exemplo.
+SOLID is vocabulary that is easy to use as an argument and hard to use as a trigger. This rubric turns each principle into a **mechanical trigger** — when to apply, anti-pattern, example.
 
-## SRP — Single Responsibility (já é regra dura 5)
+## SRP — Single Responsibility (already hard rule 5)
 
-**Gatilho:** nome do arquivo / função tem "and"/"manager"/"utils"/"helpers" sem prefixo de domínio.
+**Trigger:** the file/function name has "and"/"manager"/"utils"/"helpers" without a domain prefix.
 
-**Aplica:** parte. Um arquivo, uma responsabilidade.
+**Apply:** split. One file, one responsibility.
 
 Anti-pattern: `notification-and-billing.ts`, `user-manager.ts`, `helpers.ts`.
 
-## OCP — Open/Closed: extensão sem modificação
+## OCP — Open/Closed: extension without modification
 
-**Gatilho:** vou adicionar **provider novo** (registry NPM/GitHub/Custom; storage S3/R2/MinIO; plano novo; método de pagamento novo; canal de notificação novo).
+**Trigger:** I am going to add a **new provider** (NPM/GitHub/Custom registry; S3/R2/MinIO storage; a new plan; a new payment method; a new notification channel).
 
-**Aplica:** **arquivo novo** implementando uma porta tipada. Registrador central injeta. **Sem** `switch (provider)` espalhado em ≥ 2 arquivos.
+**Apply:** a **new file** implementing a typed port. A central registrar injects it. **No** `switch (provider)` scattered across ≥ 2 files.
 
 ```ts
-// ✅ porta + adapters + registry
+// ✅ port + adapters + registry
 type RegistryAdapter = {
   publish(tarball: Buffer, opts: PublishOpts): Promise<PublishResult>;
 };
@@ -27,43 +27,43 @@ const adapters: Record<RegistryKind, RegistryAdapter> = {
   custom:  customAdapter,
 };
 
-// ❌ switch espalhado em 3 arquivos
+// ❌ switch scattered across 3 files
 function publish(kind: RegistryKind, ...) {
-  if (kind === "npm") { /* lógica npm */ }
-  else if (kind === "github") { /* lógica github */ }
-  // ... e idem em outras funções
+  if (kind === "npm") { /* npm logic */ }
+  else if (kind === "github") { /* github logic */ }
+  // ... and the same in other functions
 }
 ```
 
-## LSP — Liskov Substitution: implementações intercambiáveis
+## LSP — Liskov Substitution: interchangeable implementations
 
-**Gatilho:** tenho **2+ implementações da mesma porta** (RegistryAdapter, StorageAdapter, EmailAdapter).
+**Trigger:** I have **2+ implementations of the same port** (RegistryAdapter, StorageAdapter, EmailAdapter).
 
-**Aplica:** todas devolvem o **mesmo shape de resultado classificado**. Adapter A não retorna `null` em conflict enquanto B joga exception.
+**Apply:** all return the **same classified result shape**. Adapter A does not return `null` on conflict while B throws an exception.
 
 ```ts
-// ✅ todas as implementações retornam o mesmo Result discriminado
+// ✅ all implementations return the same discriminated Result
 type PublishResult =
   | { code: "PUBLISHED"; version: string }
   | { code: "CONFLICT"; existingVersion: string }
   | { code: "FAILED"; reason: string };
 
-// ❌ adapter A: retorna null em conflict
+// ❌ adapter A: returns null on conflict
 async function publishNpm(): Promise<{ version: string } | null> { ... }
-// ❌ adapter B: joga exception
+// ❌ adapter B: throws an exception
 async function publishGithub(): Promise<{ version: string }> {
   throw new ConflictError(...);
 }
 ```
 
-## ISP — Interface Segregation: porta mínima
+## ISP — Interface Segregation: the minimal port
 
-**Gatilho:** função domain recebe `ctx: TRPCContext` inteiro mas só usa `ctx.db` e `ctx.log`.
+**Trigger:** a domain function receives the whole `ctx: TRPCContext` but only uses `ctx.db` and `ctx.log`.
 
-**Aplica:** declara só o que usa: `ctx: Pick<TRPCContext, "db" | "log">`. Senão teste tem que mockar o universo.
+**Apply:** declare only what you use: `ctx: Pick<TRPCContext, "db" | "log">`. Otherwise the test has to mock the universe.
 
 ```ts
-// ✅ porta mínima
+// ✅ minimal port
 async function domain_createSessionAuth({
   ctx,
   input,
@@ -72,36 +72,36 @@ async function domain_createSessionAuth({
   input: { userId: string };
 }): Promise<Result<IssuedSession, "USER_NOT_FOUND">> { ... }
 
-// ❌ ctx inteiro, esconde dependência
+// ❌ the whole ctx, hides the dependency
 async function domain_createSessionAuth({ ctx, input }: DomainInput<...>) {
-  // só usa ctx.db, mas teste tem que mockar ctx.user, ctx.session, ctx.headers, ...
+  // only uses ctx.db, but the test has to mock ctx.user, ctx.session, ctx.headers, ...
 }
 ```
 
-## DIP — Dependency Inversion: domain não conhece infra
+## DIP — Dependency Inversion: the domain does not know infra
 
-**Gatilho:** domain function ou lib pura está prestes a importar algo de framework (`TRPCError`, `req.headers`, ORM client direto sem abstração).
+**Trigger:** a domain function or a pure lib is about to import something from a framework (`TRPCError`, `req.headers`, a raw ORM client with no abstraction).
 
-**Aplica:** inverte a direção. Domain define a interface; infra implementa. Domain importa só do que está abaixo (lib pura, tipos).
+**Apply:** invert the direction. The domain defines the interface; infra implements it. The domain imports only from what is below it (pure lib, types).
 
 ```
-✅ direção correta:
-  app/   →   server/   →   server/modules/X/   →   domain/X/   →   lib/   →   tipos
+✅ correct direction:
+  app/   →   server/   →   server/modules/X/   →   domain/X/   →   lib/   →   types
   
-  Cada camada conhece a de baixo, nunca a de cima.
+  Each layer knows the one below, never the one above.
 
-❌ inversões comuns:
-  - domain/X/ importando TRPCError (transport sobe pra domain)
-  - lib/Y/ importando do server (lib não é mais publishable)
-  - lib/Y/ importando ORM type (acopla a infra)
+❌ common inversions:
+  - domain/X/ importing TRPCError (transport rises into the domain)
+  - lib/Y/ importing from the server (the lib is no longer publishable)
+  - lib/Y/ importing an ORM type (couples it to infra)
 ```
 
-## Resumo — qual perguntar quando
+## Summary — which to ask when
 
-| Sintoma | Princípio | O que faz |
+| Symptom | Principle | What to do |
 | --- | --- | --- |
-| Arquivo crescendo, vai 2+ coisas | SRP | Parte |
-| Vou adicionar 4ª variante de algo | OCP | Porta + adapters em vez de switch |
-| 2 implementações da mesma coisa retornam shapes diferentes | LSP | Padroniza Result discriminado |
-| Função recebe ctx gigante mas usa 2 campos | ISP | Pick / interface mínima |
-| Domain quer importar coisa de cima | DIP | Inverte: domain define, infra implementa |
+| A file growing, doing 2+ things | SRP | Split |
+| I am going to add a 4th variant of something | OCP | Port + adapters instead of a switch |
+| 2 implementations of the same thing return different shapes | LSP | Standardize a discriminated Result |
+| A function receives a giant ctx but uses 2 fields | ISP | Pick / minimal interface |
+| The domain wants to import something from above | DIP | Invert: the domain defines, infra implements |

@@ -1,25 +1,25 @@
-# Rubrica — template congelado (offline) vs. aprendizado streaming (online): precedência, nunca soma
+# Rubric — frozen template (offline) vs streaming learning (online): precedence, never a sum
 
-> **Achado load-bearing do AWM (arXiv:2409.07429):** conhecimento **offline** (template arquitetural congelado via `export-template`) e **online** (aprendizado que o `reconcile`/`restructure` acumulam em streaming durante a vida do projeto) são **não-aditivos — combinar os dois machuca** (o resultado fica *entre* os dois e não bate nenhum). O AFM tem as duas camadas, então precisa de uma regra explícita de **precedência + tombstone**, jamais de fusão.
+> **Load-bearing finding from AWM (arXiv:2409.07429):** **offline** knowledge (an architectural template frozen via `export-template`) and **online** knowledge (learning that `reconcile`/`restructure` accumulate in streaming during the project's life) are **non-additive — combining the two hurts** (the result lands *between* the two and matches neither). AFM has both layers, so it needs an explicit rule of **precedence + tombstone**, never fusion.
 
-A regra única: quando offline e online colidem, **escolhe UM e tombstona o outro** (proveniência preservada). Nunca mantém os dois "somados", nunca funde o conteúdo.
+The single rule: when offline and online collide, **pick ONE and tombstone the other** (provenance preserved). Never keep the two "summed", never merge the content.
 
-## Tabela de decisão
+## Decision table
 
-| Situação | Regra |
+| Situation | Rule |
 | --- | --- |
-| Projeto de **origem-template** (`docs/.template` foi a semente) E o `reconcile` quer propor regra/gotcha que **contradiz** um artefato herdado do template | **Streaming vence localmente.** Aplica a regra/gotcha nova e marca o artefato herdado com `*(overridden — ver reconcile NNN / ciclo NNN)*`. **NÃO funde** os dois (non-additivity: misturar = pior que qualquer um isolado). |
-| O **mesmo conhecimento** existe no template congelado **E** numa learning streaming (duplicata, não contradição) | **Escolhe UM** (o mais recente/local em geral) e tombstona o outro. Proibido manter as duas cópias "somadas" — vira a inflação que o `diagnose A6` depois acusa. |
-| `export-template` vai **congelar** um projeto que já acumulou learnings streaming | Consolida os learnings streaming **via `/afm:generalize` ANTES** do export — eles viram parte do template congelado (offline), não uma camada paralela. Evita congelar metade e deixar a outra metade pro reconcile do consumer colidir depois. |
+| A **template-origin** project (`docs/.template` was the seed) AND `reconcile` wants to propose a rule/gotcha that **contradicts** a template-inherited artifact | **Streaming wins locally.** Apply the new rule/gotcha and mark the inherited artifact with `*(overridden — see reconcile NNN / cycle NNN)*`. **Do NOT merge** the two (non-additivity: mixing = worse than either alone). |
+| The **same knowledge** exists in the frozen template **AND** in a streaming learning (a duplicate, not a contradiction) | **Pick ONE** (the more recent/local one in general) and tombstone the other. Keeping the two copies "summed" is forbidden — it becomes the inflation `diagnose A6` later flags. |
+| `export-template` is about to **freeze** a project that already accumulated streaming learnings | Consolidate the streaming learnings **via `/afm:generalize` BEFORE** the export — they become part of the frozen template (offline), not a parallel layer. It avoids freezing half and leaving the other half for the consumer's reconcile to collide with later. |
 
-## Por que não fundir
+## Why not merge
 
-- **AWM mediu:** offline+online combinados ficam *entre* os dois e não batem nenhum. Fusão silenciosa é o pior dos mundos.
-- **Tombstone, não deleção:** a precedência preserva a proveniência (o artefato perdedor vira nota, não some) — mesma disciplina do `generalize` (gotcha fundido vira tombstone) e do princípio #6 (deleção é bright line).
-- **`reflect`/`generalize` continuam válidos** *dentro* de cada camada — o que esta rubrica proíbe é misturar **entre** camadas sem decidir a precedência.
+- **AWM measured:** offline+online combined land *between* the two and match neither. Silent fusion is the worst of both worlds.
+- **Tombstone, not deletion:** precedence preserves provenance (the losing artifact becomes a note, does not disappear) — the same discipline as `generalize` (a merged gotcha becomes a tombstone) and principle #6 (deletion is a bright line).
+- **`reflect`/`generalize` stay valid** *within* each layer — what this rubric forbids is mixing **between** layers without deciding the precedence.
 
-## Antiexemplos
+## Anti-examples
 
-- ❌ Manter a regra herdada do template **e** a regra nova do reconcile que a contradiz, esperando que "as duas valham" — viola a non-additivity; decide a precedência.
-- ❌ `export-template` congelar com learnings streaming pendentes sem consolidar antes — o consumer herda uma camada parcial que vai brigar com o próprio reconcile.
-- ❌ Fundir o texto dos dois numa terceira versão "combinada" — é exatamente o resultado *entre os dois* que o AWM mostrou ser pior.
+- ❌ Keeping the template-inherited rule **and** the new reconcile rule that contradicts it, hoping "both hold" — it violates non-additivity; decide the precedence.
+- ❌ `export-template` freezing with pending streaming learnings without consolidating first — the consumer inherits a partial layer that will fight its own reconcile.
+- ❌ Merging the text of the two into a third "combined" version — it is exactly the *between the two* result AWM showed to be worse.

@@ -5,6 +5,8 @@ import { readPostOutputSchema, readPostSchema } from "../schema";
 const procedure_readPost = publicProcedure
 	.input(readPostSchema)
 	.output(readPostOutputSchema)
-	.query(async ({ input, ctx }) => domain_readPost({ ctx, input }));
+	.query(async ({ input, ctx }) => {
+		return domain_readPost({ ctx, input });
+	});
 
 export { procedure_readPost };

@@ -35,13 +35,6 @@ const handler = (req: NextRequest) => {
 
 			return { headers };
 		},
-		// onError: IS_DEVELOPMENT
-		//   ? ({ path, error }) => {
-		//       console.error(
-		//         `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`
-		//       );
-		//     }
-		//   : undefined,
 	});
 };
 

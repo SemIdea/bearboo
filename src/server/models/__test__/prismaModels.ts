@@ -168,6 +168,10 @@ describe("Prisma-backed models", () => {
 		});
 	});
 
+	// Search moved to native full-text (ADR-0027): the tsvector query runs raw
+	// SQL prisma-mock cannot execute, so matching/ranking/filters/pagination are
+	// covered in src/server/features/post/__itest__/search.integration.ts.
+
 	test("PostModel reads posts by user", async () => {
 		prismaMock.post.findMany.mockResolvedValue([]);
 

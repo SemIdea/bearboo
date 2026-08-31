@@ -8,11 +8,11 @@ import {
 const procedure_submitForReviewPost = verifiedProcedure
 	.input(submitForReviewPostSchema)
 	.output(submitForReviewPostOutputSchema)
-	.mutation(async ({ input, ctx }) =>
-		domain_submitForReviewPost({
+	.mutation(async ({ input, ctx }) => {
+		return domain_submitForReviewPost({
 			ctx,
 			input: { ...input, userId: ctx.user.id },
-		}),
-	);
+		});
+	});
 
 export { procedure_submitForReviewPost };

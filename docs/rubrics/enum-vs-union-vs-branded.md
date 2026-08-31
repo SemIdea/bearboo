@@ -1,30 +1,30 @@
-# Rubrica — enum vs union literal vs branded type vs Zod schema
+# Rubric — enum vs literal union vs branded type vs Zod schema
 
-## Tabela de decisão
+## Decision table
 
-| Caso | Escolha | Anti-pattern |
+| Case | Choice | Anti-pattern |
 | --- | --- | --- |
-| Valor existe no DB (status, role, plano) — **neste repo** | `enum` no `schema.prisma` pra persistência **+ union literal hand-rolled** no model do app (`src/server/models/<entity>.ts`, ex. `IPostStatus`/`IRole`), nunca o tipo gerado importado de `@prisma/client` fora de `infra/drivers/`/`test/prisma/` | Importar o tipo do Prisma client (`import { Role } from "@prisma/client"`) em domain/procedure/lib — acopla o app ao client gerado onde o resto do código já não faz isso |
-| ≤ 5 valores fechados, só vivem em código | **Union literal** (`"latest" \| "next" \| "beta"`) | Enum TS puro — gera lixo de transpilação, não tree-shakeable |
-| String aberta com regra (user-input, dist-tag livre) | **Schema parser** (Zod) + parse no boundary | Validar dentro do domain (viola regra dura 16) |
-| Primitivo com invariante semântica (sha256, userId ≠ sessionId, currency cents) | **Branded type** (`type Hash = string & { __brand: "Hash" }`) | `string` cru — perde checagem em call-site |
-| Valor opaco vindo de SDK externo (Stripe price id) | Tipo da SDK + Zod no boundary | Re-tipar como branded — duplica SDK |
+| A value exists in the DB (status, role, plan) — **in this repo** | `enum` in `schema.prisma` for persistence **+ a hand-rolled literal union** in the app model (`src/server/models/<entity>.ts`, e.g. `IPostStatus`/`IRole`), never the generated type imported from `@prisma/client` outside `infra/drivers/`/`test/prisma/` | Importing the Prisma-client type (`import { Role } from "@prisma/client"`) in domain/procedure/lib — it couples the app to the generated client where the rest of the code already does not |
+| ≤ 5 closed values, live only in code | **Literal union** (`"latest" \| "next" \| "beta"`) | A pure TS enum — it generates transpilation garbage, not tree-shakeable |
+| An open string with a rule (user-input, a free dist-tag) | **Schema parser** (Zod) + parse at the boundary | Validating inside the domain (violates hard rule 16) |
+| A primitive with a semantic invariant (sha256, userId ≠ sessionId, currency cents) | **Branded type** (`type Hash = string & { __brand: "Hash" }`) | Raw `string` — loses the check at the call site |
+| An opaque value from an external SDK (Stripe price id) | The SDK type + Zod at the boundary | Re-typing as branded — duplicates the SDK |
 
-## Quando branded type vence
+## When a branded type wins
 
-- Função aceita 2 strings com semântica diferente (`copy(from: string, to: string)`) — branded evita trocar ordem.
-- Hash, ID, currency em cents, timestamp em ms vs s — branded torna conversão explícita.
-- ID de domínio diferente (UserId vs SessionId vs OrgId) — branded evita passar UserId onde pediu OrgId.
+- A function accepts 2 strings with different semantics (`copy(from: string, to: string)`) — branded avoids swapping the order.
+- Hash, ID, currency in cents, timestamp in ms vs s — branded makes the conversion explicit.
+- A different domain ID (UserId vs SessionId vs OrgId) — branded avoids passing a UserId where it asked for an OrgId.
 
-## Quando branded type NÃO compensa
+## When a branded type is NOT worth it
 
-- String que vai pra log, UI, network — leitor não ganha nada.
-- Tipo já vem da SDK como string opaca — re-tipar duplica.
-- Função tem 1 parâmetro — sem ambiguidade pra resolver.
+- A string that goes to a log, UI, network — the reader gains nothing.
+- The type already comes from the SDK as an opaque string — re-typing duplicates.
+- A function has 1 parameter — no ambiguity to resolve.
 
-## Antiexemplos
+## Anti-examples
 
-- ❌ `enum Plan { FREE = "FREE", PRO = "PRO" }` em TS (enum de verdade, não union) quando o Prisma já tem `enum Plan { FREE, PRO }` — usa union literal (`"FREE" | "PRO"`) hand-rolled no model, não um enum TS espelhado nem o tipo importado de `@prisma/client` (ver linha da tabela acima — corrigido 2026-07-12 após achar o precedente real, `IPostStatus`/`IRole`, durante `013-role-based-permissions`).
-- ❌ `type DistTag = string` aceitando qualquer coisa — usa union literal se fechado, ou Zod se aberto com regra.
-- ❌ `copy(src: string, dst: string)` chamado como `copy(dst, src)` por engano — branded `SrcPath` e `DstPath` resolvem.
-- ❌ Branded em todo `string` "por consistência" — overhead sem ganho de checagem.
+- ❌ `enum Plan { FREE = "FREE", PRO = "PRO" }` in TS (a real enum, not a union) when Prisma already has `enum Plan { FREE, PRO }` — use a hand-rolled literal union (`"FREE" | "PRO"`) in the model, not a mirrored TS enum nor the type imported from `@prisma/client` (see the table row above — fixed 2026-07-12 after finding the real precedent, `IPostStatus`/`IRole`, during `013-role-based-permissions`).
+- ❌ `type DistTag = string` accepting anything — use a literal union if closed, or Zod if open with a rule.
+- ❌ `copy(src: string, dst: string)` called as `copy(dst, src)` by mistake — branded `SrcPath` and `DstPath` resolve it.
+- ❌ Branded on every `string` "for consistency" — overhead with no check gain.

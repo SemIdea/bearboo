@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { createLogger } from "@/lib/log";
 import { CookieJar } from "@/server/http/cookieJar";
 import { gateways, IGateways } from "@/server/infra/container/gateways";
 import { helpers } from "@/server/infra/container/helpers";
@@ -20,7 +21,9 @@ class TestContext {
 	gateways: IGateways;
 	env = env;
 	resCookies = new CookieJar();
+	log = createLogger();
 	refreshToken?: string;
+	visitorId?: string;
 	user?: IAuthenticatedUserDTO;
 
 	constructor(
@@ -84,10 +87,15 @@ class TestContext {
 				| "content"
 				| "userId"
 				| "slug"
+				| "previousSlug"
+				| "seoTitle"
+				| "seoDescription"
+				| "canonicalUrl"
 				| "status"
 				| "scheduledAt"
 				| "categoryId"
 				| "coverImageUrl"
+				| "viewCount"
 			>
 		> & { tagIds?: string[] } = {},
 	) {
@@ -102,10 +110,15 @@ class TestContext {
 			title: overrides.title ?? "Test Post",
 			content: overrides.content ?? "This is a test post.",
 			slug: overrides.slug ?? `test-post-${postId}`,
+			previousSlug: overrides.previousSlug ?? null,
+			seoTitle: overrides.seoTitle ?? null,
+			seoDescription: overrides.seoDescription ?? null,
+			canonicalUrl: overrides.canonicalUrl ?? null,
 			status: overrides.status ?? "PUBLISHED",
 			scheduledAt: overrides.scheduledAt ?? null,
 			categoryId: overrides.categoryId ?? null,
 			coverImageUrl: overrides.coverImageUrl ?? null,
+			viewCount: overrides.viewCount ?? 0,
 			userId,
 		});
 

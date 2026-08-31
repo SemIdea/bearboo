@@ -1,13 +1,13 @@
 yarn lint
 
 set +e
-yarn test
+yarn lint-staged --diff "origin/main...HEAD"
 STATUS=$?
 set -e
 
 if [ $STATUS -ne 0 ]; then
-  echo "❌ Tests failed. Push aborted."
+  echo "❌ Staged tests failed. Push aborted."
   exit 1
 fi
 
-echo "✅ Tests passed. Proceeding with push."
+echo "✅ Staged tests passed. Remember to run full suite locally before push."

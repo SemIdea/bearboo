@@ -1,4 +1,10 @@
-import { httpBatchLink, loggerLink } from "@trpc/react-query";
+import {
+	httpBatchLink,
+	httpLink,
+	isNonJsonSerializable,
+	splitLink,
+} from "@trpc/client";
+import { loggerLink } from "@trpc/react-query";
 import superjson from "superjson";
 import { trpc } from "@/app/_trpc/client";
 import { sessionRefreshLink } from "./sessionRefreshLink";
@@ -21,9 +27,19 @@ export const createTRPCClient = () => {
 				},
 			}),
 			sessionRefreshLink,
-			httpBatchLink({
-				transformer: superjson,
-				url: "/api/trpc",
+			// httpBatchLink can't carry FormData/File input (media.upload) — it JSON-encodes
+			// every op in the batch. splitLink routes non-JSON-serializable input to the
+			// unbatched httpLink instead, which streams it as multipart/form-data.
+			splitLink({
+				condition: (op) => isNonJsonSerializable(op.input),
+				true: httpLink({
+					transformer: superjson,
+					url: "/api/trpc",
+				}),
+				false: httpBatchLink({
+					transformer: superjson,
+					url: "/api/trpc",
+				}),
 			}),
 		],
 	});

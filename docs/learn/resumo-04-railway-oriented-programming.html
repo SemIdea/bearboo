@@ -1,0 +1,144 @@
+<!doctype html>
+<!-- learn · template de output (web components). Vocabulário e fluxo de geração: ver SKILL.md do plugin learn. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Railway Oriented Programming — Scott Wlaschin (resumo)</title>
+<style>
+  body{margin:0;background:#0d1117;color:#e6edf3;
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  l-doc{display:block;max-width:820px;margin:0 auto;padding:32px 20px 80px}
+  l-head{display:block;border-bottom:1px solid #2b3340;padding-bottom:24px;margin-bottom:32px}
+  l-sec,l-steps,l-tldr,l-fig{display:block}
+  l-fig{margin:22px 0}
+  l-apply{display:block;background:linear-gradient(180deg,#16221b,#13191c);
+    border:1px solid #2b6e3a;border-left:5px solid #3fb950;border-radius:10px;padding:4px 22px 16px;margin:22px 0}
+  l-note{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #f0883e;
+    border-radius:8px;padding:10px 16px;margin:18px 0}
+  l-note[kind=info]{border-left-color:#58a6ff}
+  l-card{display:block;background:#161b22;border:1px solid #2b3340;border-left:4px solid #a371f7;
+    border-radius:8px;padding:8px 16px 4px;margin:14px 0}
+  l-data{display:grid;grid-template-columns:max-content 1fr;margin:14px 0;
+    border:1px solid #2b3340;border-radius:8px;overflow:hidden}
+  l-row{display:contents}
+  /* conteúdo de autoria (light DOM) */
+  p{margin:0 0 14px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:0 0 9px}
+  strong{color:#fff}
+  a{color:#58a6ff}
+  code{background:#1c2330;border:1px solid #2b3340;border-radius:5px;padding:1px 6px;
+    font:13px/1.5 ui-monospace,"SFMono-Regular",Consolas,monospace;color:#ffa657}
+  table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}
+  th,td{padding:8px 11px;text-align:left;border-bottom:1px solid #2b3340}
+  th{background:#1c2330;color:#58a6ff;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td.num,th.num,.num{color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+  td.num,th.num{text-align:right}
+</style>
+<script>
+  const CSS = `:host{display:block}
+    a{color:#58a6ff;text-decoration:none} a:hover{text-decoration:underline}
+    h1{font-size:28px;line-height:1.25;margin:0 0 12px}
+    .b{display:inline-block;background:linear-gradient(90deg,#58a6ff,#7ee787);color:#0d1117;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:14px}
+    .au{color:#9aa7b4;font-size:14px;margin:0 0 8px}
+    .me{color:#9aa7b4;font-size:13px;margin:0}
+    h2.s{font-size:21px;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid #2b3340}
+    h2.s i{font-style:normal;color:#58a6ff;font-variant-numeric:tabular-nums;margin-right:8px}
+    h2.a{font-size:20px;margin:10px 0 8px;color:#7ee787}
+    b.nt{display:block;color:#fff;margin:0 0 6px}
+    ol{margin:0;padding-left:20px} ul.td{list-style:none;margin:0;padding:0}
+    figure{margin:0;background:#161b22;border:1px solid #2b3340;border-radius:10px;padding:12px}
+    img{display:block;max-width:100%;border-radius:6px;margin:0 auto}
+    figcaption{color:#9aa7b4;font-size:13px;margin-top:8px}
+    .k{padding:8px 12px;border-bottom:1px solid #2b3340;color:#cbd5e1}
+    .v{padding:8px 12px;border-bottom:1px solid #2b3340;text-align:right;color:#ffd866;font-weight:700;font-variant-numeric:tabular-nums}
+    .q{color:#fff;font-weight:600;margin:0}
+    summary{cursor:pointer;color:#58a6ff;font-size:13px;margin-top:4px;list-style:none}
+    .ans{margin:8px 0 0}
+    .cite{color:#9aa7b4;font-size:12px;margin:6px 0 0}`;
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const def = (tag, render) => customElements.define(tag, class extends HTMLElement{
+    connectedCallback(){
+      if(this._r) return; this._r = 1;
+      const a = n => this.getAttribute(n) || '';
+      this.attachShadow({mode:'open'}).innerHTML = '<style>'+CSS+'</style>' + render(a);
+    }
+  });
+  def('l-head', a => (a('badge')?`<span class="b">${esc(a('badge'))}</span>`:'')
+    + `<h1>${esc(a('title'))}</h1>`
+    + (a('authors')?`<p class="au">${esc(a('authors'))}</p>`:'')
+    + (a('src')?`<p class="me">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src'))}</a>`:esc(a('src'))}</p>`:''));
+  def('l-sec',  a => `<h2 class="s"><i>${esc(a('n'))}</i>${esc(a('title'))}</h2><slot></slot>`);
+  def('l-apply',a => `<h2 class="a">\u{1F3AF} ${esc(a('title')||'Aplicar no contexto')}</h2><slot></slot>`);
+  def('l-note', a => `<b class="nt">${esc(a('title')||'Cuidado')}</b><slot></slot>`);
+  def('l-steps',() => `<ol><slot></slot></ol>`);
+  def('l-tldr', () => `<ul class="td"><slot></slot></ul>`);
+  def('l-data', () => `<slot></slot>`);
+  def('l-row',  a => `<span class="k">${esc(a('k'))}</span><span class="v">${esc(a('v'))}</span>`);
+  def('l-fig',  a => `<figure><img src="${esc(a('src'))}" loading="lazy" alt="${esc(a('cap'))}">`
+    + ((a('cap')||a('href'))?`<figcaption>${esc(a('cap'))} ${a('href')?`<a href="${esc(a('href'))}">fonte</a>`:''}</figcaption>`:'')
+    + `</figure>`);
+  def('l-card', a => `<p class="q">${esc(a('q'))}</p>`
+    + `<details><summary>Mostrar resposta</summary><div class="ans"><slot></slot></div>`
+    + ((a('src')||a('href'))?`<p class="cite">${a('href')?`<a href="${esc(a('href'))}">${esc(a('src')||'fonte')}</a>`:esc(a('src'))}</p>`:'')
+    + `</details>`);
+</script>
+</head>
+<body>
+<l-doc>
+<l-head badge="Pilar 3 · Result/Either" title="Railway Oriented Programming" authors="Scott Wlaschin" src="fsharpforfunandprofit.com — a explicação canônica do Result como pipeline" href="https://fsharpforfunandprofit.com/rop/"></l-head>
+
+<l-note kind="info" title="Método deste resumo">Entendimento por contraste. Este é <strong>o caminho que você NÃO escolheu</strong> (ADR-0017 rejeitou <code>Result&lt;T,E&gt;</code>). Ler pra entender exatamente o que abriu mão — e o que a decisão custou/economizou.</l-note>
+
+<l-sec n="1" title="O conceito — a metáfora do trilho">
+<p>Toda função de negócio tem dois resultados possíveis: sucesso ou falha. Modele isso como <strong>dois trilhos paralelos</strong>. Uma função é um <strong>desvio (switch)</strong>: entra no trilho de sucesso, pode sair no de falha. O tipo que carrega isso é o <code>Result</code> (a.k.a. <code>Either</code>): <code>Success of 'a | Failure of 'error</code>.</p>
+<p>Detalhe importante que o Wlaschin faz certo e que muita gente esquece: o lado de falha carrega um <strong>tipo de erro rico, não uma string</strong> (<code>Either [error] (value, [error])</code> na versão dele). Isso é o mesmo princípio da regra 15 — erro é dado estruturado, não texto.</p>
+</l-sec>
+
+<l-sec n="2" title="Como funciona — composição e short-circuit">
+<p>O ganho não é o tipo, é a <strong>composição</strong>. Você encadeia funções que retornam <code>Result</code> e o encadeamento cuida do desvio automaticamente:</p>
+<ul>
+<li><strong>Short-circuit:</strong> uma vez no trilho de falha, você <em>fica</em> nele — as operações seguintes não rodam, o erro propaga até o fim intocado. É o equivalente funcional do "exception pula pro catch", mas explícito e sem exceptions.</li>
+<li><strong>Adaptadores</strong> pra plugar funções de tipos diferentes no pipeline:
+<l-data>
+<l-row k="bind (>>=)" v="pluga função de 1-trilho→2-trilhos (que pode falhar)"></l-row>
+<l-row k="map (fmap)" v="pluga função de 1-trilho→1-trilho (não falha) no pipeline"></l-row>
+<l-row k="tee" v="pluga função de efeito colateral (log, save) sem quebrar o trilho"></l-row>
+</l-data>
+</li>
+</ul>
+<p>Resultado: um pipeline <code>validate >> canonicalize >> updateDb >> sendEmail</code> onde qualquer passo que falhe curto-circuita o resto, e o tipo de retorno <em>diz</em> que pode falhar. Erro vira valor explícito na assinatura — o oposto da exception invisível (docs 1 e 3).</p>
+</l-sec>
+
+<l-sec n="3" title="O aviso do próprio autor">
+<p>Wlaschin literalmente escreve: <strong>"please don't take it to extremes!"</strong> — não use ROP em todo lugar. O custo é <strong>cerimônia</strong>: <em>toda</em> função no pipeline precisa retornar <code>Result</code>, e você paga <code>bind</code>/<code>map</code> em cada junção. Ele também nota, com honestidade teórica, que "one bind does not a monad make" — ROP é a versão pragmática, não a teoria monádica completa (essa é o doc 5, Wadler).</p>
+</l-sec>
+
+<l-apply title="Aplicar no bearboo — por que a ADR-0017 rejeitou isso (e estava certa)">
+<p>O argumento da rejeição, agora que você viu ROP funcionando, fica cristalino. <strong>ROP paga por si quando o pipeline é PROFUNDO</strong> — muitas funções encadeadas, onde propagar erro manualmente por cada camada seria doloroso e o <code>bind</code> automático economiza. É o "Railway Oriented Programming (evitar poluir camadas intermediárias)" que a própria ADR cita.</p>
+<p><strong>No bearboo o call depth é raso: domain → 1 procedure.</strong> Não há pipeline de 6 estágios pra encadear — há uma função de domínio que lança e uma procedure que pega. Nesse formato, o <code>bind</code> não economiza nada (não há intermediários pra poluir), e você pagaria a cerimônia (todo domain retornando <code>Result</code>, toda procedure fazendo pattern-match) <em>sem</em> o benefício. <code>throw DomainError</code> + <code>catch</code> no boundary é menos código pro mesmo efeito. A decisão foi <strong>"o argumento do ROP não se aplica com força aqui"</strong> — e é literalmente isso.</p>
+<p><strong>Mas — atenção pro seu pilar 5-a:</strong> tem uma coisa que o ROP te daria de graça e que o throw <em>não</em> dá. No trilho de falha, o erro é um <em>valor que você constrói e pode enriquecer a cada bind</em> — acumular contexto ("falhou em updateDb, durante canonicalize, no request X") é natural, porque o erro passa de mão em mão explicitamente. Com <code>throw</code>, você ganha o stack trace de graça mas perde esse enriquecimento estruturado — o erro sobe opaco até o <code>catch</code>. <strong>É por isso que o seu error tracer (5-a) precisa reintroduzir manualmente, via <code>cause</code>, o que o Result daria automático.</strong> Você não escolheu ROP, então a acumulação de contexto causal vira trabalho explícito seu — que é exatamente o projeto do tracer.</p>
+</l-apply>
+
+<l-note kind="warn" title="Cuidado ao reavaliar">Não conclua "então eu deveria ter usado Result". A ADR pesou certo pro <em>call depth atual</em>. O gatilho pra reconsiderar seria: se surgir um fluxo de domínio genuinamente profundo (ex. uma saga de publicação com 5+ passos que podem falhar e precisam de rollback/contexto acumulado), aí o ROP <em>localizado nesse fluxo</em> passaria a compensar. É decisão por-fluxo, não global.</l-note>
+
+<l-sec n="Recall" title="Recall">
+<l-card q="O que é um 'switch' na metáfora do trilho?" src="Wlaschin §metaphor" href="https://fsharpforfunandprofit.com/rop/">Uma função que entra no trilho de sucesso e pode sair no de falha.</l-card>
+<l-card q="O que 'bind' faz?" src="Wlaschin §adapters">Pluga função que-pode-falhar (1→2 trilhos) no pipeline.</l-card>
+<l-card q="Diferença bind vs map?" src="Wlaschin §adapters">map é pra função que NÃO falha (1→1 trilho).</l-card>
+<l-card q="Quando ROP compensa?" src="Wlaschin §warning + Aplicar">Pipeline profundo; NÃO quando o call depth é raso.</l-card>
+<l-card q="Por que a ADR-0017 rejeitou Result no bearboo?" src="Aplicar no contexto">Call depth raso (domain→1 procedure) — bind não economiza nada.</l-card>
+<l-card q="O que o throw te faz perder vs. Result, e que o 5-a reintroduz?" src="Aplicar no contexto">Acumulação estruturada de contexto causal (vira o cause manual).</l-card>
+</l-sec>
+
+<l-tldr>
+<li><strong>Result/Either = erro como valor num pipeline de dois trilhos</strong>; <code>bind</code>/<code>map</code>/<code>tee</code> compõem, e a falha curto-circuita o resto.</li>
+<li>O ganho é <strong>composição em pipelines profundos</strong>. O custo é cerimônia (tudo retorna Result). O próprio autor avisa: não exagere.</li>
+<li>ADR-0017 rejeitou por <strong>call depth raso</strong> no bearboo — o benefício do bind não materializa, só o custo. Decisão correta pro formato atual.</li>
+<li>Nuance pro 5-a: Result acumularia contexto causal de graça; com <code>throw</code> você ganha stack trace mas precisa reintroduzir a cadeia via <code>cause</code> — <strong>que é o seu projeto de tracer</strong>.</li>
+</l-tldr>
+</l-doc>
+</body>
+</html>

@@ -5,11 +5,11 @@ import { archivePostOutputSchema, archivePostSchema } from "../schema";
 const procedure_archivePost = verifiedProcedure
 	.input(archivePostSchema)
 	.output(archivePostOutputSchema)
-	.mutation(async ({ input, ctx }) =>
-		domain_archivePost({
+	.mutation(async ({ input, ctx }) => {
+		return domain_archivePost({
 			ctx,
 			input: { ...input, role: ctx.user.role },
-		}),
-	);
+		});
+	});
 
 export { procedure_archivePost };

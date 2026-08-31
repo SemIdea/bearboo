@@ -1,7 +1,4 @@
-import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, test } from "vitest";
-import { SessionErrorCode } from "@/shared/error/session";
-import { UserErrorCode } from "@/shared/error/user";
 import {
 	createAuthenticatedContext,
 	IControllerContextDTO,
@@ -44,12 +41,10 @@ describe("Logout Session Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).session.logout(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: UserErrorCode.USER_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "User not found. Please check the email.",
+		});
 	});
 
 	test("Should throw an error if session is not found", async () => {
@@ -57,11 +52,9 @@ describe("Logout Session Controller Unitary Testing", () => {
 
 		await expect(
 			AuthRouter.createCaller(ctx).session.logout(),
-		).rejects.toThrowError(
-			new TRPCError({
-				code: "NOT_FOUND",
-				message: SessionErrorCode.SESSION_NOT_FOUND,
-			}),
-		);
+		).rejects.toMatchObject({
+			code: "NOT_FOUND",
+			message: "Session not found.",
+		});
 	});
 });

@@ -1,20 +1,12 @@
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { MyPostsPanel } from "./page.client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MyPostsDescription, MyPostsPanel } from "./page.client";
 
 const Page = () => {
 	return (
 		<Card className="border-0 shadow-none">
 			<CardHeader>
 				<CardTitle>My Posts</CardTitle>
-				<CardDescription>
-					All your posts, including drafts and archived ones
-				</CardDescription>
+				<MyPostsDescription />
 			</CardHeader>
 			<CardContent>
 				<MyPostsPanel />

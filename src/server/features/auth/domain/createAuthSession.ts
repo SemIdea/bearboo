@@ -1,7 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { DomainInput } from "@/server/createDomain";
 import { domain_getUserOrThrow } from "@/server/features/user/domain/getUserOrThrow";
-import { SessionErrorCode } from "@/shared/error/session";
+import { AppError } from "@/shared/error/appError";
 
 const domain_createAuthSession = async ({
 	ctx,
@@ -23,10 +22,7 @@ const domain_createAuthSession = async ({
 	});
 
 	if (!session) {
-		throw new TRPCError({
-			code: "INTERNAL_SERVER_ERROR",
-			message: SessionErrorCode.SESSION_CREATE_ERROR,
-		});
+		throw new AppError("session.session_create_error");
 	}
 
 	return session;

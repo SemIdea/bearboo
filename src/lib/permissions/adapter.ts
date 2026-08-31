@@ -5,7 +5,8 @@ type IPermissionAction =
 	| "post:deleteAny"
 	| "post:publish"
 	| "category:manage"
-	| "user:manageRoles";
+	| "user:manageRoles"
+	| "media:deleteAny";
 
 type IPermissionHelperAdapter = {
 	can: (role: IRole, action: IPermissionAction) => boolean;
