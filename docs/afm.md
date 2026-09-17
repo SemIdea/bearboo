@@ -137,6 +137,8 @@ The § 2 loop covers a small change. For a feature that hits **any** of the crit
 
 On-demand helpers: `/afm:clarify`, `/afm:analyze`, `/afm:research`. Otherwise (small change): straight to § 2.
 
+**A load-bearing open decision carries `[NEEDS CLARIFICATION:]`** — including a bucket-(b) residue the delivery flow leaves for the gate. The `tasks` op refuses to run on it, and the `deliver` resumability detector greps for it; a decision written only in prose is invisible to both, and a resumed delivery can execute it unconfirmed.
+
 ---
 
 ## 3. Hard rules
