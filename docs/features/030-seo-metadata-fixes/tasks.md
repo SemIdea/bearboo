@@ -14,11 +14,11 @@
 - [X] **T003** GREEN: `src/lib/seo/metadata.ts` + wire `src/app/layout.tsx` and `src/app/page.tsx`; add `googleSiteVerification` to `src/lib/env/index.ts` (US-021)
 - [X] **T004** RED: extend `src/server/http/__test__/buildArticleJsonLd.ts` — `publisher.name`, `inLanguage: "en-US"`, image fallback to the OG route when there is no cover (US-021)
 - [X] **T005** GREEN: implement the new `buildArticleJsonLd` fields and pass the site values from the post page (US-021)
-- [ ] **T006** [P] `<h1>` on the home (`src/app/page.tsx`, "Latest posts") and on the post title (`page.tsx`, `h2` → `h1`) (US-021)
+- [X] **T006** [P] `<h1>` on the home (`src/app/page.tsx`, "Latest posts") and on the post title (`page.tsx`, `h2` → `h1`) (US-021)
 
 ## Phase 3 — Boundary
 
-- [ ] **T007** [P] `src/app/opengraph-image.tsx` — generated `og:image` (1200×630, `next/og`, default font, alt text) (US-021)
+- [X] **T007** [P] `src/app/opengraph-image.tsx` — generated `og:image` (1200×630, `next/og`, default font, alt text) (US-021)
 
 ## Phase 4 — Verification + Reconciliation (8.5)
 

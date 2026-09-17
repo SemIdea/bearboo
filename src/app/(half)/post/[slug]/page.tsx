@@ -209,7 +209,7 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 							className="max-h-96 w-full rounded object-cover"
 						/>
 					)}
-					<h2 className="text-4xl font-bold">{post.title}</h2>
+					<h1 className="text-4xl font-bold">{post.title}</h1>
 					<MdView source={post.content} />
 					<ViewTracker postId={post.id} />
 					<CommentArea postId={post.id} />

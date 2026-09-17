@@ -6,7 +6,8 @@ export const metadata = buildHomeMetadata();
 
 const Home = async () => {
 	return (
-		<div className="w-[55%]">
+		<div className="flex w-[55%] flex-col gap-4">
+			<h1 className="text-2xl font-bold">Latest posts</h1>
 			<Suspense fallback={<p>Loading posts...</p>}>
 				<PostFeed />
 			</Suspense>

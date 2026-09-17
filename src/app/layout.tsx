@@ -3,7 +3,6 @@ import clsx from "clsx";
 import { Metadata, Viewport } from "next";
 import { Header } from "@/components/header";
 import { fontSans } from "@/config/fonts";
-import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
 import { buildRootMetadata } from "@/lib/seo/metadata";
 import { Providers } from "./providers";
