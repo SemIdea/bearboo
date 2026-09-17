@@ -11,3 +11,4 @@
 * [tRPC — a bare `t.procedure` skips the error-translation middleware](009-trpc-a-bare-t-procedure-skips.md) - tRPC — a bare `t.procedure` skips the error-translation middleware
 * [Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column](010-prisma-never-db-push-migrate-dev.md) - Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column
 * [Dependabot — alerts are evaluated against the default branch, not the branch you are on](011-dependabot-alerts-track-the-default-branch.md) - Dependabot — alerts are evaluated against the default branch, not the branch you are on
+* [A missing `/post/<slug>` answers HTTP 200 with `noindex` — streamed 404 behavior (accepted 2026-09-16)](012-a-missing-post-slug-answers.md) - A missing `/post/<slug>` answers HTTP 200 with `noindex` — streamed 404 behavior, accepted on 2026-09-16

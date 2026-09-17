@@ -23,7 +23,7 @@
 ## Phase 4 — Verification + Reconciliation (8.5)
 
 - [ ] **T008** Verify — `npx biome check .`, `npx tsc --noEmit`, `npm test`, `npx next build` (US-021)
-- [ ] **T009** `docs/gotchas/012-*` — register the streamed-404 behavior (`200` + `noindex`) and the accepted decision; append the 2026-09-16 note to the `docs/ust.md` soft-404 entry (US-021)
+- [X] **T009** `docs/gotchas/012-*` — register the streamed-404 behavior (`200` + `noindex`) and the accepted decision; append the 2026-09-16 note to the `docs/ust.md` soft-404 entry (US-021)
 - [ ] **T010** Close the loop — US-021 → `done`, spec/plan headers → `done`; § 6.1 ritual, push, PR, then verify the Vercel preview tags live (US-021)
 
 ---
