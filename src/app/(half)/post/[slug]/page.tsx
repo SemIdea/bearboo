@@ -9,6 +9,7 @@ import { MdView } from "@/components/ui/mdView";
 import { ViewTracker } from "@/components/viewTracker";
 import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
+import { buildArticleOpenGraph } from "@/lib/seo/metadata";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
 import { AppError } from "@/shared/error/appError";
@@ -58,13 +59,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			alternates: {
 				canonical,
 			},
-			openGraph: {
+			openGraph: buildArticleOpenGraph({
 				title,
 				description,
-				type: "article",
 				url: canonical,
-				images,
-			},
+				images: images,
+			}),
 			twitter: {
 				card: images ? "summary_large_image" : "summary",
 				title,

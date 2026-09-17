@@ -26,6 +26,8 @@
 - [X] **T009** `docs/gotchas/012-*` — register the streamed-404 behavior (`200` + `noindex`) and the accepted decision; append the 2026-09-16 note to the `docs/ust.md` soft-404 entry (US-021)
 - [X] **T010** Close the loop — US-021 → `done`, spec/plan headers → `done`; § 6.1 ritual, push, PR, then verify the Vercel preview tags live (US-021)
 
+- [X] **T011** [P] Post Open Graph completeness — `og:locale`/`og:site_name`/`og:image` are explicit in the post's `generateMetadata` (the page-level `openGraph` does not inherit the layout's; found on the local end-to-end run) (US-021)
+
 ---
 
 *Every task references US-021 or RF-10 in the commit (rule in `core/afm.md` § 2, step 7 COMMIT).*
