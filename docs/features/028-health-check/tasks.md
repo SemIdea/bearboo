@@ -7,7 +7,7 @@
 ## Phase 1 — Setup
 
 - [X] **T001** [P] `docs/ust.md` + `docs/prd.md` — register US-019 (an operator checks liveness) and RF-15 (Observability); mark the accepted option in `plan.md` § 6 and commit the feature docs (`spec.md`, `plan.md`, `tasks.md`) (US-019, RF-15)
-- [ ] **T002** [P] `src/server/infra/health/checkHealth.ts` — create the module with the exported `HealthProbeResult` type and the `checkHealth` signature (stub; no probe logic yet) (US-019)
+- [X] **T002** [P] `src/server/infra/health/checkHealth.ts` — create the module with the exported `HealthProbeResult` type and the `checkHealth` signature (stub; no probe logic yet) (US-019)
 - [ ] **T003** [P] `src/lib/env/index.ts` — add `version` (from `package.json`, `APP_VERSION` override) (RF-15)
 
 ## Phase 2 — Foundation (failing tests first)
