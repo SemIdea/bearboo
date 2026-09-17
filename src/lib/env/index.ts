@@ -1,4 +1,5 @@
 import path from "node:path";
+import packageJson from "../../../package.json";
 import { config } from "dotenv";
 import { getBoolEnv } from "./getBoolEnv";
 import { getIntEnv } from "./getIntEnv";
@@ -11,6 +12,7 @@ config({
 
 const env = {
 	nodeEnv: getStrEnv("NODE_ENV", "development"),
+	version: getStrEnv("APP_VERSION", packageJson.version),
 	databaseUrl: getStrEnv(
 		"DATABASE_URL",
 		"postgresql://postgres:postgres@localhost:5432/postgres?schema=public",
