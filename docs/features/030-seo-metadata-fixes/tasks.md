@@ -10,8 +10,8 @@
 
 ## Phase 2 — Foundation (failing tests first)
 
-- [ ] **T002** RED: `src/lib/seo/__test__/metadata.ts` — root metadata carries the complete OG set (`type`/`locale`/`siteName`/`url`/`title`/`description`), `verification.google` only when a code is given, home canonical `/` (US-021)
-- [ ] **T003** GREEN: `src/lib/seo/metadata.ts` + wire `src/app/layout.tsx` and `src/app/page.tsx`; add `googleSiteVerification` to `src/lib/env/index.ts` (US-021)
+- [X] **T002** RED: `src/lib/seo/__test__/metadata.ts` — root metadata carries the complete OG set (`type`/`locale`/`siteName`/`url`/`title`/`description`), `verification.google` only when a code is given, home canonical `/` (US-021)
+- [X] **T003** GREEN: `src/lib/seo/metadata.ts` + wire `src/app/layout.tsx` and `src/app/page.tsx`; add `googleSiteVerification` to `src/lib/env/index.ts` (US-021)
 - [ ] **T004** RED: extend `src/server/http/__test__/buildArticleJsonLd.ts` — `publisher.name`, `inLanguage: "en-US"`, image fallback to the OG route when there is no cover (US-021)
 - [ ] **T005** GREEN: implement the new `buildArticleJsonLd` fields and pass the site values from the post page (US-021)
 - [ ] **T006** [P] `<h1>` on the home (`src/app/page.tsx`, "Latest posts") and on the post title (`page.tsx`, `h2` → `h1`) (US-021)

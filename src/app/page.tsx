@@ -1,5 +1,8 @@
 import { Suspense } from "react";
 import { PostFeed } from "@/components/postFeed";
+import { buildHomeMetadata } from "@/lib/seo/metadata";
+
+export const metadata = buildHomeMetadata();
 
 const Home = async () => {
 	return (

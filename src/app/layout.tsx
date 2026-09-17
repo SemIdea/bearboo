@@ -5,19 +5,13 @@ import { Header } from "@/components/header";
 import { fontSans } from "@/config/fonts";
 import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
+import { buildRootMetadata } from "@/lib/seo/metadata";
 import { Providers } from "./providers";
 
-export const metadata: Metadata = {
-	metadataBase: new URL(env.siteUrl),
-	title: {
-		default: siteConfig.name,
-		template: `%s - ${siteConfig.name}`,
-	},
-	description: siteConfig.description,
-	icons: {
-		icon: "/favicon.ico",
-	},
-};
+export const metadata: Metadata = buildRootMetadata({
+	siteUrl: env.siteUrl,
+	googleVerification: env.googleSiteVerification,
+});
 
 export const viewport: Viewport = {
 	themeColor: [
