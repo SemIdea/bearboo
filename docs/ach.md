@@ -234,6 +234,11 @@ integrations/**/implementations/* → implements the port; may receive config/en
 - **New permission action:** `media:deleteAny` (`src/lib/permissions/adapter.ts` + `implementations/matrix.ts`) → `["ADMIN", "EDITOR"]`, the same pattern as `post:deleteAny`. `domain_readOwnMedia` reuses this same action (not a separate `media:readAny`) to decide whether the read is scoped to the user or site-wide — the same trick as `domain_readOwnPosts` with `post:editAny`.
 - **Generic `AppError` — the first use of the forward-only rule 15:** `src/shared/error/appError.ts` (`class AppError<C extends string>`), a design already prescribed in `docs/rubrics/error-classification.md` (Option B) but not used until here — at that point every existing domain threw `TRPCError` directly; the debt was closed in `022-error-registry` (2026-07-27), and hard rule 15 left the `afm.md § 3.1` forward-only table. `media/domain/{upload,readOwn,delete}.ts` do not import `TRPCError`; the delete procedure (`media/procedures/delete.ts`) maps `AppError` → `TRPCError` at the boundary (`NOT_FOUND`/`FORBIDDEN`), the only point that knows transport.
 
+#### Health probe and the second route kind — a new piece from `028-health-check` (2026-09-16, `ADR-0028`)
+
+- **Probe (infra):** `src/server/infra/health/checkHealth.ts` (`checkHealth()`) — a cheap `SELECT 1` through the Prisma driver, the infra exception of rule 30, with any driver error caught as `{ database: "disconnected" }`. Unit-tested at the prisma-mock seam; the mock ships no SQL engine (ADR-0026), so `$queryRaw` is stubbed in the unit test and the real query belongs to the integration suite.
+- **Route (boundary):** `src/app/api/health/route.ts` (`GET`) — the second route kind, after `src/app/api/trpc/[trpc]/route.ts`: thin, non-tRPC, public, `Cache-Control: no-store`, mapping `connected`/`disconnected` to `200`/`503` and adding `env.version` (single source: `package.json`, `APP_VERSION` override). Unlike the App Router special files above, it does not call `createCaller()` — it delegates to the infra probe. Rule 31's prose widened forward-only to cover this second kind (`ADR-0028`); the mechanical trigger (every route handler under 80 lines) is unchanged.
+
 ### 3.2 Support components (second-class)
 
 #### Schema — validation at the boundary

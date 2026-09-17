@@ -6,7 +6,7 @@ gotcha	003-native-node-esm-prisma-ts-via	warm	event				gotchas/003-native-node-e
 gotcha	004-next-js-cache-components-cachecomponents-true	warm	event				gotchas/004-next-js-cache-components-cachecomponents-true.md	Next.js — Cache Components (`cacheComponents: true`) forbids a route without `<Suspense>`, even if you do not want PPR
 gotcha	005-next-js-a-use-cache-page	warm	event				gotchas/005-next-js-a-use-cache-page.md	Next.js — a `"use cache"` page never knows who is asking (no cookies)
 gotcha	006-next-js-a-root-layout-under	warm	event				gotchas/006-next-js-a-root-layout-under.md	Next.js — a root layout under a dynamic segment leaves `_not-found` orphaned
-gotcha	007-pre-push-hook-runs-scoped-tests	warm	event				gotchas/007-pre-push-hook-runs-scoped-tests.md	Pre-push hook — runs scoped tests, not the full suite
+gotcha	007-pre-push-hook-runs-scoped-tests	warm	event				gotchas/007-pre-push-hook-runs-scoped-tests.md	Hooks (pre-commit/pre-push) — run scoped tests, not the full suite
 gotcha	008-zod-v3-v4-string-format-validators	warm	event				gotchas/008-zod-v3-v4-string-format-validators.md	Zod v3 → v4 — string-format validators became top-level functions (deprecated, not an error)
 gotcha	009-trpc-a-bare-t-procedure-skips	warm	event				gotchas/009-trpc-a-bare-t-procedure-skips.md	tRPC — a bare `t.procedure` skips the error-translation middleware
 gotcha	010-prisma-never-db-push-migrate-dev	warm	event				gotchas/010-prisma-never-db-push-migrate-dev.md	Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column

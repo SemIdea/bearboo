@@ -6,7 +6,7 @@
 * [Next.js — Cache Components (`cacheComponents: true`) forbids a route without `<Suspense>`, even if you do not want PPR](004-next-js-cache-components-cachecomponents-true.md) - Next.js — Cache Components (`cacheComponents: true`) forbids a route without `<Suspense>`, even if you do not want PPR
 * [Next.js — a `"use cache"` page never knows who is asking (no cookies)](005-next-js-a-use-cache-page.md) - Next.js — a `"use cache"` page never knows who is asking (no cookies)
 * [Next.js — a root layout under a dynamic segment leaves `_not-found` orphaned](006-next-js-a-root-layout-under.md) - Next.js — a root layout under a dynamic segment leaves `_not-found` orphaned
-* [Pre-push hook — runs scoped tests, not the full suite](007-pre-push-hook-runs-scoped-tests.md) - Pre-push hook — runs scoped tests, not the full suite
+* [Hooks (pre-commit/pre-push) — run scoped tests, not the full suite](007-pre-push-hook-runs-scoped-tests.md) - Hooks (pre-commit/pre-push) — run scoped tests, not the full suite
 * [Zod v3 → v4 — string-format validators became top-level functions (deprecated, not an error)](008-zod-v3-v4-string-format-validators.md) - Zod v3 → v4 — string-format validators became top-level functions (deprecated, not an error)
 * [tRPC — a bare `t.procedure` skips the error-translation middleware](009-trpc-a-bare-t-procedure-skips.md) - tRPC — a bare `t.procedure` skips the error-translation middleware
 * [Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column](010-prisma-never-db-push-migrate-dev.md) - Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column
