@@ -3,6 +3,8 @@ import { buildArticleJsonLd } from "../buildArticleJsonLd";
 
 const baseInput = {
 	siteUrl: "https://bearboo.dev",
+	siteName: "Bearboo",
+	inLanguage: "en-US",
 	slug: "my-post",
 	title: "My Post",
 	description: "A short description",
@@ -26,10 +28,21 @@ describe("buildArticleJsonLd Unitary Testing", () => {
 		expect(parsed.mainEntityOfPage).toBe("https://bearboo.dev/post/my-post");
 	});
 
-	test("Should omit image when there is no cover image", () => {
+	test("Should fall back to the generated OG image when there is no cover image", () => {
 		const parsed = JSON.parse(buildArticleJsonLd(baseInput));
 
-		expect(parsed.image).toBeUndefined();
+		expect(parsed.image).toEqual(["https://bearboo.dev/opengraph-image"]);
+	});
+
+	test("Should include the publisher Organization and the language", () => {
+		const parsed = JSON.parse(buildArticleJsonLd(baseInput));
+
+		expect(parsed.publisher).toEqual({
+			"@type": "Organization",
+			name: "Bearboo",
+			url: "https://bearboo.dev",
+		});
+		expect(parsed.inLanguage).toBe("en-US");
 	});
 
 	test("Should include image when a cover image is present", () => {

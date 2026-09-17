@@ -7,7 +7,9 @@ import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
 import { ViewTracker } from "@/components/viewTracker";
+import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
+import { buildArticleOpenGraph } from "@/lib/seo/metadata";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
 import { AppError } from "@/shared/error/appError";
@@ -57,13 +59,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			alternates: {
 				canonical,
 			},
-			openGraph: {
+			openGraph: buildArticleOpenGraph({
 				title,
 				description,
-				type: "article",
 				url: canonical,
-				images,
-			},
+				images: images,
+			}),
 			twitter: {
 				card: images ? "summary_large_image" : "summary",
 				title,
@@ -167,6 +168,8 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 
 	const articleJsonLd = buildArticleJsonLd({
 		siteUrl: env.siteUrl,
+		siteName: siteConfig.name,
+		inLanguage: "en-US",
 		slug: post.slug,
 		title: post.title,
 		description: post.content.substring(0, 160),
@@ -206,7 +209,7 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 							className="max-h-96 w-full rounded object-cover"
 						/>
 					)}
-					<h2 className="text-4xl font-bold">{post.title}</h2>
+					<h1 className="text-4xl font-bold">{post.title}</h1>
 					<MdView source={post.content} />
 					<ViewTracker postId={post.id} />
 					<CommentArea postId={post.id} />

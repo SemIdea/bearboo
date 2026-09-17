@@ -269,6 +269,12 @@ class PostModelClass extends BaseModel<IPostEntity> {
 		}));
 	}
 
+	async existsBySlug(slug: string): Promise<boolean> {
+		const count = await prisma.post.count({ where: { slug } });
+
+		return count > 0;
+	}
+
 	async readBySlug(slug: string): Promise<IPostEntityWithTaxonomy | null> {
 		const post = await prisma.post.findUnique({
 			where: {
@@ -419,6 +425,7 @@ type IPostModel = BaseModel<IPostEntity> & {
 		tagId?: string,
 	) => Promise<IPostEntityWithRelations[]>;
 	readBySlug: (slug: string) => Promise<IPostEntityWithTaxonomy | null>;
+	existsBySlug: (slug: string) => Promise<boolean>;
 	readByPreviousSlug: (slug: string) => Promise<{ slug: string } | null>;
 	readAllPublicSlugs: () => Promise<IPostSitemapEntry[]>;
 	readRelated: (
