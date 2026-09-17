@@ -1,10 +1,17 @@
+import { prisma } from "@/server/infra/drivers/prisma";
+
 type HealthProbeResult = {
 	database: "connected" | "disconnected";
 };
 
-const checkHealth = (): Promise<HealthProbeResult> => {
-	throw new Error("checkHealth is not implemented yet");
+const checkHealth = async (): Promise<HealthProbeResult> => {
+	try {
+		await prisma.$queryRaw`SELECT 1`;
+		return { database: "connected" };
+	} catch {
+		return { database: "disconnected" };
+	}
 };
 
-export { checkHealth };
 export type { HealthProbeResult };
+export { checkHealth };

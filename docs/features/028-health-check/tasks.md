@@ -12,8 +12,8 @@
 
 ## Phase 2 — Foundation (failing tests first)
 
-- [ ] **T004** RED: `src/server/infra/health/__test__/checkHealth.ts` — probe resolves → `{ database: "connected" }`; probe rejects → `{ database: "disconnected" }`, stubbing `$queryRaw` at the prisma-mock seam (spec § 3, criterion 4) (US-019)
-- [ ] **T005** GREEN: minimal `checkHealth()` — `SELECT 1` via `prisma.$queryRaw`, any driver error caught as `"disconnected"`, that passes T004 (US-019)
+- [X] **T004** RED: `src/server/infra/health/__test__/checkHealth.ts` — probe resolves → `{ database: "connected" }`; probe rejects → `{ database: "disconnected" }`, stubbing `$queryRaw` at the prisma-mock seam (spec § 3, criterion 4) (US-019)
+- [X] **T005** GREEN: minimal `checkHealth()` — `SELECT 1` via `prisma.$queryRaw`, any driver error caught as `"disconnected"`, that passes T004 (US-019)
 
 ## Phase 3 — Boundary
 
