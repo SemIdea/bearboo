@@ -7,6 +7,7 @@ import { CardBase } from "@/components/cardBase";
 import { By } from "@/components/ui/by";
 import { MdView } from "@/components/ui/mdView";
 import { ViewTracker } from "@/components/viewTracker";
+import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env";
 import { createCaller, createOptionalDynamicCaller } from "@/server/caller";
 import { buildArticleJsonLd } from "@/server/http/buildArticleJsonLd";
@@ -167,6 +168,8 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 
 	const articleJsonLd = buildArticleJsonLd({
 		siteUrl: env.siteUrl,
+		siteName: siteConfig.name,
+		inLanguage: "en-US",
 		slug: post.slug,
 		title: post.title,
 		description: post.content.substring(0, 160),
