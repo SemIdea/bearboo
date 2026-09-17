@@ -17,8 +17,8 @@
 
 ## Phase 3 — Boundary
 
-- [ ] **T006** RED: `src/app/api/health/__test__/route.ts` — `GET` returns `200` `{ status: "ok", database: "connected", version: <pkg> }` with `Cache-Control: no-store`; a probe throw returns `503` `{ status: "degraded", database: "disconnected" }` with no stack or secret in the body (spec § 3, criteria 1-2) (US-019)
-- [ ] **T007** GREEN: thin `src/app/api/health/route.ts` — `GET` delegates to `checkHealth()`, adds `env.version` and the status mapping; no tRPC envelope (rule 31 spirit, `plan.md` § 3) (US-019)
+- [X] **T006** RED: `src/app/api/health/__test__/route.ts` — `GET` returns `200` `{ status: "ok", database: "connected", version: <pkg> }` with `Cache-Control: no-store`; a probe throw returns `503` `{ status: "degraded", database: "disconnected" }` with no stack or secret in the body (spec § 3, criteria 1-2) (US-019)
+- [X] **T007** GREEN: thin `src/app/api/health/route.ts` — `GET` delegates to `checkHealth()`, adds `env.version` and the status mapping; no tRPC envelope (rule 31 spirit, `plan.md` § 3) (US-019)
 - [ ] **T008** [P] `plan.md` § 4 — record that rule 16 has no call here: the route takes no input (GET, no params/body), so there is no boundary schema to validate (RF-15)
 
 ## Phase 4 — Reconciliation (8.5)
