@@ -35,6 +35,6 @@ The live site carries an incomplete crawl surface: the home has no `rel=canonica
 
 ## 4. Notes
 
-- The soft-404 (`/post/<missing>` → HTTP 200) is Next's documented streamed-response behavior; Next emits `noindex` there, so the page is excluded from the index. Accepted on 2026-09-16; the Proxy path (Node runtime, `matcher /post/:slug`) stays a documented follow-up.
+- The soft-404 (`/post/<missing>` → HTTP 200) is Next's documented streamed-response behavior. **Correction (2026-09-16, end-to-end run): this route carries NO `noindex`** — verified in production and locally on 16.3.5; the earlier `noindex` observation belonged to `/api/health`, a real 404. The page therefore has no explicit robots directive: a soft-404 with not-found content. Accepted on 2026-09-16; the Proxy path (Node runtime, `matcher /post/:slug`) stays the documented follow-up — and this corrected evidence is the reason it may be reopened.
 - Locale stays `en-US`; the PT content mismatch is known and recorded — the locale lint keeps flagging it until one side moves.
 - References: the research dossiers live in PR #238; the scorecard and gotchas in PR #239.
