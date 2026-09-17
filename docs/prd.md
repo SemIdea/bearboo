@@ -7,14 +7,14 @@
 
 Bearboo is a personal technical blog built for performance, code organization, and modern full-stack practices. It is a study repository and a practical architecture demo (DDD-lite, typed end-to-end layers) — not a product with an external user base today.
 
-One-line value proposition: *"[A DEFINIR — validate with the product owner]"*
+One-line value proposition: *"[TBD — validate with the product owner]"*
 
 *(Source: the first paragraphs of `README.md`.)*
 
 ## 2. Problem & Opportunity
 
 - **Observed pain:** it does not solve a third party's pain — it is the owner's study and technical-portfolio vehicle (practice full-stack architecture, end-to-end type safety, modern practices in real production).
-- **Why now:** [A DEFINIR].
+- **Why now:** [TBD].
 - **Size of the gain:** a practical, verifiable architecture demo (DDD-lite, tRPC, testable layers) for anyone who assesses the owner's work.
 
 ## 3. Target user & Jobs-to-be-done
@@ -22,7 +22,7 @@ One-line value proposition: *"[A DEFINIR — validate with the product owner]"*
 **Primary persona:** a pair — (a) the dev himself (Bruno), who writes technical posts and evolves the architecture to practice; (b) recruiters/portfolio readers, who assess the published code and product.
 
 **Typical companies:**
-- [A DEFINIR — personal project, does not apply today].
+- [TBD — personal project, does not apply today].
 
 **Jobs-to-be-done:**
 - When Bruno wants to practice a new technique/architecture, I want a real project to apply it, to consolidate learning and keep a verifiable portfolio.
@@ -53,17 +53,17 @@ One-line value proposition: *"[A DEFINIR — validate with the product owner]"*
 
 *(RFs inferred from `git log` — `feat:` commits for register/login/session, token verification, password reset, post/comment CRUD, and profile editing. See the full history via `git log --oneline --grep=feat`.)*
 
-**Discrepancy note:** `README.md` mentions "semantic post search using similarity vectors" among current features, but no implementation (embeddings/pgvector/similarity) was found in the code (`grep -rniE "embedding|vector|similarity|pgvector"` returns empty) — treat it as a roadmap item (`README.md` § Futuro), not an implemented RF. [A DEFINIR — confirm the real status with the product owner.]
+**Discrepancy note:** `README.md` mentions "semantic post search using similarity vectors" among current features, but no implementation (embeddings/pgvector/similarity) was found in the code (`grep -rniE "embedding|vector|similarity|pgvector"` returns empty) — treat it as a roadmap item (`README.md` § Futuro), not an implemented RF. [TBD — confirm the real status with the product owner.]
 
 ## 5. Non-Functional Requirements (RNF)
 
 | ID | Type | Criterion |
 | --- | --- | --- |
-| RNF-01 | Availability | [A DEFINIR] |
-| RNF-02 | Latency | [A DEFINIR] |
+| RNF-01 | Availability | [TBD] |
+| RNF-02 | Latency | [TBD] |
 | RNF-03 | Security | Hashed passwords (bcrypt), session/verification/reset tokens with expiry and single use (`used: Boolean`) |
 
-*[A DEFINIR — numeric thresholds.]*
+*[TBD — numeric thresholds.]*
 
 ## 6. Stage Goals
 
@@ -79,9 +79,9 @@ One-line value proposition: *"[A DEFINIR — validate with the product owner]"*
 
 **Discrepancy note vs. the roadmap:** the roadmap Phase 0 "suggested stack" lists Auth.js/Better Auth, Playwright, and GitHub Actions. Playwright/GitHub Actions were not adopted (tests are `vitest`, no CI — `.github/workflows/` absent, see `ach.md`). **Auth.js/Better Auth was an explicit decision not to adopt — see ADR-0005:** the custom auth (an opaque session in `Session`, Postgres as source of truth) is kept, with incremental hardening instead of a library swap.
 
-**Acceptance criterion:** [A DEFINIR].
+**Acceptance criterion:** [TBD].
 
-**Success metric:** [A DEFINIR].
+**Success metric:** [TBD].
 
 ### 6.2 GTM — roadmap Phases 2-5
 
@@ -91,15 +91,15 @@ Admin/CMS (Phase 2), authentication with Admin/Editor/Author roles (Phase 3), ed
 
 Search (6), internal analytics (7), media upload (8), production quality/tests (9), CI/CD and deploy (10), observability (11).
 
-## 7. Metrics & North Stars [A DEFINIR]
+## 7. Metrics & North Stars [TBD]
 
-[A DEFINIR.]
+[TBD.]
 
-## 8. Risks & Mitigations [A DEFINIR]
+## 8. Risks & Mitigations [TBD]
 
 | Risk | Impact | Probability | Mitigation |
 | --- | --- | --- | --- |
-| [A DEFINIR] | | | |
+| [TBD] | | | |
 
 ## 9. Non-scope (v1)
 
@@ -119,8 +119,12 @@ Search (6), internal analytics (7), media upload (8), production quality/tests (
 
 - **User-facing product:** "Bearboo" — use in UI, emails, titles, external copy.
 - **Technical identifiers do NOT change:**
-  - `src/config/site.ts` still has the placeholder `"Next.js + HeroUI"` — [A DEFINIR: update to the real product name].
+  - `src/config/site.ts` still has the placeholder `"Next.js + HeroUI"` — [TBD: update to the real product name].
   - Other technical identifiers (paths, env vars) not inventoried in this retroactive adoption — they grow on demand.
+
+### 11.1 App-facing string language
+
+**The language this product shows its own users:** `en-US` — single locale today, with a future i18n system adding pt-BR (owner decision, 2026-08-29; stated in `afm.md` § 1.3 and the README). The excluded scope for a language migration is therefore empty: UI copy, rendered error messages, and seed data are content in the product locale, and the artifacts outside that scope stay English.
 
 ---
 

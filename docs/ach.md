@@ -232,7 +232,7 @@ integrations/**/implementations/* → implements the port; may receive config/en
 - **`{ url, storageKey }`, not just `url`:** a decision from `ADR-0015` — a future storage (Cloudinary/S3) has a deletion identifier that is not the public URL (`public_id`, not the URL). Storing both now in `Media.storageKey`/`Media.url` avoids a migration just for this when the storage changes.
 - **The upload comes through the same tRPC route, not a new route handler:** `media.upload` uses `.input()` with a Zod schema that accepts `z.instanceof(FormData)` and does `.transform()` to validate/extract `{ file, altText }` — the native content-type handler of `fetchRequestHandler` (tRPC v11) hands the raw `FormData` as raw input when the request is `multipart/form-data`, so the schema **must** accept `FormData`, not an already-destructured object. Client-side, `httpBatchLink` (the project's default link) does **not** support `FormData`/`File` — it serializes every batch op into JSON. `src/context/trpc/client.ts` uses `splitLink` to route only the `isNonJsonSerializable` inputs (checked via `@trpc/client`) to `httpLink` (non-batched, which does a raw `getBody: () => input`); everything else stays on `httpBatchLink`. Found and fixed only after testing against a real dev server — `createCaller` (used in procedure tests) does not pass through the link or the content-type handler, so it does not catch this kind of bug.
 - **New permission action:** `media:deleteAny` (`src/lib/permissions/adapter.ts` + `implementations/matrix.ts`) → `["ADMIN", "EDITOR"]`, the same pattern as `post:deleteAny`. `domain_readOwnMedia` reuses this same action (not a separate `media:readAny`) to decide whether the read is scoped to the user or site-wide — the same trick as `domain_readOwnPosts` with `post:editAny`.
-- **Generic `AppError` — the first use of the forward-only rule 15:** `src/shared/error/appError.ts` (`class AppError<C extends string>`), a design already prescribed in `docs/rubrics/error-classification.md` (Option B) but never used until here — every existing domain throws `TRPCError` directly (debt tracked in `afm.md § 3.1`). `media/domain/{upload,readOwn,delete}.ts` do not import `TRPCError`; the delete procedure (`media/procedures/delete.ts`) maps `AppError` → `TRPCError` at the boundary (`NOT_FOUND`/`FORBIDDEN`), the only point that knows transport.
+- **Generic `AppError` — the first use of the forward-only rule 15:** `src/shared/error/appError.ts` (`class AppError<C extends string>`), a design already prescribed in `docs/rubrics/error-classification.md` (Option B) but not used until here — at that point every existing domain threw `TRPCError` directly; the debt was closed in `022-error-registry` (2026-07-27), and hard rule 15 left the `afm.md § 3.1` forward-only table. `media/domain/{upload,readOwn,delete}.ts` do not import `TRPCError`; the delete procedure (`media/procedures/delete.ts`) maps `AppError` → `TRPCError` at the boundary (`NOT_FOUND`/`FORBIDDEN`), the only point that knows transport.
 
 ### 3.2 Support components (second-class)
 
@@ -273,8 +273,8 @@ integrations/**/implementations/* → implements the port; may receive config/en
 | Level | What it tests | Where it lives | Current state |
 | ----- | ----------- | --------- | ------------- |
 | **Unit/Procedure** | Procedure + Domain + Model via `TestContext` | `src/server/features/**/procedures/*.test.ts` | 23 test files (`vitest`) |
-| **Integration** | [A DEFINIR — not found in the scan] | — | — |
-| **E2E** | [A DEFINIR — not found in the scan] | — | — |
+| **Integration** | [TBD — not found in the scan] | — | — |
+| **E2E** | [TBD — not found in the scan] | — | — |
 
 Current backend coverage ~90% (measured 2026-08-25, v8: `src/server`+`lib`+`shared` ~90.5% lines, `server/features` domain+procedures 98.9%; 85 test files / 411 tests). Whole-repo ~52% is dragged down by the untested frontend (`src/app`/`src/components` ~0%, deferred with the frontend refactor). See `afm.md` § 3.1 forward-only.
 
@@ -296,7 +296,7 @@ Pattern observed in `git log`: several `test:` commits accompany `fix:`/`refacto
 
 ### 4.5 Target coverage per layer
 
-[A DEFINIR — no threshold defined today.]
+[TBD — no threshold defined today.]
 
 ---
 
