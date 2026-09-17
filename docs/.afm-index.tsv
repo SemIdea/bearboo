@@ -11,7 +11,7 @@ gotcha	008-zod-v3-v4-string-format-validators	warm	event				gotchas/008-zod-v3-v
 gotcha	009-trpc-a-bare-t-procedure-skips	warm	event				gotchas/009-trpc-a-bare-t-procedure-skips.md	tRPC — a bare `t.procedure` skips the error-translation middleware
 gotcha	010-prisma-never-db-push-migrate-dev	warm	event				gotchas/010-prisma-never-db-push-migrate-dev.md	Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column
 gotcha	011-dependabot-alerts-track-the-default-branch	warm	event				gotchas/011-dependabot-alerts-track-the-default-branch.md	Dependabot — alerts are evaluated against the default branch, not the branch you are on
-gotcha	012-a-missing-post-slug-answers	warm	event				gotchas/012-a-missing-post-slug-answers.md	A missing `/post/<slug>` answers HTTP 200 with `noindex` — streamed 404 behavior, accepted on 2026-09-16
+gotcha	012-a-missing-post-slug-answers	warm	event				gotchas/012-a-missing-post-slug-answers.md	A missing `/post/<slug>` answered HTTP 200 — fixed with a Proxy existence check on 2026-09-16
 rubric	error-classification	warm	file-shape		*/domain/*	(\b(TRPCError|HttpException|HTTPException|ApiError|ResponseError)\b|throw[[:space:]]+new[[:space:]]+Error\()	rubrics/error-classification.md	Separates a domain error from a procedure error and from an infrastructure error.
 rubric	negative-filters	warm	op-call				rubrics/negative-filters.md	Rejects what must not become a durable doc, because a false constraint is poison.
 rubric	when-to-create-dsl	warm	repo-shape				rubrics/when-to-create-dsl.md	Decides when a DSL is worth suggesting, and when it is premature.

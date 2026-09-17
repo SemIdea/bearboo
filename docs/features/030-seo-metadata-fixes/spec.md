@@ -17,10 +17,11 @@ The live site carries an incomplete crawl surface: the home has no `rel=canonica
 - Post: the title becomes the `<h1>`.
 - `buildArticleJsonLd`: `publisher` (Organization), `inLanguage: "en-US"`, and an `image` fallback to the generated OG route.
 - `src/app/opengraph-image.tsx` (`next/og` ImageResponse, default font) → `og:image` for both pages.
-- A gotcha for the streamed-404 behavior and the accepted decision.
+- The real 404: `src/proxy.ts` (Next 16 Proxy, Node runtime) probes `PostModel.existsBySlug` for `/post/:slug` and rewrites a missing slug to the `/404` route with status `404`; it also carries the `x-url` header behavior migrated from the deleted `src/middleware.tsx`.
+- A gotcha for the streamed-404 behavior and the decision.
 
 **Out:**
-- The Proxy-based real 404 (accepted and deferred, 2026-09-16).
+- Per-post Open Graph cards (the generated route is site-wide).
 - Content-level fixes (title/meta length, word count, passages, question headings) → `/seo-write`.
 - Search Console OAuth/property and the PageSpeed quota (owner/ops).
 - Locale migration to `pt-BR` (owner decision: keep `en-US`).
@@ -31,10 +32,11 @@ The live site carries an incomplete crawl surface: the home has no `rel=canonica
 - Both pages carry the required OG set (`og:type`, `og:locale`, `og:site_name`, `og:url`, `og:title`, `og:description`) and `og:image` resolves to the generated route (`200`, `image/png`).
 - `Article` JSON-LD includes `publisher.name`, `inLanguage: "en-US"` and `image` (cover when present, generated route otherwise).
 - `<meta name="google-site-verification">` renders only when `GOOGLE_SITE_VERIFICATION` is set (no literal in the repo).
+- `/post/<missing>` answers HTTP `404` with the app's not-found UI; real slugs and reserved paths (`/post/create`, `/post/mine`) are untouched.
 - Unit tests cover the metadata builders and the JSON-LD; biome, `tsc`, `npm test` and `next build` are green; the Vercel preview shows the tags live.
 
 ## 4. Notes
 
-- The soft-404 (`/post/<missing>` → HTTP 200) is Next's documented streamed-response behavior. **Correction (2026-09-16, end-to-end run): this route carries NO `noindex`** — verified in production and locally on 16.3.5; the earlier `noindex` observation belonged to `/api/health`, a real 404. The page therefore has no explicit robots directive: a soft-404 with not-found content. Accepted on 2026-09-16; the Proxy path (Node runtime, `matcher /post/:slug`) stays the documented follow-up — and this corrected evidence is the reason it may be reopened.
+- The soft-404 (`/post/<missing>` → HTTP 200) is Next's documented streamed-response behavior. **Correction (2026-09-16, end-to-end run): this route carries NO `noindex`** — verified in production and locally on 16.3.5; the earlier `noindex` observation belonged to `/api/health`, a real 404. With that corrected evidence the owner reopened the gate and approved the Proxy: `src/proxy.ts` probes existence and rewrites to `/404` with status `404` (verified end-to-end: 404 + the app's not-found UI; reserved slugs and real posts untouched; the probe fails open).
 - Locale stays `en-US`; the PT content mismatch is known and recorded — the locale lint keeps flagging it until one side moves.
 - References: the research dossiers live in PR #238; the scorecard and gotchas in PR #239.

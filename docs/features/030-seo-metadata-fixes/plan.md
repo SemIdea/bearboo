@@ -26,7 +26,7 @@ Extract the metadata into a small pure module (`src/lib/seo/metadata.ts`) so the
 - **`verification.google` from env** (`GOOGLE_SITE_VERIFICATION`): the code is complete before the Search Console code exists, and no literal enters the repo (rule 13).
 - **`og:image` via `next/og` ImageResponse** with the default font — self-contained, no asset pipeline; per-post images are a later iteration.
 - **Locale `en-US` kept**; `<html lang="en">` unchanged.
-- **Soft-404 accepted and documented** (gotcha); no Proxy (rule 11 avoided by decision).
+- **Soft-404: Proxy implemented** (2026-09-16, after the corrected evidence reopened the gate): `src/proxy.ts` migrates the old `x-url` header behavior, probes `PostModel.existsBySlug` for `/post/:slug`, and rewrites missing slugs to `/404` with status `404`; it fails open on a probe error.
 
 ## 4. Validation against afm.md § 3
 
