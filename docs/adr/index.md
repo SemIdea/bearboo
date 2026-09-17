@@ -24,3 +24,4 @@
 * [ADR-0022 — Structured logging: one canonical log line per call](0022-structured-logging-canonical-line.md) - 
 * [ADR-0026 — Integration tests against real Postgres via Testcontainers](0026-integration-tests-testcontainers.md) - 
 * [ADR-0027 — Native Postgres full-text search (tsvector/ts_rank)](0027-native-fulltext-search.md) - 
+* [ADR-0028 — Liveness probe as a thin non-tRPC route](0028-health-liveness-route.md) - 
