@@ -1,7 +1,7 @@
 # Feature 028 — Plan
 
 > **Spec:** [`./spec.md`](./spec.md) · **ADR:** ADR-0028 (proposed — the non-tRPC liveness route)
-> **Status:** approved at the single gate on 2026-09-16 (thin non-tRPC route adopted — § 6); executing via [`./tasks.md`](./tasks.md).
+> **Status:** done — delivered 2026-09-16 (thin non-tRPC route adopted at the gate, § 6; all tasks closed).
 
 ## 1. Approach
 

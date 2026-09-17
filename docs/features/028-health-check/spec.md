@@ -2,7 +2,7 @@
 
 > **Spec:** the what and the why. The route decision lives in the plan + a new ADR.
 > **Related:** Roadmap Phase 11 (Observability) — first slice. Seeds from the `health-request-id` candidate in `ust.md`. Request-id correlation is a separate follow-up (feature 029).
-> **Status:** draft — materialized up to the plan for review (no `tasks.md`, no execution yet).
+> **Status:** done — delivered 2026-09-16 (tasks T001-T012; route decision in `ADR-0028`).
 > **Opened:** 2026-09-16
 
 ## 1. Problem (from the roadmap)
