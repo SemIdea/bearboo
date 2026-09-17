@@ -34,6 +34,7 @@
 | US-016 | Authenticated user uploads and manages media | Media | RF-13 | done |
 | US-017 | Dev resolves domain error without duplicated code per procedure | System Quality | RF-14 | done |
 | US-018 | Dev observes one structured log line per operation | System Quality | RF-14 | done |
+| US-019 | Operator/monitor checks app and database liveness | System Quality | RF-15 | in progress |
 
 ## Technical Pending Items
 
