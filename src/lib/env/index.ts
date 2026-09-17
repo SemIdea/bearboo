@@ -1,6 +1,6 @@
 import path from "node:path";
-import packageJson from "../../../package.json";
 import { config } from "dotenv";
+import packageJson from "../../../package.json";
 import { getBoolEnv } from "./getBoolEnv";
 import { getIntEnv } from "./getIntEnv";
 import { getStrEnv } from "./getStrEnv";
