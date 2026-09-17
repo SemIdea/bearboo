@@ -33,6 +33,7 @@ A thin `GET /api/health` route handler (`src/app/api/health/route.ts`) delegates
 - **Rule 1:** `checkHealth()` is covered by a unit test (both branches) via the mock seam.
 - **Rule 13 / 36:** no secret or stack in the response body or logs; the route sits outside the tRPC canonical-line boundary (it is not a procedure call), so it emits no canonical line — acceptable (rule 36 scopes to procedure calls).
 - **Rules 5 / 6 / 7:** `checkHealth.ts` is one small responsibility; it is infra, not a `domain_` file (rule 7 N/A).
+- **Rule 16 (validation at the boundary):** no call — the route accepts no input (GET, no params, no body) and `checkHealth()` consumes no external payload, so there is no boundary schema to apply.
 
 ## 5. Contract
 
