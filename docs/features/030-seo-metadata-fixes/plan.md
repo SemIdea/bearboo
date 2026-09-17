@@ -1,6 +1,6 @@
 # Feature 030 — Plan
 
-> **Spec:** [`./spec.md`](./spec.md) · **Status:** approved at the single gate on 2026-09-16; executing via [`./tasks.md`](./tasks.md).
+> **Spec:** [`./spec.md`](./spec.md) · **Status:** done — delivered 2026-09-16 (all tasks closed).
 
 ## 1. Approach
 

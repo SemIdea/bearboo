@@ -2,7 +2,7 @@
 
 > **Spec:** the what and the why. The engine evidence is the audit scorecard (PR #239, `.seo/audit.md`).
 > **Related:** RF-10 (SEO and professional publishing — closed in `015-seo-metadata`/`018-seo-overrides-slug-redirect`). The 2026-09-16 engine audit scored the site **7/100 (poor)**: `structure.no-canonical` fail on the home, `metadata.h1-missing` on home and post, incomplete Open Graph, `schema.missing-recommended-field` and `schema.inlanguage-missing`.
-> **Status:** approved at the single gate on 2026-09-16 (soft-404 accepted and documented; locale `en-US` kept; `og:image` via a generated route); executing.
+> **Status:** done — delivered 2026-09-16 (`npm test` 424/424; tasks T001-T010).
 > **Opened:** 2026-09-16
 
 ## 1. Problem
