@@ -35,7 +35,7 @@
 | US-017 | Dev resolves domain error without duplicated code per procedure | System Quality | RF-14 | done |
 | US-018 | Dev observes one structured log line per operation | System Quality | RF-14 | done |
 | US-019 | Operator/monitor checks app and database liveness | System Quality | RF-15 | done |
-| US-020 | Dev keeps the dependency tree free of known vulnerabilities | System Quality | RNF-03 | in progress |
+| US-020 | Dev keeps the dependency tree free of known vulnerabilities | System Quality | RNF-03 | done |
 
 ## Technical Pending Items
 
