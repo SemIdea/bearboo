@@ -10,3 +10,4 @@
 * [Zod v3 → v4 — string-format validators became top-level functions (deprecated, not an error)](008-zod-v3-v4-string-format-validators.md) - Zod v3 → v4 — string-format validators became top-level functions (deprecated, not an error)
 * [tRPC — a bare `t.procedure` skips the error-translation middleware](009-trpc-a-bare-t-procedure-skips.md) - tRPC — a bare `t.procedure` skips the error-translation middleware
 * [Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column](010-prisma-never-db-push-migrate-dev.md) - Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column
+* [Dependabot — alerts are evaluated against the default branch, not the branch you are on](011-dependabot-alerts-track-the-default-branch.md) - Dependabot — alerts are evaluated against the default branch, not the branch you are on

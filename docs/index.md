@@ -15,8 +15,8 @@ okf_version: "0.2"
 
 * [adr](adr/) - 25 files
 * [evolution](evolution/) - 4 files
-* [features](features/) - 85 files
-* [gotchas](gotchas/) - 10 files
+* [features](features/) - 88 files
+* [gotchas](gotchas/) - 11 files
 * [learn](learn/) - 0 files
 * [protocols](protocols/) - 3 files
 * [research](research/) - 4 files
