@@ -25,7 +25,7 @@
 
 - [X] **T009** `docs/adr/0028-health-liveness-route.md` — record the non-tRPC liveness route and the forward-only note on rule 31; regenerate the docs index (US-019)
 - [X] **T010** `docs/ach.md` § 3.1 — add the health probe (infra) and the second route kind on the public non-tRPC surface (US-019)
-- [ ] **T011** Close the loop — US-019 → `done` in `docs/ust.md`, spec header status → `done` (US-019)
+- [X] **T011** Close the loop — US-019 → `done` in `docs/ust.md`, spec header status → `done` (US-019)
 - [ ] **T012** Full validation before the push boundary — `npx tsc --noEmit`, `npm test`, and `npm run build` if the environment allows (RF-15)
 
 ---
