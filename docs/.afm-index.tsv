@@ -1,0 +1,65 @@
+# type	slug	load	fires_on	trigger_basename	trigger_path	trigger_grep	path	description
+evolution	2026-09-16-002	cold					evolution/2026-09-16-002.md	Evolution cycle report: cycle 002 — 2026-09-16 — instance migration 3.5.0-rc.1 → 3.30.0 (OKF split, gate tooling, namespace) plus two staleness fixes.
+gotcha	001-next-js-cookies-headers-only-in	warm	event				gotchas/001-next-js-cookies-headers-only-in.md	Next.js — `cookies()` / `headers()` only in a Server Component / route handler
+gotcha	002-next-js-revalidatepath-revalidatetag-does-not	warm	event				gotchas/002-next-js-revalidatepath-revalidatetag-does-not.md	Next.js — `revalidatePath` / `revalidateTag` does not invalidate React Query
+gotcha	003-native-node-esm-prisma-ts-via	warm	event				gotchas/003-native-node-esm-prisma-ts-via.md	Native Node ESM (`prisma/*.ts` via `node`) — you cannot re-import `src/lib/*`
+gotcha	004-next-js-cache-components-cachecomponents-true	warm	event				gotchas/004-next-js-cache-components-cachecomponents-true.md	Next.js — Cache Components (`cacheComponents: true`) forbids a route without `<Suspense>`, even if you do not want PPR
+gotcha	005-next-js-a-use-cache-page	warm	event				gotchas/005-next-js-a-use-cache-page.md	Next.js — a `"use cache"` page never knows who is asking (no cookies)
+gotcha	006-next-js-a-root-layout-under	warm	event				gotchas/006-next-js-a-root-layout-under.md	Next.js — a root layout under a dynamic segment leaves `_not-found` orphaned
+gotcha	007-pre-push-hook-runs-scoped-tests	warm	event				gotchas/007-pre-push-hook-runs-scoped-tests.md	Hooks (pre-commit/pre-push) — run scoped tests, not the full suite
+gotcha	008-zod-v3-v4-string-format-validators	warm	event				gotchas/008-zod-v3-v4-string-format-validators.md	Zod v3 → v4 — string-format validators became top-level functions (deprecated, not an error)
+gotcha	009-trpc-a-bare-t-procedure-skips	warm	event				gotchas/009-trpc-a-bare-t-procedure-skips.md	tRPC — a bare `t.procedure` skips the error-translation middleware
+gotcha	010-prisma-never-db-push-migrate-dev	warm	event				gotchas/010-prisma-never-db-push-migrate-dev.md	Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column
+gotcha	011-dependabot-alerts-track-the-default-branch	warm	event				gotchas/011-dependabot-alerts-track-the-default-branch.md	Dependabot — alerts are evaluated against the default branch, not the branch you are on
+research	005-google-indexing	cold	op-call				research/005-google-indexing.md	How to get this blog crawled and indexed by Google: the discovery channels that work, the Search Console operations, and the priorities after the basic SEO.
+research	006-vercel-app-indexing	cold	op-call				research/006-vercel-app-indexing.md	How to get a site hosted on the free *.vercel.app host indexed by Google, what verification is possible without owning a domain, and the limits of not buying one.
+gotcha	012-a-missing-post-slug-answers	warm	event				gotchas/012-a-missing-post-slug-answers.md	A missing `/post/<slug>` answered HTTP 200 — fixed with a Proxy existence check on 2026-09-16
+rubric	error-classification	warm	file-shape		*/domain/*	(\b(TRPCError|HttpException|HTTPException|ApiError|ResponseError)\b|throw[[:space:]]+new[[:space:]]+Error\()	rubrics/error-classification.md	Separates a domain error from a procedure error and from an infrastructure error.
+rubric	negative-filters	warm	op-call				rubrics/negative-filters.md	Rejects what must not become a durable doc, because a false constraint is poison.
+rubric	when-to-create-dsl	warm	repo-shape				rubrics/when-to-create-dsl.md	Decides when a DSL is worth suggesting, and when it is premature.
+rule	30-domain-procedure-does-not-import-prismaclient	warm	event				rules/30-domain-procedure-does-not-import-prismaclient.md	Domain/Procedure does NOT import `PrismaClient`/`@prisma/client`/the Prisma driver directly.
+rule	31-a-route-handler-src-app-api	warm	event				rules/31-a-route-handler-src-app-api.md	A route handler (`src/app/api/**/route.ts`) is thin.
+rule	32-no-direct-commit-to-main-develop	warm	event				rules/32-no-direct-commit-to-main-develop.md	No direct commit to `main`/`develop`.
+rule	33-a-boundary-error-is-classified-recoverable	warm	event				rules/33-a-boundary-error-is-classified-recoverable.md	A boundary error is classified: recoverable (`AppError`) vs. bug.
+rule	34-pr-title-and-body-in-english	warm	event				rules/34-pr-title-and-body-in-english.md	PR title and body in English.
+rule	35-src-shared	warm	event				rules/35-src-shared.md	`src/shared/**` does not import `@trpc/*`.
+rule	36-the-boundary-emits-one-canonical-log	warm	event				rules/36-the-boundary-emits-one-canonical-log.md	The boundary emits one canonical log line per call; the logger never carries a secret.
+rule	PLUGIN-10-no-backwards-compat-shim	warm	event				rules/PLUGIN-10-no-backwards-compat-shim.md	No backwards-compat shim.
+rule	PLUGIN-11-an-architectural-change-stops-and-asks	warm	event				rules/PLUGIN-11-an-architectural-change-stops-and-asks.md	An architectural change stops and asks.
+rule	PLUGIN-13-tokens-and-secrets-do-not-leak	warm	event				rules/PLUGIN-13-tokens-and-secrets-do-not-leak.md	Tokens and secrets do not leak.
+rule	PLUGIN-15-error-classification-domain-transport	warm	event				rules/PLUGIN-15-error-classification-domain-transport.md	Error classification — Domain ≠ Transport.
+rule	PLUGIN-16-validation-at-the-boundary-schema-only	warm	event				rules/PLUGIN-16-validation-at-the-boundary-schema-only.md	Validation at the boundary — schema only at a procedure's input/output.
+rule	PLUGIN-17-a-docs-edit-does-not-collapse	warm	event				rules/PLUGIN-17-a-docs-edit-does-not-collapse.md	A `/docs/` edit does not collapse the doc.
+rule	PLUGIN-18-the-capture-substrate-is-append-only	warm	event				rules/PLUGIN-18-the-capture-substrate-is-append-only.md	The capture substrate is append-only.
+rule	PLUGIN-19-a-recurring-anchored-failure-becomes-remediation	warm	event				rules/PLUGIN-19-a-recurring-anchored-failure-becomes-remediation.md	A recurring, anchored failure becomes remediation, not silent recurrence
+rule	PLUGIN-1-no-new-code-without-a-test	warm	event				rules/PLUGIN-1-no-new-code-without-a-test.md	No new code without a test
+rule	PLUGIN-20-docs-focus-md-is-small-overwritable	warm	event				rules/PLUGIN-20-docs-focus-md-is-small-overwritable.md	`docs/_focus.md` is small, overwritable slot-state.
+rule	PLUGIN-21-inalienable-code-and-tests-are-written-in-eng	warm	event				rules/PLUGIN-21-inalienable-code-and-tests-are-written-in-eng.md	INALIENABLE — code and tests are written in English
+rule	PLUGIN-2-zero-any-unknown-in-your-own	warm	event				rules/PLUGIN-2-zero-any-unknown-in-your-own.md	Zero `any` / `unknown` in your own helpers.
+rule	PLUGIN-35-a-hard-rule-with-a-0-1-trigger-needs-a-versio	warm	event				rules/PLUGIN-35-a-hard-rule-with-a-0-1-trigger-needs-a-versio.md	A hard rule with a 0/1 trigger needs a versioned runner in the gate
+rule	PLUGIN-36-a-doc-under-docs-carries-no-filesystem-absolu	warm	event				rules/PLUGIN-36-a-doc-under-docs-carries-no-filesystem-absolu.md	A doc under `docs/` carries no FILESYSTEM absolute path
+rule	PLUGIN-37-the-prose-of-an-artifact-is-english	warm	event				rules/PLUGIN-37-the-prose-of-an-artifact-is-english.md	The prose of an artifact is English
+rule	PLUGIN-38-a-portuguese-literal-never-survives-inside-a	warm	event				rules/PLUGIN-38-a-portuguese-literal-never-survives-inside-a.md	A Portuguese literal never survives inside a script or inside a quoted marker
+rule	PLUGIN-39-an-indexed-file-carries-the-okf-contract-and	warm	event				rules/PLUGIN-39-an-indexed-file-carries-the-okf-contract-and.md	An indexed file carries the OKF contract, and an op declares what it writes and composes
+rule	PLUGIN-40-a-normative-doc-cites-no-path-that-does-not-e	warm	event				rules/PLUGIN-40-a-normative-doc-cites-no-path-that-does-not-e.md	A normative doc cites no path that does not exist
+rule	PLUGIN-4-do-not-commit-with-a-broken	warm	event				rules/PLUGIN-4-do-not-commit-with-a-broken.md	Do not commit with a broken type-check.
+rule	PLUGIN-5-one-responsibility-per-file	warm	event				rules/PLUGIN-5-one-responsibility-per-file.md	One responsibility per file.
+rule	PLUGIN-6-file-300-lines	warm	event				rules/PLUGIN-6-file-300-lines.md	File ≤ 300 lines.
+rule	PLUGIN-7-a-domain-like-file-exports-exactly	warm	event				rules/PLUGIN-7-a-domain-like-file-exports-exactly.md	A domain-like file exports exactly ONE `domain_<action>` function.
+handoff	2026-07-01-0156-5d247c						sessions/2026-07-01-0156-5d247c.md	
+handoff	2026-07-04-0438-5d247c						sessions/2026-07-04-0438-5d247c.md	
+handoff	2026-07-04-1848-5d247c						sessions/2026-07-04-1848-5d247c.md	
+handoff	2026-07-11-2037-5d247c						sessions/2026-07-11-2037-5d247c.md	
+handoff	2026-07-12-1628-5d247c						sessions/2026-07-12-1628-5d247c.md	
+handoff	2026-07-12-1956-5d247c						sessions/2026-07-12-1956-5d247c.md	
+handoff	2026-07-16-0220-6081a9						sessions/2026-07-16-0220-6081a9.md	
+handoff	2026-07-18-0326-6081a9						sessions/2026-07-18-0326-6081a9.md	
+handoff	2026-07-26-0220-5d247c						sessions/2026-07-26-0220-5d247c.md	
+handoff	2026-07-29-0001-5d247c						sessions/2026-07-29-0001-5d247c.md	
+handoff	2026-07-30-0257-5d247c						sessions/2026-07-30-0257-5d247c.md	
+session	2026-08-20-0345-5d247c						sessions/2026-08-20-0345-5d247c.md	
+session	2026-08-21-0137-5d247c						sessions/2026-08-21-0137-5d247c.md	
+session	2026-08-22-0101-5d247c						sessions/2026-08-22-0101-5d247c.md	
+session	2026-08-22-1834-5d247c						sessions/2026-08-22-1834-5d247c.md	
+session	2026-08-23-0151-5d247c						sessions/2026-08-23-0151-5d247c.md	
+session	2026-08-31-0220-5d247c						sessions/2026-08-31-0220-5d247c.md	

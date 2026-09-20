@@ -47,7 +47,7 @@
 - **Everything in English; `/docs/` in STE-spirit.** Identifiers (models, fields, functions, variables), comments, commit messages, **and `/docs/`** — plus the methodology `.md` files outside them (CLAUDE.md/AGENTS.md/README.md) — are written in **English**. `/docs/` follows **Simplified Technical English at the "spirit" level** (ADR-0021): short active sentences, one idea per sentence, the same term for the same concept, vertical lists, no flair/metaphor/hedge. This is **not** the full letter of ASD-STE100 — no ~900-word approved dictionary and no mandatory articles/repetition (measured at +11% tokens; STE-spirit measures −15~26%, so the spirit is the target). **Exception — product content follows the product locale, not the identifiers-in-English rule:** a string literal that is user-visible text (UI copy, an `err.message`/`message` rendered on screen) or demo/seed data (`prisma/seed*.ts`) is content/data, not an identifier, even inside a `.ts`. The product locale is **en-US today** (single-locale, owner decision 2026-08-29), so this content is **English** now; a future i18n system will add pt-BR, at which point content becomes locale-specific. A test fixture that needs a specific accent/character to test (e.g. `kebabCase.ts` testing accent removal) may keep that literal regardless of locale — it is a test input, not content. **Content legacy debt:** the existing seed data (`prisma/seed*.ts`) and any UI copy still in Portuguese predate the en-US decision — migrate to en-US when you touch them, or in a dedicated pass. It also covers process artifacts: **branch name, PR title and body, labels** are process identifiers, always English (without the copy exception). The PR subset becomes hard rule 34 (mechanical); the rest — including Portuguese comments in code — is checked by review (no grep catches accent-free Portuguese without high false positives, and the accent alone collides with the content exceptions). Known legacy debt: Portuguese comments in `prisma/slug.ts`, `src/test/prisma/index.ts`, `src/context/trpc/sessionRefreshLink.ts`, and the migration `20250731144607_*` — boy-scout when you touch the file.
 - **Converting `/docs/` to English/STE-spirit is forward-only** (ADR-0021). A new doc is born in English STE-spirit. The live normative core (`afm`/`ach`/`prd`/`ust`/`gotchas`/`roadmap`/`rubrics`) converts **doc-by-doc, in its own PR** (rule 17 — no collapse). Historical record is **not** rewritten: ADRs and delivered `features/` stay as-is; the append-only ledger (`docs/sessions/`, `docs/.afm-log/`) is forbidden to rewrite by rule 18. Until the conversion reaches a doc, it stays pt-BR — the docs are bilingual **per doc**, never per line.
 
-*[A DEFINIR — product-intent-specific principles come from the retroactive-adoption interview.]*
+*[TBD — product-intent-specific principles come from the retroactive-adoption interview.]*
 
 ---
 
@@ -137,66 +137,53 @@ The § 2 loop covers a small change. For a feature that hits **any** of the crit
 
 On-demand helpers: `/afm:clarify`, `/afm:analyze`, `/afm:research`. Otherwise (small change): straight to § 2.
 
+**A load-bearing open decision carries `[NEEDS CLARIFICATION:]`** — including a bucket-(b) residue the delivery flow leaves for the gate. The `tasks` op refuses to run on it, and the `deliver` resumability detector greps for it; a decision written only in prose is invisible to both, and a resumed delivery can execute it unconfirmed.
+
 ---
 
 ## 3. Hard rules
 
 Every rule below has an **executable trigger** the agent runs at the keyboard — binary pass/fail. A rule without a trigger lives in § 1.3 as a principle.
 
-1. **No new code without a test.** Includes a type test.
-   *Verification:* `vitest` covers the new path; the diff shows a matching `.test.ts`.
-2. **Zero `any` / `unknown` in your own helpers.**
-   *Verification:* `grep -nE "\bany\b|\bunknown\b" src/` in non-boundary files.
-4. **Do not commit with a broken type-check.**
-   *Verification:* `npx tsc --noEmit`.
-5. **One responsibility per file.** A vague name ("manager", "utils", "helpers" without a domain prefix) = split.
-   *Verification:* `find src -type f \( -iname "*manager*" -o -iname "*utils*" -o -iname "*helpers*" \)` returns 0 without a domain prefix. Today it returns `src/lib/utils.ts` and `src/server/infra/container/helpers.ts` — see § 3.1 forward-only.
-6. **File ≤ 300 lines.** Exceptions with a header that explains.
-   *Verification:* `find src -type f \( -name "*.ts" -o -name "*.tsx" \) -not -name "*.test.*" -print0 | xargs -0 wc -l | awk '$2 != "total" && $1 > 300'`. **2 production files exceed today** (scan 2026-08-22): `src/server/models/post.ts` (416) and `src/server/features/post/schema.ts` (314) — neither is from this feature; treated as forward-only tech debt (§ 3.1), not a block. *(The command also lists `src/server/models/__test__/prismaModels.ts` (429) — a test file the `*.test.*` filter misses because of the `__test__/` naming; outside the rule's scope, which is production code.)*
-7. **A domain-like file exports exactly ONE `domain_<action>` function.** Domain is business rule; query builder, schema/Zod, and transport glue do not go here.
-   *Verification:* `for f in $(find src/server/features -path '*/domain/*.ts'); do n=$(rg -o '^export \{[^}]*\}' "$f" | tr ',' '\n' | wc -l); test "$n" -eq 1 || echo "$f: $n exports"; done` returns empty. **Compliant today** across 30 domain files.
-10. **No backwards-compat shim.** The caller does not exist → delete. `// removed for X` pollutes.
-    *Verification:* `grep -rn "removed\|deprecated\|legacy" src/`. **Compliant today** (0 occurrences).
-11. **An architectural change stops and asks.** A new layer / first-class component / cross-module contract / folder refactor needs the architecture owner's sign-off.
-    *Verification (mid-flight):* `git status --porcelain` shows an `A` for a new first-class directory under `src/`, OR the diff moves folders / introduces a new cross-module import → stop and ask.
-12. *(principle — lives in § 1.3. No Task-like component in the project today — no job/queue/scheduler found in scan A.1. If one is introduced, promote to a hard rule with an idempotency trigger.)*
-13. **Tokens and secrets do not leak.** Never log a token in the clear. Redact in errors. Never commit `.env`. **Covers `docs/sessions/`** — versioning narrative is a new leak path: the agent cites the command it ran, and the command had the key.
-    *Verification:* `git diff --staged | grep -nE "(token|secret|api[_-]?key|password|bearer)\s*[:=]\s*['\"][^'\"]+"` returns 0; `git diff --staged --name-only | grep -E "(^|/)\.env"` empty; and about sessions, `git diff --staged -- docs/sessions/ | grep -nE "(sk-|ghp_|AIza|xox[baprs]-|eyJ[A-Za-z0-9_-]+\.eyJ)"` returns 0 (known credential prefixes — OpenAI/GitHub/Google/Slack/JWT).
-15. **Error classification — Domain ≠ Transport.** Domain/Model does not import `TRPCError` (`@trpc/server`). The Procedure maps a domain error → `TRPCError` at the boundary, via `AppError`/`ErrorRegistry` (`ADR-0017`).
-    *Verification:* `rg -l "TRPCError" src/server/features/*/domain/*.ts`. **Compliant today** — coordinated migration closed in `022-error-registry` (2026-07-27). See `ach.md` § 3.2.
-16. **Validation at the boundary — schema only at a procedure's input/output.** Zod validates at (a) a procedure's `.input()`/`.output()` (`src/server/features/<feature>/schema.ts`), (b) an external payload. Domain/Model receives an already-validated shape.
-    *Verification:* `rg -n "z\.|zod" src/server/models src/server/features/*/domain/*.ts` returns 0. **Compliant today.**
-17. **A `/docs/` edit does not collapse the doc.** A rewrite that deletes more than half the lines in one edit stops and needs explicit review.
-    *Verification:* `git diff --numstat -- docs/ | grep -vE '(^|/)\.afm-log|(^|/)_focus\.md$|(^|/)sessions/' | awk '$2 > 20 && $2/($1+$2+1) > 0.5 {print}'` returns empty.
-18. **The capture substrate is append-only.** `docs/.afm-log/` only takes appends.
-    *Verification:* `git log -p -- docs/.afm-log/events/ 2>/dev/null | grep -c '^-- \['` returns `0`.
-19. **A recurring anchored failure becomes remediation.** Every `sig=` that appears ≥2× in `docs/.afm-log-failures/` must have a remediation artifact that cites it.
-20. **`docs/_focus.md` is small, overwritable slot-state.**
-    *Verification:* `{ [ -f docs/_focus.md ] && wc -l < docs/_focus.md || echo 0; } | awk '$1 > 40 {print "INCHOU"}'` returns empty.
 
-### Project-specific rules (from 30)
+> **Each rule is its own file under [`rules/`](./rules/).** This section is the index:
+> one line per rule, in the exact `N. **title**` shape that `afm-session-start.sh` and
+> `afm-health.sh` parse. The body, the rationale and the verification travel with the file.
 
-30. **Domain/Procedure does NOT import `PrismaClient`/`@prisma/client`/the Prisma driver directly.** Data access goes through the injected `ctx.repositories`; `src/server/models/*`, `src/server/infra/drivers/prisma.ts`, and the test seam `src/test/prisma/` are the intentional data-layer exception.
-    *Verification:* `rg -n "from.*@prisma/client|new PrismaClient|@/server/infra/drivers/prisma" src/server/features/*/domain/*.ts src/server/features/*/procedures/*.ts` returns 0. **Compliant today.**
-31. **A route handler (`src/app/api/**/route.ts`) is thin.** It delegates to the tRPC handler; no inline business rule.
-    *Verification:* `find src/app/api -name route.ts | xargs wc -l` — all < 80 lines. **Compliant today** (only route: `src/app/api/trpc/[trpc]/route.ts`).
-32. **No direct commit to `main`/`develop`.** All code work happens on a feature branch created from `develop` (English name, e.g. `feature/016-search-content`), commits following `.commitlintrc` (Conventional Commits, English). PR against `develop` using `.github/pull_request_template.md`; only the owner approves/merges on GitHub. `main` only takes a merge from `develop` at release/deploy, never a commit or a feature-branch merge directly. GitHub branch protection (`main`/`develop`, PR required) is an extra layer — the primary enforcement is this check before you commit.
-    *Verification:* `git rev-parse --abbrev-ref HEAD` is not `main` nor `develop`. If it is, create/switch to a feature branch before any `git commit`.
+### Universal rules (PLUGIN namespace)
 
-33. **A boundary error is classified: recoverable (`AppError`) vs. bug.** An expected business failure is an `AppError` (thrown in the domain, translated at the boundary — rule 15); an unexpected throw is a bug. The boundary **distinguishes the two** — it translates `AppError` → `TRPCError` and **rethrows the rest** — and never dresses a bug as a recoverable domain error. The classification feeds the canonical log line: the logging middleware (`withCanonicalLog` in `src/server/createRouter.ts`) calls `depositBoundaryError` to add `error.kind`/`error.level`/`error.retryable`/`error.code` to `ctx.log`, and a bug also carries its stack (rule 36, ADR-0022). Metadata (`retryable`/`level`, `ErrorLevel = fatal|error|warn|info`) lives in the catalogs `src/shared/error/catalog/*.ts` and is resolved by `AppError` with defaults `retryable=false`/`level=warn`. See ADR-0018 (extends ADR-0017; `Result<T,E>` was evaluated and rejected).
-    *Verification:* `rg -l "new TRPCError" src/server/features/*/procedures/*.ts` returns empty — the translation no longer lives in the procedure, but in the single choke point `src/server/http/appErrorToTRPCError.ts`, which returns `null` for a non-`AppError` throw (a bug stays a bug, never wrapped as a domain error). **Compliant today** — centralized in `024-error-boundary-centralization` (2026-08-22, ADR-0019).
-    *Note 2026-08-22:* the previous trigger (`comm -23` between who builds a `TRPCError` and who branches on `instanceof AppError`) measured the discipline **inside** each procedure. With the translation centralized, the first set became empty and the `comm` would pass **vacuously** — verifying nothing. The new trigger targets where the convention now lives.
+PLUGIN-1. **No new code without a test** — [`rules/PLUGIN-1-no-new-code-without-a-test.md`](./rules/PLUGIN-1-no-new-code-without-a-test.md)
+PLUGIN-2. **Zero `any` / `unknown` in your own helpers.** — [`rules/PLUGIN-2-zero-any-unknown-in-your-own.md`](./rules/PLUGIN-2-zero-any-unknown-in-your-own.md)
+PLUGIN-4. **Do not commit with a broken type-check.** — [`rules/PLUGIN-4-do-not-commit-with-a-broken.md`](./rules/PLUGIN-4-do-not-commit-with-a-broken.md)
+PLUGIN-5. **One responsibility per file.** — [`rules/PLUGIN-5-one-responsibility-per-file.md`](./rules/PLUGIN-5-one-responsibility-per-file.md)
+PLUGIN-6. **File ≤ 300 lines.** — [`rules/PLUGIN-6-file-300-lines.md`](./rules/PLUGIN-6-file-300-lines.md)
+PLUGIN-7. **A domain-like file exports exactly ONE `domain_<action>` function.** — [`rules/PLUGIN-7-a-domain-like-file-exports-exactly.md`](./rules/PLUGIN-7-a-domain-like-file-exports-exactly.md)
+PLUGIN-10. **No backwards-compat shim.** — [`rules/PLUGIN-10-no-backwards-compat-shim.md`](./rules/PLUGIN-10-no-backwards-compat-shim.md)
+PLUGIN-11. **An architectural change stops and asks.** — [`rules/PLUGIN-11-an-architectural-change-stops-and-asks.md`](./rules/PLUGIN-11-an-architectural-change-stops-and-asks.md)
+PLUGIN-13. **Tokens and secrets do not leak.** — [`rules/PLUGIN-13-tokens-and-secrets-do-not-leak.md`](./rules/PLUGIN-13-tokens-and-secrets-do-not-leak.md)
+PLUGIN-15. **Error classification — Domain ≠ Transport.** — [`rules/PLUGIN-15-error-classification-domain-transport.md`](./rules/PLUGIN-15-error-classification-domain-transport.md)
+PLUGIN-16. **Validation at the boundary — schema only at a procedure's input/output.** — [`rules/PLUGIN-16-validation-at-the-boundary-schema-only.md`](./rules/PLUGIN-16-validation-at-the-boundary-schema-only.md)
+PLUGIN-17. **A `/docs/` edit does not collapse the doc.** — [`rules/PLUGIN-17-a-docs-edit-does-not-collapse.md`](./rules/PLUGIN-17-a-docs-edit-does-not-collapse.md)
+PLUGIN-18. **The capture substrate is append-only.** — [`rules/PLUGIN-18-the-capture-substrate-is-append-only.md`](./rules/PLUGIN-18-the-capture-substrate-is-append-only.md)
+PLUGIN-19. **A recurring, anchored failure becomes remediation, not silent recurrence** — [`rules/PLUGIN-19-a-recurring-anchored-failure-becomes-remediation.md`](./rules/PLUGIN-19-a-recurring-anchored-failure-becomes-remediation.md)
+PLUGIN-20. **`docs/_focus.md` is small, overwritable slot-state.** — [`rules/PLUGIN-20-docs-focus-md-is-small-overwritable.md`](./rules/PLUGIN-20-docs-focus-md-is-small-overwritable.md)
+PLUGIN-21. **INALIENABLE — code and tests are written in English** — [`rules/PLUGIN-21-inalienable-code-and-tests-are-written-in-eng.md`](./rules/PLUGIN-21-inalienable-code-and-tests-are-written-in-eng.md)
+PLUGIN-35. **A hard rule with a 0/1 trigger needs a versioned runner in the gate** — [`rules/PLUGIN-35-a-hard-rule-with-a-0-1-trigger-needs-a-versio.md`](./rules/PLUGIN-35-a-hard-rule-with-a-0-1-trigger-needs-a-versio.md)
+PLUGIN-36. **A doc under `docs/` carries no FILESYSTEM absolute path** — [`rules/PLUGIN-36-a-doc-under-docs-carries-no-filesystem-absolu.md`](./rules/PLUGIN-36-a-doc-under-docs-carries-no-filesystem-absolu.md)
+PLUGIN-37. **The prose of an artifact is English** — [`rules/PLUGIN-37-the-prose-of-an-artifact-is-english.md`](./rules/PLUGIN-37-the-prose-of-an-artifact-is-english.md)
+PLUGIN-38. **A Portuguese literal never survives inside a script or inside a quoted marker** — [`rules/PLUGIN-38-a-portuguese-literal-never-survives-inside-a.md`](./rules/PLUGIN-38-a-portuguese-literal-never-survives-inside-a.md)
+PLUGIN-39. **An indexed file carries the OKF contract, and an op declares what it writes and composes** — [`rules/PLUGIN-39-an-indexed-file-carries-the-okf-contract-and.md`](./rules/PLUGIN-39-an-indexed-file-carries-the-okf-contract-and.md)
+PLUGIN-40. **A normative doc cites no path that does not exist** — [`rules/PLUGIN-40-a-normative-doc-cites-no-path-that-does-not-e.md`](./rules/PLUGIN-40-a-normative-doc-cites-no-path-that-does-not-e.md)
 
-34. **PR title and body in English.** It mechanizes in the GitHub artifact the § 1.3 principle "code in English" (branch name, PR title/body, labels — process identifiers, always English). Applies to a new PR (forward — PRs opened before this rule stay as they are). Covers title and body (the durable artifact that becomes history); does **not** cover the PR conversation/review, which follows the interlocutor's language, like chat. `.github/pull_request_template.md` is in English — a template that asks in Portuguese harvests Portuguese answers.
-    *Verification:* `gh pr view <N> --json title,body -q '.title + "\n" + .body' | grep -nP '[À-ÿ]'` returns empty. Manual today (check before opening/at review); becomes a CI step when the pipeline (`.github/workflows/ci.yml`, PR #208) lands in develop. **Limit:** the grep catches accent, not accent-free Portuguese — but in long PR prose the accent is nearly inevitable, which makes the proxy strong; accent-free Portuguese that slips through is still a violation, caught at review.
+### Specific to this repo (numbered from 30)
 
-35. **`src/shared/**` does not import `@trpc/*`.** `shared/` is vocabulary common to server and client; transport is one specific consumer's opinion. The error catalog declares only what is agnostic (`message`/`retryable`/`level`); the projection to the tRPC code lives in `src/server/http/appErrorTransport.ts` as `Record<ErrorCode, TRPC_ERROR_CODE_KEY>` — total, checked at compile time. A new consumer (job, CLI, webhook) gets its **own** table, not a column in the domain catalog. See ADR-0019.
-    *Verification:* `rg -n "from \"@trpc" src/shared/` returns 0. **Compliant today** — inversion done in `024-error-boundary-centralization` (2026-08-22). *(The trigger targets the `import`: a raw `@trpc` grep would also match a mention in a comment.)*
-
-36. **The boundary emits one canonical log line per call; the logger never carries a secret.** Every procedure call emits exactly one wide structured event at the boundary (`withCanonicalLog`), success or failure — JSON in prod, pretty in dev (`env.nodeEnv`). Enrich a line with `ctx.log.add({ ... })`; `LogFields` is scalar-only, so a raw `input`/`ctx`/`user` object cannot be dumped (also covering PII), and on emit a scrub drops a field named after a secret (`token`/`password`/`secret`/`authorization`/`cookie`) and masks a known credential shape in a value (the rule-13 prefixes) (rule 13). No `console.*` in `src/server/**`, except the sanctioned mock mailer transport. Logs go to stdout as one event stream (12-Factor); shipping/aggregation is the environment's job. See ADR-0022.
-    *Verification:* `rg -n "console\.(log|info|warn|error|debug)" src/server --glob '!**/__test__/**'` returns only `src/server/integrations/gateway/mailer/transports/console.ts` (the mock mailer). **Compliant today** — added in `025-structured-logging` (2026-08-24, ADR-0022).
-
----
+30. **Domain/Procedure does NOT import `PrismaClient`/`@prisma/client`/the Prisma driver directly.** — [`rules/30-domain-procedure-does-not-import-prismaclient.md`](./rules/30-domain-procedure-does-not-import-prismaclient.md)
+31. **A route handler (`src/app/api/**/route.ts`) is thin.** — [`rules/31-a-route-handler-src-app-api.md`](./rules/31-a-route-handler-src-app-api.md)
+32. **No direct commit to `main`/`develop`.** — [`rules/32-no-direct-commit-to-main-develop.md`](./rules/32-no-direct-commit-to-main-develop.md)
+33. **A boundary error is classified: recoverable (`AppError`) vs. bug.** — [`rules/33-a-boundary-error-is-classified-recoverable.md`](./rules/33-a-boundary-error-is-classified-recoverable.md)
+34. **PR title and body in English.** — [`rules/34-pr-title-and-body-in-english.md`](./rules/34-pr-title-and-body-in-english.md)
+35. **`src/shared/**` does not import `@trpc/*`.** — [`rules/35-src-shared.md`](./rules/35-src-shared.md)
+36. **The boundary emits one canonical log line per call; the logger never carries a secret.** — [`rules/36-the-boundary-emits-one-canonical-log.md`](./rules/36-the-boundary-emits-one-canonical-log.md)
 
 ## 3.1 Forward-only rules
 
@@ -204,9 +191,9 @@ Retroactive adoption via `/afm:refactor` on **2026-06-30**. The rules below appl
 
 | Rule | Reason for forward-only | Violation found | Tech debt tracked in |
 | --- | --- | --- | --- |
-| 1 — TDD/coverage | Backend coverage grew to ~90% by applying this rule to new code over time — no retroactive sweep needed (measured 2026-08-25, v8: `src/server`+`lib`+`shared` ~90.5% lines, `server/features` domain+procedures 98.9%, 86 test files / 411 tests + an integration suite). The remaining uncovered surface is frontend (`src/app`/`src/components` ~0%), deferred with the frontend refactor. | frontend `app`/`components` ~0% (whole-repo ~52%) | `[A DEFINIR — closes with the frontend refactor]` |
-| 2 — zero `any`/`unknown` | Small volume, but still present in legacy helpers/components; does not block in-flight PRs until the boy-scout reaches it. | 5 occurrences | `[A DEFINIR]` |
-| 5 — vague naming | 2 files without a domain prefix (`src/lib/utils.ts`, `src/server/infra/container/helpers.ts`). Renaming/splitting needs a review of every import. | `src/lib/utils.ts`, `src/server/infra/container/helpers.ts` | `[A DEFINIR]` |
+| 1 — TDD/coverage | Backend coverage grew to ~90% by applying this rule to new code over time — no retroactive sweep needed (measured 2026-08-25, v8: `src/server`+`lib`+`shared` ~90.5% lines, `server/features` domain+procedures 98.9%, 86 test files / 411 tests + an integration suite). The remaining uncovered surface is frontend (`src/app`/`src/components` ~0%), deferred with the frontend refactor. | frontend `app`/`components` ~0% (whole-repo ~52%) | `[TBD — closes with the frontend refactor]` |
+| 2 — zero `any`/`unknown` | Small volume, but still present in legacy helpers/components; does not block in-flight PRs until the boy-scout reaches it. | 5 occurrences | `[TBD]` |
+| 5 — vague naming | 2 files without a domain prefix (`src/lib/utils.ts`, `src/server/infra/container/helpers.ts`). Renaming/splitting needs a review of every import. | `src/lib/utils.ts`, `src/server/infra/container/helpers.ts` | `[TBD]` |
 | 6 — file ≤300 lines | Resolved by the `entities/` → `models/` migration (ADR-0007); kept as a forward-only rule for new code. | 0 production files >300 lines | — |
 
 **Boy-scout criterion:** when you edit a legacy file that violates a forward-only rule, bring it to compliance in the same PR if the scope justifies. Otherwise, open a separate issue and link it.

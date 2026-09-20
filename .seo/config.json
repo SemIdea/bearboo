@@ -1,0 +1,32 @@
+{
+	"version": "1.0.0",
+	"site": {
+		"url": "https://bearboo-eight.vercel.app",
+		"gscProperty": "https://bearboo-eight.vercel.app/",
+		"locale": "en-US",
+		"country": "us"
+	},
+	"output": {
+		"kind": "cms",
+		"contentDir": "prisma",
+		"slugPattern": "{slug}"
+	},
+	"corpus": {
+		"id": "bearbooeightvercelapp"
+	},
+	"audit": {
+		"sourceGlobs": ["src/app/**/*.ts", "src/app/**/*.tsx"]
+	},
+	"editorial": {
+		"defaultAuthor": "semidea",
+		"authors": [
+			{
+				"id": "semidea",
+				"name": "SemIdea",
+				"accountable": true,
+				"identityKind": "org-byline",
+				"sameAs": ["https://github.com/SemIdea"]
+			}
+		]
+	}
+}

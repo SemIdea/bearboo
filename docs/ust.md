@@ -3,7 +3,7 @@
 > Live backlog of stories. Every new feature/change starts as a US.
 > Status flows: `draft` → `ready` → `in_progress` → `done` (or `cancelled` with a reason).
 >
-> The stories below were **reverse-engineered from existing tests** (`controller.test.ts`) during the retroactive adoption via `/afm:refactor` on 2026-06-30. Persona is `[A DEFINIR]` — comes from the interview.
+> The stories below were **reverse-engineered from existing tests** (`controller.test.ts`) during the retroactive adoption via `/afm:refactor` on 2026-06-30. Persona is `[TBD]` — comes from the interview.
 
 ## Conventions
 
@@ -34,6 +34,9 @@
 | US-016 | Authenticated user uploads and manages media | Media | RF-13 | done |
 | US-017 | Dev resolves domain error without duplicated code per procedure | System Quality | RF-14 | done |
 | US-018 | Dev observes one structured log line per operation | System Quality | RF-14 | done |
+| US-019 | Operator/monitor checks app and database liveness | System Quality | RF-15 | done |
+| US-020 | Dev keeps the dependency tree free of known vulnerabilities | System Quality | RNF-03 | done |
+| US-021 | Crawler gets complete page metadata | System Quality | RF-10 | done |
 
 ## Technical Pending Items
 
@@ -41,7 +44,20 @@
 - ~~Investigate whether the same pluggable-transport pattern used in the mailer can be applied to Prisma, to reduce duplication between runtime, tests, and other adapters.~~ **Resolved on 2026-07-06** — adopted `prisma-mock` (a PrismaClient fake generated from the schema) at the driver seam; hand-written fakes in `src/test/repositories/` deleted. See ADR-0011 and `docs/research/001-teste-prisma-sem-banco-real.md`.
 - ~~Investigate why the token sent in emails does not work when the link is opened. The registration/verification flow seems to build the link correctly, but the final route does not complete the expected action.~~ **Resolved on 2026-07-11** — mismatch bug between the built link (`?token=`, query param) and the route `src/app/(smal)/auth/verify/[token]/page.tsx` (path param); fixed in `register.ts` and `resendVerificationEmail.ts` to build the link as `/auth/verify/${token}`, matching the pattern already used by the password reset flow (`sendResetPasswordEmail.ts`). Regression tests added in both `controller.test.ts` files.
 - ~~`src/context/trpc/fetcher.ts` (`customFetcher`) reimplemented by hand the parsing of the `httpBatchLink` error envelope (array + `error.json.message` from superjson) to decide whether to refresh the session.~~ **Resolved on 2026-07-12** — logic moved to `src/context/trpc/sessionRefreshLink.ts`, a custom tRPC link (`opts.next(op)`) that receives the already-typed error (`TRPCClientError.data.code`/`.message`) instead of raw JSON; `fetcher.ts` deleted. See `docs/features/008-trpc-error-link/`. Treated as a standalone item (not folded into `001-auth-hardening`, which remains `draft` and covers a different security scope — see `008-trpc-error-link/spec.md` § 6).
-- `/post/[slug]` (`docs/features/002-post-slug/`) now correctly calls `notFound()` when the slug does not exist (**2026-07-11**, previously it fell through to the generic `error.tsx` — see commit `a620cde`), but the HTTP status of the response is still `200`, not `404`. **Investigated and reclassified on 2026-07-12** (`docs/features/009-post-404-status/`): the original hypothesis ("taking the post out of the `<Suspense>` fixes it, at the cost of losing the loading fallback") **was wrong** — with `cacheComponents: true` (`next.config.ts`), Next.js requires a `<Suspense>` boundary around any uncached dynamic read; removing it breaks the entire `next build` (`Uncached data was accessed outside of <Suspense>`), it is not a UX trade-off. `export const dynamic = "force-dynamic"` no longer exists as an escape hatch (removed together with Cache Components in Next 16). See `docs/gotchas.md` § Cache Components. A real fix would require checking the slug **outside** the Cache Components pipeline (e.g. `middleware`/`proxy` on the Edge) — new infrastructure, not a point fix. **Owner decision (2026-07-12): accept as a known limitation for now**, without investing in the new infrastructure; reopen if it becomes a real blocker (e.g. SEO starts requiring a real 404). Relevant for roadmap Phase 5 (SEO) — bots that check HTTP status will not see a real 404.
+- `/post/[slug]` (`docs/features/002-post-slug/`) now correctly calls `notFound()` when the slug does not exist (**2026-07-11**, previously it fell through to the generic `error.tsx` — see commit `a620cde`), but the HTTP status of the response is still `200`, not `404`. **Investigated and reclassified on 2026-07-12** (`docs/features/009-post-404-status/`): the original hypothesis ("taking the post out of the `<Suspense>` fixes it, at the cost of losing the loading fallback") **was wrong** — with `cacheComponents: true` (`next.config.ts`), Next.js requires a `<Suspense>` boundary around any uncached dynamic read; removing it breaks the entire `next build` (`Uncached data was accessed outside of <Suspense>`), it is not a UX trade-off. `export const dynamic = "force-dynamic"` no longer exists as an escape hatch (removed together with Cache Components in Next 16). See `docs/gotchas/004-next-js-cache-components-cachecomponents-true.md` § Cache Components. A real fix would require checking the slug **outside** the Cache Components pipeline (e.g. `middleware`/`proxy` on the Edge) — new infrastructure, not a point fix. **Owner decision (2026-07-12): accept as a known limitation for now**, without investing in the new infrastructure; reopen if it becomes a real blocker (e.g. SEO starts requiring a real 404). Relevant for roadmap Phase 5 (SEO) — bots that check HTTP status will not see a real 404. **Reaffirmed on 2026-09-16** (`030-seo-metadata-fixes`): the audited page carried **no** `noindex` (the earlier observation belonged to `/api/health`, a real 404); with that corrected evidence the owner reopened the gate and the fix landed — `src/proxy.ts` now probes the slug and returns a real `404` (see `docs/gotchas/012-a-missing-post-slug-answers.md`).
+
+### Backend improvement candidates (scan 2026-09-16)
+
+- **Analytics flush is lazy and lossy.** `analytics.readDashboard` is the only trigger that drains the Redis buffer to Postgres (`analytics/domain/readDashboard.ts`), so `Post.viewCount` stays stale until an Admin/Editor opens the dashboard — the public `post.search` with `sortBy: "mostViewed"` orders by that stale column. The drain itself uses blocking `KEYS` plus a non-atomic GET/DEL (`viewCounter/implementations/redis.ts`), inserts one row per event, applies counts without a transaction, and leaves `ioredis` without an `error` listener; `domain_recordView` swallows every gateway failure without a log. Candidate follow-up `analytics-flush-durability`.
+- **No Prisma constraint-error mapping.** `rg P2002` returns 0: two concurrent post creates can pick the same slug in `resolveAvailableSlug` and surface a unique violation as a bug (500). `BaseModel.delete`/`PostModel.delete` also swallow every error as `false` ("not found") — a database failure looks like a missing row. Candidate follow-up `prisma-constraint-errors`.
+- **Tokens stored in plaintext.** `Session.accessToken`/`refreshToken`, `VerificationToken.token`, and `ResetToken.token` are written raw, and expired rows are never deleted. A database leak allows session hijacking; hashing at rest (SHA-256 is enough for high-entropy tokens) plus lazy cleanup closes it. Candidate follow-up `token-hashing-at-rest`.
+- **Rate limiting is per-process and narrow.** `lib/rateLimit/implementations/inMemory.ts` keeps counters in process memory (ineffective on serverless/multi-instance) and only 4 auth procedures call `assertRateLimit`; `analytics.recordView` is public, writes to Redis, and has no limit. Redis is already available. Candidate follow-up `rate-limit-redis-general` (overlaps roadmap Phase 9).
+- **Missing indexes on foreign keys and list filters.** Postgres does not index FK columns: `Session.accessToken`/`refreshToken` (one scan per authenticated request), `Post(status, createdAt)` / `Post(status, scheduledAt)`, `Post.userId`/`categoryId`, `Comment.postId`/`userId`, `PostTag.tagId`, `VerificationToken.userId`, `ResetToken.userId`, `PostReviewComment.postId`. Candidate follow-up `backend-indexes` — the integration harness (026) can assert the plans with EXPLAIN.
+- **Boundary and payload trimming on post reads.** `postRelationsInclude` loads every `Comment.id` of each listed post although no consumer reads them (replace with `_count` or drop); `readUserPosts`/`readOwnPosts` have no pagination. Candidate follow-up `post-read-payload`.
+- **`recordView` input is loose and unbounded.** `postId: z.string()` (should be `z.uuid()`) and `userAgent`/`referer` come raw from headers into an unbounded `String` column. Candidate follow-up `record-view-boundary`.
+- **Production env is not validated.** `lib/env/index.ts` defaults everything, including `MAIL_FROM_PASS: "your_email_password"` and a localhost `DATABASE_URL`; production should fail fast on a missing required var (the class of bug fixed by `fix/email-links-use-site-url`). Candidate follow-up `env-validation-production`.
+- **Media delete order.** `media/domain/delete.ts` removes the storage file before the database row — a row-delete failure leaves a dangling record. Candidate follow-up `media-delete-ordering`.
+- **Health check and request correlation.** No `/api/health`; the canonical log line carries no request id (roadmap Phase 11). Candidate follow-up `health-request-id`.
 
 ---
 
@@ -49,7 +65,7 @@
 
 ### US-001 — [Persona] registers a new account
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to create an account with email/password/name so I can publish posts and comment.
 
 **Acceptance criteria:**
@@ -77,7 +93,7 @@ Scenario: Email already registered
 
 ### US-002 — [Persona] logs in
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to log in with email/password so I can create an authenticated session.
 
 **Acceptance criteria:**
@@ -100,7 +116,7 @@ Scenario: Login with a nonexistent user
 
 ### US-003 — [Persona] refreshes or ends (logout) the session
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want my session to renew automatically, and I want to be able to log out explicitly.
 
 **Acceptance criteria:**
@@ -133,7 +149,7 @@ Scenario: Logout with a nonexistent session or user
 
 ### US-004 — [Persona] verifies the account email
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to verify my email via token to unlock the account, and resend the token if needed.
 
 **Acceptance criteria:**
@@ -166,7 +182,7 @@ Scenario: Resend with a nonexistent email
 
 ### US-005 — [Persona] recovers a forgotten password
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to request a password reset by email and set a new password via token.
 
 **Acceptance criteria:**
@@ -199,7 +215,7 @@ Scenario: Reset with an invalid, used, or expired token, or mismatched passwords
 
 ### US-010 — [Persona] acts according to their role (Admin/Editor/Author)
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]` with a role (`ADMIN`/`EDITOR`/`AUTHOR`), I want the system to only let me do what my role allows — and let Admin/Editor act on any user's content, while Author can only act on their own.
 
 **Acceptance criteria:**
@@ -234,7 +250,7 @@ Scenario: Admin promotes another user
 
 ### US-011 — [Persona] publishes a post via review workflow
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]` with a role (`ADMIN`/`EDITOR`/`AUTHOR`), I want publishing a post to follow a review workflow — Author submits for review, Admin/Editor approves/rejects/publishes/schedules/archives — instead of any owner freely publishing/archiving their own post.
 
 **Acceptance criteria:**
@@ -282,7 +298,7 @@ Scenario: Author tries to publish or archive their own post directly
 
 ### US-012 — [Persona] shares and indexes a post with full SEO
 
-- **Persona:** `[A DEFINIR]` (external reader/search engine — not an authenticated role in the system).
+- **Persona:** `[TBD]` (external reader/search engine — not an authenticated role in the system).
 - **Story:** As a reader sharing a post link (Discord/LinkedIn/WhatsApp) or as a search engine indexing the site, I want every published post to have complete metadata (canonical, Open Graph with image, Twitter Card, schema.org) and the site to expose sitemap/robots/RSS, so previews are rich and indexing works.
 
 **Acceptance criteria:**
@@ -315,7 +331,7 @@ Scenario: Shared post has a rich preview
 
 ### US-013 — [Persona] searches posts by title or content
 
-- **Persona:** `[A DEFINIR]` (public blog reader — not an authenticated role in the system).
+- **Persona:** `[TBD]` (public blog reader — not an authenticated role in the system).
 - **Story:** As a reader browsing the blog, I want to search posts by a keyword present in the title or content, with suggestions as I type, so I can find a specific post without scrolling the chronological listing.
 
 **Acceptance criteria:**
@@ -452,7 +468,7 @@ Scenario: The new slug collides with an existing one
 
 ### US-006 — [Persona] creates and reads posts
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to publish a post and be able to read it (individually or among recent posts).
 
 **Acceptance criteria:**
@@ -504,7 +520,7 @@ Scenario: A duplicate title generates a slug with a suffix
 
 ### US-007 — [Persona] updates, revalidates, and deletes a post
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to edit, revalidate (ISR), or remove my own posts.
 
 **Acceptance criteria:**
@@ -544,7 +560,7 @@ Scenario: Nonexistent post or another user's post
 
 ### US-008 — [Persona] comments on posts
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to create, list, update, and delete comments on posts.
 
 **Acceptance criteria:**
@@ -584,7 +600,7 @@ Scenario: Nonexistent comment or another user's comment
 
 ### US-009 — [Persona] views and edits their own profile
 
-- **Persona:** `[A DEFINIR]`.
+- **Persona:** `[TBD]`.
 - **Story:** As a `[persona]`, I want to see my profile (with posts/comments) and edit my name/bio.
 
 **Acceptance criteria:**
