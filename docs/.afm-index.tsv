@@ -11,6 +11,8 @@ gotcha	008-zod-v3-v4-string-format-validators	warm	event				gotchas/008-zod-v3-v
 gotcha	009-trpc-a-bare-t-procedure-skips	warm	event				gotchas/009-trpc-a-bare-t-procedure-skips.md	tRPC — a bare `t.procedure` skips the error-translation middleware
 gotcha	010-prisma-never-db-push-migrate-dev	warm	event				gotchas/010-prisma-never-db-push-migrate-dev.md	Prisma — never `db push` / `migrate dev` on a model with an `Unsupported` generated column
 gotcha	011-dependabot-alerts-track-the-default-branch	warm	event				gotchas/011-dependabot-alerts-track-the-default-branch.md	Dependabot — alerts are evaluated against the default branch, not the branch you are on
+research	005-google-indexing	cold	op-call				research/005-google-indexing.md	How to get this blog crawled and indexed by Google: the discovery channels that work, the Search Console operations, and the priorities after the basic SEO.
+research	006-vercel-app-indexing	cold	op-call				research/006-vercel-app-indexing.md	How to get a site hosted on the free *.vercel.app host indexed by Google, what verification is possible without owning a domain, and the limits of not buying one.
 gotcha	012-a-missing-post-slug-answers	warm	event				gotchas/012-a-missing-post-slug-answers.md	A missing `/post/<slug>` answered HTTP 200 — fixed with a Proxy existence check on 2026-09-16
 rubric	error-classification	warm	file-shape		*/domain/*	(\b(TRPCError|HttpException|HTTPException|ApiError|ResponseError)\b|throw[[:space:]]+new[[:space:]]+Error\()	rubrics/error-classification.md	Separates a domain error from a procedure error and from an infrastructure error.
 rubric	negative-filters	warm	op-call				rubrics/negative-filters.md	Rejects what must not become a durable doc, because a false constraint is poison.

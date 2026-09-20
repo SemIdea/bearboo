@@ -19,7 +19,7 @@ okf_version: "0.2"
 * [gotchas](gotchas/) - 12 files
 * [learn](learn/) - 0 files
 * [protocols](protocols/) - 3 files
-* [research](research/) - 4 files
+* [research](research/) - 6 files
 * [rubrics](rubrics/) - 12 files
 * [rules](rules/) - 29 files
 * [sessions](sessions/) - 17 files
