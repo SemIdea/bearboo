@@ -1,5 +1,7 @@
 type IArticleJsonLdInput = {
 	siteUrl: string;
+	siteName: string;
+	inLanguage: string;
 	slug: string;
 	title: string;
 	description: string;
@@ -15,13 +17,19 @@ const buildArticleJsonLd = (input: IArticleJsonLdInput): string => {
 		"@type": "Article",
 		headline: input.title,
 		description: input.description,
-		image: input.imageUrl ? [input.imageUrl] : undefined,
+		image: [input.imageUrl ?? `${input.siteUrl}/opengraph-image`],
 		datePublished: input.createdAt.toISOString(),
 		dateModified: input.updatedAt.toISOString(),
 		author: {
 			"@type": "Person",
 			name: input.authorName,
 		},
+		publisher: {
+			"@type": "Organization",
+			name: input.siteName,
+			url: input.siteUrl,
+		},
+		inLanguage: input.inLanguage,
 		mainEntityOfPage: `${input.siteUrl}/post/${input.slug}`,
 	};
 
