@@ -5,6 +5,7 @@ import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
+import { Spinner } from "@/components/ui/spinner";
 import { getErrorMessage } from "@/lib/error";
 
 const useCheckEmailLogic = () => {
@@ -66,6 +67,7 @@ const ResendEmailButton = () => {
 				className="w-full"
 				type="button"
 			>
+				{isResending && <Spinner />}
 				{isResending ? "Sending..." : "Resend verification email"}
 			</Button>
 			<ErrorMessage error={errorMessage} />

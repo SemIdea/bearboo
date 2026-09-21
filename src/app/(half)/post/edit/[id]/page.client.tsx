@@ -8,6 +8,7 @@ import { CoverImageMediaPicker } from "@/components/mediaPicker";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { MdEditor } from "@/components/ui/mdEditor";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/context/auth";
 import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { getErrorMessage } from "@/lib/error";
@@ -99,6 +100,7 @@ const DeletePostButton = ({ post }: { post: IPostEntity }) => {
 			onClick={handleDeletePost}
 			disabled={isDeleting}
 		>
+			{isDeleting && <Spinner />}
 			{isDeleting ? "Deleting Post..." : "Delete Post"}
 		</Button>
 	);
@@ -141,6 +143,7 @@ const UpdatePostForm = ({ post }: { post: IPostEntity }) => {
 				placeholder="https://... (e.g. cross-posted original)"
 			/>
 			<Button type="submit" disabled={isUploading}>
+				{isUploading && <Spinner />}
 				{isUploading ? "Editing Post..." : "Edit Post"}
 			</Button>
 			<ErrorMessage error={errorMessage} />
@@ -173,29 +176,33 @@ const PostWorkflowActions = ({ post }: { post: IPostEntity }) => {
 		setErrorMessage(getErrorMessage(error.message));
 	};
 
-	const { mutate: submitForReview } = trpc.post.submitForReview.useMutation({
-		onSuccess: invalidate,
-		onError,
-	});
-	const { mutate: publish } = trpc.post.publish.useMutation({
-		onSuccess: () => {
-			setComment("");
-			setScheduledAt("");
-			invalidate();
-		},
-		onError,
-	});
-	const { mutate: reject } = trpc.post.reject.useMutation({
-		onSuccess: () => {
-			setComment("");
-			invalidate();
-		},
-		onError,
-	});
-	const { mutate: archive } = trpc.post.archive.useMutation({
-		onSuccess: invalidate,
-		onError,
-	});
+	const { mutate: submitForReview, isPending: isSubmittingForReview } =
+		trpc.post.submitForReview.useMutation({
+			onSuccess: invalidate,
+			onError,
+		});
+	const { mutate: publish, isPending: isPublishing } =
+		trpc.post.publish.useMutation({
+			onSuccess: () => {
+				setComment("");
+				setScheduledAt("");
+				invalidate();
+			},
+			onError,
+		});
+	const { mutate: reject, isPending: isRejecting } =
+		trpc.post.reject.useMutation({
+			onSuccess: () => {
+				setComment("");
+				invalidate();
+			},
+			onError,
+		});
+	const { mutate: archive, isPending: isArchiving } =
+		trpc.post.archive.useMutation({
+			onSuccess: invalidate,
+			onError,
+		});
 
 	if (!session) return null;
 
@@ -212,7 +219,9 @@ const PostWorkflowActions = ({ post }: { post: IPostEntity }) => {
 						type="button"
 						variant="outline"
 						onClick={() => submitForReview({ id: post.id })}
+						disabled={isSubmittingForReview}
 					>
+						{isSubmittingForReview && <Spinner />}
 						Submit for review
 					</Button>
 				)}
@@ -229,7 +238,9 @@ const PostWorkflowActions = ({ post }: { post: IPostEntity }) => {
 									comment: comment || undefined,
 								})
 							}
+							disabled={isPublishing}
 						>
+							{isPublishing && <Spinner />}
 							{scheduledAt ? "Schedule" : "Publish"}
 						</Button>
 					)}
@@ -245,7 +256,9 @@ const PostWorkflowActions = ({ post }: { post: IPostEntity }) => {
 							}
 							reject({ id: post.id, comment });
 						}}
+						disabled={isRejecting}
 					>
+						{isRejecting && <Spinner />}
 						Reject
 					</Button>
 				)}
@@ -255,7 +268,9 @@ const PostWorkflowActions = ({ post }: { post: IPostEntity }) => {
 						type="button"
 						variant="destructive"
 						onClick={() => archive({ id: post.id })}
+						disabled={isArchiving}
 					>
+						{isArchiving && <Spinner />}
 						Archive
 					</Button>
 				)}

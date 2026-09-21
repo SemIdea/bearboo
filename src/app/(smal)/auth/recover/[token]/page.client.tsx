@@ -5,6 +5,7 @@ import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
+import { Spinner } from "@/components/ui/spinner";
 import { getErrorMessage } from "@/lib/error";
 import {
 	ResetPasswordInput,
@@ -67,6 +68,7 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
 				placeholder="Confirm your new password"
 			/>
 			<Button type="submit" className="w-full" disabled={isLoading}>
+				{isLoading && <Spinner />}
 				{isLoading ? "Resetting..." : "Reset Password"}
 			</Button>
 			{successMessage && (

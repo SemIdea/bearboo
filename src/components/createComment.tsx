@@ -9,6 +9,7 @@ import { CardBase } from "./cardBase";
 import { Button } from "./ui/button";
 import { ErrorMessage } from "./ui/errorMessage";
 import { MdEditor } from "./ui/mdEditor";
+import { Spinner } from "./ui/spinner";
 
 type ICommentHook = {
 	comments: ICommentEntityWithUser[];
@@ -88,6 +89,7 @@ const CommentEditor = ({
 						setComment("");
 					}}
 				>
+					{isSubmiting && <Spinner />}
 					{isSubmiting ? "Submitting..." : "Submit"}
 				</Button>
 			</div>

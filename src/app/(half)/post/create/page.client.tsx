@@ -8,6 +8,7 @@ import { CoverImageMediaPicker } from "@/components/mediaPicker";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { MdEditor } from "@/components/ui/mdEditor";
+import { Spinner } from "@/components/ui/spinner";
 import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { getErrorMessage } from "@/lib/error";
 import {
@@ -73,6 +74,7 @@ const CreatePostForm = () => {
 				</select>
 			</InputField>
 			<Button type="submit" disabled={isSubmitting}>
+				{isSubmitting && <Spinner />}
 				{isSubmitting ? "Creating Post..." : "Create Post"}
 			</Button>
 			<ErrorMessage error={errorMessage} />

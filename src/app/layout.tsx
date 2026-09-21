@@ -1,8 +1,9 @@
 import "@/styles/globals.css";
 import clsx from "clsx";
 import { Metadata, Viewport } from "next";
+import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { fontSans } from "@/config/fonts";
+import { fontMono, fontSans } from "@/config/fonts";
 import { env } from "@/lib/env";
 import { buildRootMetadata } from "@/lib/seo/metadata";
 import { Providers } from "./providers";
@@ -25,15 +26,15 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 			<head />
 			<body
 				className={clsx(
-					"min-h-screen bg-background font-sans antialiased",
+					"flex min-h-screen flex-col bg-background font-sans antialiased",
 					fontSans.variable,
+					fontMono.variable,
 				)}
 			>
 				<Providers>
 					<Header />
-					<div className="relative flex flex-col">
-						<div className="flex justify-center w-full">{children}</div>
-					</div>
+					<main className="flex-1">{children}</main>
+					<Footer />
 				</Providers>
 			</body>
 		</html>

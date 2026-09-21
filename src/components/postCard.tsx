@@ -1,40 +1,39 @@
 import { formatDistance } from "date-fns";
 import Link from "next/link";
 import { IPostEntityWithRelations } from "@/server/models/post";
-import { By } from "./ui/by";
-import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
+import { CategoryChip } from "./ui/categoryChip";
 
 type PostCardProps = {
 	post: IPostEntityWithRelations;
-	index: number;
 };
 
-const PostCard = ({ post, index }: PostCardProps) => {
+const PostCard = ({ post }: PostCardProps) => {
 	const createdDistance = formatDistance(new Date(post.createdAt), new Date(), {
 		addSuffix: true,
 	});
 
 	return (
-		<Card className="border-0 shadow-none">
-			<CardContent>
-				{post.coverImageUrl && (
-					<img
-						src={post.coverImageUrl}
-						alt={post.title}
-						className="mb-2 h-40 w-full rounded object-cover"
-					/>
-				)}
-				<CardTitle className="flex">
-					<span className="mr-2">{index + 1}.</span>
-					<Link href={`/post/${post.slug}`} className="hover:underline">
-						<h2 className="font-semibold">{post.title}</h2>
-					</Link>
-				</CardTitle>
-				<CardDescription className="ml-5">
-					<By name={post.user.name} id={post.user.id} /> {createdDistance}
-				</CardDescription>
-			</CardContent>
-		</Card>
+		<Link
+			href={`/post/${post.slug}`}
+			className="group flex flex-col gap-4 border-b border-border py-7 last:border-0 sm:flex-row sm:gap-6"
+		>
+			{post.coverImageUrl && (
+				<img
+					src={post.coverImageUrl}
+					alt=""
+					className="h-44 w-full shrink-0 rounded-lg bg-muted object-cover sm:h-[120px] sm:w-[180px]"
+				/>
+			)}
+			<div className="flex min-w-0 flex-col gap-2">
+				{post.category && <CategoryChip name={post.category.name} />}
+				<span className="text-[22px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-brand">
+					{post.title}
+				</span>
+				<span className="text-sm font-medium text-muted-foreground">
+					By {post.user.name} · {createdDistance}
+				</span>
+			</div>
+		</Link>
 	);
 };
 

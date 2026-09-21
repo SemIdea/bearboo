@@ -1,11 +1,6 @@
-import { Suspense } from "react";
-import { PostFeed } from "@/components/postFeed";
 import { PostFeedSkeleton } from "@/components/skeletons";
-import { buildHomeMetadata } from "@/lib/seo/metadata";
 
-export const metadata = buildHomeMetadata();
-
-const Home = async () => {
+const Loading = () => {
 	return (
 		<div className="mx-auto flex w-full max-w-[680px] flex-col gap-10 px-4 pt-16 pb-24">
 			<div className="flex flex-col gap-2">
@@ -17,11 +12,9 @@ const Home = async () => {
 					building software.
 				</p>
 			</div>
-			<Suspense fallback={<PostFeedSkeleton />}>
-				<PostFeed />
-			</Suspense>
+			<PostFeedSkeleton />
 		</div>
 	);
 };
 
-export default Home;
+export default Loading;
