@@ -1,23 +1,24 @@
 import Link from "next/link";
-import { CardBase } from "../cardBase";
 import { SearchBox } from "../searchBox";
+import { ThemeSwitch } from "../theme-switch";
 import { AuthSection } from "./index.client";
 
 const Header = () => {
 	return (
-		<CardBase
-			title={
-				<div className="flex items-center justify-between">
-					<Link href="/">
-						<h2 className="text-2xl font-bold hover:underline">BearBoo</h2>
-					</Link>
-					<div className="flex items-center gap-4">
+		<header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
+			<div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-18">
+				<Link href="/" className="shrink-0">
+					<span className="text-lg font-bold tracking-tight">BearBoo</span>
+				</Link>
+				<div className="flex items-center gap-2 sm:gap-3">
+					<div className="hidden sm:block">
 						<SearchBox />
-						<AuthSection />
 					</div>
+					<AuthSection />
+					<ThemeSwitch />
 				</div>
-			}
-		/>
+			</div>
+		</header>
 	);
 };
 

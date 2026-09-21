@@ -5,6 +5,7 @@ import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
+import { Spinner } from "@/components/ui/spinner";
 import { getErrorMessage } from "@/lib/error";
 import {
 	SendResetPasswordEmailInput,
@@ -54,6 +55,7 @@ const SendResetPasswordEmailForm = () => {
 				placeholder="Enter your email"
 			/>
 			<Button type="submit" className="w-full" disabled={isSubmitting}>
+				{isSubmitting && <Spinner />}
 				{isSubmitting ? "Sending..." : "Send Recover Link"}
 			</Button>
 			{successMessage && <p className="text-green-500">{successMessage}</p>}

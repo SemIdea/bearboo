@@ -25,6 +25,8 @@
 	--color-primary: hsl(var(--primary));
 	--color-primary-foreground: hsl(var(--primary-foreground));
 
+	--color-brand: hsl(var(--brand));
+
 	--color-secondary: hsl(var(--secondary));
 	--color-secondary-foreground: hsl(var(--secondary-foreground));
 
@@ -74,8 +76,9 @@
 		--card-foreground: 240 10% 3.9%;
 		--popover: 0 0% 100%;
 		--popover-foreground: 240 10% 3.9%;
-		--primary: 240 5.9% 10%;
-		--primary-foreground: 0 0% 98%;
+		--primary: 38 92% 50%;
+		--primary-foreground: 28 60% 12%;
+		--brand: 32 85% 32%;
 		--secondary: 240 4.8% 95.9%;
 		--secondary-foreground: 240 5.9% 10%;
 		--muted: 240 4.8% 95.9%;
@@ -86,7 +89,7 @@
 		--destructive-foreground: 0 0% 98%;
 		--border: 240 5.9% 90%;
 		--input: 240 5.9% 90%;
-		--ring: 240 10% 3.9%;
+		--ring: 38 92% 50%;
 		--chart-1: 12 76% 61%;
 		--chart-2: 173 58% 39%;
 		--chart-3: 197 37% 24%;
@@ -101,8 +104,9 @@
 		--card-foreground: 0 0% 98%;
 		--popover: 240 10% 3.9%;
 		--popover-foreground: 0 0% 98%;
-		--primary: 0 0% 98%;
-		--primary-foreground: 240 5.9% 10%;
+		--primary: 40 96% 58%;
+		--primary-foreground: 28 60% 10%;
+		--brand: 40 96% 58%;
 		--secondary: 240 3.7% 15.9%;
 		--secondary-foreground: 0 0% 98%;
 		--muted: 240 3.7% 15.9%;
@@ -113,7 +117,7 @@
 		--destructive-foreground: 0 0% 98%;
 		--border: 240 3.7% 15.9%;
 		--input: 240 3.7% 15.9%;
-		--ring: 240 4.9% 83.9%;
+		--ring: 40 96% 58%;
 		--chart-1: 220 70% 50%;
 		--chart-2: 160 60% 45%;
 		--chart-3: 30 80% 55%;
@@ -130,13 +134,105 @@
 		@apply bg-background text-foreground;
 	}
 
-	.markdown-viewer * {
-		all: revert;
-	}
-
 	.markdown-editor .w-md-editor-preview * {
 		all: revert;
 	}
+}
+
+/* Article reading typography (matches the BearBoo design).
+   Higher specificity (.markdown-viewer.markdown <el>) so these win over the
+   embedded md-editor viewer styles without !important. */
+.markdown-viewer.markdown {
+	color: hsl(var(--foreground));
+	font-family: var(--font-sans), system-ui, sans-serif;
+	font-size: 17px;
+	line-height: 1.75;
+	background-color: var(--background) !important;
+}
+.markdown-viewer.markdown p {
+	margin: 0 0 22px;
+}
+.markdown-viewer.markdown h1 {
+	margin: 40px 0 16px;
+	font-size: 30px;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+}
+.markdown-viewer.markdown h2 {
+	margin: 44px 0 16px;
+	font-size: 26px;
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
+}
+.markdown-viewer.markdown h3 {
+	margin: 32px 0 12px;
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1.3;
+}
+.markdown-viewer.markdown ul,
+.markdown-viewer.markdown ol {
+	margin: 0 0 22px;
+	padding-left: 22px;
+}
+.markdown-viewer.markdown ul {
+	list-style: disc;
+}
+.markdown-viewer.markdown ol {
+	list-style: decimal;
+}
+.markdown-viewer.markdown li {
+	margin-bottom: 6px;
+}
+.markdown-viewer.markdown a {
+	color: hsl(var(--brand));
+	text-decoration: underline;
+	text-decoration-color: hsl(var(--brand) / 0.35);
+	text-underline-offset: 2px;
+}
+.markdown-viewer.markdown blockquote {
+	margin: 0 0 22px;
+	padding: 4px 0 4px 20px;
+	border-left: 3px solid hsl(var(--primary) / 0.5);
+	color: hsl(var(--muted-foreground));
+	font-style: italic;
+}
+.markdown-viewer.markdown code {
+	font-family: var(--font-mono), "Fira Code", monospace;
+	font-size: 0.88em;
+	background: hsl(var(--muted));
+	border: 1px solid hsl(var(--border));
+	border-radius: 4px;
+	padding: 2px 6px;
+}
+.markdown-viewer.markdown pre {
+	margin: 0 0 26px;
+	background: hsl(240 10% 3.9%);
+	color: hsl(0 0% 92%);
+	border: 1px solid hsl(var(--border));
+	border-radius: 8px;
+	padding: 20px 22px;
+	overflow-x: auto;
+}
+.markdown-viewer.markdown pre code {
+	background: none;
+	border: none;
+	padding: 0;
+	font-size: 14px;
+	line-height: 1.6;
+	color: inherit;
+}
+.markdown-viewer.markdown img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
+.markdown-viewer.markdown hr {
+	margin: 32px 0;
+	border: none;
+	border-top: 1px solid hsl(var(--border));
 }
 
 .markdown {

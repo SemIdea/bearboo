@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { trpc } from "@/app/_trpc/client";
+import { MyPostsSkeleton } from "@/components/skeletons";
 import {
 	Card,
 	CardContent,
@@ -101,7 +102,7 @@ const MyPostsPanel = () => {
 				</select>
 			</div>
 
-			{isLoading && <p>Loading...</p>}
+			{isLoading && <MyPostsSkeleton />}
 			{!isLoading && posts?.length === 0 && <p>No posts found.</p>}
 			{posts?.map((post) => (
 				<Card key={post.id} className="border-0 shadow-none">

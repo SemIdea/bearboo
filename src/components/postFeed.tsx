@@ -1,7 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { createCaller } from "@/server/caller";
 import { PostFeedList } from "./postFeed.client";
-import { Card, CardHeader } from "./ui/card";
 
 const PostFeed = async () => {
 	"use cache";
@@ -12,13 +11,7 @@ const PostFeed = async () => {
 
 	const { posts, nextCursor } = await caller.post.readRecent();
 
-	return (
-		<Card className="border-0 shadow-none">
-			<CardHeader>
-				<PostFeedList initialPosts={posts} initialNextCursor={nextCursor} />
-			</CardHeader>
-		</Card>
-	);
+	return <PostFeedList initialPosts={posts} initialNextCursor={nextCursor} />;
 };
 
 export { PostFeed };

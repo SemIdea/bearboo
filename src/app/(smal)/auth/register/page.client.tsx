@@ -6,6 +6,7 @@ import { trpc } from "@/app/_trpc/client";
 import { FormBase, InputField } from "@/components/formBase";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
+import { Spinner } from "@/components/ui/spinner";
 import { getErrorMessage } from "@/lib/error";
 import {
 	CreateUserInput,
@@ -62,6 +63,7 @@ const RegisterForm = () => {
 				placeholder="Enter your password"
 			/>
 			<Button type="submit" className="w-full" disabled={isLoading}>
+				{isLoading && <Spinner />}
 				{isLoading ? "Creating account..." : "Create account"}
 			</Button>
 			<ErrorMessage error={errorMessage} />
