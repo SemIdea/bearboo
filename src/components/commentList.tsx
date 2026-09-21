@@ -4,6 +4,7 @@ import { useAuth } from "@/context/auth";
 import { getErrorMessage } from "@/lib/error";
 import { ICommentEntityWithUser } from "@/server/models/comment";
 import { Comment } from "./comment";
+import { CommentsSkeleton } from "./skeletons";
 import { Separator } from "./ui/separator";
 
 type ICommentHook = {
@@ -93,7 +94,7 @@ const CommentList = ({ commentHook }: { commentHook: ICommentHook }) => {
 		handleDelete,
 	} = useDeleteComment(deleteLocalComment);
 
-	if (isLoading) return <p>Loading comments...</p>;
+	if (isLoading) return <CommentsSkeleton />;
 	if (!comments || comments.length === 0) return <p>No comments yet.</p>;
 
 	return comments.map((comment, index) => (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { trpc } from "@/app/_trpc/client";
+import { MediaPickerSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 
 const CoverImageMediaPicker = () => {
@@ -24,9 +25,7 @@ const CoverImageMediaPicker = () => {
 			</Button>
 			{isOpen && (
 				<div className="flex flex-wrap gap-2 rounded-md border border-input p-2">
-					{isLoading && (
-						<p className="text-muted-foreground text-sm">Loading media...</p>
-					)}
+					{isLoading && <MediaPickerSkeleton />}
 					{!isLoading && media?.length === 0 && (
 						<p className="text-muted-foreground text-sm">
 							No media uploaded yet.{" "}

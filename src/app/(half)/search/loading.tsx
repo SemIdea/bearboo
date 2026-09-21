@@ -1,16 +1,12 @@
-import { Suspense } from "react";
 import { SearchResultsSkeleton } from "@/components/skeletons";
-import { SearchResults } from "./page.client";
 
-const Page = () => {
+const Loading = () => {
 	return (
 		<div className="mx-auto flex w-full max-w-[680px] flex-col gap-8 pt-14 pb-24">
 			<h1 className="text-3xl font-bold tracking-tight">Search</h1>
-			<Suspense fallback={<SearchResultsSkeleton />}>
-				<SearchResults />
-			</Suspense>
+			<SearchResultsSkeleton />
 		</div>
 	);
 };
 
-export default Page;
+export default Loading;

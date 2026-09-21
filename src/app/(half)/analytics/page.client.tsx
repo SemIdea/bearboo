@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { trpc } from "@/app/_trpc/client";
+import { AnalyticsSkeleton } from "@/components/skeletons";
 
 const REFERRER_BUCKET_LABEL: Record<string, string> = {
 	DIRECT: "Direct",
@@ -14,7 +15,7 @@ const AnalyticsDashboard = () => {
 	const { data, isLoading, error } = trpc.analytics.readDashboard.useQuery();
 
 	if (isLoading) {
-		return <p>Loading analytics...</p>;
+		return <AnalyticsSkeleton />;
 	}
 
 	if (error) {

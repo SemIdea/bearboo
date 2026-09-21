@@ -3,8 +3,10 @@ import { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
-import { CardBase } from "@/components/cardBase";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { ArticleSkeleton } from "@/components/skeletons";
 import { By } from "@/components/ui/by";
+import { CategoryChip } from "@/components/ui/categoryChip";
 import { MdView } from "@/components/ui/mdView";
 import { ViewTracker } from "@/components/viewTracker";
 import { siteConfig } from "@/config/site";
@@ -87,7 +89,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const Page = (props: PageProps) => {
 	return (
-		<Suspense fallback={<p>Loading post...</p>}>
+		<Suspense fallback={<ArticleSkeleton />}>
 			<PostContent params={props.params} />
 		</Suspense>
 	);
@@ -121,7 +123,7 @@ const PostContent = async ({ params: paramsPromise }: PageProps) => {
 			}
 
 			return (
-				<Suspense fallback={<p>Loading post...</p>}>
+				<Suspense fallback={<ArticleSkeleton />}>
 					<OwnerPreview slug={slug} />
 				</Suspense>
 			);
@@ -180,47 +182,52 @@ const PostView = ({ post, user }: { post: Post; user: User }) => {
 	});
 
 	return (
-		<CardBase
-			title="Post Details"
-			description={
-				<p>
+		<article className="mx-auto w-full max-w-[700px] pb-24">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: articleJsonLd }}
+			/>
+			{post.status !== "PUBLISHED" && (
+				<div className="mt-8 flex items-center gap-2.5 rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-medium">
+					<FaExclamationTriangle className="size-4 shrink-0 text-brand" />
+					<span>
+						{post.status === "DRAFT"
+							? "Draft — only you can see this."
+							: "Archived — only you can see this."}
+					</span>
+				</div>
+			)}
+			<header className="flex flex-col gap-4 pt-12">
+				{post.category && <CategoryChip name={post.category.name} />}
+				<h1 className="text-[42px] font-bold leading-[1.1] tracking-tight">
+					{post.title}
+				</h1>
+				<p className="text-sm text-muted-foreground">
 					<By name={user.name} id={user.id} />
 					{createdAt}
-					{isUpdated ? ` (edited ${updatedAt})` : ""}
+					{isUpdated ? ` · edited ${updatedAt}` : ""}
 				</p>
-			}
-			content={
-				<div className="flex flex-col gap-4">
-					<script
-						type="application/ld+json"
-						dangerouslySetInnerHTML={{ __html: articleJsonLd }}
-					/>
-					{post.status !== "PUBLISHED" && (
-						<p className="rounded bg-yellow-100 px-3 py-2 text-sm text-yellow-900">
-							{post.status === "DRAFT"
-								? "Draft — only you can see this."
-								: "Archived — only you can see this."}
-						</p>
-					)}
-					{post.coverImageUrl && (
-						<img
-							src={post.coverImageUrl}
-							alt={post.title}
-							className="max-h-96 w-full rounded object-cover"
-						/>
-					)}
-					<h1 className="text-4xl font-bold">{post.title}</h1>
-					<MdView source={post.content} />
-					<ViewTracker postId={post.id} />
-					<CommentArea postId={post.id} />
-					<RelatedPosts
-						postId={post.id}
-						categoryId={post.category?.id ?? null}
-						tagIds={post.tags.map((tag) => tag.id)}
-					/>
-				</div>
-			}
-		/>
+			</header>
+			{post.coverImageUrl && (
+				<img
+					src={post.coverImageUrl}
+					alt={post.title}
+					className="mt-8 h-[360px] w-full rounded-xl bg-muted object-cover"
+				/>
+			)}
+			<div className="mt-10">
+				<MdView source={post.content} />
+			</div>
+			<ViewTracker postId={post.id} />
+			<RelatedPosts
+				postId={post.id}
+				categoryId={post.category?.id ?? null}
+				tagIds={post.tags.map((tag) => tag.id)}
+			/>
+			<div className="mt-14">
+				<CommentArea postId={post.id} />
+			</div>
+		</article>
 	);
 };
 

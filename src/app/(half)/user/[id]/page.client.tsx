@@ -4,6 +4,10 @@ import { formatDistance } from "date-fns";
 import Link from "next/link";
 import { BsThreeDots } from "react-icons/bs";
 import { trpc } from "@/app/_trpc/client";
+import {
+	UserCommentsSkeleton,
+	UserPostsSkeleton,
+} from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -40,7 +44,7 @@ const UserPosts = ({ id }: { id: string }) => {
 
 	return (
 		<>
-			{isLoading && <p>Loading posts...</p>}
+			{isLoading && <UserPostsSkeleton count={5} />}
 			{!isLoading && !posts?.length && <p>No posts found.</p>}
 			{posts?.length && (
 				<ul className="space-y-2">
@@ -90,7 +94,7 @@ const UserComments = ({ id }: { id: string }) => {
 
 	return (
 		<>
-			{isLoading && <p>Loading comments...</p>}
+			{isLoading && <UserCommentsSkeleton count={5} />}
 			{!isLoading && !comments?.length && <p>No comments found.</p>}
 			{comments?.length && (
 				<ul>

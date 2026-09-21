@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { FormSkeleton } from "@/components/skeletons";
 import {
 	Card,
 	CardContent,
@@ -21,7 +22,7 @@ type PageProps = {
 
 const Page = (props: PageProps) => {
 	return (
-		<Suspense fallback={<p>Loading post...</p>}>
+		<Suspense fallback={<FormSkeleton />}>
 			<EditPostContent params={props.params} />
 		</Suspense>
 	);

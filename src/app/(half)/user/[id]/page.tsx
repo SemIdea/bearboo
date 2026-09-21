@@ -1,6 +1,7 @@
 import { cacheLife } from "next/cache";
 import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
+import { ProfileSkeleton } from "@/components/skeletons";
 import { MdView } from "@/components/ui/mdView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createCaller } from "@/server/caller";
@@ -14,7 +15,7 @@ type PageProps = {
 
 const Page = (props: PageProps) => {
 	return (
-		<Suspense fallback={<p>Loading profile...</p>}>
+		<Suspense fallback={<ProfileSkeleton />}>
 			<UserContent params={props.params} />
 		</Suspense>
 	);

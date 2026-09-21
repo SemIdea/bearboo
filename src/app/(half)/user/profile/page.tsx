@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { CardBase } from "@/components/cardBase";
+import { FormSkeleton } from "@/components/skeletons";
 import { createDynamicCaller } from "@/server/caller";
 import { UpdateUserForm } from "./page.client";
 
 const Page = () => {
 	return (
-		<Suspense fallback={<p>Loading profile...</p>}>
+		<Suspense fallback={<FormSkeleton fields={3} />}>
 			<ProfileContent />
 		</Suspense>
 	);

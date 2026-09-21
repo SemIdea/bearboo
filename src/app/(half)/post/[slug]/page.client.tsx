@@ -53,10 +53,11 @@ const CommentArea = ({ postId }: { postId: string }) => {
 	const commentHook = useComment(postId);
 
 	return (
-		<>
+		<div className="flex flex-col gap-6">
+			<h2 className="text-xl font-bold">Comments</h2>
 			<CreateComment postId={postId} commentHook={commentHook} />
 			<CommentList commentHook={commentHook} />
-		</>
+		</div>
 	);
 };
 
@@ -80,20 +81,21 @@ const RelatedPosts = ({
 	}
 
 	return (
-		<div className="flex flex-col gap-2">
-			<h3 className="text-lg font-semibold">Related posts</h3>
-			<ul className="flex flex-col gap-1">
+		<div className="mt-16 flex flex-col gap-5 border-t border-border pt-10">
+			<h2 className="text-xl font-bold">Related posts</h2>
+			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 				{relatedPosts.map((relatedPost) => (
-					<li key={relatedPost.id}>
-						<Link
-							href={`/post/${relatedPost.slug}`}
-							className="hover:underline"
-						>
+					<Link
+						key={relatedPost.id}
+						href={`/post/${relatedPost.slug}`}
+						className="group flex flex-col gap-2"
+					>
+						<span className="text-[17px] font-semibold leading-snug transition-colors group-hover:text-brand">
 							{relatedPost.title}
-						</Link>
-					</li>
+						</span>
+					</Link>
 				))}
-			</ul>
+			</div>
 		</div>
 	);
 };

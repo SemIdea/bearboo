@@ -2,9 +2,11 @@
 
 import { useRef, useState } from "react";
 import { trpc } from "@/app/_trpc/client";
+import { MediaGridSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { ErrorMessage } from "@/components/ui/errorMessage";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useRequireAuth } from "@/context/auth/useRequireAuth";
 import { getErrorMessage } from "@/lib/error";
 import { ACCEPTED_IMAGE_MIME_TYPES } from "@/server/features/media/acceptedImageTypes";
@@ -57,6 +59,7 @@ const UploadMediaForm = () => {
 				onChange={(event) => setAltText(event.target.value)}
 			/>
 			<Button type="submit" disabled={isPending} className="w-fit">
+				{isPending && <Spinner />}
 				{isPending ? "Uploading..." : "Upload"}
 			</Button>
 			<ErrorMessage error={errorMessage} />
@@ -75,7 +78,7 @@ const MediaGrid = () => {
 	});
 
 	if (isLoading) {
-		return <p>Loading media...</p>;
+		return <MediaGridSkeleton />;
 	}
 
 	if (!media || media.length === 0) {

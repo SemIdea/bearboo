@@ -7,6 +7,7 @@ import { By } from "./ui/by";
 import { ErrorMessage } from "./ui/errorMessage";
 import { MdEditor } from "./ui/mdEditor";
 import { MdView } from "./ui/mdView";
+import { Spinner } from "./ui/spinner";
 
 const CommentDescription = ({
 	comment,
@@ -41,6 +42,7 @@ const CommentDescription = ({
 				onClick={() => handleDelete(comment.id)}
 				disabled={isDeleting}
 			>
+				{isDeleting && <Spinner />}
 				{isDeleting ? "Deleting..." : "Delete"}
 			</Button>
 		</div>
@@ -99,6 +101,7 @@ const CommentEditor = ({
 						})
 					}
 				>
+					{isUpdating && <Spinner />}
 					{isUpdating ? "Saving..." : "Save"}
 				</Button>
 			</div>

@@ -1,81 +1,33 @@
-// "use client";
+"use client";
 
-// import { FC } from "react";
-// import { VisuallyHidden } from "@react-aria/visually-hidden";
-// import { SwitchProps, useSwitch } from "@heroui/switch";
-// import { useTheme } from "next-themes";
-// import { useIsSSR } from "@react-aria/ssr";
-// import clsx from "clsx";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { FaMoon, FaSun } from "react-icons/fa";
 
-// import { SunFilledIcon, MoonFilledIcon } from "@/components/icons";
+const ThemeSwitch = () => {
+	const { resolvedTheme, setTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
 
-// export interface ThemeSwitchProps {
-//   className?: string;
-//   classNames?: SwitchProps["classNames"];
-// }
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
-// export const ThemeSwitch: FC<ThemeSwitchProps> = ({
-//   className,
-//   classNames,
-// }) => {
-//   const { theme, setTheme } = useTheme();
-//   const isSSR = useIsSSR();
+	const isDark = resolvedTheme === "dark";
 
-//   const onChange = () => {
-//     theme === "light" ? setTheme("dark") : setTheme("light");
-//   };
+	return (
+		<button
+			type="button"
+			aria-label="Toggle dark mode"
+			onClick={() => setTheme(isDark ? "light" : "dark")}
+			className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+		>
+			{mounted && isDark ? (
+				<FaMoon className="size-4" />
+			) : (
+				<FaSun className="size-4" />
+			)}
+		</button>
+	);
+};
 
-//   const {
-//     Component,
-//     slots,
-//     isSelected,
-//     getBaseProps,
-//     getInputProps,
-//     getWrapperProps,
-//   } = useSwitch({
-//     isSelected: theme === "light" || isSSR,
-//     "aria-label": `Switch to ${theme === "light" || isSSR ? "dark" : "light"} mode`,
-//     onChange,
-//   });
-
-//   return (
-//     <Component
-//       {...getBaseProps({
-//         className: clsx(
-//           "px-px transition-opacity hover:opacity-80 cursor-pointer",
-//           className,
-//           classNames?.base,
-//         ),
-//       })}
-//     >
-//       <VisuallyHidden>
-//         <input {...getInputProps()} />
-//       </VisuallyHidden>
-//       <div
-//         {...getWrapperProps()}
-//         className={slots.wrapper({
-//           class: clsx(
-//             [
-//               "w-auto h-auto",
-//               "bg-transparent",
-//               "rounded-lg",
-//               "flex items-center justify-center",
-//               "group-data-[selected=true]:bg-transparent",
-//               "!text-default-500",
-//               "pt-px",
-//               "px-0",
-//               "mx-0",
-//             ],
-//             classNames?.wrapper,
-//           ),
-//         })}
-//       >
-//         {!isSelected || isSSR ? (
-//           <SunFilledIcon size={22} />
-//         ) : (
-//           <MoonFilledIcon size={22} />
-//         )}
-//       </div>
-//     </Component>
-//   );
-// };
+export { ThemeSwitch };
