@@ -45,3 +45,6 @@ public/uploads/*
 todo.md
 .env*
 !.env.example
+docs/sessions/
+docs/.afm-log/
+docs/.afm-log-failures/
