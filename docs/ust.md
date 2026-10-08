@@ -143,7 +143,7 @@ Scenario: Logout with a nonexistent session or user
   Then the operation is rejected with the appropriate error
 ```
 
-**Metadata:** RF-01. *Test ref:* `src/server/features/auth/session/controller.test.ts`. *Spec:* `docs/features/001-auth-hardening/spec.md`.
+**Metadata:** RF-01. *Test ref:* `src/server/features/auth/procedures/__test__/refreshSession.ts`, `src/server/features/auth/procedures/__test__/logoutUserFromSession.ts`. *Spec:* `docs/features/001-auth-hardening/spec.md`.
 
 ---
 
