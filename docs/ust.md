@@ -87,7 +87,7 @@ Scenario: Email already registered
   Then the operation is rejected with a conflict error
 ```
 
-**Metadata:** RF-01. *Test ref:* `src/server/features/user/register/controller.test.ts`.
+**Metadata:** RF-01. *Test ref:* `src/server/features/user/procedures/__test__/register.ts`.
 
 ---
 
@@ -110,7 +110,7 @@ Scenario: Login with a nonexistent user
   Then the operation is rejected
 ```
 
-**Metadata:** RF-01. *Test ref:* `src/server/features/user/login/controller.test.ts`. *Spec:* `docs/features/001-auth-hardening/spec.md`.
+**Metadata:** RF-01. *Test ref:* `src/server/features/user/procedures/__test__/login.ts`. *Spec:* `docs/features/001-auth-hardening/spec.md`.
 
 ---
 
@@ -176,7 +176,7 @@ Scenario: Resend with a nonexistent email
   Then the operation is rejected
 ```
 
-**Metadata:** RF-02. *Test ref:* `src/server/features/auth/verifyToken/controller.test.ts`.
+**Metadata:** RF-02. *Test ref:* `src/server/features/auth/procedures/__test__/verifyToken.ts`.
 
 ---
 
@@ -209,7 +209,7 @@ Scenario: Reset with an invalid, used, or expired token, or mismatched passwords
   Then the operation is rejected with the corresponding error
 ```
 
-**Metadata:** RF-03. *Test ref:* `src/server/features/auth/resetToken/controller.test.ts`.
+**Metadata:** RF-03. *Test ref:* `src/server/features/auth/procedures/__test__/resetPassword.ts`.
 
 ---
 
@@ -514,7 +514,7 @@ Scenario: A duplicate title generates a slug with a suffix
   Then the new post receives the slug "como-fiz-x-2"
 ```
 
-**Metadata:** RF-04. *Test ref:* `src/server/features/post/create/controller.test.ts`, `post/read`, `post/readRecent`, `post/readBySlug`. *Spec:* `docs/features/002-post-slug/spec.md` (amend — read by slug, `in_progress`).
+**Metadata:** RF-04. *Test ref:* `src/server/features/post/procedures/__test__/create.ts`, `post/read`, `post/readRecent`, `post/readBySlug`. *Spec:* `docs/features/002-post-slug/spec.md` (amend — read by slug, `in_progress`).
 
 ---
 
