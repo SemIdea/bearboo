@@ -7,6 +7,5 @@ PLUGIN-38	.	0	measured at baseline on 2026-09-16
 PLUGIN-40	.	0	no dead reference outside the deliberately-historical exemptions below (was 16, measured 2026-09-16)
 PLUGIN-40	docs/gotchas/006-next-js-a-root-layout-under.md	exempt	app/global-not-found.tsx is a Next.js convention for globalNotFound, not enabled here; cited as the documented solution, not a repo file
 PLUGIN-40	docs/gotchas/012-a-missing-post-slug-answers.md	exempt	src/middleware.tsx is the pre-migration middleware, named as history; its behavior moved to src/proxy.ts
-PLUGIN-40	docs/ust.md	exempt	src/context/trpc/fetcher.ts is a deleted module cited in a struck-through Resolved note (feature 008 moved it to sessionRefreshLink.ts)
 PLUGIN-39	.	178	measured at baseline on 2026-10-08
 PLUGIN-37	.	177	measured at baseline on 2026-10-08
